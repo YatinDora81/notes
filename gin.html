@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin Framework — Complete Mastery Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b; --surface: #0c0c0e; --card: #111113;
+    --border: #1e1e22; --border2: #27272a;
+    --text: #fafafa; --muted: #a1a1aa; --dim: #71717a;
+    --accent: #00ADD8; --accent2: #CE3262;
+    --green: #22c55e; --yellow: #eab308; --orange: #f97316;
+    --purple: #a78bfa; --pink: #ec4899; --sky: #38bdf8;
+    --red: #ef4444;
+    --sidebar-w: 280px;
+    --sidebar-bg: linear-gradient(180deg, #0f0f12 0%, #0a0a0d 100%);
+    --sidebar-accent: rgba(0,173,216,0.08);
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-padding-top: 24px; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    font-size: 15px; -webkit-font-smoothing: antialiased;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: var(--sidebar-w); height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 0; z-index: 100;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    display: flex; flex-direction: column;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: #0f0f12; z-index: 2;
+  }
+  .sidebar-logo {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo .go-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent2), #9b1b47);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px; color: #fff; flex-shrink: 0;
+  }
+  .sidebar-logo span { color: var(--text); }
+  .sidebar-logo .dim { color: var(--dim); font-weight: 400; }
+  .sidebar-nav { flex: 1; padding: 12px 0 24px; overflow-y: auto; }
+  .nav-group { margin-bottom: 4px; }
+  .nav-group-title {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.6px;
+    color: var(--dim); padding: 16px 20px 6px; font-weight: 600; user-select: none;
+  }
+  .sidebar a {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 20px 7px 24px; color: var(--muted);
+    text-decoration: none; font-size: 0.82rem; font-weight: 450;
+    transition: all 0.15s ease; border-left: 2px solid transparent;
+    margin: 0 8px 0 0; border-radius: 0 6px 6px 0; line-height: 1.4;
+  }
+  .sidebar a:hover { color: var(--text); background: rgba(255,255,255,0.03); border-left-color: var(--border2); }
+  .sidebar a.active { color: var(--accent); background: var(--sidebar-accent); border-left-color: var(--accent); font-weight: 550; }
+  .main-wrapper { margin-left: var(--sidebar-w); display: flex; justify-content: center; min-height: 100vh; }
+  .main { width: 100%; max-width: 820px; padding: 48px 40px 120px; }
+  h1 {
+    font-size: 2.6rem; font-weight: 800; letter-spacing: -1.5px;
+    margin-bottom: 8px; line-height: 1.1;
+    background: linear-gradient(135deg, var(--accent2) 0%, var(--pink) 40%, var(--purple) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: var(--dim); font-size: 1.05rem; margin-bottom: 48px; font-weight: 400; }
+  h2 {
+    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    margin: 64px 0 12px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border); letter-spacing: -0.5px;
+    scroll-margin-top: 24px;
+  }
+  h2 .section-num { color: var(--accent); font-weight: 800; margin-right: 6px; }
+  h3 { font-size: 1.15rem; color: var(--text); margin: 32px 0 10px; font-weight: 600; letter-spacing: -0.3px; }
+  h3::before { content: ''; display: inline-block; width: 3px; height: 16px; background: var(--green); border-radius: 2px; margin-right: 10px; vertical-align: middle; }
+  h4 { font-size: 1rem; color: var(--yellow); margin: 24px 0 8px; font-weight: 600; }
+  p { margin: 10px 0; color: var(--muted); }
+  pre {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    overflow-x: auto; margin: 14px 0 18px; font-size: 0.84rem; line-height: 1.65;
+  }
+  pre code { color: var(--text); font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.84rem; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,173,216,0.08); padding: 2px 7px; border-radius: 5px;
+    font-size: 0.84em; color: var(--accent); font-weight: 500;
+  }
+  pre code { background: none; padding: 0; font-weight: 400; }
+  .kw { color: var(--accent2); font-weight: 600; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cm { color: #545460; font-style: italic; }
+  .ty { color: var(--accent); }
+  .num { color: #79c0ff; }
+  .op { color: var(--accent2); }
+  .info-box, .warn-box, .tip-box { padding: 16px 20px; border-radius: var(--radius); margin: 18px 0; border: 1px solid var(--border); }
+  .info-box { border-left: 3px solid var(--accent); background: rgba(0,173,216,0.04); }
+  .warn-box { border-left: 3px solid var(--yellow); background: rgba(234,179,8,0.04); }
+  .tip-box { border-left: 3px solid var(--green); background: rgba(34,197,94,0.04); }
+  .box-title { font-weight: 650; margin-bottom: 6px; color: var(--text); font-size: 0.92rem; }
+  .file-tree {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 22px; margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.9; color: var(--dim);
+  }
+  .file-tree .folder { color: var(--accent); font-weight: 600; }
+  .file-tree .file { color: var(--green); }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.88rem; }
+  th { background: var(--card); color: var(--text); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-weight: 600; font-size: 0.84rem; }
+  td { padding: 10px 14px; border: 1px solid var(--border); color: var(--muted); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 0.68rem; font-weight: 600; margin: 0 3px; letter-spacing: 0.3px; vertical-align: middle; }
+  .badge-junior { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .badge-mid { background: rgba(0,173,216,0.1); color: var(--accent); border: 1px solid rgba(0,173,216,0.2); }
+  .badge-senior { background: rgba(234,179,8,0.1); color: var(--yellow); border: 1px solid rgba(234,179,8,0.2); }
+  .badge-staff { background: rgba(206,50,98,0.1); color: var(--accent2); border: 1px solid rgba(206,50,98,0.2); }
+  ul, ol { margin: 10px 0 10px 22px; }
+  li { margin: 4px 0; color: var(--muted); }
+  strong { color: var(--text); font-weight: 600; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+  .accordion-item { border-bottom: 1px solid var(--border); }
+  .accordion-item:last-child { border-bottom: none; }
+  .accordion-trigger {
+    width: 100%; border: none; color: var(--text);
+    background: var(--surface);
+    padding: 16px 20px; font-size: 0.92rem; font-weight: 550;
+    text-align: left; cursor: pointer; display: flex;
+    align-items: center; justify-content: space-between;
+    font-family: inherit; transition: background 0.15s; line-height: 1.5;
+  }
+  .accordion-trigger:hover { background: #151518; }
+  .accordion-trigger .chevron { width: 16px; height: 16px; transition: transform 0.2s ease; flex-shrink: 0; margin-left: 12px; color: var(--dim); }
+  .accordion-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: transparent; }
+  .accordion-content.open { max-height: 2000px; background: rgba(255,255,255,0.015); }
+  .accordion-body { padding: 14px 20px 16px; color: var(--muted); font-size: 0.88rem; line-height: 1.75; border-top: 1px solid var(--border); }
+  .accordion-body pre { margin: 10px 0; }
+  .accordion-body p { margin: 6px 0; }
+  .qa-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 2px 8px; height: 22px; border-radius: 5px;
+    font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+  }
+  .qa-q { background: rgba(0,173,216,0.1); color: var(--accent); margin-right: 12px; }
+  .qa-a { background: rgba(34,197,94,0.1); color: var(--green); margin-right: 10px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--dim); text-decoration: none; font-size: 0.82rem; margin-bottom: 24px; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main-wrapper { margin-left: 0; }
+    .main { padding: 24px 20px 80px; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="go-icon">Gin</div>
+      <span>Gin <span class="dim">Mastery</span></span>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-group-title">Getting Started</div>
+      <a href="#intro" data-section="intro">Why Gin?</a>
+      <a href="#setup" data-section="setup">Setup & Hello World</a>
+      <a href="#routing" data-section="routing">Routing</a>
+      <a href="#params" data-section="params">Params & Query</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Request & Response</div>
+      <a href="#binding" data-section="binding">Request Binding</a>
+      <a href="#validation" data-section="validation">Validation</a>
+      <a href="#response" data-section="response">Response Types</a>
+      <a href="#context" data-section="context">Gin Context Deep Dive</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Middleware</div>
+      <a href="#middleware" data-section="middleware">Middleware Basics</a>
+      <a href="#custom-mw" data-section="custom-mw">Custom Middleware</a>
+      <a href="#auth" data-section="auth">Authentication (JWT)</a>
+      <a href="#cors" data-section="cors">CORS</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Real-World Patterns</div>
+      <a href="#errors" data-section="errors">Error Handling</a>
+      <a href="#db" data-section="db">Database (GORM)</a>
+      <a href="#files" data-section="files">File Upload/Download</a>
+      <a href="#templates" data-section="templates">HTML Templates</a>
+      <a href="#testing" data-section="testing">Testing</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Production</div>
+      <a href="#structure" data-section="structure">Project Structure</a>
+      <a href="#graceful" data-section="graceful">Graceful Shutdown</a>
+      <a href="#deploy" data-section="deploy">Docker & Deploy</a>
+      <a href="#interview" data-section="interview">Interview Questions</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main-wrapper">
+<div class="main">
+
+<a href="golang.html" class="back-link">&larr; Back to Go Guide</a>
+
+<h1>The Complete Gin Framework Guide</h1>
+<p class="subtitle">Everything you need to build production REST APIs with Gin. You know Go &mdash; now master the framework.</p>
+
+<!-- ==================== SECTION 1: INTRO ==================== -->
+<h2 id="intro"><span class="section-num">01</span> Why Gin?</h2>
+
+<p>Gin is the most popular Go web framework. ~81K GitHub stars, used by ~48% of Go developers. It's a thin, fast wrapper around <code>net/http</code> with routing, middleware, binding, and validation built in.</p>
+
+<ul>
+  <li><strong>Fast</strong> &mdash; zero-allocation router (httprouter), 40x faster than Martini</li>
+  <li><strong>Minimal</strong> &mdash; learn it in a day, not a week</li>
+  <li><strong>Middleware</strong> &mdash; plug-and-play: logging, recovery, CORS, auth</li>
+  <li><strong>Binding</strong> &mdash; auto-parse JSON/XML/Form into structs</li>
+  <li><strong>Validation</strong> &mdash; struct tag validation out of the box</li>
+  <li><strong>Battle-tested</strong> &mdash; Uber, Airbnb, Twitch, Dropbox, Cloudflare</li>
+</ul>
+
+<table>
+  <tr><th>Framework</th><th>GitHub API (203 routes)</th><th>Allocs</th></tr>
+  <tr><td><strong>Gin</strong></td><td>~10,000 ns/op</td><td>0</td></tr>
+  <tr><td>Echo</td><td>~11,000 ns/op</td><td>0</td></tr>
+  <tr><td>Chi</td><td>~90,000 ns/op</td><td>varies</td></tr>
+  <tr><td>Gorilla Mux</td><td>~1,000,000 ns/op</td><td>many</td></tr>
+</table>
+
+<!-- ==================== SECTION 2: SETUP ==================== -->
+<h2 id="setup"><span class="section-num">02</span> Setup & Hello World</h2>
+
+<pre><code><span class="cm"># Create project</span>
+mkdir gin-api &amp;&amp; cd gin-api  <span class="cm"># create project folder &amp; enter it</span>
+go mod init github.com/yourname/gin-api  <span class="cm"># initialise Go module</span>
+
+<span class="cm"># Install Gin</span>
+go get -u github.com/gin-gonic/gin  <span class="cm"># download &amp; add Gin dependency</span></code></pre>
+
+<pre><code><span class="kw">package</span> main  <span class="cm">// every executable starts with package main</span>
+
+<span class="kw">import</span> <span class="str">"github.com/gin-gonic/gin"</span>  <span class="cm">// import the Gin framework</span>
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    r := gin.<span class="fn">Default</span>()  <span class="cm">// includes Logger + Recovery middleware</span>
+
+    r.<span class="fn">GET</span>(<span class="str">"/ping"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// register GET /ping route</span>
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"message"</span>: <span class="str">"pong"</span>})  <span class="cm">// respond with JSON 200</span>
+    })
+
+    r.<span class="fn">Run</span>(<span class="str">":8080"</span>)  <span class="cm">// listen on 0.0.0.0:8080</span>
+}</code></pre>
+
+<pre><code>go run main.go  <span class="cm"># compile &amp; run the server</span>
+<span class="cm"># curl http://localhost:8080/ping</span>
+<span class="cm"># {"message":"pong"}</span></code></pre>
+
+<div class="info-box">
+  <div class="box-title">gin.Default() vs gin.New()</div>
+  <p><code>gin.Default()</code> = <code>gin.New()</code> + Logger + Recovery middleware. Use <code>gin.New()</code> when you want full control over which middleware to attach.</p>
+</div>
+
+<div class="warn-box">
+  <div class="box-title">Gin Modes</div>
+  <ul>
+    <li><code>gin.SetMode(gin.DebugMode)</code> &mdash; default, verbose logging</li>
+    <li><code>gin.SetMode(gin.ReleaseMode)</code> &mdash; production, minimal logging</li>
+    <li><code>gin.SetMode(gin.TestMode)</code> &mdash; for tests</li>
+    <li>Or set env var: <code>GIN_MODE=release</code></li>
+  </ul>
+</div>
+
+<!-- ==================== SECTION 3: ROUTING ==================== -->
+<h2 id="routing"><span class="section-num">03</span> Routing</h2>
+
+<h3>All HTTP Methods</h3>
+<pre><code>r.<span class="fn">GET</span>(<span class="str">"/users"</span>, getUsers)              <span class="cm">// read list of users</span>
+r.<span class="fn">POST</span>(<span class="str">"/users"</span>, createUser)           <span class="cm">// create a new user</span>
+r.<span class="fn">PUT</span>(<span class="str">"/users/:id"</span>, updateUser)        <span class="cm">// replace full user record</span>
+r.<span class="fn">PATCH</span>(<span class="str">"/users/:id"</span>, patchUser)      <span class="cm">// update partial user fields</span>
+r.<span class="fn">DELETE</span>(<span class="str">"/users/:id"</span>, deleteUser)    <span class="cm">// remove a user</span>
+r.<span class="fn">HEAD</span>(<span class="str">"/users"</span>, headUsers)            <span class="cm">// headers only, no body</span>
+r.<span class="fn">OPTIONS</span>(<span class="str">"/users"</span>, optionsUsers)     <span class="cm">// preflight / CORS check</span>
+
+<span class="cm">// Match ANY method</span>
+r.<span class="fn">Any</span>(<span class="str">"/anything"</span>, handler)  <span class="cm">// handles GET/POST/PUT/… all at once</span>
+
+<span class="cm">// Match specific methods</span>
+r.<span class="fn">Match</span>([]<span class="ty">string</span>{<span class="str">"GET"</span>, <span class="str">"POST"</span>}, <span class="str">"/mixed"</span>, handler)  <span class="cm">// only listed methods</span></code></pre>
+
+<h3>Route Groups</h3>
+<pre><code><span class="cm">// Group routes by prefix</span>
+api := r.<span class="fn">Group</span>(<span class="str">"/api"</span>)  <span class="cm">// all routes here start with /api</span>
+{
+    v1 := api.<span class="fn">Group</span>(<span class="str">"/v1"</span>)  <span class="cm">// nested group: /api/v1</span>
+    {
+        v1.<span class="fn">GET</span>(<span class="str">"/users"</span>, getUsers)       <span class="cm">// GET /api/v1/users</span>
+        v1.<span class="fn">POST</span>(<span class="str">"/users"</span>, createUser)    <span class="cm">// POST /api/v1/users</span>
+    }
+
+    v2 := api.<span class="fn">Group</span>(<span class="str">"/v2"</span>)  <span class="cm">// second version group: /api/v2</span>
+    {
+        v2.<span class="fn">GET</span>(<span class="str">"/users"</span>, getUsersV2)    <span class="cm">// GET /api/v2/users</span>
+    }
+}
+
+<span class="cm">// Group with middleware</span>
+authorized := r.<span class="fn">Group</span>(<span class="str">"/admin"</span>)  <span class="cm">// group all admin routes</span>
+authorized.<span class="fn">Use</span>(<span class="fn">AuthRequired</span>())  <span class="cm">// every route here needs auth</span>
+{
+    authorized.<span class="fn">GET</span>(<span class="str">"/dashboard"</span>, dashboard)        <span class="cm">// protected dashboard</span>
+    authorized.<span class="fn">POST</span>(<span class="str">"/settings"</span>, updateSettings)   <span class="cm">// protected settings</span>
+}</code></pre>
+
+<h3>Static Files</h3>
+<pre><code><span class="cm">// Serve a directory</span>
+r.<span class="fn">Static</span>(<span class="str">"/assets"</span>, <span class="str">"./public"</span>)  <span class="cm">// maps URL prefix to disk folder</span>
+
+<span class="cm">// Serve a single file</span>
+r.<span class="fn">StaticFile</span>(<span class="str">"/favicon.ico"</span>, <span class="str">"./resources/favicon.ico"</span>)  <span class="cm">// one file at fixed path</span>
+
+<span class="cm">// Embed filesystem (Go 1.16+)</span>
+r.<span class="fn">StaticFS</span>(<span class="str">"/static"</span>, http.<span class="fn">FS</span>(embeddedFiles))  <span class="cm">// serve embedded FS at /static</span></code></pre>
+
+<!-- ==================== SECTION 4: PARAMS ==================== -->
+<h2 id="params"><span class="section-num">04</span> Params & Query Strings</h2>
+
+<pre><code><span class="cm">// Path parameters  :name</span>
+<span class="cm">// GET /users/42</span>
+r.<span class="fn">GET</span>(<span class="str">"/users/:id"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// :id is a named path param</span>
+    id := c.<span class="fn">Param</span>(<span class="str">"id"</span>)  <span class="cm">// "42"</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"id"</span>: id})  <span class="cm">// send id back as JSON</span>
+})
+
+<span class="cm">// Wildcard  *path (catches everything)</span>
+<span class="cm">// GET /files/css/style.css &rarr; path = "/css/style.css"</span>
+r.<span class="fn">GET</span>(<span class="str">"/files/*path"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// *path captures everything after /files</span>
+    path := c.<span class="fn">Param</span>(<span class="str">"path"</span>)  <span class="cm">// "/css/style.css"</span>
+    c.<span class="fn">String</span>(<span class="num">200</span>, <span class="str">"Path: %s"</span>, path)  <span class="cm">// respond with plain text</span>
+})
+
+<span class="cm">// Query strings</span>
+<span class="cm">// GET /search?q=golang&amp;page=2</span>
+r.<span class="fn">GET</span>(<span class="str">"/search"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// reads ?q=&amp;page= from URL</span>
+    q := c.<span class="fn">Query</span>(<span class="str">"q"</span>)                       <span class="cm">// "golang"</span>
+    page := c.<span class="fn">DefaultQuery</span>(<span class="str">"page"</span>, <span class="str">"1"</span>)    <span class="cm">// "2" (or "1" if missing)</span>
+    limit := c.<span class="fn">Query</span>(<span class="str">"limit"</span>)                <span class="cm">// "" (empty if missing)</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"q"</span>: q, <span class="str">"page"</span>: page, <span class="str">"limit"</span>: limit})  <span class="cm">// return all params</span>
+})
+
+<span class="cm">// Query array</span>
+<span class="cm">// GET /filter?tags=go&amp;tags=web&amp;tags=api</span>
+r.<span class="fn">GET</span>(<span class="str">"/filter"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// reads repeated ?tags= values</span>
+    tags := c.<span class="fn">QueryArray</span>(<span class="str">"tags"</span>)  <span class="cm">// ["go", "web", "api"]</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"tags"</span>: tags})  <span class="cm">// return the slice</span>
+})
+
+<span class="cm">// Query map</span>
+<span class="cm">// GET /info?user[name]=yatin&amp;user[age]=25</span>
+r.<span class="fn">GET</span>(<span class="str">"/info"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// reads ?user[key]=val pairs</span>
+    user := c.<span class="fn">QueryMap</span>(<span class="str">"user"</span>)  <span class="cm">// map["name":"yatin", "age":"25"]</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// return the map as JSON</span>
+})</code></pre>
+
+<!-- ==================== SECTION 5: BINDING ==================== -->
+<h2 id="binding"><span class="section-num">05</span> Request Binding</h2>
+
+<pre><code><span class="cm">// Binding = auto-parse request body into a struct</span>
+
+<span class="kw">type</span> <span class="ty">CreateUserReq</span> <span class="kw">struct</span> {  <span class="cm">// struct Gin binds request JSON into</span>
+    Name  <span class="ty">string</span> <span class="str">`json:"name" binding:"required"`</span>         <span class="cm">// name must be present</span>
+    Email <span class="ty">string</span> <span class="str">`json:"email" binding:"required,email"`</span>  <span class="cm">// must be valid email</span>
+    Age   <span class="ty">int</span>    <span class="str">`json:"age" binding:"gte=0,lte=130"`</span>     <span class="cm">// 0–130 inclusive</span>
+}
+
+<span class="cm">// ShouldBindJSON — returns error (you handle it)</span>
+r.<span class="fn">POST</span>(<span class="str">"/users"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// POST /users accepts JSON body</span>
+    <span class="kw">var</span> req <span class="ty">CreateUserReq</span>  <span class="cm">// declare empty struct to fill</span>
+    <span class="kw">if</span> err := c.<span class="fn">ShouldBindJSON</span>(&amp;req); err != <span class="kw">nil</span> {  <span class="cm">// parse JSON into req</span>
+        c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()})  <span class="cm">// bad request if invalid</span>
+        <span class="kw">return</span>  <span class="cm">// stop — don't continue to success path</span>
+    }
+    c.<span class="fn">JSON</span>(<span class="num">201</span>, gin.<span class="ty">H</span>{<span class="str">"user"</span>: req})  <span class="cm">// 201 Created with new resource</span>
+})
+
+<span class="cm">// Bind from different sources</span>
+c.<span class="fn">ShouldBindJSON</span>(&amp;req)    <span class="cm">// JSON body</span>
+c.<span class="fn">ShouldBindXML</span>(&amp;req)     <span class="cm">// XML body</span>
+c.<span class="fn">ShouldBind</span>(&amp;req)        <span class="cm">// auto-detect (JSON/XML/Form)</span>
+c.<span class="fn">ShouldBindQuery</span>(&amp;req)   <span class="cm">// query string only</span>
+c.<span class="fn">ShouldBindUri</span>(&amp;req)     <span class="cm">// path params only</span>
+
+<span class="cm">// Bind URI params</span>
+<span class="kw">type</span> <span class="ty">UserUri</span> <span class="kw">struct</span> {  <span class="cm">// maps :id in path to struct field</span>
+    ID <span class="ty">int</span> <span class="str">`uri:"id" binding:"required"`</span>  <span class="cm">// :id auto-converted to int</span>
+}
+
+r.<span class="fn">GET</span>(<span class="str">"/users/:id"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// GET /users/42</span>
+    <span class="kw">var</span> uri <span class="ty">UserUri</span>  <span class="cm">// empty struct to receive path param</span>
+    <span class="kw">if</span> err := c.<span class="fn">ShouldBindUri</span>(&amp;uri); err != <span class="kw">nil</span> {  <span class="cm">// bind :id → uri.ID</span>
+        c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()})  <span class="cm">// invalid id format</span>
+        <span class="kw">return</span>
+    }
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"id"</span>: uri.ID})  <span class="cm">// respond with the parsed id</span>
+})
+
+<span class="cm">// Bind form data (POST form / multipart)</span>
+<span class="kw">type</span> <span class="ty">LoginForm</span> <span class="kw">struct</span> {  <span class="cm">// maps HTML form fields to struct</span>
+    Username <span class="ty">string</span> <span class="str">`form:"username" binding:"required"`</span>  <span class="cm">// must be present</span>
+    Password <span class="ty">string</span> <span class="str">`form:"password" binding:"required"`</span>  <span class="cm">// must be present</span>
+}
+
+r.<span class="fn">POST</span>(<span class="str">"/login"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// handle login form submission</span>
+    <span class="kw">var</span> form <span class="ty">LoginForm</span>  <span class="cm">// empty struct to receive form data</span>
+    <span class="kw">if</span> err := c.<span class="fn">ShouldBind</span>(&amp;form); err != <span class="kw">nil</span> {  <span class="cm">// auto-detects form/JSON</span>
+        c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()})  <span class="cm">// return validation error</span>
+        <span class="kw">return</span>
+    }
+})</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">ShouldBind vs Bind</div>
+  <p><code>ShouldBind*</code> returns the error &mdash; you decide what to do. <code>Bind*</code> (without Should) auto-responds with 400 and aborts. <strong>Always use ShouldBind*</strong> for control.</p>
+</div>
+
+<!-- ==================== SECTION 6: VALIDATION ==================== -->
+<h2 id="validation"><span class="section-num">06</span> Validation</h2>
+
+<pre><code><span class="cm">// Gin uses go-playground/validator under the hood</span>
+
+<span class="kw">type</span> <span class="ty">Product</span> <span class="kw">struct</span> {  <span class="cm">// validator tags on every field</span>
+    Name     <span class="ty">string</span>  <span class="str">`json:"name"     binding:"required,min=2,max=100"`</span>       <span class="cm">// 2–100 chars</span>
+    Price    <span class="ty">float64</span> <span class="str">`json:"price"    binding:"required,gt=0"`</span>                <span class="cm">// must be &gt; 0</span>
+    Category <span class="ty">string</span>  <span class="str">`json:"category" binding:"required,oneof=electronics clothing food"`</span>  <span class="cm">// allowlist</span>
+    SKU      <span class="ty">string</span>  <span class="str">`json:"sku"      binding:"required,alphanum,len=8"`</span>       <span class="cm">// exactly 8 chars</span>
+    Email    <span class="ty">string</span>  <span class="str">`json:"email"    binding:"omitempty,email"`</span>               <span class="cm">// optional email</span>
+    URL      <span class="ty">string</span>  <span class="str">`json:"url"      binding:"omitempty,url"`</span>                 <span class="cm">// optional URL</span>
+    IP       <span class="ty">string</span>  <span class="str">`json:"ip"       binding:"omitempty,ip"`</span>                  <span class="cm">// optional IP addr</span>
+}</code></pre>
+
+<h3>Common Validation Tags</h3>
+<table>
+  <tr><th>Tag</th><th>What it does</th></tr>
+  <tr><td><code>required</code></td><td>Field must be present and non-zero</td></tr>
+  <tr><td><code>email</code></td><td>Must be valid email</td></tr>
+  <tr><td><code>url</code></td><td>Must be valid URL</td></tr>
+  <tr><td><code>min=5</code></td><td>Minimum length (string) or value (number)</td></tr>
+  <tr><td><code>max=100</code></td><td>Maximum length or value</td></tr>
+  <tr><td><code>len=8</code></td><td>Exact length</td></tr>
+  <tr><td><code>gt=0</code></td><td>Greater than</td></tr>
+  <tr><td><code>gte=0</code></td><td>Greater than or equal</td></tr>
+  <tr><td><code>oneof=a b c</code></td><td>Must be one of the listed values</td></tr>
+  <tr><td><code>alphanum</code></td><td>Alphanumeric only</td></tr>
+  <tr><td><code>omitempty</code></td><td>Skip validation if field is empty</td></tr>
+  <tr><td><code>eqfield=Password</code></td><td>Must equal another field</td></tr>
+</table>
+
+<h3>Custom Validator</h3>
+<pre><code><span class="kw">import</span> (
+    <span class="str">"github.com/gin-gonic/gin/binding"</span>    <span class="cm">// to access Gin's validator</span>
+    <span class="str">"github.com/go-playground/validator/v10"</span>  <span class="cm">// underlying validator lib</span>
+)
+
+<span class="cm">// Custom validation function</span>
+<span class="kw">var</span> <span class="fn">noSpaces</span> validator.<span class="ty">Func</span> = <span class="kw">func</span>(fl validator.<span class="ty">FieldLevel</span>) <span class="ty">bool</span> {  <span class="cm">// returns true = valid</span>
+    value := fl.<span class="fn">Field</span>().<span class="fn">String</span>()  <span class="cm">// get the field's string value</span>
+    <span class="kw">return</span> !strings.<span class="fn">Contains</span>(value, <span class="str">" "</span>)  <span class="cm">// fail if any space found</span>
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    r := gin.<span class="fn">Default</span>()  <span class="cm">// create router with default middleware</span>
+
+    <span class="cm">// Register custom validator</span>
+    <span class="kw">if</span> v, ok := binding.Validator.Engine().(*validator.<span class="ty">Validate</span>); ok {  <span class="cm">// type-assert to concrete type</span>
+        v.<span class="fn">RegisterValidation</span>(<span class="str">"nospaces"</span>, noSpaces)  <span class="cm">// give it a tag name</span>
+    }
+}
+
+<span class="cm">// Use it</span>
+<span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {  <span class="cm">// struct using the custom validator</span>
+    Username <span class="ty">string</span> <span class="str">`json:"username" binding:"required,nospaces"`</span>  <span class="cm">// "nospaces" runs our func</span>
+}</code></pre>
+
+<!-- ==================== SECTION 7: RESPONSE ==================== -->
+<h2 id="response"><span class="section-num">07</span> Response Types</h2>
+
+<pre><code><span class="cm">// JSON (most common)</span>
+c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"message"</span>: <span class="str">"ok"</span>})  <span class="cm">// send status + JSON body</span>
+c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// struct with json tags</span>
+
+<span class="cm">// gin.H is just map[string]any — a shortcut</span>
+<span class="kw">type</span> <span class="ty">H</span> <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">any</span>  <span class="cm">// defined in gin; alias for convenience</span>
+
+<span class="cm">// IndentedJSON (pretty, for debugging)</span>
+c.<span class="fn">IndentedJSON</span>(<span class="num">200</span>, user)  <span class="cm">// human-readable JSON, slower</span>
+
+<span class="cm">// String</span>
+c.<span class="fn">String</span>(<span class="num">200</span>, <span class="str">"Hello %s"</span>, name)  <span class="cm">// printf-style plain text reply</span>
+
+<span class="cm">// XML</span>
+c.<span class="fn">XML</span>(<span class="num">200</span>, user)  <span class="cm">// serialise struct to XML</span>
+
+<span class="cm">// YAML</span>
+c.<span class="fn">YAML</span>(<span class="num">200</span>, user)  <span class="cm">// serialise struct to YAML</span>
+
+<span class="cm">// Redirect</span>
+c.<span class="fn">Redirect</span>(<span class="num">301</span>, <span class="str">"https://google.com"</span>)  <span class="cm">// 301 = permanent redirect</span>
+
+<span class="cm">// File</span>
+c.<span class="fn">File</span>(<span class="str">"./files/report.pdf"</span>)  <span class="cm">// serve file inline in browser</span>
+c.<span class="fn">FileAttachment</span>(<span class="str">"./files/report.pdf"</span>, <span class="str">"download.pdf"</span>)  <span class="cm">// with custom filename</span>
+
+<span class="cm">// Data (raw bytes)</span>
+c.<span class="fn">Data</span>(<span class="num">200</span>, <span class="str">"application/octet-stream"</span>, rawBytes)  <span class="cm">// binary download</span>
+
+<span class="cm">// Set headers</span>
+c.<span class="fn">Header</span>(<span class="str">"X-Custom"</span>, <span class="str">"value"</span>)  <span class="cm">// add a custom response header</span>
+
+<span class="cm">// Set status without body</span>
+c.<span class="fn">Status</span>(<span class="num">204</span>)  <span class="cm">// 204 No Content — no body sent</span>
+
+<span class="cm">// Set cookie</span>
+c.<span class="fn">SetCookie</span>(<span class="str">"token"</span>, <span class="str">"abc"</span>, <span class="num">3600</span>, <span class="str">"/"</span>, <span class="str">""</span>, <span class="kw">false</span>, <span class="kw">true</span>)  <span class="cm">// httpOnly=true</span>
+val, _ := c.<span class="fn">Cookie</span>(<span class="str">"token"</span>)  <span class="cm">// read cookie value from request</span></code></pre>
+
+<!-- ==================== SECTION 8: CONTEXT ==================== -->
+<h2 id="context"><span class="section-num">08</span> Gin Context Deep Dive</h2>
+
+<p><code>*gin.Context</code> is the most important type in Gin. It carries the request, response writer, middleware chain, and key-value store. One context per request.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">handler</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// c carries the whole request</span>
+    <span class="cm">// === REQUEST INFO ===</span>
+    c.Request.Method             <span class="cm">// "GET"</span>
+    c.Request.URL.Path           <span class="cm">// "/users/42"</span>
+    c.Request.Header.<span class="fn">Get</span>(<span class="str">"Auth"</span>) <span class="cm">// header value</span>
+    c.<span class="fn">ClientIP</span>()                  <span class="cm">// client IP (respects proxies)</span>
+    c.<span class="fn">ContentType</span>()               <span class="cm">// "application/json"</span>
+    c.<span class="fn">FullPath</span>()                  <span class="cm">// "/users/:id" (route pattern)</span>
+
+    <span class="cm">// === PARAMS ===</span>
+    c.<span class="fn">Param</span>(<span class="str">"id"</span>)                 <span class="cm">// path param</span>
+    c.<span class="fn">Query</span>(<span class="str">"page"</span>)               <span class="cm">// query string</span>
+    c.<span class="fn">DefaultQuery</span>(<span class="str">"page"</span>, <span class="str">"1"</span>)  <span class="cm">// with default</span>
+    c.<span class="fn">PostForm</span>(<span class="str">"username"</span>)        <span class="cm">// form field</span>
+
+    <span class="cm">// === READ BODY ===</span>
+    c.<span class="fn">ShouldBindJSON</span>(&amp;req)        <span class="cm">// parse JSON body</span>
+    c.<span class="fn">GetRawData</span>()                <span class="cm">// raw []byte body</span>
+
+    <span class="cm">// === WRITE RESPONSE ===</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, data)              <span class="cm">// JSON response</span>
+    c.<span class="fn">String</span>(<span class="num">200</span>, <span class="str">"hi"</span>)           <span class="cm">// plain text</span>
+    c.<span class="fn">Header</span>(<span class="str">"X-Key"</span>, <span class="str">"val"</span>)     <span class="cm">// set header</span>
+
+    <span class="cm">// === KEY-VALUE STORE (pass data between middleware) ===</span>
+    c.<span class="fn">Set</span>(<span class="str">"userID"</span>, <span class="num">42</span>)           <span class="cm">// store</span>
+    id, exists := c.<span class="fn">Get</span>(<span class="str">"userID"</span>) <span class="cm">// retrieve</span>
+    uid := c.<span class="fn">MustGet</span>(<span class="str">"userID"</span>)   <span class="cm">// retrieve or PANIC</span>
+    s := c.<span class="fn">GetString</span>(<span class="str">"role"</span>)     <span class="cm">// typed getters</span>
+    n := c.<span class="fn">GetInt</span>(<span class="str">"count"</span>)  <span class="cm">// returns int, zero if missing</span>
+
+    <span class="cm">// === FLOW CONTROL ===</span>
+    c.<span class="fn">Next</span>()                      <span class="cm">// call next handler/middleware</span>
+    c.<span class="fn">Abort</span>()                     <span class="cm">// stop chain (no more handlers)</span>
+    c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">401</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"unauthorized"</span>})  <span class="cm">// abort + send JSON at once</span>
+    c.<span class="fn">IsAborted</span>()                 <span class="cm">// check if aborted</span>
+}</code></pre>
+
+<!-- ==================== SECTION 9: MIDDLEWARE ==================== -->
+<h2 id="middleware"><span class="section-num">09</span> Middleware Basics</h2>
+
+<p>Middleware = a function that runs before/after your handler. They form a chain: Request &rarr; MW1 &rarr; MW2 &rarr; Handler &rarr; MW2 &rarr; MW1 &rarr; Response.</p>
+
+<pre><code><span class="cm">// Global middleware — applies to ALL routes</span>
+r.<span class="fn">Use</span>(gin.<span class="fn">Logger</span>())    <span class="cm">// log every incoming request</span>
+r.<span class="fn">Use</span>(gin.<span class="fn">Recovery</span>())  <span class="cm">// catch panics, return 500</span>
+
+<span class="cm">// Group middleware — applies to group only</span>
+admin := r.<span class="fn">Group</span>(<span class="str">"/admin"</span>)  <span class="cm">// create a /admin sub-router</span>
+admin.<span class="fn">Use</span>(<span class="fn">AuthRequired</span>())  <span class="cm">// every /admin route needs auth</span>
+
+<span class="cm">// Per-route middleware</span>
+r.<span class="fn">GET</span>(<span class="str">"/secret"</span>, <span class="fn">AuthRequired</span>(), <span class="fn">RateLimit</span>(), secretHandler)  <span class="cm">// inline middleware chain</span>
+
+<span class="cm">// Built-in middleware</span>
+gin.<span class="fn">Logger</span>()     <span class="cm">// logs every request</span>
+gin.<span class="fn">Recovery</span>()   <span class="cm">// recovers from panics, returns 500</span></code></pre>
+
+<!-- ==================== SECTION 10: CUSTOM MIDDLEWARE ==================== -->
+<h2 id="custom-mw"><span class="section-num">10</span> Custom Middleware</h2>
+
+<pre><code><span class="cm">// Logging middleware</span>
+<span class="kw">func</span> <span class="fn">RequestLogger</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// returns a HandlerFunc</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// this runs on every request</span>
+        start := time.<span class="fn">Now</span>()  <span class="cm">// record when request arrived</span>
+        path := c.Request.URL.Path  <span class="cm">// save path before handlers may change it</span>
+
+        c.<span class="fn">Next</span>()  <span class="cm">// process request</span>
+
+        <span class="cm">// After handler runs:</span>
+        latency := time.<span class="fn">Since</span>(start)  <span class="cm">// total time taken</span>
+        status := c.Writer.<span class="fn">Status</span>()  <span class="cm">// HTTP status written by handler</span>
+        log.<span class="fn">Printf</span>(<span class="str">"[%d] %s %s %v"</span>, status, c.Request.Method, path, latency)  <span class="cm">// log it</span>
+    }
+}
+
+<span class="cm">// Auth middleware</span>
+<span class="kw">func</span> <span class="fn">AuthRequired</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// gate: stops unauthenticated requests</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        token := c.<span class="fn">GetHeader</span>(<span class="str">"Authorization"</span>)  <span class="cm">// read Authorization header</span>
+        <span class="kw">if</span> token == <span class="str">""</span> {  <span class="cm">// no token supplied at all</span>
+            c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">401</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"missing token"</span>})
+            <span class="kw">return</span>
+        }
+
+        userID, err := <span class="fn">validateToken</span>(token)  <span class="cm">// verify signature &amp; expiry</span>
+        <span class="kw">if</span> err != <span class="kw">nil</span> {  <span class="cm">// token was tampered or expired</span>
+            c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">401</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"invalid token"</span>})
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Pass data to handlers</span>
+        c.<span class="fn">Set</span>(<span class="str">"userID"</span>, userID)  <span class="cm">// handlers can read this later</span>
+        c.<span class="fn">Next</span>()  <span class="cm">// token OK — continue to actual handler</span>
+    }
+}
+
+<span class="cm">// Rate limiter middleware</span>
+<span class="kw">func</span> <span class="fn">RateLimit</span>(maxRequests <span class="ty">int</span>, window time.<span class="ty">Duration</span>) gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// configurable limiter</span>
+    limiter := rate.<span class="fn">NewLimiter</span>(rate.<span class="fn">Every</span>(window/<span class="ty">time.Duration</span>(maxRequests)), maxRequests)  <span class="cm">// token bucket</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        <span class="kw">if</span> !limiter.<span class="fn">Allow</span>() {  <span class="cm">// bucket empty — reject request</span>
+            c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">429</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"too many requests"</span>})  <span class="cm">// 429 Too Many Requests</span>
+            <span class="kw">return</span>
+        }
+        c.<span class="fn">Next</span>()  <span class="cm">// within limit — continue</span>
+    }
+}
+
+<span class="cm">// Request ID middleware</span>
+<span class="kw">func</span> <span class="fn">RequestID</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// unique ID per request for tracing</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        id := uuid.<span class="fn">New</span>().<span class="fn">String</span>()  <span class="cm">// generate a fresh UUID</span>
+        c.<span class="fn">Set</span>(<span class="str">"requestID"</span>, id)  <span class="cm">// available to all handlers</span>
+        c.<span class="fn">Header</span>(<span class="str">"X-Request-ID"</span>, id)  <span class="cm">// echo ID back to client</span>
+        c.<span class="fn">Next</span>()  <span class="cm">// continue chain</span>
+    }
+}</code></pre>
+
+<!-- ==================== SECTION 11: AUTH ==================== -->
+<h2 id="auth"><span class="section-num">11</span> Authentication (JWT)</h2>
+
+<pre><code><span class="cm">// go get github.com/golang-jwt/jwt/v5</span>
+
+<span class="kw">import</span> <span class="str">"github.com/golang-jwt/jwt/v5"</span>  <span class="cm">// JWT parsing &amp; signing lib</span>
+
+<span class="kw">var</span> jwtSecret = []<span class="ty">byte</span>(os.<span class="fn">Getenv</span>(<span class="str">"JWT_SECRET"</span>))  <span class="cm">// secret from env, not hardcoded</span>
+
+<span class="cm">// Generate token</span>
+<span class="kw">func</span> <span class="fn">GenerateToken</span>(userID <span class="ty">int</span>) (<span class="ty">string</span>, <span class="ty">error</span>) {  <span class="cm">// creates a signed JWT</span>
+    claims := jwt.<span class="ty">MapClaims</span>{  <span class="cm">// payload embedded in the token</span>
+        <span class="str">"user_id"</span>: userID,  <span class="cm">// our custom claim</span>
+        <span class="str">"exp"</span>:     time.<span class="fn">Now</span>().<span class="fn">Add</span>(<span class="num">24</span> * time.Hour).<span class="fn">Unix</span>(),  <span class="cm">// expire in 24h</span>
+        <span class="str">"iat"</span>:     time.<span class="fn">Now</span>().<span class="fn">Unix</span>(),  <span class="cm">// issued-at timestamp</span>
+    }
+    token := jwt.<span class="fn">NewWithClaims</span>(jwt.SigningMethodHS256, claims)  <span class="cm">// HMAC-SHA256</span>
+    <span class="kw">return</span> token.<span class="fn">SignedString</span>(jwtSecret)  <span class="cm">// sign and return string</span>
+}
+
+<span class="cm">// JWT middleware</span>
+<span class="kw">func</span> <span class="fn">JWTAuth</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// validates Bearer token on every call</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        authHeader := c.<span class="fn">GetHeader</span>(<span class="str">"Authorization"</span>)  <span class="cm">// "Bearer &lt;token&gt;"</span>
+        <span class="kw">if</span> !strings.<span class="fn">HasPrefix</span>(authHeader, <span class="str">"Bearer "</span>) {  <span class="cm">// wrong format</span>
+            c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">401</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"missing bearer token"</span>})
+            <span class="kw">return</span>
+        }
+
+        tokenStr := strings.<span class="fn">TrimPrefix</span>(authHeader, <span class="str">"Bearer "</span>)  <span class="cm">// strip "Bearer " prefix</span>
+        token, err := jwt.<span class="fn">Parse</span>(tokenStr, <span class="kw">func</span>(t *jwt.<span class="ty">Token</span>) (<span class="ty">any</span>, <span class="ty">error</span>) {  <span class="cm">// parse &amp; verify</span>
+            <span class="kw">if</span> _, ok := t.Method.(*jwt.<span class="ty">SigningMethodHMAC</span>); !ok {  <span class="cm">// guard against alg:none</span>
+                <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"unexpected signing method"</span>)  <span class="cm">// reject non-HMAC</span>
+            }
+            <span class="kw">return</span> jwtSecret, <span class="kw">nil</span>  <span class="cm">// provide key for verification</span>
+        })
+
+        <span class="kw">if</span> err != <span class="kw">nil</span> || !token.Valid {  <span class="cm">// expired, wrong sig, etc.</span>
+            c.<span class="fn">AbortWithStatusJSON</span>(<span class="num">401</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"invalid token"</span>})
+            <span class="kw">return</span>
+        }
+
+        claims := token.Claims.(jwt.<span class="ty">MapClaims</span>)  <span class="cm">// type-assert to access fields</span>
+        c.<span class="fn">Set</span>(<span class="str">"userID"</span>, <span class="ty">int</span>(claims[<span class="str">"user_id"</span>].(<span class="ty">float64</span>)))  <span class="cm">// JWT numbers are float64</span>
+        c.<span class="fn">Next</span>()  <span class="cm">// token valid — proceed</span>
+    }
+}
+
+<span class="cm">// Login handler</span>
+r.<span class="fn">POST</span>(<span class="str">"/login"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// POST /login with JSON body</span>
+    <span class="kw">var</span> req <span class="kw">struct</span> {  <span class="cm">// anonymous inline struct for the request</span>
+        Email    <span class="ty">string</span> <span class="str">`json:"email" binding:"required"`</span>     <span class="cm">// required email</span>
+        Password <span class="ty">string</span> <span class="str">`json:"password" binding:"required"`</span>  <span class="cm">// required password</span>
+    }
+    <span class="kw">if</span> err := c.<span class="fn">ShouldBindJSON</span>(&amp;req); err != <span class="kw">nil</span> {  <span class="cm">// validate input</span>
+        c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()}); <span class="kw">return</span>
+    }
+    <span class="cm">// verify password against DB...</span>
+    token, _ := <span class="fn">GenerateToken</span>(user.ID)  <span class="cm">// create JWT for authenticated user</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"token"</span>: token})  <span class="cm">// return token to client</span>
+})
+
+<span class="cm">// Protected routes</span>
+protected := r.<span class="fn">Group</span>(<span class="str">"/api"</span>)  <span class="cm">// group that requires JWT</span>
+protected.<span class="fn">Use</span>(<span class="fn">JWTAuth</span>())  <span class="cm">// every route below needs valid token</span>
+{
+    protected.<span class="fn">GET</span>(<span class="str">"/me"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// GET /api/me — current user</span>
+        userID := c.<span class="fn">GetInt</span>(<span class="str">"userID"</span>)  <span class="cm">// read from context set by JWTAuth</span>
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"user_id"</span>: userID})  <span class="cm">// return it</span>
+    })
+}</code></pre>
+
+<!-- ==================== SECTION 12: CORS ==================== -->
+<h2 id="cors"><span class="section-num">12</span> CORS</h2>
+
+<pre><code><span class="cm">// go get github.com/gin-contrib/cors</span>
+
+<span class="kw">import</span> <span class="str">"github.com/gin-contrib/cors"</span>  <span class="cm">// official Gin CORS package</span>
+
+<span class="cm">// Quick setup</span>
+r.<span class="fn">Use</span>(cors.<span class="fn">Default</span>())  <span class="cm">// allows all origins</span>
+
+<span class="cm">// Production config</span>
+r.<span class="fn">Use</span>(cors.<span class="fn">New</span>(cors.<span class="ty">Config</span>{  <span class="cm">// fine-grained CORS rules</span>
+    AllowOrigins:     []<span class="ty">string</span>{<span class="str">"https://yoursite.com"</span>},  <span class="cm">// whitelist your domain</span>
+    AllowMethods:     []<span class="ty">string</span>{<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>},  <span class="cm">// permitted HTTP verbs</span>
+    AllowHeaders:     []<span class="ty">string</span>{<span class="str">"Authorization"</span>, <span class="str">"Content-Type"</span>},  <span class="cm">// permitted request headers</span>
+    ExposeHeaders:    []<span class="ty">string</span>{<span class="str">"Content-Length"</span>},  <span class="cm">// headers browser can read</span>
+    AllowCredentials: <span class="kw">true</span>,  <span class="cm">// allow cookies cross-origin</span>
+    MaxAge:           <span class="num">12</span> * time.Hour,  <span class="cm">// cache preflight for 12h</span>
+}))</code></pre>
+
+<!-- ==================== SECTION 13: ERROR HANDLING ==================== -->
+<h2 id="errors"><span class="section-num">13</span> Error Handling</h2>
+
+<pre><code><span class="cm">// Standard JSON error response</span>
+<span class="kw">type</span> <span class="ty">APIError</span> <span class="kw">struct</span> {  <span class="cm">// consistent error shape across API</span>
+    Code    <span class="ty">int</span>    <span class="str">`json:"code"`</span>     <span class="cm">// HTTP status code</span>
+    Message <span class="ty">string</span> <span class="str">`json:"message"`</span>  <span class="cm">// human-readable reason</span>
+}
+
+<span class="cm">// Error middleware — collect errors, respond once</span>
+<span class="kw">func</span> <span class="fn">ErrorHandler</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// centralised error response</span>
+    <span class="kw">return</span> <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        c.<span class="fn">Next</span>()  <span class="cm">// run all handlers first</span>
+
+        <span class="cm">// Check for errors after handlers run</span>
+        <span class="kw">if</span> <span class="fn">len</span>(c.Errors) > <span class="num">0</span> {  <span class="cm">// any errors recorded?</span>
+            err := c.Errors.<span class="fn">Last</span>()  <span class="cm">// grab most recent error</span>
+            <span class="kw">switch</span> e := err.Err.(<span class="kw">type</span>) {  <span class="cm">// type-switch on error kind</span>
+            <span class="kw">case</span> *<span class="ty">APIError</span>:  <span class="cm">// our custom API error</span>
+                c.<span class="fn">JSON</span>(e.Code, e)  <span class="cm">// use the code it carries</span>
+            <span class="kw">default</span>:  <span class="cm">// unknown error — hide details</span>
+                c.<span class="fn">JSON</span>(<span class="num">500</span>, APIError{<span class="num">500</span>, <span class="str">"internal error"</span>})
+            }
+        }
+    }
+}
+
+<span class="cm">// In handlers — use c.Error() to collect errors</span>
+<span class="kw">func</span> <span class="fn">getUser</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// handler using ErrorHandler middleware</span>
+    user, err := userService.<span class="fn">FindByID</span>(c.<span class="fn">Param</span>(<span class="str">"id"</span>))  <span class="cm">// fetch from service layer</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> {  <span class="cm">// something went wrong</span>
+        c.<span class="fn">Error</span>(&amp;APIError{<span class="num">404</span>, <span class="str">"user not found"</span>})  <span class="cm">// push error onto chain</span>
+        <span class="kw">return</span>
+    }
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// found — send it back</span>
+}
+
+<span class="cm">// Simpler pattern — just respond directly</span>
+<span class="kw">func</span> <span class="fn">getUser2</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// inline error handling, no middleware</span>
+    user, err := userService.<span class="fn">FindByID</span>(c.<span class="fn">Param</span>(<span class="str">"id"</span>))  <span class="cm">// call service</span>
+    <span class="kw">if</span> errors.<span class="fn">Is</span>(err, ErrNotFound) {  <span class="cm">// sentinel error check</span>
+        c.<span class="fn">JSON</span>(<span class="num">404</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"not found"</span>}); <span class="kw">return</span>
+    }
+    <span class="kw">if</span> err != <span class="kw">nil</span> {  <span class="cm">// any other unexpected error</span>
+        c.<span class="fn">JSON</span>(<span class="num">500</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"internal error"</span>}); <span class="kw">return</span>
+    }
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// success path</span>
+}
+
+<span class="cm">// Custom recovery (catch panics with context)</span>
+r.<span class="fn">Use</span>(gin.<span class="fn">CustomRecovery</span>(<span class="kw">func</span>(c *gin.<span class="ty">Context</span>, err <span class="ty">any</span>) {  <span class="cm">// called when handler panics</span>
+    c.<span class="fn">JSON</span>(<span class="num">500</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"server panic"</span>, <span class="str">"detail"</span>: fmt.<span class="fn">Sprint</span>(err)})  <span class="cm">// safe 500 response</span>
+}))</code></pre>
+
+<!-- ==================== SECTION 14: DATABASE ==================== -->
+<h2 id="db"><span class="section-num">14</span> Database (GORM)</h2>
+
+<pre><code><span class="cm">// go get gorm.io/gorm</span>
+<span class="cm">// go get gorm.io/driver/postgres</span>
+
+<span class="kw">import</span> (
+    <span class="str">"gorm.io/gorm"</span>             <span class="cm">// ORM core</span>
+    <span class="str">"gorm.io/driver/postgres"</span>  <span class="cm">// Postgres dialect</span>
+)
+
+<span class="cm">// Model</span>
+<span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {  <span class="cm">// GORM model mapped to "users" table</span>
+    gorm.<span class="ty">Model</span>              <span class="cm">// ID, CreatedAt, UpdatedAt, DeletedAt</span>
+    Name  <span class="ty">string</span> <span class="str">`json:"name"`</span>                       <span class="cm">// plain text name</span>
+    Email <span class="ty">string</span> <span class="str">`json:"email" gorm:"uniqueIndex"`</span>  <span class="cm">// DB index ensures uniqueness</span>
+}
+
+<span class="cm">// Connect</span>
+<span class="kw">func</span> <span class="fn">setupDB</span>() *gorm.<span class="ty">DB</span> {  <span class="cm">// returns a ready-to-use DB handle</span>
+    dsn := <span class="str">"host=localhost user=postgres password=pass dbname=myapp port=5432 sslmode=disable"</span>  <span class="cm">// connection string</span>
+    db, err := gorm.<span class="fn">Open</span>(postgres.<span class="fn">Open</span>(dsn), &amp;gorm.<span class="ty">Config</span>{})  <span class="cm">// open connection</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }  <span class="cm">// crash fast if DB unreachable</span>
+    db.<span class="fn">AutoMigrate</span>(&amp;User{})  <span class="cm">// create/update tables automatically</span>
+    <span class="kw">return</span> db  <span class="cm">// share this single handle across handlers</span>
+}
+
+<span class="cm">// Inject DB into handlers via middleware</span>
+<span class="kw">func</span> <span class="fn">main</span>() {
+    db := <span class="fn">setupDB</span>()  <span class="cm">// connect once at startup</span>
+    r := gin.<span class="fn">Default</span>()  <span class="cm">// router with logger + recovery</span>
+
+    r.<span class="fn">GET</span>(<span class="str">"/users"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// list all users</span>
+        <span class="kw">var</span> users []<span class="ty">User</span>  <span class="cm">// slice to hold results</span>
+        db.<span class="fn">Find</span>(&amp;users)  <span class="cm">// SELECT * FROM users</span>
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, users)  <span class="cm">// return the slice</span>
+    })
+
+    r.<span class="fn">POST</span>(<span class="str">"/users"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// create a new user</span>
+        <span class="kw">var</span> user <span class="ty">User</span>  <span class="cm">// empty struct to bind JSON into</span>
+        <span class="kw">if</span> err := c.<span class="fn">ShouldBindJSON</span>(&amp;user); err != <span class="kw">nil</span> {  <span class="cm">// validate request</span>
+            c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()}); <span class="kw">return</span>
+        }
+        <span class="kw">if</span> result := db.<span class="fn">Create</span>(&amp;user); result.Error != <span class="kw">nil</span> {  <span class="cm">// INSERT INTO users</span>
+            c.<span class="fn">JSON</span>(<span class="num">500</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"could not create"</span>}); <span class="kw">return</span>
+        }
+        c.<span class="fn">JSON</span>(<span class="num">201</span>, user)  <span class="cm">// return created user with its new ID</span>
+    })
+
+    r.<span class="fn">GET</span>(<span class="str">"/users/:id"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// get single user by ID</span>
+        <span class="kw">var</span> user <span class="ty">User</span>  <span class="cm">// destination struct</span>
+        <span class="kw">if</span> err := db.<span class="fn">First</span>(&amp;user, c.<span class="fn">Param</span>(<span class="str">"id"</span>)).Error; err != <span class="kw">nil</span> {  <span class="cm">// SELECT … LIMIT 1</span>
+            c.<span class="fn">JSON</span>(<span class="num">404</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: <span class="str">"not found"</span>}); <span class="kw">return</span>
+        }
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// send the user record</span>
+    })
+
+    r.<span class="fn">Run</span>(<span class="str">":8080"</span>)  <span class="cm">// start listening</span>
+}</code></pre>
+
+<!-- ==================== SECTION 15: FILES ==================== -->
+<h2 id="files"><span class="section-num">15</span> File Upload/Download</h2>
+
+<pre><code><span class="cm">// Single file upload</span>
+r.<span class="fn">POST</span>(<span class="str">"/upload"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// accepts multipart form data</span>
+    file, err := c.<span class="fn">FormFile</span>(<span class="str">"file"</span>)  <span class="cm">// get the "file" form field</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> {  <span class="cm">// no file uploaded or wrong field name</span>
+        c.<span class="fn">JSON</span>(<span class="num">400</span>, gin.<span class="ty">H</span>{<span class="str">"error"</span>: err.<span class="fn">Error</span>()}); <span class="kw">return</span>
+    }
+    dst := fmt.<span class="fn">Sprintf</span>(<span class="str">"./uploads/%s"</span>, file.Filename)  <span class="cm">// build destination path</span>
+    c.<span class="fn">SaveUploadedFile</span>(file, dst)  <span class="cm">// write to disk</span>
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"filename"</span>: file.Filename, <span class="str">"size"</span>: file.Size})  <span class="cm">// confirm upload</span>
+})
+
+<span class="cm">// Multiple files</span>
+r.<span class="fn">POST</span>(<span class="str">"/uploads"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// batch upload endpoint</span>
+    form, _ := c.<span class="fn">MultipartForm</span>()  <span class="cm">// parse the whole multipart form</span>
+    files := form.File[<span class="str">"files"</span>]  <span class="cm">// get all files under key "files"</span>
+    <span class="kw">for</span> _, file := <span class="kw">range</span> files {  <span class="cm">// iterate each uploaded file</span>
+        c.<span class="fn">SaveUploadedFile</span>(file, <span class="str">"./uploads/"</span>+file.Filename)  <span class="cm">// save each one</span>
+    }
+    c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"count"</span>: <span class="fn">len</span>(files)})  <span class="cm">// tell client how many saved</span>
+})
+
+<span class="cm">// Set upload limit</span>
+r.MaxMultipartMemory = <span class="num">8</span> &lt;&lt; <span class="num">20</span>  <span class="cm">// 8 MB</span>
+
+<span class="cm">// Download</span>
+r.<span class="fn">GET</span>(<span class="str">"/download/:name"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// serve file as attachment</span>
+    name := c.<span class="fn">Param</span>(<span class="str">"name"</span>)  <span class="cm">// filename from path param</span>
+    c.<span class="fn">FileAttachment</span>(<span class="str">"./uploads/"</span>+name, name)  <span class="cm">// triggers browser download</span>
+})</code></pre>
+
+<!-- ==================== SECTION 16: TEMPLATES ==================== -->
+<h2 id="templates"><span class="section-num">16</span> HTML Templates</h2>
+
+<pre><code><span class="cm">// Load templates</span>
+r.<span class="fn">LoadHTMLGlob</span>(<span class="str">"templates/*"</span>)  <span class="cm">// load all files in templates/</span>
+<span class="cm">// or specific files:</span>
+r.<span class="fn">LoadHTMLFiles</span>(<span class="str">"templates/index.html"</span>, <span class="str">"templates/about.html"</span>)  <span class="cm">// explicit list</span>
+
+<span class="cm">// Render</span>
+r.<span class="fn">GET</span>(<span class="str">"/"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// serve the homepage</span>
+    c.<span class="fn">HTML</span>(<span class="num">200</span>, <span class="str">"index.html"</span>, gin.<span class="ty">H</span>{  <span class="cm">// render template with data</span>
+        <span class="str">"title"</span>: <span class="str">"Home"</span>,  <span class="cm">// accessible as {{ .title }}</span>
+        <span class="str">"users"</span>: users,  <span class="cm">// accessible as {{ range .users }}</span>
+    })
+})</code></pre>
+
+<pre><code><span class="cm">&lt;!-- templates/index.html --&gt;</span>
+&lt;h1&gt;{{ .title }}&lt;/h1&gt;
+{{ range .users }}
+  &lt;p&gt;{{ .Name }} - {{ .Email }}&lt;/p&gt;
+{{ end }}</code></pre>
+
+<!-- ==================== SECTION 17: TESTING ==================== -->
+<h2 id="testing"><span class="section-num">17</span> Testing</h2>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"net/http"</span>            <span class="cm">// http.NewRequest, http.StatusOK…</span>
+    <span class="str">"net/http/httptest"</span>   <span class="cm">// in-memory response recorder</span>
+    <span class="str">"strings"</span>            <span class="cm">// strings.NewReader for body</span>
+    <span class="str">"testing"</span>            <span class="cm">// Go's standard test framework</span>
+    <span class="str">"github.com/gin-gonic/gin"</span>  <span class="cm">// the framework under test</span>
+)
+
+<span class="cm">// Setup test router</span>
+<span class="kw">func</span> <span class="fn">setupRouter</span>() *gin.<span class="ty">Engine</span> {  <span class="cm">// shared helper for all tests</span>
+    gin.<span class="fn">SetMode</span>(gin.TestMode)  <span class="cm">// suppress debug output in tests</span>
+    r := gin.<span class="fn">New</span>()  <span class="cm">// no default middleware in tests</span>
+    r.<span class="fn">GET</span>(<span class="str">"/ping"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// inline handler for test</span>
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"message"</span>: <span class="str">"pong"</span>})
+    })
+    r.<span class="fn">POST</span>(<span class="str">"/users"</span>, createUser)  <span class="cm">// reuse real handler</span>
+    <span class="kw">return</span> r  <span class="cm">// caller gets configured router</span>
+}
+
+<span class="cm">// Test GET</span>
+<span class="kw">func</span> <span class="fn">TestPing</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// test the /ping endpoint</span>
+    r := <span class="fn">setupRouter</span>()  <span class="cm">// get a fresh router</span>
+
+    req, _ := http.<span class="fn">NewRequest</span>(<span class="str">"GET"</span>, <span class="str">"/ping"</span>, <span class="kw">nil</span>)  <span class="cm">// build a fake GET request</span>
+    w := httptest.<span class="fn">NewRecorder</span>()  <span class="cm">// captures response in memory</span>
+    r.<span class="fn">ServeHTTP</span>(w, req)  <span class="cm">// dispatch request through router</span>
+
+    <span class="kw">if</span> w.Code != <span class="num">200</span> {  <span class="cm">// check HTTP status</span>
+        t.<span class="fn">Errorf</span>(<span class="str">"expected 200, got %d"</span>, w.Code)  <span class="cm">// fail test with message</span>
+    }
+    <span class="kw">if</span> !strings.<span class="fn">Contains</span>(w.Body.<span class="fn">String</span>(), <span class="str">"pong"</span>) {  <span class="cm">// check response body</span>
+        t.<span class="fn">Errorf</span>(<span class="str">"expected pong in body"</span>)
+    }
+}
+
+<span class="cm">// Test POST with JSON body</span>
+<span class="kw">func</span> <span class="fn">TestCreateUser</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// test POST /users</span>
+    r := <span class="fn">setupRouter</span>()  <span class="cm">// fresh router per test</span>
+
+    body := strings.<span class="fn">NewReader</span>(<span class="str">`{"name":"Yatin","email":"y@test.com"}`</span>)  <span class="cm">// fake JSON body</span>
+    req, _ := http.<span class="fn">NewRequest</span>(<span class="str">"POST"</span>, <span class="str">"/users"</span>, body)  <span class="cm">// create POST request</span>
+    req.Header.<span class="fn">Set</span>(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)  <span class="cm">// tell Gin it's JSON</span>
+
+    w := httptest.<span class="fn">NewRecorder</span>()  <span class="cm">// in-memory response writer</span>
+    r.<span class="fn">ServeHTTP</span>(w, req)  <span class="cm">// run through router</span>
+
+    <span class="kw">if</span> w.Code != <span class="num">201</span> {  <span class="cm">// expect 201 Created</span>
+        t.<span class="fn">Errorf</span>(<span class="str">"expected 201, got %d"</span>, w.Code)
+    }
+}
+
+<span class="cm">// Table-driven tests</span>
+<span class="kw">func</span> <span class="fn">TestRoutes</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// run multiple cases in one func</span>
+    r := <span class="fn">setupRouter</span>()  <span class="cm">// single router for all cases</span>
+    tests := []<span class="kw">struct</span> {  <span class="cm">// slice of anonymous structs</span>
+        method, path <span class="ty">string</span>  <span class="cm">// HTTP method and URL path</span>
+        wantCode     <span class="ty">int</span>     <span class="cm">// expected status code</span>
+    }{
+        {<span class="str">"GET"</span>, <span class="str">"/ping"</span>, <span class="num">200</span>},      <span class="cm">// should respond 200</span>
+        {<span class="str">"GET"</span>, <span class="str">"/nonexist"</span>, <span class="num">404</span>},  <span class="cm">// unregistered route → 404</span>
+    }
+    <span class="kw">for</span> _, tt := <span class="kw">range</span> tests {  <span class="cm">// iterate every test case</span>
+        req, _ := http.<span class="fn">NewRequest</span>(tt.method, tt.path, <span class="kw">nil</span>)  <span class="cm">// build request</span>
+        w := httptest.<span class="fn">NewRecorder</span>()  <span class="cm">// capture response</span>
+        r.<span class="fn">ServeHTTP</span>(w, req)  <span class="cm">// execute request</span>
+        <span class="kw">if</span> w.Code != tt.wantCode {  <span class="cm">// compare status codes</span>
+            t.<span class="fn">Errorf</span>(<span class="str">"%s %s: got %d, want %d"</span>, tt.method, tt.path, w.Code, tt.wantCode)
+        }
+    }
+}</code></pre>
+
+<!-- ==================== SECTION 18: PROJECT STRUCTURE ==================== -->
+<h2 id="structure"><span class="section-num">18</span> Project Structure</h2>
+
+<div class="file-tree">
+<span class="folder">gin-api/</span>
+&#x251C;&#x2500;&#x2500; <span class="file">go.mod</span> / <span class="file">go.sum</span>
+&#x251C;&#x2500;&#x2500; <span class="file">Makefile</span>
+&#x251C;&#x2500;&#x2500; <span class="file">Dockerfile</span>
+&#x251C;&#x2500;&#x2500; <span class="file">.env.example</span>
+&#x251C;&#x2500;&#x2500; <span class="folder">cmd/</span>
+&#x2502;   &#x2514;&#x2500;&#x2500; <span class="folder">api/</span>
+&#x2502;       &#x2514;&#x2500;&#x2500; <span class="file">main.go</span>             &#x2190; entry point, wires everything
+&#x251C;&#x2500;&#x2500; <span class="folder">internal/</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">config/</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">config.go</span>         &#x2190; loads env vars / yaml
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">models/</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">user.go</span>           &#x2190; GORM models + request/response structs
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">repository/</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">user_repo.go</span>      &#x2190; DB queries (interface + impl)
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">service/</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">user_service.go</span>   &#x2190; business logic
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">handler/</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">user_handler.go</span>   &#x2190; Gin handlers (c *gin.Context)
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="folder">middleware/</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; <span class="file">auth.go</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; <span class="file">logger.go</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="file">cors.go</span>
+&#x2502;   &#x2514;&#x2500;&#x2500; <span class="folder">router/</span>
+&#x2502;       &#x2514;&#x2500;&#x2500; <span class="file">router.go</span>         &#x2190; all route registration
+&#x251C;&#x2500;&#x2500; <span class="folder">pkg/</span>
+&#x2502;   &#x2514;&#x2500;&#x2500; <span class="folder">response/</span>
+&#x2502;       &#x2514;&#x2500;&#x2500; <span class="file">response.go</span>       &#x2190; shared JSON response helpers
+&#x2514;&#x2500;&#x2500; <span class="folder">migrations/</span>
+</div>
+
+<div class="tip-box">
+  <div class="box-title">Dependency Flow</div>
+  <p><code>main.go &rarr; router &rarr; handler &rarr; service &rarr; repository &rarr; DB</code></p>
+  <p>Handlers know about Gin. Services don't. Repositories only know about the DB. Clean separation.</p>
+</div>
+
+<!-- ==================== SECTION 19: GRACEFUL SHUTDOWN ==================== -->
+<h2 id="graceful"><span class="section-num">19</span> Graceful Shutdown</h2>
+
+<pre><code><span class="kw">package</span> main  <span class="cm">// executable entry point</span>
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>            <span class="cm">// timeout for shutdown</span>
+    <span class="str">"log"</span>                <span class="cm">// simple logging</span>
+    <span class="str">"net/http"</span>           <span class="cm">// http.Server for manual control</span>
+    <span class="str">"os"</span>                 <span class="cm">// os.Signal type</span>
+    <span class="str">"os/signal"</span>          <span class="cm">// signal.Notify</span>
+    <span class="str">"syscall"</span>            <span class="cm">// SIGINT / SIGTERM constants</span>
+    <span class="str">"time"</span>               <span class="cm">// time.Second</span>
+    <span class="str">"github.com/gin-gonic/gin"</span>  <span class="cm">// web framework</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    r := gin.<span class="fn">Default</span>()  <span class="cm">// create router</span>
+    r.<span class="fn">GET</span>(<span class="str">"/ping"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {
+        c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"message"</span>: <span class="str">"pong"</span>})
+    })
+
+    srv := &amp;http.<span class="ty">Server</span>{  <span class="cm">// manual server for graceful shutdown</span>
+        Addr:    <span class="str">":8080"</span>,  <span class="cm">// listen address</span>
+        Handler: r,         <span class="cm">// gin router is the handler</span>
+    }
+
+    <span class="cm">// Start server in goroutine</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {  <span class="cm">// non-blocking so we can wait for signal below</span>
+        <span class="kw">if</span> err := srv.<span class="fn">ListenAndServe</span>(); err != <span class="kw">nil</span> &amp;&amp; err != http.<span class="ty">ErrServerClosed</span> {  <span class="cm">// ErrServerClosed is normal</span>
+            log.<span class="fn">Fatalf</span>(<span class="str">"listen: %s\n"</span>, err)  <span class="cm">// real error — crash</span>
+        }
+    }()
+
+    <span class="cm">// Wait for interrupt signal</span>
+    quit := <span class="fn">make</span>(<span class="kw">chan</span> os.<span class="ty">Signal</span>, <span class="num">1</span>)  <span class="cm">// buffered so signal isn't missed</span>
+    signal.<span class="fn">Notify</span>(quit, syscall.SIGINT, syscall.SIGTERM)  <span class="cm">// Ctrl+C or kill</span>
+    &lt;-quit  <span class="cm">// block here until signal received</span>
+    log.<span class="fn">Println</span>(<span class="str">"Shutting down server..."</span>)
+
+    <span class="cm">// Give 5 seconds to finish in-flight requests</span>
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">5</span>*time.Second)  <span class="cm">// 5s deadline</span>
+    <span class="kw">defer</span> <span class="fn">cancel</span>()  <span class="cm">// release resources when done</span>
+
+    <span class="kw">if</span> err := srv.<span class="fn">Shutdown</span>(ctx); err != <span class="kw">nil</span> {  <span class="cm">// wait for active conns</span>
+        log.<span class="fn">Fatal</span>(<span class="str">"Server forced to shutdown:"</span>, err)  <span class="cm">// timed out — force exit</span>
+    }
+    log.<span class="fn">Println</span>(<span class="str">"Server exited cleanly"</span>)  <span class="cm">// all requests finished in time</span>
+}</code></pre>
+
+<!-- ==================== SECTION 20: DEPLOY ==================== -->
+<h2 id="deploy"><span class="section-num">20</span> Docker & Deploy</h2>
+
+<pre><code><span class="cm"># Dockerfile — multi-stage build</span>
+FROM golang:1.22-alpine AS builder  <span class="cm"># stage 1: compile with full Go toolchain</span>
+WORKDIR /app  <span class="cm"># set working dir inside container</span>
+COPY go.mod go.sum ./  <span class="cm"># copy dependency manifests first</span>
+RUN go mod download  <span class="cm"># cache deps before copying source</span>
+COPY . .  <span class="cm"># copy all source code</span>
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/api  <span class="cm"># static binary, stripped</span>
+
+FROM alpine:latest  <span class="cm"># stage 2: tiny final image</span>
+RUN apk --no-cache add ca-certificates  <span class="cm"># needed for HTTPS requests</span>
+WORKDIR /app  <span class="cm"># working dir in final image</span>
+COPY --from=builder /app/server .  <span class="cm"># copy only the compiled binary</span>
+EXPOSE 8080  <span class="cm"># document the port (doesn't publish it)</span>
+ENV GIN_MODE=release  <span class="cm"># disable debug output in prod</span>
+CMD ["./server"]  <span class="cm"># start the binary</span></code></pre>
+
+<pre><code><span class="cm"># Build and run</span>
+docker build -t gin-api .  <span class="cm"># build image tagged "gin-api"</span>
+docker run -p 8080:8080 --env-file .env gin-api  <span class="cm"># run, expose port, load env vars</span>
+
+<span class="cm"># Final image size: ~15-20MB (vs ~1GB with full Go image)</span></code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Production Checklist</div>
+  <ul>
+    <li>Set <code>GIN_MODE=release</code></li>
+    <li>Use graceful shutdown</li>
+    <li>Add health check: <code>GET /health</code></li>
+    <li>Set request size limits: <code>r.MaxMultipartMemory</code></li>
+    <li>Use HTTPS (or terminate TLS at load balancer)</li>
+    <li>Add rate limiting middleware</li>
+    <li>Add request ID middleware for tracing</li>
+    <li>Structured logging (zerolog / slog)</li>
+  </ul>
+</div>
+
+<!-- ==================== SECTION 21: INTERVIEW ==================== -->
+<h2 id="interview"><span class="section-num">21</span> Interview Questions</h2>
+
+<div style="display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:16px 0;">
+  <span id="toggleLabel" style="color:var(--dim); font-size:0.82rem; font-weight:500;">Show All</span>
+  <button id="toggleSwitch" onclick="toggleAllBtn()" aria-checked="false" style="width:44px; height:24px; border-radius:9999px; border:none; background:var(--border2); cursor:pointer; position:relative; transition:background 0.2s; padding:0; flex-shrink:0;">
+    <span style="position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:all 0.2s; display:block;" id="toggleKnob"></span>
+  </button>
+</div>
+
+<h3>Core Concepts</h3>
+<div class="accordion">
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>What is <code>gin.H</code> and why is it used everywhere?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p><code>gin.H</code> is simply <code>map[string]any</code>. It's a shortcut for building quick JSON responses without defining a struct. Use structs for complex/reusable responses, <code>gin.H</code> for simple one-offs.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>What's the difference between <code>ShouldBindJSON</code> and <code>BindJSON</code>?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p><code>ShouldBindJSON</code> returns the error to you &mdash; you decide the response. <code>BindJSON</code> auto-responds with 400 and calls <code>c.Abort()</code>. Always prefer <code>ShouldBind*</code> for full control over error responses.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>How does middleware chaining work in Gin? What do <code>c.Next()</code> and <code>c.Abort()</code> do?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p>Gin stores handlers as a chain (slice). <code>c.Next()</code> advances to the next handler &mdash; code after <code>Next()</code> runs on the way BACK. <code>c.Abort()</code> stops the chain; remaining handlers won't execute. This is how logging middleware measures latency (before/after <code>Next()</code>) and auth middleware blocks unauthorized requests.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>How do you pass data from middleware to a handler?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p>Use <code>c.Set("key", value)</code> in middleware and <code>c.Get("key")</code> or typed getters like <code>c.GetInt("key")</code> in the handler. The context's key-value store is request-scoped and lives for one request only.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>How would you structure a production Gin API?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p>Separate concerns: <code>handler</code> (HTTP layer, knows Gin), <code>service</code> (business logic, no HTTP), <code>repository</code> (data access, no business logic). Wire them with dependency injection in <code>main.go</code>. Use <code>internal/</code> to enforce boundaries. Route groups map to resource types.</p>
+  </div></div>
+</div>
+
+</div>
+
+<h3>Advanced</h3>
+<div class="accordion">
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>Is <code>*gin.Context</code> safe for concurrent use?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p><strong>No.</strong> <code>*gin.Context</code> is NOT goroutine-safe. If you need to use it in a goroutine, copy it first with <code>c.Copy()</code>:</p>
+    <pre><code>cp := c.<span class="fn">Copy</span>()  <span class="cm">// snapshot current request data safely</span>
+<span class="kw">go</span> <span class="kw">func</span>() {  <span class="cm">// run work in a background goroutine</span>
+    <span class="cm">// use cp, not c</span>
+    log.<span class="fn">Println</span>(cp.<span class="fn">ClientIP</span>())  <span class="cm">// safe: reading from copied context</span>
+}()</code></pre>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>How does Gin achieve zero-allocation routing?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p>Gin uses a radix tree (compressed trie) for routing via httprouter. Route parameters are extracted in-place without allocating new strings for each request. The Context object is pooled with <code>sync.Pool</code> &mdash; reused across requests instead of being garbage collected each time.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>How would you implement graceful shutdown and why does it matter?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p>Create an <code>http.Server</code> manually, start it in a goroutine, then listen for OS signals (SIGINT/SIGTERM). On signal, call <code>srv.Shutdown(ctx)</code> with a timeout context. This lets in-flight requests finish (up to the timeout) before the server stops. Critical for Kubernetes deployments where pods get SIGTERM before being killed.</p>
+  </div></div>
+</div>
+
+<div class="accordion-item">
+  <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)"><span class="qa-badge qa-q">Ques</span>
+    <span>Gin vs Echo vs Chi &mdash; when would you choose each?</span>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="accordion-content"><div class="accordion-body"><span class="qa-badge qa-a">Ans</span>
+    <p><strong>Gin</strong>: largest ecosystem, most tutorials, best for teams. Slightly opinionated. <strong>Echo</strong>: similar perf, cleaner API for some, smaller community. <strong>Chi</strong>: lightweight, stdlib-compatible (<code>net/http</code> handlers), best for projects that want minimal framework lock-in. Choose Gin for most new projects due to ecosystem. Choose Chi if you want to stay close to stdlib.</p>
+  </div></div>
+</div>
+
+</div>
+
+<hr>
+
+<div class="info-box">
+  <div class="box-title">What's Next?</div>
+  <ol>
+    <li>Build a CRUD API with Gin + GORM</li>
+    <li>Add JWT auth + middleware</li>
+    <li>Write tests with <code>httptest</code></li>
+    <li>Add Swagger docs (<code>swaggo/gin-swagger</code>)</li>
+    <li>Deploy with Docker + graceful shutdown</li>
+    <li>Add WebSocket support (<code>gorilla/websocket</code>)</li>
+  </ol>
+</div>
+
+<div style="text-align:center; margin-top:60px;">
+  <a href="golang.html" style="display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); color:var(--accent); padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.92rem; transition:all 0.15s;" onmouseover="this.style.background='var(--border)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--card)';this.style.borderColor='var(--border)'">&larr; Back to Go Fundamentals</a>
+  <p style="color:var(--dim); margin-top:20px; font-size:0.88rem;">You know Go. You know Gin. Now ship something.</p>
+</div>
+
+</div>
+</div>
+
+<script>
+function toggleAccordion(btn) {
+  const content = btn.nextElementSibling;
+  const isOpen = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+  content.classList.toggle('open');
+}
+
+function toggleAllBtn() {
+  const sw = document.getElementById('toggleSwitch');
+  const knob = document.getElementById('toggleKnob');
+  const label = document.getElementById('toggleLabel');
+  const isOn = sw.getAttribute('aria-checked') === 'true';
+
+  document.querySelectorAll('.accordion-trigger').forEach(t => {
+    t.setAttribute('aria-expanded', isOn ? 'false' : 'true');
+    const content = t.nextElementSibling;
+    if (isOn) content.classList.remove('open');
+    else content.classList.add('open');
+  });
+
+  sw.setAttribute('aria-checked', !isOn);
+  sw.style.background = isOn ? 'var(--border2)' : 'var(--accent)';
+  knob.style.left = isOn ? '2px' : '22px';
+  knob.style.background = isOn ? 'var(--muted)' : '#fff';
+  label.textContent = isOn ? 'Show All' : 'Hide All';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('h2[id]');
+  const navLinks = document.querySelectorAll('.sidebar a[data-section]');
+  const sidebar = document.getElementById('sidebar');
+  if (!sections.length) return;
+  let currentActive = null;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        if (currentActive !== id) {
+          currentActive = id;
+          navLinks.forEach(link => {
+            if (link.dataset.section === id) {
+              link.classList.add('active');
+              const sidebarNav = sidebar.querySelector('.sidebar-nav');
+              const linkTop = link.offsetTop - sidebarNav.offsetTop;
+              const sidebarHeight = sidebarNav.clientHeight;
+              if (linkTop < sidebarNav.scrollTop || linkTop > sidebarNav.scrollTop + sidebarHeight - 60) {
+                sidebarNav.scrollTo({ top: linkTop - sidebarHeight / 3, behavior: 'smooth' });
+              }
+            } else {
+              link.classList.remove('active');
+            }
+          });
+          history.replaceState(null, '', '#' + id);
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+
+  sections.forEach(section => observer.observe(section));
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = link.dataset.section;
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    const el = document.getElementById(hash);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'instant', block: 'start' }), 50);
+  }
+});
+</script>
+</body>
+</html>

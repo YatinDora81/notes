@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elasticsearch - Complete Guide</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.8}
+.sidebar{position:fixed;top:0;left:0;width:260px;height:100vh;background:#111;border-right:1px solid #222;overflow-y:auto;padding:20px 0;z-index:100;scrollbar-width:thin;scrollbar-color:#333 #111}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+.sidebar h2{color:#00bcd4;padding:10px 20px;font-size:17px;margin-bottom:5px}
+.sidebar .section-label{color:#555;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;padding:15px 20px 5px;font-weight:bold}
+.sidebar a{display:block;padding:7px 20px;color:#777;text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .25s}
+.sidebar a:hover{color:#aaa;background:#1a1a1a}
+.sidebar a.active{color:#00bcd4;background:#0d1b2a;border-left-color:#00bcd4;font-weight:600}
+.main{margin-left:260px;display:flex;justify-content:center}
+.content{max-width:860px;width:100%;padding:40px 50px 80px}
+h1{color:#00bcd4;font-size:38px;margin-bottom:10px}
+h2{color:#ff9800;font-size:24px;margin:50px 0 15px;border-bottom:1px solid #333;padding-bottom:8px}
+h3{color:#4caf50;font-size:18px;margin:25px 0 10px}
+h4{color:#ce93d8;font-size:15px;margin:18px 0 8px}
+p{margin-bottom:12px;color:#bbb}
+strong{color:#fff}
+ul,ol{margin:0 0 15px 25px;color:#bbb}
+li{margin-bottom:6px}
+.interview-box{background:#1a1a2e;border-left:4px solid #00bcd4;padding:15px 20px;margin:15px 0;border-radius:0 8px 8px 0}
+.interview-box::before{content:"🎤 Interview Answer";display:block;color:#00bcd4;font-weight:bold;margin-bottom:8px;font-size:12px}
+.bts-box{background:#1a0a0a;border-left:4px solid #ff5722;padding:15px 20px;margin:15px 0;border-radius:0 8px 8px 0}
+.bts-box::before{content:"⚙️ Behind The Scenes";display:block;color:#ff5722;font-weight:bold;margin-bottom:8px;font-size:12px}
+.arg-box{background:#1a1a1a;border:1px solid #333;padding:12px 16px;margin:8px 0;border-radius:6px}
+.arg-box .arg-name{color:#ff9800;font-family:monospace;font-weight:bold}
+.arg-box .arg-desc{color:#bbb;margin-top:4px}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:16px;overflow-x:auto;margin:12px 0}
+code{font-family:'Fira Code','Consolas',monospace;font-size:13px;color:#e6edf3}
+.kw{color:#ff7b72}.st{color:#a5d6ff}.cm{color:#8b949e}.fn{color:#d2a8ff}.nu{color:#79c0ff}
+table{width:100%;border-collapse:collapse;margin:15px 0}
+th{background:#1a1a2e;color:#00bcd4;padding:10px;text-align:left}
+td{padding:10px;border-bottom:1px solid #222}
+tr:hover{background:#1a1a1a}
+.hero{text-align:center;padding:60px 0 30px;background:linear-gradient(135deg,#0a0a0a,#1a1a2e);border-radius:12px;margin-bottom:30px}
+.hero h1{font-size:44px}.hero p{color:#888;font-size:15px}
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:15px 0}
+.comparison-card{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:15px}
+.comparison-card h4{margin-top:0}
+.flow-diagram{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:20px;margin:15px 0;text-align:center;font-family:monospace;color:#8b949e;line-height:2}
+.flow-diagram .arrow{color:#00bcd4}
+.flow-diagram .node{color:#ff9800;font-weight:bold}
+.flow-diagram .highlight{color:#4caf50;font-weight:bold}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:20px}.comparison-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+<h2>⚡ ES Guide</h2>
+
+<div class="section-label">— Concepts —</div>
+<a href="#what-is-es">What is Elasticsearch</a>
+<a href="#why-es">Why Elasticsearch</a>
+<a href="#behind-inverted-index">Inverted Index Deep Dive</a>
+<a href="#core-concepts">Core Concepts</a>
+<a href="#es-vs-db">ES vs Database</a>
+<a href="#how-write-works">How a Write Works</a>
+<a href="#how-search-works">How a Search Works</a>
+<a href="#analyzers">Analyzers & Tokenizers</a>
+<a href="#mappings">Mappings</a>
+<a href="#query-dsl">Query DSL</a>
+<a href="#aggregations">Aggregations</a>
+<a href="#pagination">Pagination</a>
+<a href="#cluster">Cluster Architecture</a>
+<a href="#sharding">Sharding</a>
+<a href="#replication">Replication</a>
+<a href="#performance">Performance Tuning</a>
+<a href="#security">Security</a>
+<a href="#elk-stack">ELK Stack</a>
+<a href="#scaling">Scaling & ILM</a>
+<a href="#cost">Cost Optimization</a>
+
+<div class="section-label">— Node.js Implementation —</div>
+<a href="#node-setup">Setup & Connection</a>
+<a href="#node-index-create">Create Index & Mapping</a>
+<a href="#node-crud">CRUD Operations</a>
+<a href="#node-search">Search & Filters</a>
+<a href="#node-aggs">Aggregations</a>
+<a href="#node-pagination">Pagination</a>
+<a href="#node-autocomplete">Autocomplete</a>
+<a href="#node-bulk">Bulk Operations</a>
+<a href="#node-aliases">Aliases & Reindex</a>
+<a href="#node-cluster">Cluster Monitoring</a>
+<a href="#node-fullproject">Full Project</a>
+<a href="#cheatsheet">Interview Cheatsheet</a>
+</nav>
+
+<div class="main">
+<div class="content">
+
+<div class="hero">
+<h1>⚡ Elasticsearch</h1>
+<p>Complete Topic-Wise Guide with Node.js Implementation</p>
+<p style="color:#555;font-size:13px">Deep behind-the-scenes explanations • Every argument explained • Interview-ready</p>
+</div>
+
+<!-- ============================================== -->
+<!--        PART 1: ALL CONCEPTS EXPLAINED          -->
+<!-- ============================================== -->
+
+<h1 style="color:#ff9800;font-size:28px;margin:40px 0 10px;text-align:center">PART 1 — Elasticsearch Concepts</h1>
+<p style="text-align:center;color:#555">Everything you need to understand before writing a single line of code</p>
+
+<!-- 1 -->
+<section id="what-is-es">
+<h2>1. What is Elasticsearch?</h2>
+
+<p>Elasticsearch is a <strong>distributed, open-source, RESTful search and analytics engine</strong> built on top of <strong>Apache Lucene</strong>. It stores data as JSON documents and provides <strong>near real-time search</strong> — meaning data you index becomes searchable within ~1 second.</p>
+
+<div class="interview-box">
+<p>"Elasticsearch is a distributed search engine built on Apache Lucene. It stores JSON documents, builds an inverted index on them, and lets you search millions of records in milliseconds via a REST API. It's schema-free, horizontally scalable, and designed for full-text search, log analytics, and real-time monitoring."</p>
+</div>
+
+<div class="bts-box">
+<p><strong>What actually happens when ES starts:</strong><br>
+1. ES launches a <strong>JVM process</strong> (it's written in Java)<br>
+2. It reads <code>elasticsearch.yml</code> for cluster name, node name, ports, paths<br>
+3. It binds to <strong>port 9200</strong> (REST API for your app) and <strong>port 9300</strong> (transport protocol for node-to-node communication)<br>
+4. It joins or forms a <strong>cluster</strong> by discovering other nodes via seed hosts<br>
+5. A <strong>master node</strong> is elected using a quorum-based algorithm<br>
+6. The master manages the <strong>cluster state</strong> — a metadata map of every index, shard, and which node holds what<br>
+7. Each data node initializes its <strong>Lucene instances</strong> (one per shard) and loads the inverted index into memory</p>
+</div>
+
+<table>
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>Built On</td><td>Apache Lucene (Java library for full-text indexing)</td></tr>
+<tr><td>Protocol</td><td>RESTful HTTP + JSON</td></tr>
+<tr><td>Written In</td><td>Java</td></tr>
+<tr><td>License</td><td>SSPL / Elastic License 2.0 (was Apache 2.0 before v7.11)</td></tr>
+<tr><td>Search Speed</td><td>Near real-time (~1 second after indexing)</td></tr>
+<tr><td>Data Format</td><td>JSON Documents (schema-free)</td></tr>
+<tr><td>Default Ports</td><td>9200 (REST API), 9300 (Transport/Node-to-Node)</td></tr>
+</table>
+</section>
+
+<!-- 2 -->
+<section id="why-es">
+<h2>2. Why Use Elasticsearch?</h2>
+
+<p>Traditional databases (MySQL, PostgreSQL) use <strong>B-tree indexes</strong> which are great for exact lookups and range queries, but terrible for full-text search. Searching "best noise cancelling headphones" across millions of product descriptions would require a full table scan or a slow LIKE query.</p>
+
+<p>Elasticsearch solves this with an <strong>inverted index</strong> — the same data structure used by Google, Wikipedia search, and every search engine.</p>
+
+<div class="interview-box">
+<p>"We use Elasticsearch when we need blazing-fast full-text search, complex filtering, or real-time analytics. Unlike SQL databases that scan rows sequentially, ES pre-builds an inverted index — mapping every word to the documents containing it. This gives us O(1) term lookups instead of O(n) scans. It's commonly used alongside a primary database — Postgres as source of truth, ES for search."</p>
+</div>
+
+<table>
+<tr><th>Use Case</th><th>Example</th><th>Why ES Wins</th></tr>
+<tr><td>Full-text Search</td><td>E-commerce product search</td><td>Relevance scoring, fuzzy match, synonyms, stemming</td></tr>
+<tr><td>Log Analytics</td><td>Server/application logs</td><td>Aggregate millions of log lines in seconds</td></tr>
+<tr><td>Autocomplete</td><td>Search-as-you-type</td><td>Edge n-gram tokenizer returns results in &lt;50ms</td></tr>
+<tr><td>Geospatial</td><td>Find nearby restaurants</td><td>Built-in geo_point, geo_shape queries</td></tr>
+<tr><td>Metrics/APM</td><td>Infrastructure monitoring</td><td>Time-series aggregations, dashboards</td></tr>
+<tr><td>Security/SIEM</td><td>Threat detection</td><td>Real-time correlation across event streams</td></tr>
+</table>
+</section>
+
+<!-- 3 -->
+<section id="behind-inverted-index">
+<h2>3. Inverted Index — Deep Dive</h2>
+
+<p>This is the single most important concept in Elasticsearch. Every feature — search speed, relevance scoring, fuzzy matching — exists because of the inverted index.</p>
+
+<h3>What is a Forward Index?</h3>
+<p>A traditional database stores data like this (forward index):</p>
+<pre><code><span class="cm">// Forward Index — how a normal DB stores data</span>
+<span class="cm">// To find "fast", you must scan EVERY row</span>
+
+Doc1 → "Elasticsearch is fast and scalable"
+Doc2 → "Redis is fast for caching"
+Doc3 → "MongoDB is a NoSQL database"</code></pre>
+
+<p>To find all documents containing "fast", the DB must <strong>scan every single row</strong> — this is O(n) and gets slower as data grows.</p>
+
+<h3>What is an Inverted Index?</h3>
+<p>Elasticsearch <strong>flips this around</strong>. At index time, it breaks every text into words (tokens) and builds a map from each word to its documents:</p>
+
+<pre><code><span class="cm">// Inverted Index — how Elasticsearch stores data</span>
+<span class="cm">// To find "fast", just look up the word → instant O(1)</span>
+
+Term              → Documents (Postings List)
+─────────────────────────────────────────────
+"elasticsearch"   → [Doc1]
+"is"              → [Doc1, Doc2, Doc3]
+"fast"            → [Doc1, Doc2]          ← instant lookup!
+"and"             → [Doc1]
+"scalable"        → [Doc1]
+"redis"           → [Doc2]
+"caching"         → [Doc2]
+"mongodb"         → [Doc3]
+"nosql"           → [Doc3]
+"database"        → [Doc3]</code></pre>
+
+<div class="bts-box">
+<p><strong>What ES actually stores in the inverted index:</strong><br><br>
+Each entry in the postings list is NOT just a document ID. It contains:<br><br>
+1. <strong>Document ID</strong> — which doc contains this term<br>
+2. <strong>Term Frequency (TF)</strong> — how many times this term appears in that doc (more = more relevant)<br>
+3. <strong>Position</strong> — at which word position the term appears (needed for phrase queries like "noise cancelling")<br>
+4. <strong>Offsets</strong> — character start/end positions (needed for highlighting the matched text)<br>
+5. <strong>Field Length</strong> — how many total words the field has (shorter fields with the term rank higher)<br><br>
+So the real entry looks like:<br>
+<code>"fast" → [{doc:1, tf:1, pos:[2], offset:[21-25]}, {doc:2, tf:1, pos:[2], offset:[9-13]}]</code><br><br>
+This is how ES calculates <strong>relevance scores</strong> — using BM25 algorithm which considers TF, document length, and inverse document frequency (how rare the term is across all docs).</p>
+</div>
+
+<h3>How Multi-Word Search Works Behind the Scenes</h3>
+<p>When you search for <code>"fast scalable"</code>:</p>
+
+<div class="flow-diagram">
+<span class="node">Query: "fast scalable"</span><br>
+<span class="arrow">↓</span> Analyzer breaks query into tokens<br>
+<span class="highlight">["fast", "scalable"]</span><br>
+<span class="arrow">↓</span> Look up each term in inverted index<br>
+<span class="node">"fast" → [Doc1, Doc2]</span> &nbsp;&nbsp; <span class="node">"scalable" → [Doc1]</span><br>
+<span class="arrow">↓</span> Merge results (OR by default)<br>
+<span class="highlight">Result: [Doc1 (score: 2.4), Doc2 (score: 1.1)]</span><br>
+<span class="cm">Doc1 ranks higher because it matches BOTH terms</span>
+</div>
+</section>
+
+<!-- 4 -->
+<section id="core-concepts">
+<h2>4. Core Concepts</h2>
+
+<table>
+<tr><th>ES Term</th><th>RDBMS Equivalent</th><th>Definition (say this in interview)</th></tr>
+<tr><td><strong>Cluster</strong></td><td>Database Server</td><td>A group of one or more nodes working together. Identified by a unique name. Holds ALL your data.</td></tr>
+<tr><td><strong>Node</strong></td><td>Single DB Instance</td><td>A single server (JVM process) in the cluster. Each node has a unique ID and stores data on disk.</td></tr>
+<tr><td><strong>Index</strong></td><td>Table</td><td>A collection of documents with similar structure. You search within an index. Like a "table" but flexible.</td></tr>
+<tr><td><strong>Document</strong></td><td>Row</td><td>A single JSON object stored in an index. The smallest unit of data in ES. Has a unique _id.</td></tr>
+<tr><td><strong>Field</strong></td><td>Column</td><td>A key-value pair in a document. Each field has a type (text, keyword, integer, date, etc).</td></tr>
+<tr><td><strong>Mapping</strong></td><td>Schema</td><td>Defines field types and how they're indexed. Dynamic (auto-detect) or explicit (you define).</td></tr>
+<tr><td><strong>Shard</strong></td><td>Partition</td><td>An index is split into shards for horizontal distribution. Each shard is a complete Lucene index with its own inverted index.</td></tr>
+<tr><td><strong>Replica</strong></td><td>Read Replica</td><td>A copy of a primary shard on a different node. Provides fault tolerance + read throughput.</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>The hierarchy behind the scenes:</strong><br><br>
+<code>Cluster → Nodes → Indices → Shards → Segments → Documents</code><br><br>
+The part most people miss is <strong>Segments</strong>. Each shard is made of multiple <strong>immutable segments</strong>. When you index a document:<br>
+1. It first goes to an <strong>in-memory buffer</strong><br>
+2. Every 1 second (the refresh interval), the buffer is written to a new <strong>segment</strong> on disk<br>
+3. That segment becomes <strong>searchable</strong> (this is why ES is "near real-time" — 1 sec delay)<br>
+4. Segments are <strong>immutable</strong> — they never change. Updates create new segments; deletes just mark docs as deleted<br>
+5. Periodically, small segments are <strong>merged</strong> into larger ones (background merge process) to keep things efficient<br><br>
+This immutable segment design is WHY ES is so fast — no locks needed for reads, and the OS can cache segments aggressively.</p>
+</div>
+
+<div class="interview-box">
+<p>"A Cluster has Nodes. Each Node holds Indices. Each Index is split into Shards for horizontal distribution. Each Shard is a full Lucene index made of immutable Segments. Replicas are copies of shards on different nodes for fault tolerance. Documents are JSON objects stored within an Index, and Fields are the key-value pairs inside each document."</p>
+</div>
+</section>
+
+<!-- 5 -->
+<section id="es-vs-db">
+<h2>5. Elasticsearch vs Traditional Database</h2>
+
+<div class="comparison-grid">
+<div class="comparison-card">
+<h4 style="color:#ff9800">Elasticsearch</h4>
+<p>✅ Full-text search (milliseconds on millions of docs)</p>
+<p>✅ Built-in relevance scoring (BM25)</p>
+<p>✅ Horizontal scaling (just add nodes)</p>
+<p>✅ Schema-flexible (dynamic mapping)</p>
+<p>✅ Real-time analytics & aggregations</p>
+<p>✅ Fuzzy search, autocomplete, synonyms built-in</p>
+<p>❌ No ACID transactions</p>
+<p>❌ Not ideal as primary data store</p>
+<p>❌ Eventual consistency (not strong)</p>
+<p>❌ No joins between indices</p>
+</div>
+<div class="comparison-card">
+<h4 style="color:#4caf50">PostgreSQL / MySQL</h4>
+<p>✅ ACID transactions (strong consistency)</p>
+<p>✅ Complex JOINs & relationships</p>
+<p>✅ Referential integrity (foreign keys)</p>
+<p>✅ Mature, proven, huge ecosystem</p>
+<p>❌ Full-text search is very slow at scale</p>
+<p>❌ Vertical scaling primarily</p>
+<p>❌ No relevance scoring</p>
+<p>❌ Schema changes = migrations</p>
+<p>❌ LIKE '%query%' cannot use index = full scan</p>
+</div>
+</div>
+
+<div class="bts-box">
+<p><strong>Why SQL LIKE is slow vs ES:</strong><br><br>
+<code>SELECT * FROM products WHERE description LIKE '%noise cancelling%'</code><br><br>
+This forces PostgreSQL to do a <strong>sequential scan</strong> — reading every single row and checking if the string contains "noise cancelling". With 10 million rows, this takes seconds.<br><br>
+In ES, "noise cancelling" was already broken into tokens ["noise", "cancelling"] at index time, and each token points to matching doc IDs in the inverted index. The lookup is <strong>O(1) per term</strong>, then ES merges the posting lists. Result: milliseconds.</p>
+</div>
+
+<div class="interview-box">
+<p>"Elasticsearch is NOT a replacement for your primary database. The best architecture is: PostgreSQL/MongoDB as the source of truth for writes and transactions, and Elasticsearch as a read-optimized search layer. You sync data from your DB to ES using change data capture, application-level dual writes, or tools like Logstash/Debezium."</p>
+</div>
+</section>
+
+<!-- 6 -->
+<section id="how-write-works">
+<h2>6. How a Write (Index) Works — Behind the Scenes</h2>
+
+<p>When you send a document to Elasticsearch, here's <strong>every single step</strong> that happens internally:</p>
+
+<div class="flow-diagram">
+<span class="node">Client sends POST /products/_doc/1</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 1: Coordinating Node receives the request</span><br>
+<span class="cm">Any node can be a coordinating node. It determines which shard owns this doc.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 2: Routing — shard = hash(_id) % number_of_shards</span><br>
+<span class="cm">The doc ID is hashed to determine which primary shard gets it.</span><br>
+<span class="cm">This is why you CANNOT change shard count after index creation.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 3: Primary Shard receives the document</span><br>
+<span class="cm">The doc is written to the Translog (write-ahead log) for crash recovery.</span><br>
+<span class="cm">Then it goes into the In-Memory Buffer.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 4: Refresh (every 1 second by default)</span><br>
+<span class="cm">The in-memory buffer is written to a new Segment (immutable).</span><br>
+<span class="cm">The segment is now SEARCHABLE. This is the "near real-time" delay.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 5: Replicate to Replica Shards</span><br>
+<span class="cm">The primary forwards the write to all replica shards in parallel.</span><br>
+<span class="cm">Once all replicas confirm, the client gets a success response.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 6: Flush (every 30 min or when translog gets big)</span><br>
+<span class="cm">Segments are fsync'd to disk. Translog is cleared.</span><br>
+<span class="cm">Data is now durable even if power goes out.</span><br>
+<span class="arrow">↓</span><br>
+<span class="highlight">Step 7: Merge (background)</span><br>
+<span class="cm">Many small segments are merged into fewer large segments.</span><br>
+<span class="cm">Deleted docs are permanently removed during merge.</span>
+</div>
+
+<div class="interview-box">
+<p>"When you index a document, the coordinating node routes it to the correct primary shard using hash(id) % num_shards. The primary writes it to the translog for durability, then to an in-memory buffer. Every 1 second, the buffer is flushed to a new immutable Lucene segment — that's when it becomes searchable. The write is then replicated to all replica shards. Periodically, segments are merged in the background to optimize read performance."</p>
+</div>
+</section>
+
+<!-- 7 -->
+<section id="how-search-works">
+<h2>7. How a Search Works — Behind the Scenes</h2>
+
+<p>Search is a <strong>two-phase process</strong>: Query phase and Fetch phase.</p>
+
+<div class="flow-diagram">
+<span class="node">Client sends GET /products/_search { "query": { "match": { "name": "iPhone" } } }</span><br><br>
+<span class="highlight">═══ QUERY PHASE ═══</span><br>
+<span class="arrow">↓</span><br>
+<span class="node">Step 1: Coordinating node broadcasts query to ALL shards</span><br>
+<span class="cm">If index has 5 shards, query goes to all 5 (primary or replica)</span><br>
+<span class="arrow">↓</span><br>
+<span class="node">Step 2: Each shard searches its LOCAL inverted index</span><br>
+<span class="cm">Looks up "iphone" in inverted index → gets matching doc IDs + scores</span><br>
+<span class="cm">Each shard returns only doc IDs + scores (lightweight)</span><br>
+<span class="arrow">↓</span><br>
+<span class="node">Step 3: Coordinating node MERGES results from all shards</span><br>
+<span class="cm">Sorts by score, applies from/size pagination</span><br>
+<span class="cm">Now knows the TOP N document IDs</span><br><br>
+<span class="highlight">═══ FETCH PHASE ═══</span><br>
+<span class="arrow">↓</span><br>
+<span class="node">Step 4: Coordinating node fetches actual documents</span><br>
+<span class="cm">Sends multi-get to only the shards that have the top N docs</span><br>
+<span class="cm">Each shard returns full _source JSON for requested docs</span><br>
+<span class="arrow">↓</span><br>
+<span class="node">Step 5: Return results to client</span><br>
+<span class="cm">{ hits: { total: 42, hits: [ {_source: {...}}, ... ] } }</span>
+</div>
+
+<div class="bts-box">
+<p><strong>Why deep pagination is expensive:</strong><br><br>
+If you request <code>from: 10000, size: 10</code>, EVERY shard must return its top 10,010 results to the coordinating node. With 5 shards, that's 50,050 results to merge — just to return 10 docs. This is why <code>from + size</code> is capped at 10,000 by default, and why you should use <code>search_after</code> for deep pagination.</p>
+</div>
+
+<div class="interview-box">
+<p>"ES search is a scatter-gather pattern with two phases. In the Query phase, the coordinating node broadcasts the query to all shards, each shard searches its local inverted index and returns just doc IDs + scores. The coordinator merges and ranks these. In the Fetch phase, it retrieves the actual document bodies only for the top N results. This two-phase design minimizes network transfer."</p>
+</div>
+</section>
+
+<!-- 8 -->
+<section id="analyzers">
+<h2>8. Analyzers & Tokenizers</h2>
+
+<p>An analyzer is the <strong>text processing pipeline</strong> that runs BOTH at index time (when you store data) and at search time (when you query). It determines how text is broken into searchable terms.</p>
+
+<h3>The 3-Stage Pipeline</h3>
+<div class="flow-diagram">
+<span class="node">Input: "The Quick-Brown FOX jumped! &lt;b&gt;twice&lt;/b&gt;"</span><br>
+<span class="arrow">↓</span> <span class="highlight">Stage 1: Character Filters</span><br>
+<span class="cm">Strip HTML, replace characters, pattern replace</span><br>
+<span class="node">"The Quick-Brown FOX jumped! twice"</span><br>
+<span class="arrow">↓</span> <span class="highlight">Stage 2: Tokenizer</span><br>
+<span class="cm">Split text into individual tokens (words)</span><br>
+<span class="node">["The", "Quick", "Brown", "FOX", "jumped", "twice"]</span><br>
+<span class="arrow">↓</span> <span class="highlight">Stage 3: Token Filters</span><br>
+<span class="cm">lowercase → remove stop words → stemming</span><br>
+<span class="node">["quick", "brown", "fox", "jump", "twice"]</span><br>
+<span class="cm">↑ These tokens go into the inverted index</span>
+</div>
+
+<div class="bts-box">
+<p><strong>Why "Running" matches "run" — Stemming explained:</strong><br><br>
+The <strong>stemmer</strong> token filter reduces words to their root form:<br>
+• "running" → "run"<br>
+• "jumped" → "jump"<br>
+• "happier" → "happi"<br>
+• "universities" → "univers"<br><br>
+Both the indexed text AND the search query go through the same analyzer. So when you index "I was running" it stores "run". When you search "runners", it becomes "run". They match!<br><br>
+<strong>Common mistake:</strong> Using a <code>term</code> query on an analyzed text field. The field stores "run" but you're searching for "Running" (not analyzed) — no match. Always use <code>match</code> for text fields.</p>
+</div>
+
+<h3>Built-in Analyzers</h3>
+<table>
+<tr><th>Analyzer</th><th>What It Does</th><th>Input → Output</th></tr>
+<tr><td><strong>standard</strong> (default)</td><td>Unicode tokenizer + lowercase</td><td>"Quick Brown" → ["quick", "brown"]</td></tr>
+<tr><td><strong>simple</strong></td><td>Splits on non-letters + lowercase</td><td>"2-Fast cars!" → ["fast", "cars"]</td></tr>
+<tr><td><strong>whitespace</strong></td><td>Splits on whitespace only</td><td>"Quick Brown" → ["Quick", "Brown"]</td></tr>
+<tr><td><strong>keyword</strong></td><td>No tokenization — entire string as one token</td><td>"New York" → ["New York"]</td></tr>
+<tr><td><strong>english</strong></td><td>Standard + stop words + stemming</td><td>"the runners are running" → ["runner", "run"]</td></tr>
+</table>
+
+<h3>Edge N-Gram — For Autocomplete</h3>
+<p>Breaks a word into progressive prefixes:</p>
+<pre><code><span class="cm">// edge_ngram with min_gram:2, max_gram:5</span>
+<span class="cm">// Input: "iPhone"</span>
+<span class="cm">// Tokens: ["iP", "iPh", "iPho", "iPhon"]</span>
+<span class="cm">// (after lowercase): ["ip", "iph", "ipho", "iphon"]</span>
+<span class="cm">// Now searching "iph" matches because "iph" is a stored token!</span></code></pre>
+
+<div class="interview-box">
+<p>"An analyzer has 3 stages: character filter (strip HTML, replace chars), tokenizer (split into tokens), and token filters (lowercase, stemming, stop words). The same analyzer runs at both index and search time to ensure terms match. For autocomplete, we use edge_ngram tokenizer at index time but standard analyzer at search time — so 'ip' typed by user matches the pre-built prefix tokens."</p>
+</div>
+</section>
+
+<!-- 9 -->
+<section id="mappings">
+<h2>9. Mappings (Schema Definition)</h2>
+
+<p>Mapping defines <strong>how each field is stored and indexed</strong>. It's like a database schema, but more powerful because the same field can be indexed multiple ways simultaneously.</p>
+
+<h3>Field Types</h3>
+<table>
+<tr><th>Type</th><th>Use For</th><th>Indexed As</th><th>Supports</th></tr>
+<tr><td><strong>text</strong></td><td>Full-text (descriptions, titles)</td><td>Analyzed → inverted index</td><td>match, match_phrase, fuzzy</td></tr>
+<tr><td><strong>keyword</strong></td><td>Exact values (IDs, status, tags)</td><td>Not analyzed → exact term</td><td>term, terms, sort, aggs</td></tr>
+<tr><td><strong>integer/long/float</strong></td><td>Numbers</td><td>BKD tree (numeric index)</td><td>range, sort, aggs</td></tr>
+<tr><td><strong>date</strong></td><td>Dates/timestamps</td><td>Internally as epoch millis</td><td>range, date_histogram</td></tr>
+<tr><td><strong>boolean</strong></td><td>true/false</td><td>Term index</td><td>term filter</td></tr>
+<tr><td><strong>nested</strong></td><td>Array of objects</td><td>Separate hidden documents</td><td>nested query (preserves object boundaries)</td></tr>
+<tr><td><strong>geo_point</strong></td><td>Lat/lon coordinates</td><td>Geohash + quad tree</td><td>geo_distance, geo_bounding_box</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>text vs keyword — the #1 source of confusion:</strong><br><br>
+When you store <code>"Apple iPhone"</code>:<br>
+• As <strong>text</strong>: Analyzer runs → stored as tokens ["apple", "iphone"] in inverted index. You can search with <code>match</code> and it'll find "apple" or "iphone". But you CANNOT sort or aggregate on it (tokens are scattered).<br>
+• As <strong>keyword</strong>: Stored as-is: "Apple iPhone" as one single term. You CAN sort, aggregate, and do exact match with <code>term</code>. But searching "apple" alone won't find it.<br><br>
+<strong>Best practice — Multi-field mapping:</strong> Map the field as BOTH:<br>
+<code>"name": { "type": "text", "fields": { "keyword": { "type": "keyword" } } }</code><br>
+Now use <code>name</code> for full-text search and <code>name.keyword</code> for sorting/aggregation. This is actually what ES does by default with dynamic mapping!</p>
+</div>
+
+<h3>Dynamic vs Explicit Mapping</h3>
+<table>
+<tr><th>Dynamic Mapping (default)</th><th>Explicit Mapping (recommended)</th></tr>
+<tr><td>ES auto-detects types from first document</td><td>You define every field and its type</td></tr>
+<tr><td>"42" might become text instead of integer</td><td>You control exactly how data is indexed</td></tr>
+<tr><td>Fine for development/prototyping</td><td>Required for production</td></tr>
+<tr><td>Can lead to "mapping explosion" with dynamic keys</td><td>Use <code>dynamic: 'strict'</code> to reject unmapped fields</td></tr>
+</table>
+
+<div class="interview-box">
+<p>"Mapping defines field types and indexing behavior. The key distinction is text (analyzed, for full-text search) vs keyword (not analyzed, for exact match/sort/aggs). In production, always use explicit mapping with dynamic:strict to prevent type-guessing issues. Multi-field mapping lets you index the same data both ways — text for search, keyword for sorting."</p>
+</div>
+</section>
+
+<!-- 10 -->
+<section id="query-dsl">
+<h2>10. Query DSL — Complete Guide</h2>
+
+<p>Query DSL (Domain Specific Language) is ES's JSON-based query language. Two categories: <strong>Leaf queries</strong> (search a single field) and <strong>Compound queries</strong> (combine multiple queries).</p>
+
+<h3>Query Context vs Filter Context</h3>
+<div class="bts-box">
+<p><strong>This distinction is critical for performance:</strong><br><br>
+<strong>Query context</strong> ("How WELL does this match?")<br>
+• Calculates a relevance <strong>_score</strong> for each document<br>
+• Score calculation (BM25) is CPU-intensive<br>
+• Results are NOT cached<br>
+• Use for: full-text search where ranking matters<br><br>
+<strong>Filter context</strong> ("Does this match YES or NO?")<br>
+• No scoring — just binary match/no-match<br>
+• Results ARE cached in a <strong>bitset cache</strong> (extremely fast on repeated queries)<br>
+• Much faster than query context<br>
+• Use for: exact values, ranges, boolean conditions<br><br>
+Rule: If you don't need relevance ranking, use <code>filter</code>. It's faster AND cached.</p>
+</div>
+
+<h3>10.1 match — Full-Text Search</h3>
+<pre><code><span class="cm">// match: Analyzes the query, then searches the inverted index</span>
+<span class="cm">// "titanium chip" → ["titanium", "chip"] → OR search by default</span>
+{
+  "query": {
+    "match": {
+      "description": {
+        "query": "titanium chip",
+        "operator": "and",          <span class="cm">// "or" (default) = any term, "and" = all terms must match</span>
+        "fuzziness": "AUTO",         <span class="cm">// Typo tolerance: AUTO = 0 edits for 1-2 chars, 1 for 3-5, 2 for 6+</span>
+        "minimum_should_match": "75%" <span class="cm">// At least 75% of terms must match</span>
+      }
+    }
+  }
+}</code></pre>
+
+<h3>10.2 match_phrase — Exact Phrase (Order Matters)</h3>
+<pre><code><span class="cm">// All terms must appear in EXACT order</span>
+{
+  "query": {
+    "match_phrase": {
+      "description": {
+        "query": "A17 Pro chip",
+        "slop": 1    <span class="cm">// Allow 1 word between terms ("A17 powerful Pro chip" = still matches)</span>
+      }
+    }
+  }
+}</code></pre>
+
+<div class="bts-box">
+<p><strong>How match_phrase works behind the scenes:</strong><br>
+ES doesn't just check if all terms exist — it checks their <strong>positions</strong> in the inverted index. Remember, the inverted index stores position data for each term occurrence. "A17" must be at position N, "Pro" at N+1, "chip" at N+2. Slop allows gaps: with slop:1, positions can differ by 1 extra.</p>
+</div>
+
+<h3>10.3 multi_match — Search Multiple Fields</h3>
+<pre><code>{
+  "query": {
+    "multi_match": {
+      "query": "Apple premium",
+      "fields": ["name^3", "brand^2", "description"],  <span class="cm">// ^N = boost that field's score by N</span>
+      "type": "best_fields",  <span class="cm">// Score from best matching field (default)</span>
+      "fuzziness": "AUTO"     <span class="cm">// "most_fields" = sum of all fields, "cross_fields" = treat as one field</span>
+    }
+  }
+}</code></pre>
+
+<h3>10.4 term — Exact Value (No Analysis)</h3>
+<pre><code><span class="cm">// term: Does NOT analyze the query — searches for exact token</span>
+<span class="cm">// Use for: keywords, IDs, booleans, enums, numbers</span>
+<span class="cm">// NEVER use term on text fields!</span>
+{ "query": { "term": { "brand.keyword": "Apple" } } }
+
+<span class="cm">// terms: Match any value (like SQL IN)</span>
+{ "query": { "terms": { "category.keyword": ["smartphones", "laptops", "tablets"] } } }</code></pre>
+
+<h3>10.5 range — Number/Date Ranges</h3>
+<pre><code>{ "query": { "range": { "price": { "gte": 500, "lte": 1500 } } } }
+
+<span class="cm">// Date range with relative math</span>
+{ "query": { "range": { "createdAt": {
+  "gte": "now-30d/d",   <span class="cm">// 30 days ago, rounded to start of day</span>
+  "lte": "now/d",        <span class="cm">// today, rounded to end of day</span>
+  "time_zone": "+05:30"  <span class="cm">// Adjust for timezone before comparison</span>
+} } } }</code></pre>
+
+<h3>10.6 bool — Combine Queries (MOST IMPORTANT)</h3>
+<pre><code>{
+  "query": {
+    "bool": {
+      "must": [                <span class="cm">// AND + scored — all must match, affects ranking</span>
+        { "match": { "description": "premium quality" } }
+      ],
+      "should": [              <span class="cm">// OR + scored — boosts score if matched</span>
+        { "match": { "tags": "5g" } },
+        { "match": { "tags": "camera" } }
+      ],
+      "minimum_should_match": 1, <span class="cm">// At least 1 should clause must match</span>
+      "filter": [              <span class="cm">// AND + NOT scored + CACHED — fastest for exact conditions</span>
+        { "term": { "brand.keyword": "Apple" } },
+        { "range": { "price": { "gte": 500, "lte": 2000 } } },
+        { "term": { "inStock": true } }
+      ],
+      "must_not": [            <span class="cm">// NOT + NOT scored + CACHED — exclude results</span>
+        { "term": { "category.keyword": "accessories" } }
+      ]
+    }
+  }
+}</code></pre>
+
+<div class="interview-box">
+<p>"Bool query has 4 clauses: <strong>must</strong> (AND + scored), <strong>should</strong> (OR + scored), <strong>filter</strong> (AND + not scored + cached), <strong>must_not</strong> (NOT + not scored + cached). Use must/should for text search where ranking matters. Use filter for exact matches and ranges — it's faster because there's no scoring overhead and results are cached in a bitset."</p>
+</div>
+
+<h3>10.7 Other Useful Queries</h3>
+<pre><code><span class="cm">// wildcard: Pattern matching (* = any, ? = single char)</span>
+{ "query": { "wildcard": { "name.keyword": "*Phone*" } } }
+
+<span class="cm">// prefix: Starts with</span>
+{ "query": { "prefix": { "name.keyword": "Mac" } } }
+
+<span class="cm">// exists: Field exists and is not null</span>
+{ "query": { "exists": { "field": "ratings" } } }
+
+<span class="cm">// ids: Match specific document IDs</span>
+{ "query": { "ids": { "values": ["1", "2", "3"] } } }</code></pre>
+</section>
+
+<!-- 11 -->
+<section id="aggregations">
+<h2>11. Aggregations (Analytics Engine)</h2>
+
+<p>Aggregations are ES's analytics engine — like SQL GROUP BY, COUNT, AVG, SUM on steroids. You can nest them infinitely and combine with any query.</p>
+
+<h3>Three Types</h3>
+<table>
+<tr><th>Type</th><th>What It Does</th><th>SQL Equivalent</th><th>Examples</th></tr>
+<tr><td><strong>Bucket</strong></td><td>Groups documents into buckets</td><td>GROUP BY</td><td>terms, range, date_histogram, filters</td></tr>
+<tr><td><strong>Metric</strong></td><td>Calculates values from grouped docs</td><td>AVG, SUM, COUNT</td><td>avg, sum, min, max, cardinality, percentiles</td></tr>
+<tr><td><strong>Pipeline</strong></td><td>Aggregates on other aggregation results</td><td>Subqueries on aggregates</td><td>cumulative_sum, derivative, bucket_sort</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>How aggregations work behind the scenes:</strong><br><br>
+Aggregations use <strong>doc_values</strong> — a column-oriented data structure stored on disk alongside the inverted index. While the inverted index maps terms→docs (good for search), doc_values map docs→values (good for sorting and aggregation).<br><br>
+When you ask "group by brand", ES reads the brand doc_values column for all matching documents, which is extremely cache-friendly because values for the same field are stored contiguously.<br><br>
+<strong>keyword</strong> fields have doc_values enabled by default. <strong>text</strong> fields do NOT — that's why you must use <code>brand.keyword</code> for aggregations, not <code>brand</code>.</p>
+</div>
+
+<div class="interview-box">
+<p>"Aggregations have 3 types: Bucket (grouping like GROUP BY), Metric (calculations like AVG/SUM), and Pipeline (aggregations on aggregation results). They use doc_values — a columnar data structure — which is why aggregations only work on keyword and numeric fields, not analyzed text fields. You can nest aggs infinitely: group by brand → within each brand, calculate avg price."</p>
+</div>
+</section>
+
+<!-- 12 -->
+<section id="pagination">
+<h2>12. Pagination Strategies</h2>
+
+<table>
+<tr><th>Method</th><th>Limit</th><th>Stateful?</th><th>Use Case</th></tr>
+<tr><td><strong>from/size</strong></td><td>10,000 results max</td><td>No</td><td>UI pagination (page 1, 2, 3...)</td></tr>
+<tr><td><strong>search_after</strong></td><td>Unlimited</td><td>No</td><td>Infinite scroll, deep pagination</td></tr>
+<tr><td><strong>PIT + search_after</strong></td><td>Unlimited</td><td>Yes (snapshot)</td><td>Data exports, consistent reads</td></tr>
+<tr><td><strong>scroll</strong> (deprecated)</td><td>Unlimited</td><td>Yes</td><td>Legacy — use PIT instead</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>Why from/size is capped at 10,000:</strong><br><br>
+Requesting <code>from:9990, size:10</code> means EVERY shard returns its top 10,000 results to the coordinating node. With 5 shards, the coordinator merges 50,000 results just to return 10. Memory and CPU cost grows linearly with <code>from</code>.<br><br>
+<strong>search_after</strong> is efficient because it uses the sort values of the last document as a cursor. Each shard only needs to find documents AFTER that point — no wasted work on documents you've already seen.</p>
+</div>
+
+<div class="interview-box">
+<p>"from/size is simple but capped at 10K. For deep pagination, use search_after — it's cursor-based using the last document's sort values, so each shard only processes documents after the cursor. For consistent exports (no changes during pagination), combine search_after with Point in Time (PIT), which creates a frozen snapshot of the index."</p>
+</div>
+</section>
+
+<!-- 13 -->
+<section id="cluster">
+<h2>13. Cluster Architecture</h2>
+
+<h3>Node Roles</h3>
+<table>
+<tr><th>Role</th><th>Responsibility</th><th>Hardware Needs</th></tr>
+<tr><td><strong>Master</strong></td><td>Manages cluster state, shard allocation, index creation/deletion</td><td>Low CPU/RAM, reliable network</td></tr>
+<tr><td><strong>Data</strong></td><td>Stores data, executes searches and aggregations</td><td>High CPU, RAM, fast SSD</td></tr>
+<tr><td><strong>Coordinating</strong></td><td>Routes requests, merges results from shards</td><td>Medium CPU/RAM</td></tr>
+<tr><td><strong>Ingest</strong></td><td>Pre-processes docs before indexing (transform, enrich)</td><td>Medium CPU</td></tr>
+<tr><td><strong>ML</strong></td><td>Runs machine learning jobs</td><td>High CPU/RAM</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>Cluster state and master election:</strong><br><br>
+The <strong>cluster state</strong> is a metadata object containing: all index mappings, shard routing table (which shard is on which node), node membership. Every node has a copy but only the master can modify it.<br><br>
+Master election uses a <strong>quorum</strong>: you need a majority of master-eligible nodes to agree. That's why you run an ODD number (3 or 5) of master-eligible nodes — to avoid split-brain. In a split-brain scenario, two groups of nodes think they're each the cluster, leading to data corruption.</p>
+</div>
+
+<h3>Cluster Health</h3>
+<table>
+<tr><th>Status</th><th>Meaning</th><th>Action</th></tr>
+<tr><td style="color:#4caf50"><strong>GREEN</strong></td><td>All primary + replica shards assigned</td><td>All good!</td></tr>
+<tr><td style="color:#ff9800"><strong>YELLOW</strong></td><td>All primaries OK, some replicas unassigned</td><td>Add nodes or reduce replica count</td></tr>
+<tr><td style="color:#f44336"><strong>RED</strong></td><td>Some PRIMARY shards unassigned — data loss risk</td><td>Urgent! Check disk, node health</td></tr>
+</table>
+</section>
+
+<!-- 14 -->
+<section id="sharding">
+<h2>14. Sharding</h2>
+
+<div class="bts-box">
+<p><strong>How sharding works internally:</strong><br><br>
+An index with 3 shards is actually 3 completely separate Lucene indexes, potentially on 3 different nodes. Each shard has its own inverted index, its own segments, its own doc_values.<br><br>
+<strong>Routing formula:</strong> <code>shard_number = hash(_routing) % number_of_primary_shards</code><br>
+By default, _routing is the document _id. This is WHY you cannot change shard count after creation — the hash would route existing documents to wrong shards.<br><br>
+<strong>Sizing rules:</strong><br>
+• Target <strong>10-50 GB per shard</strong><br>
+• Each shard uses ~50MB heap memory overhead<br>
+• Max ~1000 shards per node<br>
+• Formula: <code>num_shards = ceil(expected_data_size / 30GB)</code><br>
+• Too few shards = can't distribute across nodes<br>
+• Too many shards = excessive overhead, slow cluster state updates</p>
+</div>
+
+<div class="interview-box">
+<p>"Shards are how ES distributes an index across nodes. Each shard is a full Lucene index. Shard count is fixed at index creation because routing uses hash(id) % num_shards. Target 10-50GB per shard. Too few = poor distribution, too many = heap overhead per shard and slow master operations."</p>
+</div>
+</section>
+
+<!-- 15 -->
+<section id="replication">
+<h2>15. Replication</h2>
+
+<p>Every primary shard can have 0+ <strong>replica shards</strong> — exact copies on different nodes.</p>
+
+<div class="bts-box">
+<p><strong>How replication works internally:</strong><br><br>
+1. Writes ALWAYS go to the <strong>primary shard</strong> first<br>
+2. After writing locally, the primary <strong>forwards</strong> the operation to all replicas <strong>in parallel</strong><br>
+3. The client gets a response only after <strong>all in-sync replicas confirm</strong> (configurable via <code>wait_for_active_shards</code>)<br>
+4. Reads (searches) can be served by <strong>either primary or replica</strong> — ES round-robins between them<br>
+5. Replicas are NEVER on the same node as their primary — this is enforced by the shard allocator<br><br>
+<strong>Two benefits:</strong><br>
+• <strong>Fault tolerance:</strong> If a node dies, replicas on other nodes get promoted to primary. Zero data loss.<br>
+• <strong>Read scaling:</strong> More replicas = more shards that can serve search requests in parallel</p>
+</div>
+
+<div class="interview-box">
+<p>"Replicas serve two purposes: high availability (if a node dies, replica promotes to primary) and read throughput (searches can hit any replica). Writes always go to primary first, then replicate to all replicas in parallel. Replicas are never co-located with their primary. Default is 1 replica — meaning 2 copies of your data."</p>
+</div>
+</section>
+
+<!-- 16 -->
+<section id="performance">
+<h2>16. Performance Tuning</h2>
+<ul>
+<li><strong>Use filter over query</strong> for non-scoring conditions — filters are cached in bitsets</li>
+<li><strong>Reduce _source</strong> — only fetch fields you need</li>
+<li><strong>Bulk API for writes</strong> — 500-5000 docs per batch instead of one-by-one</li>
+<li><strong>Refresh interval</strong> — set to 30s or -1 during bulk indexing, back to 1s after</li>
+<li><strong>Shard sizing</strong> — 10-50GB per shard, not too many, not too few</li>
+<li><strong>Index aliases</strong> — for zero-downtime reindexing</li>
+<li><strong>Disable replicas during bulk load</strong> — set to 0, then back to 1 after</li>
+<li><strong>Force merge read-only indices</strong> — merge to 1 segment for max read speed</li>
+<li><strong>Use doc_values: false</strong> on fields you never sort/aggregate — saves disk</li>
+<li><strong>Avoid wildcard queries with leading wildcards</strong> — <code>*phone</code> requires full scan</li>
+</ul>
+
+<div class="interview-box">
+<p>"Key tuning levers: use filter context for non-scoring queries (cached), batch writes with Bulk API, temporarily increase refresh_interval during ingestion, right-size shards to 10-50GB, use index aliases for zero-downtime mapping changes, and force-merge read-only indices to a single segment."</p>
+</div>
+</section>
+
+<!-- 17 -->
+<section id="security">
+<h2>17. Security</h2>
+<p>ES security has 5 layers:</p>
+<ol>
+<li><strong>Authentication</strong> — Who are you? (API keys, SAML, LDAP, native users)</li>
+<li><strong>Authorization</strong> — What can you do? (RBAC — role-based access control)</li>
+<li><strong>Encryption</strong> — TLS for transport (node-to-node) and HTTP (client-to-node)</li>
+<li><strong>Audit logging</strong> — Who did what and when?</li>
+<li><strong>Field/document-level security</strong> — Restrict WHICH data specific roles can see</li>
+</ol>
+
+<div class="interview-box">
+<p>"Elasticsearch security covers authentication (API keys, SAML), authorization (RBAC with index-level and field-level permissions), encryption (TLS everywhere), and audit logging. API keys are preferred over username/password because they can be scoped to specific indices and operations and are easily revokable."</p>
+</div>
+</section>
+
+<!-- 18 -->
+<section id="elk-stack">
+<h2>18. ELK Stack (Elastic Stack)</h2>
+<table>
+<tr><th>Component</th><th>Role</th><th>When to Use</th></tr>
+<tr><td><strong>Beats</strong></td><td>Lightweight data shippers (Filebeat, Metricbeat)</td><td>Collect from servers/containers</td></tr>
+<tr><td><strong>Logstash</strong></td><td>Heavy ETL pipeline (collect, transform, output)</td><td>Complex transformations, multiple outputs</td></tr>
+<tr><td><strong>Ingest Pipeline</strong></td><td>Transform within ES itself</td><td>Simple transforms (grok, geoip, date parsing)</td></tr>
+<tr><td><strong>Elasticsearch</strong></td><td>Store, index, search, analyze</td><td>Always — the core engine</td></tr>
+<tr><td><strong>Kibana</strong></td><td>Visualize, dashboard, manage, Dev Tools</td><td>Dashboards, alerts, monitoring</td></tr>
+</table>
+<div class="interview-box">
+<p>"The Elastic Stack is: Beats (lightweight collection) → Logstash (heavy transform) → Elasticsearch (store and search) → Kibana (visualize). The modern alternative to Logstash for simple transforms is Ingest Pipelines built into ES. Elastic Agent with Fleet is replacing individual Beats for centralized management."</p>
+</div>
+</section>
+
+<!-- 19 -->
+<section id="scaling">
+<h2>19. Scaling & Index Lifecycle Management</h2>
+
+<h3>Hot-Warm-Cold Architecture</h3>
+<table>
+<tr><th>Tier</th><th>Hardware</th><th>Data Age</th><th>Purpose</th></tr>
+<tr><td style="color:#f44336"><strong>Hot</strong></td><td>Fast NVMe SSDs, high CPU/RAM</td><td>0-7 days</td><td>Active indexing + frequent search</td></tr>
+<tr><td style="color:#ff9800"><strong>Warm</strong></td><td>Larger, cheaper SSDs</td><td>7-30 days</td><td>Infrequent search, read-only</td></tr>
+<tr><td style="color:#2196f3"><strong>Cold</strong></td><td>HDD or shared storage</td><td>30-90 days</td><td>Rare search, compliance retention</td></tr>
+<tr><td style="color:#9e9e9e"><strong>Frozen</strong></td><td>S3 / blob storage</td><td>90+ days</td><td>Archive, searchable snapshots</td></tr>
+</table>
+
+<div class="bts-box">
+<p><strong>ILM (Index Lifecycle Management)</strong> automates data tiering:<br><br>
+You define a policy: <code>hot (7d, rollover at 50GB) → warm (shrink shards, force merge) → cold (remove replicas) → delete (after 90d)</code><br><br>
+ES automatically moves indices through these phases based on age or size. This reduces cost by 40-70% because old, rarely-searched data lives on cheap storage.</p>
+</div>
+
+<div class="interview-box">
+<p>"At scale, use Hot-Warm-Cold architecture with ILM policies. Hot tier has NVMe SSDs for active data, warm tier for read-only searchable data, cold for compliance. ILM automates rollover, shrink, merge, and deletion. Combined with searchable snapshots on S3, you can achieve 60-80% cost savings on archive data."</p>
+</div>
+</section>
+
+<!-- 20 -->
+<section id="cost">
+<h2>20. Cost Optimization</h2>
+<table>
+<tr><th>Strategy</th><th>Savings</th><th>Effort</th></tr>
+<tr><td>ILM + Tiered Storage</td><td>40-60%</td><td>Medium</td></tr>
+<tr><td>Right-size Shards (avoid oversharding)</td><td>20-30%</td><td>Low</td></tr>
+<tr><td>Searchable Snapshots (frozen tier)</td><td>60-80% on archive</td><td>Low</td></tr>
+<tr><td>Remove replicas on warm/cold</td><td>50% storage</td><td>Low</td></tr>
+<tr><td>_source excludes (prune unused fields)</td><td>10-30%</td><td>Low</td></tr>
+<tr><td>best_compression codec</td><td>10-15%</td><td>Low</td></tr>
+</table>
+
+<div class="interview-box">
+<p>"Cost optimization: ILM for automated tiering (biggest win), right-size shards to avoid overhead, searchable snapshots on S3 for archive, reduce replicas on cold data, prune _source fields, use best_compression. Also evaluate managed (Elastic Cloud) vs self-hosted annually based on team size and usage."</p>
+</div>
+</section>
+
+<!-- ============================================== -->
+<!--    PART 2: NODE.JS IMPLEMENTATION              -->
+<!-- ============================================== -->
+
+<h1 style="color:#ff9800;font-size:28px;margin:60px 0 10px;text-align:center">PART 2 — Node.js Implementation</h1>
+<p style="text-align:center;color:#555">Every method, every argument, what it does, what happens behind the scenes</p>
+
+<!-- Node Setup -->
+<section id="node-setup">
+<h2>21. Setup & Connection</h2>
+<pre><code><span class="cm">// Install: npm install @elastic/elasticsearch</span>
+
+<span class="kw">const</span> { Client } = <span class="fn">require</span>(<span class="st">'@elastic/elasticsearch'</span>);
+
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>({
+    node: <span class="st">'http://localhost:9200'</span>,   <span class="cm">// ES REST endpoint (port 9200)</span>
+    maxRetries: <span class="nu">5</span>,                   <span class="cm">// Retry failed requests 5 times</span>
+    requestTimeout: <span class="nu">60000</span>,           <span class="cm">// 60s timeout per request</span>
+    sniffOnStart: <span class="kw">false</span>,              <span class="cm">// true = discover all nodes on connect</span>
+    <span class="cm">// For Elastic Cloud:</span>
+    <span class="cm">// cloud: { id: 'deployment:base64...' },</span>
+    <span class="cm">// auth: { apiKey: 'your-key' }</span>
+});
+
+<span class="cm">// Test connection</span>
+<span class="kw">async function</span> <span class="fn">ping</span>() {
+    <span class="kw">const</span> info = <span class="kw">await</span> client.info();
+    console.log(<span class="st">'Connected:'</span>, info.version.number);
+}
+<span class="fn">ping</span>();</code></pre>
+
+<div class="arg-box"><span class="arg-name">node</span><div class="arg-desc"><strong>What:</strong> The ES REST API URL. Can be a string or array of URLs for multi-node load balancing.<br><strong>Behind the scenes:</strong> The client uses HTTP keep-alive connections. With an array, it round-robins requests across nodes.</div></div>
+<div class="arg-box"><span class="arg-name">maxRetries</span><div class="arg-desc"><strong>What:</strong> How many times to retry a failed request before throwing.<br><strong>Behind the scenes:</strong> On connection errors or 502/503/504, the client waits with exponential backoff, then retries on a different node if available.</div></div>
+<div class="arg-box"><span class="arg-name">requestTimeout</span><div class="arg-desc"><strong>What:</strong> Max ms to wait for a response. Default 30000.<br><strong>Behind the scenes:</strong> Sets the socket timeout. If ES is doing a heavy aggregation that takes 45s, a 30s timeout kills it prematurely.</div></div>
+<div class="arg-box"><span class="arg-name">sniffOnStart</span><div class="arg-desc"><strong>What:</strong> If true, calls <code>GET _nodes/_all/http</code> on startup to discover all cluster nodes.<br><strong>Behind the scenes:</strong> Builds a full node pool for optimal request distribution. Essential for multi-node clusters. Don't use with Elastic Cloud (it handles routing).</div></div>
+<div class="arg-box"><span class="arg-name">auth</span><div class="arg-desc"><strong>What:</strong> Authentication — apiKey (recommended), username/password, or bearer token.<br><strong>Behind the scenes:</strong> API keys are Base64-encoded id:key pairs sent in the Authorization header. They can be scoped per-index and revoked without changing passwords.</div></div>
+</section>
+
+<!-- Create Index -->
+<section id="node-index-create">
+<h2>22. Create Index with Mapping</h2>
+<pre><code><span class="kw">async function</span> <span class="fn">createProductIndex</span>() {
+    <span class="kw">await</span> client.indices.<span class="fn">create</span>({
+        index: <span class="st">'products'</span>,
+        settings: {
+            number_of_shards: <span class="nu">1</span>,        <span class="cm">// 1 shard (small dataset). CANNOT change later!</span>
+            number_of_replicas: <span class="nu">1</span>,      <span class="cm">// 1 replica (2 total copies). CAN change later.</span>
+            refresh_interval: <span class="st">'1s'</span>,     <span class="cm">// New data becomes searchable every 1 second</span>
+            analysis: {
+                analyzer: {
+                    autocomplete_analyzer: {
+                        type: <span class="st">'custom'</span>,
+                        tokenizer: <span class="st">'autocomplete_tokenizer'</span>,
+                        filter: [<span class="st">'lowercase'</span>]
+                    }
+                },
+                tokenizer: {
+                    autocomplete_tokenizer: {
+                        type: <span class="st">'edge_ngram'</span>,
+                        min_gram: <span class="nu">2</span>,   <span class="cm">// Minimum 2-char prefix: "iP"</span>
+                        max_gram: <span class="nu">15</span>,  <span class="cm">// Maximum 15-char prefix</span>
+                        token_chars: [<span class="st">'letter'</span>, <span class="st">'digit'</span>]
+                    }
+                }
+            }
+        },
+        mappings: {
+            dynamic: <span class="st">'strict'</span>,  <span class="cm">// Reject docs with unmapped fields</span>
+            properties: {
+                name: {
+                    type: <span class="st">'text'</span>,
+                    fields: {
+                        keyword: { type: <span class="st">'keyword'</span>, ignore_above: <span class="nu">256</span> },
+                        autocomplete: { type: <span class="st">'text'</span>, analyzer: <span class="st">'autocomplete_analyzer'</span>, search_analyzer: <span class="st">'standard'</span> }
+                    }
+                },
+                brand:       { type: <span class="st">'keyword'</span> },
+                category:    { type: <span class="st">'keyword'</span> },
+                price:       { type: <span class="st">'float'</span> },
+                description: { type: <span class="st">'text'</span> },
+                inStock:     { type: <span class="st">'boolean'</span> },
+                ratings:     { type: <span class="st">'float'</span> },
+                tags:        { type: <span class="st">'keyword'</span> },
+                createdAt:   { type: <span class="st">'date'</span> }
+            }
+        }
+    });
+    console.log(<span class="st">'Index created'</span>);
+}</code></pre>
+
+<div class="bts-box">
+<p><strong>What happens when you create an index:</strong><br>
+1. Master node validates the mapping and settings<br>
+2. Master updates the <strong>cluster state</strong> with the new index metadata<br>
+3. Shard allocation kicks in — master decides which nodes get which shards<br>
+4. Each assigned node creates a Lucene index directory on disk for its shards<br>
+5. Each shard initializes its <strong>translog</strong> (write-ahead log) and empty segment<br>
+6. Replica shards are allocated to different nodes and start syncing</p>
+</div>
+
+<div class="arg-box"><span class="arg-name">number_of_shards</span><div class="arg-desc"><strong>What:</strong> How many primary shards for this index. FIXED at creation.<br><strong>Interview:</strong> "Cannot be changed after creation because the routing formula hash(id)%shards would send existing docs to wrong shards. To change, you must reindex."</div></div>
+<div class="arg-box"><span class="arg-name">number_of_replicas</span><div class="arg-desc"><strong>What:</strong> How many copies of each primary shard. Can be changed anytime.<br><strong>Interview:</strong> "Set to 0 during bulk import for speed, then back to 1+. More replicas = better fault tolerance + read throughput but more disk."</div></div>
+<div class="arg-box"><span class="arg-name">dynamic: 'strict'</span><div class="arg-desc"><strong>What:</strong> Reject documents with fields not defined in mapping.<br><strong>Interview:</strong> "Prevents accidental mapping pollution. Without strict, a typo like 'prce' creates a new field forever."</div></div>
+<div class="arg-box"><span class="arg-name">search_analyzer</span><div class="arg-desc"><strong>What:</strong> Use a DIFFERENT analyzer at search time than index time.<br><strong>Interview:</strong> "For autocomplete: index with edge_ngram (creates prefix tokens), search with standard (search the exact typed prefix). Without this, searching 'ip' would also be edge_ngrammed into 'i','ip' causing too-broad matches."</div></div>
+</section>
+
+<!-- CRUD -->
+<section id="node-crud">
+<h2>23. CRUD Operations</h2>
+
+<h3>CREATE — Index a Document</h3>
+<pre><code><span class="kw">async function</span> <span class="fn">createDoc</span>() {
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">index</span>({
+        index: <span class="st">'products'</span>,       <span class="cm">// Target index</span>
+        id: <span class="st">'1'</span>,                  <span class="cm">// Doc ID. Omit = ES auto-generates. Exists = REPLACES entire doc.</span>
+        document: {               <span class="cm">// The JSON body to store</span>
+            name: <span class="st">'iPhone 15 Pro'</span>,
+            brand: <span class="st">'Apple'</span>,
+            price: <span class="nu">999</span>,
+            category: <span class="st">'smartphones'</span>,
+            description: <span class="st">'Latest iPhone with A17 Pro chip and titanium design'</span>,
+            inStock: <span class="kw">true</span>,
+            ratings: <span class="nu">4.8</span>,
+            tags: [<span class="st">'premium'</span>, <span class="st">'5g'</span>, <span class="st">'camera'</span>],
+            createdAt: <span class="kw">new</span> Date().toISOString()
+        },
+        refresh: <span class="st">'wait_for'</span>,     <span class="cm">// Wait until next refresh to make it searchable</span>
+    });
+    console.log(result.result); <span class="cm">// 'created' or 'updated'</span>
+}</code></pre>
+
+<div class="bts-box">
+<p><strong>Behind the scenes of client.index():</strong><br>
+1. Client sends <code>PUT /products/_doc/1</code> with JSON body<br>
+2. Coordinating node hashes ID "1" → determines shard number<br>
+3. Routes to the primary shard on the correct node<br>
+4. Primary: writes to translog → writes to in-memory buffer<br>
+5. On next refresh (1s): buffer → new immutable segment → now searchable<br>
+6. Primary replicates to replica shards<br>
+7. With <code>refresh: 'wait_for'</code>: response waits until the refresh happens</p>
+</div>
+
+<div class="arg-box"><span class="arg-name">id</span><div class="arg-desc"><strong>What:</strong> Unique document ID. If omitted, ES generates a random 20-char base64 ID.<br><strong>Critical:</strong> If ID already exists, the entire document is REPLACED (like PUT, not PATCH). Use <code>update()</code> for partial updates.</div></div>
+<div class="arg-box"><span class="arg-name">refresh</span><div class="arg-desc"><strong>'true'</strong> = force immediate refresh (expensive, avoid in production).<br><strong>'false'</strong> (default) = return immediately, doc searchable in ~1s.<br><strong>'wait_for'</strong> = return after next scheduled refresh. Safe middle ground.</div></div>
+
+<h3>READ — Get Document</h3>
+<pre><code><span class="kw">const</span> doc = <span class="kw">await</span> client.<span class="fn">get</span>({
+    index: <span class="st">'products'</span>,
+    id: <span class="st">'1'</span>,
+    _source_includes: [<span class="st">'name'</span>, <span class="st">'price'</span>], <span class="cm">// Only return these fields (reduces payload)</span>
+});
+console.log(doc._source);    <span class="cm">// { name: 'iPhone 15 Pro', price: 999 }</span>
+console.log(doc._version);   <span class="cm">// Version number (increments on every update)</span>
+
+<span class="cm">// Get multiple docs at once</span>
+<span class="kw">const</span> multi = <span class="kw">await</span> client.<span class="fn">mget</span>({ index: <span class="st">'products'</span>, ids: [<span class="st">'1'</span>, <span class="st">'2'</span>, <span class="st">'3'</span>] });</code></pre>
+
+<div class="bts-box">
+<p><strong>GET does NOT use the inverted index.</strong> It uses the document's <code>_id</code> to route directly to the correct shard (same hash formula), then reads from the <code>_source</code> stored field. This is O(1) — like a key-value lookup. It can hit either primary or replica.</p>
+</div>
+
+<h3>UPDATE — Partial Update</h3>
+<pre><code><span class="kw">await</span> client.<span class="fn">update</span>({
+    index: <span class="st">'products'</span>,
+    id: <span class="st">'1'</span>,
+    doc: {                      <span class="cm">// Only these fields change; rest stays untouched</span>
+        price: <span class="nu">899</span>,
+        inStock: <span class="kw">false</span>,
+    },
+    retry_on_conflict: <span class="nu">3</span>,     <span class="cm">// Retry 3 times if version conflict</span>
+});
+
+<span class="cm">// Update by query — update all docs matching a condition</span>
+<span class="kw">await</span> client.<span class="fn">updateByQuery</span>({
+    index: <span class="st">'products'</span>,
+    query: { match: { brand: <span class="st">'Apple'</span> } },
+    script: {
+        source: <span class="st">"ctx._source.price = ctx._source.price * 0.9"</span>, <span class="cm">// 10% discount</span>
+        lang: <span class="st">'painless'</span>
+    },
+    conflicts: <span class="st">'proceed'</span>,    <span class="cm">// Skip conflicts instead of aborting</span>
+});</code></pre>
+
+<div class="bts-box">
+<p><strong>Updates are NOT in-place.</strong> Because segments are immutable, an update actually: 1) reads the old document, 2) applies changes in memory, 3) indexes a NEW version as a new document in a new segment, 4) marks the old document as deleted. The old version is physically removed during the next segment merge. This is why <code>retry_on_conflict</code> exists — two concurrent updates might read the same version.</p>
+</div>
+
+<h3>DELETE</h3>
+<pre><code><span class="kw">await</span> client.<span class="fn">delete</span>({ index: <span class="st">'products'</span>, id: <span class="st">'1'</span> });
+
+<span class="cm">// Delete by query</span>
+<span class="kw">await</span> client.<span class="fn">deleteByQuery</span>({
+    index: <span class="st">'products'</span>,
+    query: { range: { price: { lt: <span class="nu">100</span> } } }
+});
+
+<span class="cm">// Delete entire index</span>
+<span class="kw">await</span> client.indices.<span class="fn">delete</span>({ index: <span class="st">'products'</span> });</code></pre>
+
+<div class="bts-box">
+<p><strong>Deletes don't immediately free disk space.</strong> The document is just marked as deleted in a <code>.del</code> file. It's still on disk in its segment. It's filtered out from search results. The space is reclaimed only when that segment gets merged with others — the merge process skips deleted docs.</p>
+</div>
+</section>
+
+<!-- Search -->
+<section id="node-search">
+<h2>24. Search & Filters</h2>
+<pre><code><span class="kw">async function</span> <span class="fn">searchProducts</span>({ query, brand, category, minPrice, maxPrice, inStock, page = <span class="nu">1</span>, pageSize = <span class="nu">10</span> }) {
+    <span class="kw">const</span> must = [];
+    <span class="kw">const</span> filter = [];
+
+    <span class="cm">// Full-text search (scored)</span>
+    <span class="kw">if</span> (query) {
+        must.push({
+            multi_match: {
+                query,
+                fields: [<span class="st">'name^3'</span>, <span class="st">'name.autocomplete^2'</span>, <span class="st">'description'</span>, <span class="st">'brand^2'</span>],
+                type: <span class="st">'best_fields'</span>,
+                fuzziness: <span class="st">'AUTO'</span>,
+            }
+        });
+    }
+
+    <span class="cm">// Exact filters (not scored, cached)</span>
+    <span class="kw">if</span> (brand) filter.push({ term: { brand } });
+    <span class="kw">if</span> (category) filter.push({ term: { category } });
+    <span class="kw">if</span> (minPrice || maxPrice) {
+        <span class="kw">const</span> range = {};
+        <span class="kw">if</span> (minPrice) range.gte = minPrice;
+        <span class="kw">if</span> (maxPrice) range.lte = maxPrice;
+        filter.push({ range: { price: range } });
+    }
+    <span class="kw">if</span> (inStock !== <span class="kw">undefined</span>) filter.push({ term: { inStock } });
+
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>({
+        index: <span class="st">'products'</span>,
+        from: (page - <span class="nu">1</span>) * pageSize,  <span class="cm">// Offset (skip first N results)</span>
+        size: pageSize,               <span class="cm">// Limit (return N results)</span>
+        query: {
+            bool: {
+                must: must.length ? must : [{ match_all: {} }],
+                filter,
+            }
+        },
+        highlight: {                  <span class="cm">// Wrap matched words in tags</span>
+            fields: { description: {}, name: {} },
+            pre_tags: [<span class="st">'&lt;mark&gt;'</span>],
+            post_tags: [<span class="st">'&lt;/mark&gt;'</span>],
+        },
+        _source: [<span class="st">'name'</span>, <span class="st">'brand'</span>, <span class="st">'price'</span>, <span class="st">'category'</span>, <span class="st">'ratings'</span>, <span class="st">'inStock'</span>],
+        sort: [<span class="st">'_score'</span>, { price: <span class="st">'asc'</span> }],  <span class="cm">// Primary: relevance, secondary: price</span>
+    });
+
+    <span class="kw">return</span> {
+        total: result.hits.total.value,
+        results: result.hits.hits.map(h => ({
+            id: h._id, score: h._score, ...h._source, highlight: h.highlight
+        })),
+    };
+}</code></pre>
+
+<div class="arg-box"><span class="arg-name">from / size</span><div class="arg-desc"><strong>from</strong> = offset (skip N docs). <strong>size</strong> = limit (return N docs). Max <code>from+size</code> = 10,000.<br><strong>Behind the scenes:</strong> Every shard returns its top <code>from+size</code> docs. Coordinator merges all, takes docs from <code>from</code> to <code>from+size</code>. Deep pagination wastes work.</div></div>
+<div class="arg-box"><span class="arg-name">highlight</span><div class="arg-desc"><strong>What:</strong> Returns text fragments with matched terms wrapped in tags.<br><strong>Behind the scenes:</strong> ES re-analyzes the stored text and finds positions where query terms occur, then extracts surrounding context. Three highlighter types: unified (default, best), plain (simple), fvh (for large fields).</div></div>
+<div class="arg-box"><span class="arg-name">_source</span><div class="arg-desc"><strong>What:</strong> Which fields to return. Array, boolean, or {includes, excludes}.<br><strong>Behind the scenes:</strong> ES stores the entire original JSON as a compressed blob called _source. This filter happens AFTER fetch — it just strips fields from the response, saving network bandwidth.</div></div>
+</section>
+
+<!-- Aggs -->
+<section id="node-aggs">
+<h2>25. Aggregations</h2>
+<pre><code><span class="kw">async function</span> <span class="fn">getDashboard</span>() {
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>({
+        index: <span class="st">'products'</span>,
+        size: <span class="nu">0</span>,         <span class="cm">// size:0 = only return agg results, no documents</span>
+        aggs: {
+            <span class="cm">// BUCKET: Group by brand</span>
+            brands: {
+                terms: { field: <span class="st">'brand'</span>, size: <span class="nu">20</span> },
+                aggs: {  <span class="cm">// Nested: avg price per brand</span>
+                    avg_price: { avg: { field: <span class="st">'price'</span> } }
+                }
+            },
+            <span class="cm">// BUCKET: Custom price ranges</span>
+            price_ranges: {
+                range: { field: <span class="st">'price'</span>, ranges: [
+                    { key: <span class="st">'Budget'</span>, to: <span class="nu">300</span> },
+                    { key: <span class="st">'Mid'</span>, from: <span class="nu">300</span>, to: <span class="nu">1000</span> },
+                    { key: <span class="st">'Premium'</span>, from: <span class="nu">1000</span> },
+                ]}
+            },
+            <span class="cm">// METRIC: Overall stats</span>
+            price_stats: { stats: { field: <span class="st">'price'</span> } },
+            <span class="cm">// METRIC: Count unique brands</span>
+            unique_brands: { cardinality: { field: <span class="st">'brand'</span> } },
+        }
+    });
+    console.log(result.aggregations.brands.buckets);
+    <span class="cm">// [{ key:'Apple', doc_count:4, avg_price:{value:1061} }, ...]</span>
+}</code></pre>
+
+<div class="arg-box"><span class="arg-name">size: 0</span><div class="arg-desc"><strong>What:</strong> Return zero documents, only aggregation results.<br><strong>Behind the scenes:</strong> Skips the entire fetch phase. Only the query phase + aggregation computation runs. Much faster when you just need analytics.</div></div>
+<div class="arg-box"><span class="arg-name">terms.size</span><div class="arg-desc"><strong>What:</strong> Top N buckets to return. Default 10.<br><strong>Behind the scenes:</strong> Each shard returns its local top N terms. Coordinator merges them. This means counts can be approximate if a term is common on one shard but rare on another. Set <code>shard_size</code> higher for accuracy.</div></div>
+<div class="arg-box"><span class="arg-name">cardinality</span><div class="arg-desc"><strong>What:</strong> Count distinct values (like SQL COUNT DISTINCT).<br><strong>Behind the scenes:</strong> Uses the HyperLogLog++ algorithm — probabilistic, uses very little memory, but with ~0.5% error rate on large datasets. Exact counting would require loading all values in memory.</div></div>
+</section>
+
+<!-- Pagination -->
+<section id="node-pagination">
+<h2>26. Pagination (search_after + PIT)</h2>
+<pre><code><span class="cm">// Cursor-based deep pagination (unlimited, efficient)</span>
+<span class="kw">async function</span> <span class="fn">cursorPaginate</span>(lastSort = <span class="kw">null</span>) {
+    <span class="kw">const</span> body = {
+        index: <span class="st">'products'</span>,
+        size: <span class="nu">20</span>,
+        query: { match_all: {} },
+        sort: [{ createdAt: <span class="st">'desc'</span> }, { _id: <span class="st">'asc'</span> }], <span class="cm">// Tiebreaker required!</span>
+    };
+    <span class="kw">if</span> (lastSort) body.search_after = lastSort; <span class="cm">// Sort values of last doc from previous page</span>
+
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>(body);
+    <span class="kw">const</span> hits = result.hits.hits;
+    <span class="kw">return</span> { hits, nextCursor: hits.length ? hits[hits.length-<span class="nu">1</span>].sort : <span class="kw">null</span> };
+}
+
+<span class="cm">// PIT + search_after for consistent data export</span>
+<span class="kw">async function</span> <span class="fn">exportAll</span>() {
+    <span class="kw">const</span> pit = <span class="kw">await</span> client.<span class="fn">openPointInTime</span>({ index: <span class="st">'products'</span>, keep_alive: <span class="st">'5m'</span> });
+    <span class="kw">let</span> all = [], searchAfter;
+
+    <span class="kw">while</span> (<span class="kw">true</span>) {
+        <span class="kw">const</span> r = <span class="kw">await</span> client.<span class="fn">search</span>({
+            size: <span class="nu">1000</span>,
+            pit: { id: pit.id, keep_alive: <span class="st">'5m'</span> },
+            sort: [{ _id: <span class="st">'asc'</span> }],
+            ...(searchAfter && { search_after: searchAfter }),
+        });
+        <span class="kw">if</span> (!r.hits.hits.length) <span class="kw">break</span>;
+        all.push(...r.hits.hits.map(h => h._source));
+        searchAfter = r.hits.hits[r.hits.hits.length-<span class="nu">1</span>].sort;
+    }
+    <span class="kw">await</span> client.<span class="fn">closePointInTime</span>({ id: pit.id });
+    <span class="kw">return</span> all;
+}</code></pre>
+
+<div class="arg-box"><span class="arg-name">search_after</span><div class="arg-desc"><strong>What:</strong> The sort values array from the last document of the previous page.<br><strong>Behind the scenes:</strong> Each shard starts scanning from AFTER this sort value — so it doesn't waste work on already-seen documents. Much more efficient than from/size for deep pages.</div></div>
+<div class="arg-box"><span class="arg-name">Point in Time (PIT)</span><div class="arg-desc"><strong>What:</strong> Creates a frozen snapshot of the index state.<br><strong>Behind the scenes:</strong> PIT prevents segment merges from deleting old segments, preserving a consistent view. Without PIT, a document could be updated between page requests, causing duplicates or missing results.</div></div>
+</section>
+
+<!-- Autocomplete -->
+<section id="node-autocomplete">
+<h2>27. Autocomplete</h2>
+<pre><code><span class="kw">async function</span> <span class="fn">autocomplete</span>(query) {
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>({
+        index: <span class="st">'products'</span>,
+        size: <span class="nu">5</span>,
+        query: { match: { <span class="st">'name.autocomplete'</span>: query } },
+        _source: [<span class="st">'name'</span>, <span class="st">'brand'</span>],
+    });
+    <span class="kw">return</span> result.hits.hits.map(h => h._source.name);
+}
+<span class="cm">// autocomplete('mac') → ['MacBook Pro M3 Max']</span></code></pre>
+
+<div class="bts-box">
+<p><strong>How this works:</strong><br>
+At index time, "MacBook" was processed by edge_ngram: ["ma","mac","macb","macbo","macboo","macbook"]. These all live in the inverted index.<br>
+At search time, "mac" is processed by the <strong>standard</strong> analyzer (because we set <code>search_analyzer: 'standard'</code>), so it stays as ["mac"].<br>
+ES looks up "mac" in the inverted index → finds the edge_ngram token → matches the document. Instant.</p>
+</div>
+</section>
+
+<!-- Bulk -->
+<section id="node-bulk">
+<h2>28. Bulk Operations</h2>
+<pre><code><span class="kw">async function</span> <span class="fn">bulkIndex</span>(products) {
+    <span class="kw">const</span> operations = products.flatMap((doc, i) => [
+        { index: { _index: <span class="st">'products'</span>, _id: String(i + <span class="nu">1</span>) } },  <span class="cm">// Action line</span>
+        doc                                                         <span class="cm">// Document body</span>
+    ]);
+
+    <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">bulk</span>({
+        operations,
+        refresh: <span class="kw">true</span>,     <span class="cm">// Make all docs searchable after bulk completes</span>
+    });
+
+    <span class="kw">if</span> (result.errors) {
+        <span class="kw">const</span> failed = result.items.filter(i => i.index?.error);
+        console.error(<span class="st">'Failed items:'</span>, failed);
+    }
+    console.log(<span class="st">`Indexed ${result.items.length} docs`</span>);
+}</code></pre>
+
+<div class="bts-box">
+<p><strong>Why bulk is 10-100x faster than individual index calls:</strong><br>
+1. <strong>One HTTP request</strong> instead of N — saves TCP overhead and round trips<br>
+2. ES batches writes to the translog and in-memory buffer <strong>together</strong><br>
+3. Fewer refresh cycles — instead of N small segments, you get fewer larger ones<br>
+4. Internal thread pool handles the batch efficiently<br><br>
+<strong>Optimal batch size:</strong> 500-5000 docs or 5-15MB per request. Too large = heap pressure. Too small = not enough batching benefit.</p>
+</div>
+</section>
+
+<!-- Aliases -->
+<section id="node-aliases">
+<h2>29. Aliases & Zero-Downtime Reindex</h2>
+<pre><code><span class="cm">// Step 1: Your app always uses the alias "products" (not the real index name)</span>
+<span class="kw">await</span> client.indices.<span class="fn">putAlias</span>({ index: <span class="st">'products_v1'</span>, name: <span class="st">'products'</span> });
+
+<span class="cm">// Step 2: Need to change mapping? Create new index</span>
+<span class="kw">await</span> client.indices.<span class="fn">create</span>({ index: <span class="st">'products_v2'</span>, <span class="cm">/* new mapping */</span> });
+
+<span class="cm">// Step 3: Reindex data from v1 to v2</span>
+<span class="kw">await</span> client.<span class="fn">reindex</span>({
+    source: { index: <span class="st">'products_v1'</span> },
+    dest: { index: <span class="st">'products_v2'</span> },
+});
+
+<span class="cm">// Step 4: Atomic alias swap — zero downtime!</span>
+<span class="kw">await</span> client.indices.<span class="fn">updateAliases</span>({
+    actions: [
+        { remove: { index: <span class="st">'products_v1'</span>, alias: <span class="st">'products'</span> } },
+        { add:    { index: <span class="st">'products_v2'</span>, alias: <span class="st">'products'</span> } },
+    ]
+});
+<span class="cm">// Your app never noticed the switch!</span></code></pre>
+
+<div class="bts-box">
+<p><strong>Alias swap is atomic.</strong> Both actions (remove old + add new) happen in a single cluster state update. There is zero gap where the alias points to nothing. Your application keeps querying "products" and seamlessly switches to the new index.</p>
+</div>
+</section>
+
+<!-- Cluster Monitoring -->
+<section id="node-cluster">
+<h2>30. Cluster Monitoring</h2>
+<pre><code><span class="cm">// Cluster health</span>
+<span class="kw">const</span> health = <span class="kw">await</span> client.cluster.<span class="fn">health</span>({});
+console.log(health.status);              <span class="cm">// 'green' | 'yellow' | 'red'</span>
+console.log(health.unassigned_shards);   <span class="cm">// > 0 means trouble</span>
+
+<span class="cm">// Index stats</span>
+<span class="kw">const</span> stats = <span class="kw">await</span> client.indices.<span class="fn">stats</span>({
+    index: <span class="st">'products'</span>,
+    metric: [<span class="st">'docs'</span>, <span class="st">'store'</span>, <span class="st">'search'</span>, <span class="st">'indexing'</span>]
+});
+console.log(stats._all.primaries.docs.count);     <span class="cm">// Total documents</span>
+console.log(stats._all.primaries.store.size);      <span class="cm">// Disk usage</span></code></pre>
+</section>
+
+<!-- Full Project -->
+<section id="node-fullproject">
+<h2>31. Complete Runnable Project</h2>
+<pre><code><span class="cm">// ===== elasticsearch-demo.js =====</span>
+<span class="cm">// Run: docker run -d -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.12.0</span>
+<span class="cm">// Then: npm install @elastic/elasticsearch && node elasticsearch-demo.js</span>
+
+<span class="kw">const</span> { Client } = <span class="fn">require</span>(<span class="st">'@elastic/elasticsearch'</span>);
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>({ node: <span class="st">'http://localhost:9200'</span> });
+<span class="kw">const</span> INDEX = <span class="st">'products'</span>;
+
+<span class="kw">async function</span> <span class="fn">run</span>() {
+    <span class="cm">// 1. Delete old index if exists</span>
+    <span class="kw">try</span> { <span class="kw">await</span> client.indices.<span class="fn">delete</span>({ index: INDEX }); } <span class="kw">catch</span>(e) {}
+
+    <span class="cm">// 2. Create index with mapping</span>
+    <span class="kw">await</span> client.indices.<span class="fn">create</span>({
+        index: INDEX,
+        settings: { number_of_shards: <span class="nu">1</span>, number_of_replicas: <span class="nu">0</span>,
+            analysis: { analyzer: { ac: { type:<span class="st">'custom'</span>, tokenizer:<span class="st">'ac_tok'</span>, filter:[<span class="st">'lowercase'</span>] }},
+                tokenizer: { ac_tok: { type:<span class="st">'edge_ngram'</span>, min_gram:<span class="nu">2</span>, max_gram:<span class="nu">15</span>, token_chars:[<span class="st">'letter'</span>,<span class="st">'digit'</span>] }}}},
+        mappings: { properties: {
+            name: { type:<span class="st">'text'</span>, fields:{ keyword:{type:<span class="st">'keyword'</span>}, ac:{type:<span class="st">'text'</span>,analyzer:<span class="st">'ac'</span>,search_analyzer:<span class="st">'standard'</span>}}},
+            brand:{type:<span class="st">'keyword'</span>}, category:{type:<span class="st">'keyword'</span>}, price:{type:<span class="st">'float'</span>},
+            description:{type:<span class="st">'text'</span>}, inStock:{type:<span class="st">'boolean'</span>}, ratings:{type:<span class="st">'float'</span>},
+            tags:{type:<span class="st">'keyword'</span>}, createdAt:{type:<span class="st">'date'</span>}
+        }}
+    });
+
+    <span class="cm">// 3. Bulk index sample data</span>
+    <span class="kw">const</span> data = [
+        { name:<span class="st">'iPhone 15 Pro'</span>, brand:<span class="st">'Apple'</span>, price:<span class="nu">999</span>, category:<span class="st">'smartphones'</span>, description:<span class="st">'A17 Pro chip titanium design'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.8</span>, tags:[<span class="st">'premium'</span>,<span class="st">'5g'</span>], createdAt:<span class="st">'2024-09-22'</span> },
+        { name:<span class="st">'Samsung Galaxy S24'</span>, brand:<span class="st">'Samsung'</span>, price:<span class="nu">799</span>, category:<span class="st">'smartphones'</span>, description:<span class="st">'Galaxy AI powered with S Pen'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.7</span>, tags:[<span class="st">'ai'</span>], createdAt:<span class="st">'2024-01-17'</span> },
+        { name:<span class="st">'MacBook Pro M3'</span>, brand:<span class="st">'Apple'</span>, price:<span class="nu">2499</span>, category:<span class="st">'laptops'</span>, description:<span class="st">'Professional laptop M3 Max chip'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.9</span>, tags:[<span class="st">'pro'</span>], createdAt:<span class="st">'2023-11-07'</span> },
+        { name:<span class="st">'Sony WH-1000XM5'</span>, brand:<span class="st">'Sony'</span>, price:<span class="nu">349</span>, category:<span class="st">'headphones'</span>, description:<span class="st">'Industry leading noise cancelling'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.6</span>, tags:[<span class="st">'wireless'</span>,<span class="st">'anc'</span>], createdAt:<span class="st">'2023-05-18'</span> },
+        { name:<span class="st">'iPad Air M2'</span>, brand:<span class="st">'Apple'</span>, price:<span class="nu">599</span>, category:<span class="st">'tablets'</span>, description:<span class="st">'Lightweight tablet M2 creativity'</span>, inStock:<span class="kw">false</span>, ratings:<span class="nu">4.5</span>, tags:[<span class="st">'portable'</span>], createdAt:<span class="st">'2024-03-08'</span> },
+        { name:<span class="st">'Dell XPS 15'</span>, brand:<span class="st">'Dell'</span>, price:<span class="nu">1499</span>, category:<span class="st">'laptops'</span>, description:<span class="st">'Premium Windows OLED display'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.3</span>, tags:[<span class="st">'oled'</span>], createdAt:<span class="st">'2024-02-20'</span> },
+        { name:<span class="st">'AirPods Pro 2'</span>, brand:<span class="st">'Apple'</span>, price:<span class="nu">249</span>, category:<span class="st">'headphones'</span>, description:<span class="st">'Active noise cancellation adaptive audio'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.7</span>, tags:[<span class="st">'wireless'</span>], createdAt:<span class="st">'2023-09-12'</span> },
+        { name:<span class="st">'Pixel 8 Pro'</span>, brand:<span class="st">'Google'</span>, price:<span class="nu">899</span>, category:<span class="st">'smartphones'</span>, description:<span class="st">'AI-first best camera system'</span>, inStock:<span class="kw">true</span>, ratings:<span class="nu">4.5</span>, tags:[<span class="st">'ai'</span>,<span class="st">'camera'</span>], createdAt:<span class="st">'2023-10-12'</span> },
+    ];
+    <span class="kw">await</span> client.<span class="fn">bulk</span>({ operations: data.flatMap((d,i) => [{ index:{_index:INDEX,_id:String(i+1)}}, d]), refresh:<span class="kw">true</span> });
+    console.log(<span class="st">'Seeded'</span>, data.length, <span class="st">'docs'</span>);
+
+    <span class="cm">// 4. Full-text search</span>
+    console.log(<span class="st">'\n--- Search: "apple premium" ---'</span>);
+    <span class="kw">const</span> s1 = <span class="kw">await</span> client.<span class="fn">search</span>({ index:INDEX, query:{ multi_match:{ query:<span class="st">'apple premium'</span>, fields:[<span class="st">'name^3'</span>,<span class="st">'brand^2'</span>,<span class="st">'description'</span>], fuzziness:<span class="st">'AUTO'</span> }}, _source:[<span class="st">'name'</span>,<span class="st">'price'</span>] });
+    s1.hits.hits.forEach(h => console.log(<span class="st">`  ${h._source.name} — $${h._source.price} (score: ${h._score})`</span>));
+
+    <span class="cm">// 5. Filtered search</span>
+    console.log(<span class="st">'\n--- Filter: Laptops under $2000 ---'</span>);
+    <span class="kw">const</span> s2 = <span class="kw">await</span> client.<span class="fn">search</span>({ index:INDEX, query:{ bool:{ filter:[{ term:{category:<span class="st">'laptops'</span>}}, { range:{price:{lte:<span class="nu">2000</span>}}}]}}, _source:[<span class="st">'name'</span>,<span class="st">'price'</span>] });
+    s2.hits.hits.forEach(h => console.log(<span class="st">`  ${h._source.name} — $${h._source.price}`</span>));
+
+    <span class="cm">// 6. Autocomplete</span>
+    console.log(<span class="st">'\n--- Autocomplete: "mac" ---'</span>);
+    <span class="kw">const</span> ac = <span class="kw">await</span> client.<span class="fn">search</span>({ index:INDEX, size:<span class="nu">3</span>, query:{ match:{ <span class="st">'name.ac'</span>:<span class="st">'mac'</span> }}, _source:[<span class="st">'name'</span>] });
+    ac.hits.hits.forEach(h => console.log(<span class="st">`  ${h._source.name}`</span>));
+
+    <span class="cm">// 7. Aggregations</span>
+    console.log(<span class="st">'\n--- Aggregations ---'</span>);
+    <span class="kw">const</span> agg = <span class="kw">await</span> client.<span class="fn">search</span>({ index:INDEX, size:<span class="nu">0</span>, aggs:{
+        brands: { terms:{field:<span class="st">'brand'</span>}, aggs:{ avg_price:{avg:{field:<span class="st">'price'</span>}}} },
+        price_stats: { stats:{field:<span class="st">'price'</span>} },
+    }});
+    agg.aggregations.brands.buckets.forEach(b => console.log(<span class="st">`  ${b.key}: ${b.doc_count} products, avg $${b.avg_price.value.toFixed(0)}`</span>));
+    console.log(<span class="st">'  Price stats:'</span>, agg.aggregations.price_stats);
+
+    <span class="cm">// 8. Cluster health</span>
+    console.log(<span class="st">'\n--- Cluster Health ---'</span>);
+    <span class="kw">const</span> h = <span class="kw">await</span> client.cluster.<span class="fn">health</span>({});
+    console.log(<span class="st">`  Status: ${h.status}, Nodes: ${h.number_of_nodes}, Shards: ${h.active_shards}`</span>);
+}
+<span class="fn">run</span>().catch(e => console.error(e.meta?.body?.error || e.message));</code></pre>
+</section>
+
+<!-- Cheatsheet -->
+<section id="cheatsheet">
+<h2>Interview Quick-Reference Cheatsheet</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>What is Elasticsearch?</td><td>Distributed search engine on Lucene. Stores JSON, builds inverted index, near real-time search via REST.</td></tr>
+<tr><td>What is an inverted index?</td><td>Maps each unique term → list of documents + positions + frequency. O(1) term lookup.</td></tr>
+<tr><td>How is it different from a DB?</td><td>Uses inverted index (not B-tree). Complements your DB as a search layer. No ACID, eventual consistency.</td></tr>
+<tr><td>match vs term?</td><td>match = analyzes query + full-text search. term = exact value, no analysis. Never use term on text fields.</td></tr>
+<tr><td>text vs keyword?</td><td>text = analyzed into tokens for search. keyword = stored as-is for exact match, sort, aggs.</td></tr>
+<tr><td>What is a shard?</td><td>A partition of an index. Each shard = full Lucene index. Count fixed at creation. hash(id)%shards for routing.</td></tr>
+<tr><td>Query vs Filter context?</td><td>Query = scored (relevance). Filter = yes/no, cached in bitset, faster. Use filter for exact conditions.</td></tr>
+<tr><td>What are analyzers?</td><td>3-stage pipeline: char_filter → tokenizer → token_filter. Runs at index time AND search time.</td></tr>
+<tr><td>How does a write work?</td><td>Route to primary shard → translog → in-memory buffer → refresh (1s) → segment → replicate.</td></tr>
+<tr><td>How does a search work?</td><td>Scatter-gather: query all shards → each returns IDs+scores → coordinator merges → fetch top N docs.</td></tr>
+<tr><td>Why is update not in-place?</td><td>Segments are immutable. Update = read old doc + write new version + mark old deleted. Cleaned on merge.</td></tr>
+<tr><td>Deep pagination?</td><td>search_after (cursor-based, efficient) + PIT (consistent snapshot). from/size capped at 10K.</td></tr>
+<tr><td>Cluster health colors?</td><td>Green = all shards OK. Yellow = replicas missing. Red = primaries missing — data loss risk.</td></tr>
+<tr><td>Hot-Warm-Cold?</td><td>Tiered storage: hot (SSD, active), warm (slow SSD, read-only), cold (HDD, archive). ILM automates movement.</td></tr>
+<tr><td>What is ELK?</td><td>Elasticsearch + Logstash + Kibana + Beats. Ingest, store, search, visualize.</td></tr>
+<tr><td>refresh parameter?</td><td>'true' = immediate (expensive). 'false' = ~1s delay. 'wait_for' = waits for next refresh cycle.</td></tr>
+</table>
+</section>
+
+<div style="text-align:center;padding:40px;color:#555;font-size:13px;border-top:1px solid #222;margin-top:50px">
+Elasticsearch Complete Topic-Wise Guide<br>
+Concepts + Node.js Implementation + Behind the Scenes
+</div>
+
+</div>
+</div>
+
+<script>
+// Auto-scroll sidebar to active link
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.sidebar a');
+const sidebar = document.getElementById('sidebar');
+
+function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+            // Auto-scroll sidebar so active link is visible
+            const linkTop = link.offsetTop;
+            const sidebarHeight = sidebar.clientHeight;
+            const sidebarScroll = sidebar.scrollTop;
+            if (linkTop < sidebarScroll + 80 || linkTop > sidebarScroll + sidebarHeight - 80) {
+                sidebar.scrollTo({ top: linkTop - sidebarHeight / 2 + 40, behavior: 'smooth' });
+            }
+        }
+    });
+}
+
+window.addEventListener('scroll', updateActiveLink);
+window.addEventListener('load', updateActiveLink);
+
+// Smooth scroll for sidebar links
+navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
+</script>
+</body>
+</html>

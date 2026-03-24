@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes — Tech Deep Dives</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #030014;
+      --text: #e8e8f0;
+      --text-dim: #555570;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ====== CANVAS PARTICLES ====== */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ====== AURORA BACKGROUND ====== */
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .aurora .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0;
+      animation: auroraIn 1.5s ease-out forwards, auroraMove 18s ease-in-out infinite alternate;
+    }
+    .aurora .blob:nth-child(1) {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+      top: -20%; left: -10%;
+      animation-delay: 0s, 0s;
+    }
+    .aurora .blob:nth-child(2) {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+      bottom: -15%; right: -10%;
+      animation-delay: .3s, -9s;
+    }
+    .aurora .blob:nth-child(3) {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+      top: 40%; left: 50%;
+      animation-delay: .6s, -4s;
+    }
+    .aurora .blob:nth-child(4) {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      top: 10%; right: 20%;
+      animation-delay: .9s, -12s;
+    }
+    @keyframes auroraIn {
+      to { opacity: .3; }
+    }
+    @keyframes auroraMove {
+      0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+      33%  { transform: translate(80px, -40px) rotate(5deg) scale(1.1); }
+      66%  { transform: translate(-40px, 60px) rotate(-3deg) scale(.95); }
+      100% { transform: translate(60px, 30px) rotate(4deg) scale(1.08); }
+    }
+
+    /* ====== NOISE TEXTURE OVERLAY ====== */
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+    }
+
+    /* ====== LAYOUT ====== */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem 6rem;
+    }
+
+    /* ====== HEADER ====== */
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+      opacity: 0;
+      animation: fadeUp .8s ease-out .2s forwards;
+    }
+    .badge {
+      display: inline-block;
+      padding: .35rem 1rem;
+      border-radius: 100px;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      background: rgba(167, 139, 250, .08);
+      border: 1px solid rgba(167, 139, 250, .15);
+      margin-bottom: 1.5rem;
+    }
+    .header h1 {
+      font-size: clamp(2.8rem, 7vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 30%, #06b6d4 60%, #10b981 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 8s ease-in-out infinite;
+    }
+    .header p {
+      margin-top: 1rem;
+      color: var(--text-dim);
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: .3px;
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ====== GRID ====== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ====== CARD ====== */
+    .card {
+      --accent: #a78bfa;
+      --glow: #7c3aed;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      padding: 1.75rem;
+      border-radius: 20px;
+      text-decoration: none;
+      color: var(--text);
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeUp .6s ease-out forwards;
+
+      /* Glassmorphism */
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
+      transition: transform .35s cubic-bezier(.22, .61, .36, 1),
+                  border-color .35s,
+                  box-shadow .35s;
+    }
+    .card:nth-child(1) { animation-delay: .15s; }
+    .card:nth-child(2) { animation-delay: .22s; }
+    .card:nth-child(3) { animation-delay: .29s; }
+    .card:nth-child(4) { animation-delay: .36s; }
+    .card:nth-child(5) { animation-delay: .43s; }
+    .card:nth-child(6) { animation-delay: .50s; }
+    .card:nth-child(7) { animation-delay: .57s; }
+    .card:nth-child(8) { animation-delay: .64s; }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(255, 255, 255, .12);
+      box-shadow:
+        0 0 40px -10px var(--glow),
+        0 20px 60px -20px rgba(0, 0, 0, .5),
+        inset 0 1px 0 rgba(255, 255, 255, .06);
+    }
+
+    /* Animated gradient border on hover */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      padding: 1px;
+      background: conic-gradient(from var(--angle, 0deg), transparent 40%, var(--accent) 50%, transparent 60%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity .4s;
+      animation: rotateBorder 4s linear infinite;
+    }
+    .card:hover::before { opacity: 1; }
+
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @keyframes rotateBorder {
+      to { --angle: 360deg; }
+    }
+
+    /* Inner glow */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity .4s;
+      background: radial-gradient(ellipse at 30% 20%, var(--glow) 0%, transparent 70%);
+    }
+    .card:hover::after { opacity: .08; }
+
+    /* Card top row */
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      font-size: 1.6rem;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .06);
+      transition: all .35s;
+    }
+    .card:hover .icon {
+      background: rgba(255, 255, 255, .08);
+      border-color: var(--accent);
+      box-shadow: 0 0 20px -5px var(--glow);
+      transform: rotate(-5deg) scale(1.05);
+    }
+
+    .tag {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: var(--accent);
+      opacity: .6;
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .03);
+      transition: opacity .3s;
+    }
+    .card:hover .tag { opacity: 1; }
+
+    /* Card body */
+    .card-body {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+    .label {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      transition: color .3s;
+    }
+    .card:hover .label { color: #fff; }
+
+    .desc {
+      margin-top: .35rem;
+      font-size: .82rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Card footer */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      position: relative;
+      z-index: 1;
+      margin-top: .25rem;
+    }
+    .explore-text {
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      transition: color .3s;
+    }
+    .card:hover .explore-text { color: var(--accent); }
+    .arrow-line {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .arrow-line svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-dim);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transform: translateX(-4px);
+      opacity: 0;
+      transition: all .35s;
+    }
+    .card:hover .arrow-line svg {
+      transform: translateX(0);
+      opacity: 1;
+      stroke: var(--accent);
+    }
+
+    /* Per-card accents */
+    .card[data-accent="purple"]  { --accent: #a78bfa; --glow: #7c3aed; }
+    .card[data-accent="cyan"]    { --accent: #22d3ee; --glow: #0891b2; }
+    .card[data-accent="green"]   { --accent: #34d399; --glow: #059669; }
+    .card[data-accent="blue"]    { --accent: #60a5fa; --glow: #2563eb; }
+    .card[data-accent="orange"]  { --accent: #fb923c; --glow: #ea580c; }
+    .card[data-accent="yellow"]  { --accent: #fbbf24; --glow: #d97706; }
+    .card[data-accent="pink"]    { --accent: #f472b6; --glow: #db2777; }
+    .card[data-accent="red"]     { --accent: #f87171; --glow: #dc2626; }
+
+    /* ====== FOOTER ====== */
+    .footer {
+      text-align: center;
+      margin-top: 4.5rem;
+      opacity: 0;
+      animation: fadeUp .6s ease-out .8s forwards;
+    }
+    .footer p {
+      color: var(--text-dim);
+      font-size: .78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .footer .line {
+      width: 40px;
+      height: 2px;
+      margin: .75rem auto 0;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    }
+
+    /* ====== 3D TILT ====== */
+    .card.tilt {
+      transform-style: preserve-3d;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 640px) {
+      .wrapper { padding: 3rem 1rem 4rem; }
+      .grid { grid-template-columns: 1fr; }
+      .header h1 { letter-spacing: -1px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+
+  <div class="aurora">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+  </div>
+
+  <div class="noise"></div>
+
+  <div class="wrapper">
+
+    <div class="header">
+      <div class="badge">Interactive Guides</div>
+      <h1>Notes</h1>
+      <p>Deep-dive visual guides for modern technologies</p>
+    </div>
+
+    <div class="grid">
+
+      <a href="elastic-search.html" class="card" data-accent="yellow">
+        <div class="card-top">
+          <div class="icon">&#x1F50D;</div>
+          <span class="tag">Search</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Elastic Search</div>
+          <div class="desc">Full-text search, analytics & distributed indexing</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="fastapi.html" class="card" data-accent="green">
+        <div class="card-top">
+          <div class="icon">&#x26A1;</div>
+          <span class="tag">Python</span>
+        </div>
+        <div class="card-body">
+          <div class="label">FastAPI</div>
+          <div class="desc">High-performance async Python web framework</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="gin.html" class="card" data-accent="cyan">
+        <div class="card-top">
+          <div class="icon">&#x1F378;</div>
+          <span class="tag">Go</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Gin</div>
+          <div class="desc">Blazing-fast HTTP web framework for Go</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="golang.html" class="card" data-accent="blue">
+        <div class="card-top">
+          <div class="icon">&#x1F439;</div>
+          <span class="tag">Language</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Golang</div>
+          <div class="desc">Statically typed, compiled language by Google</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="graphql.html" class="card" data-accent="pink">
+        <div class="card-top">
+          <div class="icon">&#x25C8;</div>
+          <span class="tag">API</span>
+        </div>
+        <div class="card-body">
+          <div class="label">GraphQL</div>
+          <div class="desc">Flexible query language for your APIs</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="k8s.html" class="card" data-accent="purple">
+        <div class="card-top">
+          <div class="icon">&#x2638;</div>
+          <span class="tag">DevOps</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Kubernetes</div>
+          <div class="desc">Container orchestration at scale</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="kafka.html" class="card" data-accent="orange">
+        <div class="card-top">
+          <div class="icon">&#x1F4E8;</div>
+          <span class="tag">Streaming</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Kafka</div>
+          <div class="desc">Distributed event streaming platform</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+      <a href="python.html" class="card" data-accent="red">
+        <div class="card-top">
+          <div class="icon">&#x1F40D;</div>
+          <span class="tag">Language</span>
+        </div>
+        <div class="card-body">
+          <div class="label">Python</div>
+          <div class="desc">Versatile language for everything from web to AI</div>
+        </div>
+        <div class="card-footer">
+          <span class="explore-text">Explore</span>
+          <span class="arrow-line"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="footer">
+      <p>Pick a topic &middot; Dive deep</p>
+      <div class="line"></div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ===== Floating Particles ===== */
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.r = Math.random() * 1.5 + .5;
+        this.dx = (Math.random() - .5) * .3;
+        this.dy = (Math.random() - .5) * .3;
+        this.alpha = Math.random() * .4 + .1;
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+
+      // Draw faint connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(255,255,255,${.04 * (1 - dist / 120)})`;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    /* ===== 3D Card Tilt on Mouse Move ===== */
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const rotateX = ((y - cy) / cy) * -8;
+        const rotateY = ((x - cx) / cx) * 8;
+        card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px) scale(1.02)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes: The Complete Knowledge Map</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--card:#131a2b;--card2:#0e1322;--border:#1e2d4a;--accent:#3b82f6;--accent2:#8b5cf6;--accent3:#06b6d4;--accent4:#10b981;--accent5:#f59e0b;--accent6:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--white:#fff;--sb:#0c1120}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;overflow-x:hidden}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* LAYOUT */
+.page{display:flex}
+.sidebar{width:280px;min-width:280px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;scrollbar-width:thin;transition:left .3s}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sb-header{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.sb-header h2{font-size:1rem;font-weight:700;color:var(--white);letter-spacing:-.3px}
+.sb-header p{font-size:.7rem;color:var(--text3);margin-top:2px}
+.main{margin-left:280px;flex:1;min-width:0}
+
+/* SIDEBAR NAV */
+.sb-group{border-bottom:1px solid rgba(30,45,74,.5)}
+.sb-section{display:flex;align-items:center;padding:10px 18px;gap:8px}
+.sb-section .sb-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0}
+.sb-section .sb-label{font-size:.82rem;font-weight:600;color:var(--text);flex:1}
+.sb-section .sb-arrow{display:none}
+.sb-items{display:block;padding:0 0 6px}
+.sb-item{display:block;padding:6px 18px 6px 50px;font-size:.78rem;color:var(--text3);cursor:pointer;transition:.15s;border-left:2px solid transparent;text-decoration:none;line-height:1.4}
+.sb-item:hover{color:var(--text2);background:rgba(59,130,246,.03)}
+.sb-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(59,130,246,.06);font-weight:600}
+.sb-group.active>.sb-section{background:rgba(59,130,246,.08)}
+.sb-group.active>.sb-section .sb-label{color:var(--accent)}
+.sb-group.active>.sb-section .sb-icon{box-shadow:0 0 0 2px var(--accent)}
+
+/* SECTION COLORS */
+.c1{background:rgba(59,130,246,.12);color:var(--accent)}
+.c2{background:rgba(139,92,246,.12);color:var(--accent2)}
+.c3{background:rgba(6,182,212,.12);color:var(--accent3)}
+.c4{background:rgba(16,185,129,.12);color:var(--accent4)}
+.c5{background:rgba(245,158,11,.12);color:var(--accent5)}
+.c6{background:rgba(239,68,68,.12);color:var(--accent6)}
+.c7{background:rgba(59,130,246,.12);color:#60a5fa}
+.c8{background:rgba(139,92,246,.12);color:#a78bfa}
+.c9{background:rgba(6,182,212,.12);color:#22d3ee}
+.c10{background:rgba(16,185,129,.12);color:#34d399}
+.c11{background:rgba(245,158,11,.12);color:#fbbf24}
+
+/* MAIN CONTENT */
+.content{max-width:960px;margin:0 auto;padding:24px 28px 60px}
+.section-anchor{padding-top:10px}
+.section-header{padding:30px 0 16px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.section-header h2{font-size:1.7rem;font-weight:700;color:var(--white);margin-bottom:4px}
+.section-header p{color:var(--text2);font-size:.92rem}
+
+/* TOPIC CARDS */
+.topic{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;overflow:hidden;transition:.2s;scroll-margin-top:20px}
+.topic:hover{border-color:rgba(59,130,246,.2)}
+.th{padding:18px 22px 0}
+.th h4{font-size:1.1rem;font-weight:700;color:var(--white)}
+.tb{padding:10px 22px 22px}
+.tb p{margin-bottom:10px;font-size:.94rem}
+.tb ul,.tb ol{margin:8px 0 12px 20px;color:var(--text2)}
+.tb li{margin-bottom:5px;font-size:.92rem}
+.tb li strong{color:var(--text)}
+.tb code{background:rgba(59,130,246,.1);color:var(--accent3);padding:2px 6px;border-radius:4px;font-size:.86rem;font-family:'SF Mono','Fira Code',monospace}
+.tb pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;margin:10px 0;font-size:.84rem;line-height:1.6}
+.tb pre code{background:0;padding:0;color:var(--text2)}
+
+/* CALLOUT BOXES */
+.def{background:rgba(59,130,246,.07);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin:10px 0;font-size:.93rem}
+.def strong{color:var(--accent)}
+.interview{background:rgba(139,92,246,.07);border-left:3px solid var(--accent2);padding:12px 16px;border-radius:0 8px 8px 0;margin:10px 0}
+.interview strong{color:var(--accent2)}
+.real{background:rgba(16,185,129,.07);border-left:3px solid var(--accent4);padding:12px 16px;border-radius:0 8px 8px 0;margin:10px 0}
+.real strong{color:var(--accent4)}
+.warn{background:rgba(245,158,11,.07);border-left:3px solid var(--accent5);padding:12px 16px;border-radius:0 8px 8px 0;margin:10px 0}
+.warn strong{color:var(--accent5)}
+.hl{color:var(--accent);font-weight:600}
+
+/* FLOWCHARTS */
+.flow{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;margin:14px 0;overflow-x:auto}
+.flow-title{color:var(--accent);font-weight:700;font-size:.9rem;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.flow-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.flow-box{padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;text-align:center;white-space:nowrap}
+.fb-blue{background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3)}
+.fb-purple{background:rgba(139,92,246,.15);color:var(--accent2);border:1px solid rgba(139,92,246,.3)}
+.fb-cyan{background:rgba(6,182,212,.15);color:var(--accent3);border:1px solid rgba(6,182,212,.3)}
+.fb-green{background:rgba(16,185,129,.15);color:var(--accent4);border:1px solid rgba(16,185,129,.3)}
+.fb-yellow{background:rgba(245,158,11,.15);color:var(--accent5);border:1px solid rgba(245,158,11,.3)}
+.fb-red{background:rgba(239,68,68,.15);color:var(--accent6);border:1px solid rgba(239,68,68,.3)}
+.fb-gray{background:rgba(148,163,184,.1);color:var(--text2);border:1px solid rgba(148,163,184,.2)}
+.flow-arrow{color:var(--text3);font-size:1.1rem;font-weight:700}
+.flow-down{text-align:center;color:var(--text3);font-size:1rem;line-height:1.2;margin:4px 0}
+.flow-label{font-size:.75rem;color:var(--text3);text-align:center;margin-top:2px}
+.flow-branch{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+
+/* MOBILE TOGGLE */
+.sb-toggle{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1.3rem;cursor:pointer;align-items:center;justify-content:center}
+.footer{text-align:center;padding:50px 20px;border-top:1px solid var(--border);color:var(--text3);font-size:.85rem}
+
+@media(max-width:900px){
+  .sidebar{left:-290px;box-shadow:4px 0 24px rgba(0,0,0,.6)}
+  .sidebar.open{left:0}
+  .sb-toggle{display:flex}
+  .main{margin-left:0}
+  .content{padding:16px 14px 60px}
+  .th{padding:14px 16px}
+  .tb{padding:0 16px 16px}
+  .flow-row{flex-direction:column}
+  .flow-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+
+<button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Toggle sidebar">&#9776;</button>
+
+<div class="page">
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar">
+<div class="sb-header">
+<h2>K8s Knowledge Map</h2>
+<p>57 topics &middot; 11 sections</p>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c1">1</span><span class="sb-label">Core Concepts</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-container">Container</a>
+<a class="sb-item" href="#t-docker">Docker</a>
+<a class="sb-item" href="#t-k8s">Kubernetes (K8s)</a>
+<a class="sb-item" href="#t-cluster">Cluster</a>
+<a class="sb-item" href="#t-node">Node</a>
+<a class="sb-item" href="#t-pod">Pod</a>
+<a class="sb-item" href="#t-namespace">Namespace</a>
+<a class="sb-item" href="#t-labels">Labels &amp; Selectors</a>
+<a class="sb-item" href="#t-kubectl">kubectl</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c2">2</span><span class="sb-label">Workloads</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-deployment">Deployment &amp; ReplicaSet</a>
+<a class="sb-item" href="#t-statefulset">StatefulSet</a>
+<a class="sb-item" href="#t-daemonset">DaemonSet</a>
+<a class="sb-item" href="#t-job">Job &amp; CronJob</a>
+<a class="sb-item" href="#t-replicaset">ReplicaSet</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c3">3</span><span class="sb-label">Networking</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-service">Service</a>
+<a class="sb-item" href="#t-ingress">Ingress</a>
+<a class="sb-item" href="#t-gateway">Gateway API</a>
+<a class="sb-item" href="#t-dns">DNS &amp; kube-proxy</a>
+<a class="sb-item" href="#t-cni">CNI</a>
+<a class="sb-item" href="#t-netpol">Network Policy</a>
+<a class="sb-item" href="#t-mesh">Service Mesh</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c4">4</span><span class="sb-label">Config &amp; Storage</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-configmap">ConfigMap</a>
+<a class="sb-item" href="#t-secret">Secret</a>
+<a class="sb-item" href="#t-pv">PV, PVC &amp; StorageClass</a>
+<a class="sb-item" href="#t-emptydir">emptyDir &amp; hostPath</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c5">5</span><span class="sb-label">Scheduling &amp; Scaling</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-resources">Requests &amp; Limits</a>
+<a class="sb-item" href="#t-affinity">Affinity &amp; Anti-Affinity</a>
+<a class="sb-item" href="#t-taints">Taints &amp; Tolerations</a>
+<a class="sb-item" href="#t-hpa">HPA</a>
+<a class="sb-item" href="#t-vpa">VPA, KEDA &amp; Karpenter</a>
+<a class="sb-item" href="#t-pdb">PDB</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c6">6</span><span class="sb-label">Security</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-rbac">RBAC</a>
+<a class="sb-item" href="#t-secctx">SecurityContext &amp; PSS</a>
+<a class="sb-item" href="#t-admission">Admission Controllers</a>
+<a class="sb-item" href="#t-policy">OPA &amp; Kyverno</a>
+<a class="sb-item" href="#t-imgsec">Image &amp; Runtime Security</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c7">7</span><span class="sb-label">Observability</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-prometheus">Prometheus &amp; Grafana</a>
+<a class="sb-item" href="#t-logging">Logging</a>
+<a class="sb-item" href="#t-tracing">Tracing &amp; OpenTelemetry</a>
+<a class="sb-item" href="#t-probes">Probes</a>
+<a class="sb-item" href="#t-slo">SLI, SLO &amp; SLA</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c8">8</span><span class="sb-label">Deployments &amp; GitOps</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-rolling">Rolling Update</a>
+<a class="sb-item" href="#t-bluegreen">Blue-Green</a>
+<a class="sb-item" href="#t-canary">Canary</a>
+<a class="sb-item" href="#t-gitops">GitOps (Argo CD &amp; Flux)</a>
+<a class="sb-item" href="#t-helm">Helm &amp; Kustomize</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c9">9</span><span class="sb-label">Cluster Architecture</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-controlplane">Control Plane</a>
+<a class="sb-item" href="#t-multicluster">Multi-Cluster &amp; Tenancy</a>
+<a class="sb-item" href="#t-managed">Managed vs Self-Managed</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c10">10</span><span class="sb-label">Operators &amp; CRDs</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-crd">CRD</a>
+<a class="sb-item" href="#t-operator">Operator Pattern</a>
+</div>
+</div>
+
+<div class="sb-group">
+<div class="sb-section">
+<span class="sb-icon c11">11</span><span class="sb-label">Platform &amp; Cost</span></div>
+<div class="sb-items">
+<a class="sb-item" href="#t-idp">Internal Developer Platform</a>
+<a class="sb-item" href="#t-finops">FinOps &amp; Cost</a>
+<a class="sb-item" href="#t-dr">DR &amp; Chaos Engineering</a>
+<a class="sb-item" href="#t-cloud">Cloud Strategy</a>
+<a class="sb-item" href="#t-dora">DORA &amp; Conway's Law</a>
+<a class="sb-item" href="#t-compliance">Compliance &amp; Zero Trust</a>
+</div>
+</div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main">
+<div class="content">
+
+<!-- ==================== S1: CORE CONCEPTS ==================== -->
+<div class="section-anchor" id="sec-core">
+<div class="section-header"><h2>Core Concepts</h2><p>The fundamental building blocks of Kubernetes &mdash; containers, clusters, pods, and how they connect.</p></div>
+</div>
+
+<div class="topic" id="t-container"><div class="th"><h4>Container</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A container is a lightweight, standalone package that includes your code and everything it needs to run &mdash; runtime, libraries, settings. It runs the same way everywhere.</div>
+<p><strong>Deep Dive:</strong></p>
+<p>Containers use two Linux kernel features to work:</p>
+<ul>
+<li><strong>Namespaces</strong> &mdash; Give each container its own isolated view of the system (process tree, network, filesystem, users). A container can't see other containers or the host processes.</li>
+<li><strong>Cgroups (Control Groups)</strong> &mdash; Limit how much CPU, memory, disk I/O, and network a container can use. Prevents one container from starving others.</li>
+</ul>
+<p>Unlike Virtual Machines, containers share the host OS kernel. This makes them:</p>
+<ul>
+<li>Start in <strong>milliseconds</strong> (VMs take minutes)</li>
+<li>Use <strong>MBs of memory</strong> (VMs use GBs)</li>
+<li><strong>Near-native performance</strong> (no hypervisor overhead)</li>
+</ul>
+<p>A container image is built in <strong>layers</strong>. Each instruction in a Dockerfile (FROM, COPY, RUN) creates a layer. Layers are cached and shared &mdash; if 10 services use the same base image, that layer is stored only once.</p>
+<div class="interview"><strong>Interview Answer:</strong> "A container is an isolated process that packages an application with all its dependencies using Linux namespaces for isolation and cgroups for resource limits. Unlike VMs, containers share the host kernel, making them lightweight, portable, and fast to start. They're the fundamental deployment unit in cloud-native architectures."</div>
+<div class="real"><strong>Real-World Usage:</strong> Netflix runs thousands of containers per service. Each microservice is packaged as a container image, stored in a registry, and deployed to Kubernetes. When a new version is ready, a new image is built, and containers are replaced &mdash; never patched in place. This immutability eliminates configuration drift.</div>
+</div></div>
+
+<div class="topic" id="t-docker"><div class="th"><h4>Docker</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Docker is the most popular tool for building and running containers. You write a Dockerfile, build an image from it, and run containers from that image.</div>
+<p><strong>Deep Dive:</strong></p>
+<p>Docker consists of several components:</p>
+<ul>
+<li><strong>Docker CLI</strong> &mdash; Command-line interface (<code>docker build</code>, <code>docker run</code>, <code>docker push</code>)</li>
+<li><strong>Docker Daemon (dockerd)</strong> &mdash; Background service that manages images and containers</li>
+<li><strong>containerd</strong> &mdash; The actual container runtime that Docker uses internally</li>
+<li><strong>Dockerfile</strong> &mdash; A text file with step-by-step instructions to build an image</li>
+</ul>
+<pre><code># Example Dockerfile
+FROM node:20-alpine          # Base image
+WORKDIR /app                 # Set working directory
+COPY package*.json ./        # Copy dependency files
+RUN npm ci --production      # Install dependencies
+COPY . .                     # Copy application code
+EXPOSE 3000                  # Document the port
+CMD ["node", "server.js"]    # Start command</code></pre>
+<p><strong>Important distinction:</strong> Kubernetes dropped Docker as its container runtime in v1.24. But this does NOT mean Docker is dead. Docker is still the standard tool for <em>building</em> images. K8s just uses <code>containerd</code> directly to <em>run</em> them (cutting out the Docker daemon middleman). Your Docker-built images work perfectly on K8s.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Docker popularized containers by making them easy to build and use. The core workflow is: write a Dockerfile, build an image, push to a registry, run as a container. While Kubernetes no longer uses Docker as its runtime (it uses containerd directly), Docker remains the primary tool for building container images. The images are OCI-compliant and work everywhere."</div>
+<div class="real"><strong>Real-World Usage:</strong> Every CI pipeline at companies like Shopify, GitHub, and Uber uses Docker to build container images. Developers write Dockerfiles, CI builds and scans the image, pushes it to ECR/GCR, and Kubernetes runs it using containerd.</div>
+</div></div>
+
+<div class="topic" id="t-k8s"><div class="th"><h4>Kubernetes (K8s)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Kubernetes is an open-source platform that automates deploying, scaling, and managing containerized applications across a cluster of machines.</div>
+<p><strong>Deep Dive:</strong></p>
+<p>Kubernetes was designed by Google based on 15 years of running production workloads on their internal system called <strong>Borg</strong>. Open-sourced in 2014, now maintained by the CNCF.</p>
+<p><strong>What Kubernetes actually does:</strong></p>
+<ul>
+<li><strong>Scheduling</strong> &mdash; Decides which machine runs which container based on resource needs, constraints, and policies</li>
+<li><strong>Self-healing</strong> &mdash; Restarts crashed containers, replaces unresponsive Pods, kills containers failing health checks</li>
+<li><strong>Scaling</strong> &mdash; Horizontally (more replicas) or vertically (more CPU/memory), automatically or manually</li>
+<li><strong>Service discovery &amp; load balancing</strong> &mdash; Gives Pods DNS names, distributes traffic</li>
+<li><strong>Rolling updates &amp; rollbacks</strong> &mdash; Deploy new versions with zero downtime, roll back if something breaks</li>
+<li><strong>Secret &amp; config management</strong> &mdash; Inject configuration and credentials without baking them into images</li>
+<li><strong>Storage orchestration</strong> &mdash; Automatically attach cloud disks, NFS, or other storage to Pods</li>
+</ul>
+<p><strong>The Declarative Model &mdash; the most important concept:</strong></p>
+<p>You tell K8s <em>what you want</em> (desired state in YAML), not <em>how to do it</em>. K8s continuously reconciles actual state with desired state. If you say "I want 5 replicas" and one crashes, K8s creates a new one automatically. This reconciliation loop runs forever.</p>
+<div class="flow">
+<div class="flow-title">How K8s Reconciliation Loop Works</div>
+<div class="flow-row">
+<div class="flow-box fb-blue">You write YAML</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">kubectl apply</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-cyan">API Server</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Stored in etcd</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row">
+<div class="flow-box fb-yellow">Controller watches etcd</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-red">Compares desired vs actual</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Takes action (create/delete Pods)</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row">
+<div class="flow-box fb-gray">Loop runs forever &mdash; self-healing</div>
+</div>
+</div>
+<div class="interview"><strong>Interview Answer:</strong> "Kubernetes is a container orchestration platform that manages containerized workloads across a cluster of machines. Its core principle is declarative: you define desired state in YAML, and controllers continuously reconcile actual state to match. It handles scheduling, self-healing, scaling, service discovery, rolling updates, and storage orchestration. It was created by Google based on their internal Borg system."</div>
+<div class="real"><strong>Real-World Usage:</strong> Spotify runs 100+ K8s clusters serving 400M+ users. Airbnb migrated from EC2 instances to K8s to achieve consistent deployments across 1000+ services. Pinterest uses K8s to handle 1B+ daily API requests with auto-scaling. Every major tech company runs on Kubernetes.</div>
+</div></div>
+
+<div class="topic" id="t-cluster"><div class="th"><h4>Cluster</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A cluster is the entire Kubernetes deployment &mdash; all the machines (nodes) working together, managed by a control plane.</div>
+<p><strong>Deep Dive:</strong></p>
+<p>A cluster has two types of machines:</p>
+<p><strong>Control Plane Nodes (Masters):</strong></p>
+<ul>
+<li>Run the "brain" of Kubernetes &mdash; API Server, etcd, Scheduler, Controller Manager</li>
+<li>Typically 3 or 5 nodes for high availability (odd number needed for etcd quorum)</li>
+<li>Should NOT run application workloads in production</li>
+<li>In managed K8s (EKS, GKE, AKS), the cloud provider manages these entirely</li>
+</ul>
+<p><strong>Worker Nodes:</strong></p>
+<ul>
+<li>Run your actual application Pods</li>
+<li>Each runs: <strong>kubelet</strong> (agent), <strong>kube-proxy</strong> (networking), <strong>container runtime</strong> (containerd)</li>
+<li>Can be physical servers, VMs, or cloud instances</li>
+<li>Can be added/removed dynamically (auto-scaling)</li>
+<li>Can have different sizes (mix of large and small instances)</li>
+</ul>
+<div class="interview"><strong>Interview Answer:</strong> "A Kubernetes cluster consists of control plane nodes (running API Server, etcd, Scheduler, Controller Manager) and worker nodes (running kubelet, kube-proxy, and containerd). The control plane makes decisions about the cluster, while workers run the actual workloads. For HA, you run 3 or 5 control plane nodes. Managed services like EKS/GKE handle the control plane for you."</div>
+<div class="real"><strong>Real-World Usage:</strong> A typical startup runs 1-3 clusters (dev, staging, prod) on EKS/GKE with 5-50 worker nodes each. Large enterprises like PayPal run hundreds of clusters across multiple regions. The trend is multi-cluster architectures where each cluster has a specific purpose or serves a specific region.</div>
+</div></div>
+
+<div class="topic" id="t-node"><div class="th"><h4>Node</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A node is a single machine (physical or virtual) in a Kubernetes cluster that runs containerized workloads.</div>
+<p><strong>Deep Dive:</strong></p>
+<p>Every worker node runs three essential components:</p>
+<ul>
+<li><strong>kubelet</strong> &mdash; The agent that communicates with the control plane. It receives Pod specifications and ensures the described containers are running and healthy.</li>
+<li><strong>kube-proxy</strong> &mdash; Maintains network rules for Service routing. Implements iptables or IPVS rules.</li>
+<li><strong>Container runtime</strong> &mdash; The software that actually runs containers (<code>containerd</code> or <code>CRI-O</code>).</li>
+</ul>
+<p><strong>Node lifecycle:</strong></p>
+<ul>
+<li><strong>Registration</strong> &mdash; Node joins the cluster and registers with the API server</li>
+<li><strong>Heartbeat</strong> &mdash; kubelet sends heartbeats via Lease objects in <code>kube-node-lease</code> namespace</li>
+<li><strong>NotReady</strong> &mdash; If heartbeats stop, the node is marked NotReady after 40s (default)</li>
+<li><strong>Eviction</strong> &mdash; After 5 minutes of NotReady, Pods are rescheduled to other nodes</li>
+<li><strong>Drain</strong> &mdash; <code>kubectl drain</code> gracefully evicts all Pods before maintenance</li>
+<li><strong>Cordon</strong> &mdash; <code>kubectl cordon</code> marks a node as unschedulable without evicting existing Pods</li>
+</ul>
+<div class="interview"><strong>Interview Answer:</strong> "A node is a machine in a K8s cluster running kubelet, kube-proxy, and a container runtime. Kubelet ensures Pods are running as specified, kube-proxy handles networking, and the runtime (containerd) runs containers. Nodes send heartbeats to the control plane. If a node goes down, its Pods are automatically rescheduled. You can drain a node for maintenance or cordon it to prevent new scheduling."</div>
+</div></div>
+
+<div class="topic" id="t-pod"><div class="th"><h4>Pod</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A Pod is the smallest deployable unit in Kubernetes. It wraps one or more containers that share the same network (IP address) and storage.</div>
+<p><strong>Deep Dive:</strong></p>
+<div class="flow">
+<div class="flow-title">Pod Lifecycle Flow</div>
+<div class="flow-row">
+<div class="flow-box fb-gray">Pending</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-blue">Init Containers</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Running</div>
+</div>
+<div class="flow-down">&darr; termination signal</div>
+<div class="flow-row">
+<div class="flow-box fb-yellow">Remove from endpoints</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">preStop hook</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-cyan">SIGTERM</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-gray">Grace period (30s)</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-red">SIGKILL</div>
+</div>
+</div>
+<p><strong>Key properties:</strong></p>
+<ul>
+<li><strong>Shared network</strong> &mdash; All containers in a Pod share one IP address and port space. They talk to each other via <code>localhost</code></li>
+<li><strong>Shared storage</strong> &mdash; Containers can mount the same volumes to share files</li>
+<li><strong>Co-scheduled</strong> &mdash; All containers in a Pod always run on the same node</li>
+<li><strong>Ephemeral</strong> &mdash; Pods are disposable. Created, destroyed, and replaced, never "repaired"</li>
+</ul>
+<p><strong>Multi-container patterns:</strong></p>
+<ul>
+<li><strong>Sidecar</strong> &mdash; Helper container (Envoy proxy, log shipper, monitoring agent)</li>
+<li><strong>Init Container</strong> &mdash; Runs before the main container to set up prerequisites</li>
+<li><strong>Ambassador</strong> &mdash; Proxy for outbound connections</li>
+<li><strong>Adapter</strong> &mdash; Transforms output (log format conversion)</li>
+</ul>
+<div class="interview"><strong>Interview Answer:</strong> "A Pod is the smallest deployable unit in K8s, wrapping one or more tightly coupled containers that share network and storage. Pods are ephemeral &mdash; designed to be replaced, not repaired. The most common pattern is one container per Pod. Multi-container Pods are used for sidecars (proxy, logging) and init containers (setup tasks). You manage Pods through higher-level resources like Deployments."</div>
+<div class="real"><strong>Real-World Usage:</strong> At Lyft, each microservice Pod has a main application container plus an Envoy sidecar for service mesh traffic. Init containers wait for database migrations to complete before the app starts. When Istio is enabled, a sidecar proxy is automatically injected into every Pod to handle mTLS and traffic management.</div>
+</div></div>
+
+<div class="topic" id="t-namespace"><div class="th"><h4>Namespace</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A namespace is a virtual partition within a cluster that isolates resources. It's like a folder that separates different teams, projects, or environments.</div>
+<p><strong>Deep Dive:</strong></p>
+<p><strong>Default namespaces:</strong> <code>default</code>, <code>kube-system</code>, <code>kube-public</code>, <code>kube-node-lease</code>.</p>
+<p><strong>What namespaces scope:</strong> Pods, Services, Deployments, ConfigMaps, Secrets, Roles, ServiceAccounts, PVCs.</p>
+<p><strong>What namespaces DON'T scope (cluster-wide):</strong> Nodes, PersistentVolumes, ClusterRoles, StorageClasses, Namespaces themselves.</p>
+<p><strong>Common strategies:</strong> per-team (<code>team-payments</code>), per-app (<code>app-checkout</code>), per-environment (<code>staging</code>), or hybrid.</p>
+<p><strong>Governance tools:</strong> ResourceQuota (cap resources), LimitRange (set defaults), NetworkPolicy (firewall), RBAC (access control).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Namespaces partition a cluster for resource isolation. They scope most resources (Pods, Services) but not cluster-wide ones (Nodes, PVs). You apply RBAC, ResourceQuotas, NetworkPolicies per namespace. Common strategies: per-team or per-application."</div>
+<div class="real"><strong>Real-World Usage:</strong> At Stripe, each team gets their own namespace with pre-configured RBAC, ResourceQuotas, and NetworkPolicies. A namespace provisioning controller automates this when a new team onboards.</div>
+</div></div>
+
+<div class="topic" id="t-labels"><div class="th"><h4>Labels, Selectors &amp; Annotations</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Labels are key-value tags for identifying and grouping resources. Selectors query by labels. Annotations store non-identifying metadata.</div>
+<p><strong>Deep Dive:</strong></p>
+<p><strong>Labels</strong> are the glue of K8s. A Service finds Pods, a Deployment manages ReplicaSets, NetworkPolicies target Pods &mdash; all through label selectors.</p>
+<pre><code>metadata:
+  labels:
+    app: payment-service
+    team: payments
+    env: production</code></pre>
+<p><strong>Selector types:</strong> Equality-based (<code>app = my-api</code>) and Set-based (<code>env in (production, staging)</code>).</p>
+<p><strong>Annotations</strong> store larger metadata: build timestamps, Git SHAs, monitoring config (<code>prometheus.io/scrape: "true"</code>).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Labels are key-value pairs for identification and selection. Services find Pods, Deployments manage ReplicaSets through selectors. Annotations store non-selecting metadata. A consistent labeling convention is essential for cost tracking, monitoring, and governance."</div>
+<div class="real"><strong>Real-World Usage:</strong> Kubecost uses <code>team: payments</code> labels to attribute costs. Prometheus discovers scrape targets via annotations. Kyverno enforces that every Deployment must have <code>team</code> and <code>app</code> labels.</div>
+</div></div>
+
+<div class="topic" id="t-kubectl"><div class="th"><h4>kubectl</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> kubectl is the command-line tool for interacting with Kubernetes clusters. It sends requests to the API server.</div>
+<pre><code># Viewing
+kubectl get pods -A                       # All namespaces
+kubectl describe pod my-pod               # Detailed info
+# Debugging
+kubectl logs my-pod -f                    # Stream logs
+kubectl exec -it my-pod -- /bin/sh        # Shell in
+kubectl debug -it my-pod --image=busybox  # Ephemeral debug
+# Managing
+kubectl apply -f manifest.yaml            # Create/update
+kubectl rollout undo deploy/my-app        # Rollback
+kubectl scale deploy my-app --replicas=5  # Scale
+# Networking
+kubectl port-forward svc/my-app 8080:80   # Local tunnel
+# Context
+kubectl config use-context prod           # Switch cluster</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "kubectl is the K8s CLI. Key commands: get/describe for viewing, logs/exec for debugging, apply/delete for managing, rollout for deployments, port-forward for networking. In production, direct kubectl should be limited &mdash; GitOps tools handle deployments."</div>
+</div></div>
+
+<!-- ==================== S2: WORKLOADS ==================== -->
+<div class="section-anchor" id="sec-workloads">
+<div class="section-header"><h2>Workloads</h2><p>The resources that run your applications &mdash; Deployments, StatefulSets, DaemonSets, Jobs, and CronJobs.</p></div>
+</div>
+
+<div class="topic" id="t-deployment"><div class="th"><h4>Deployment &amp; ReplicaSet</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A Deployment manages identical Pod replicas with rolling updates, rollbacks, and scaling. ReplicaSet is the mechanism underneath.</div>
+<div class="flow">
+<div class="flow-title">Deployment &rarr; ReplicaSet &rarr; Pods Chain</div>
+<div class="flow-row">
+<div class="flow-box fb-blue">Deployment</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">ReplicaSet (v2)</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Pod</div><div class="flow-box fb-green">Pod</div><div class="flow-box fb-green">Pod</div>
+</div>
+<div class="flow-down">&darr; on update</div>
+<div class="flow-row">
+<div class="flow-box fb-blue">Deployment</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-cyan">ReplicaSet (v3) &uarr;</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">New Pods</div>
+</div>
+<div class="flow-label">Old ReplicaSet scales down, new one scales up = rolling update</div>
+</div>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: payment-api
+  template:
+    metadata:
+      labels:
+        app: payment-api
+    spec:
+      containers:
+      - name: api
+        image: payment-api:2.1.0
+        resources:
+          requests: { cpu: "250m", memory: "256Mi" }
+          limits: { cpu: "1", memory: "1Gi" }</code></pre>
+<p><strong>Rolling update:</strong> New ReplicaSet created &rarr; new Pods start &rarr; pass readiness probes &rarr; old Pods terminated. <code>maxSurge: 1</code> = at most 4 total. <code>maxUnavailable: 0</code> = always 3 ready.</p>
+<p><strong>Rollback:</strong> <code>kubectl rollout undo deployment/payment-api</code> (K8s keeps 10 revisions by default).</p>
+<div class="interview"><strong>Interview Answer:</strong> "A Deployment manages ReplicaSets which manage Pods. Rolling updates are controlled by maxSurge/maxUnavailable. New Pods must pass readiness probes before old ones terminate. Keeps revision history for rollbacks. Apps must be stateless &mdash; any replica handles any request."</div>
+<div class="real"><strong>Real-World Usage:</strong> Every stateless microservice runs as a Deployment. Typical config: 3-10 replicas, maxSurge=25% maxUnavailable=25%, VPA-recommended requests, readiness probes on /health.</div>
+</div></div>
+
+<div class="topic" id="t-statefulset"><div class="th"><h4>StatefulSet</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Like a Deployment but for apps needing stable identity and persistent storage &mdash; databases, Kafka, ZooKeeper.</div>
+<p><strong>What makes it special:</strong></p>
+<ul>
+<li><strong>Stable Pod names</strong> &mdash; <code>mysql-0</code>, <code>mysql-1</code>, <code>mysql-2</code></li>
+<li><strong>Stable DNS</strong> &mdash; <code>mysql-0.mysql-headless.default.svc.cluster.local</code></li>
+<li><strong>Persistent storage</strong> &mdash; Each Pod gets its own PVC that survives restarts</li>
+<li><strong>Ordered operations</strong> &mdash; Created 0&rarr;1&rarr;2, deleted 2&rarr;1&rarr;0</li>
+</ul>
+<p>Requires a <strong>headless Service</strong> (<code>clusterIP: None</code>) and <code>volumeClaimTemplates</code> for per-Pod storage.</p>
+<div class="interview"><strong>Interview Answer:</strong> "StatefulSets provide stable names (ordinal indices), stable DNS (via headless Service), persistent storage (PVC per Pod), and ordered deployment. Used for databases, Kafka, ZooKeeper. Each Pod gets its own PVC through volumeClaimTemplates."</div>
+<div class="real"><strong>Real-World Usage:</strong> LinkedIn runs Kafka on StatefulSets using Strimzi Operator. Each broker (kafka-0, kafka-1, kafka-2) has stable identity and persistent volume. CloudNativePG manages PostgreSQL StatefulSets with automated failover.</div>
+</div></div>
+
+<div class="topic" id="t-daemonset"><div class="th"><h4>DaemonSet</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Ensures a Pod runs on every node (or a selected subset). When new nodes join, Pods are auto-added.</div>
+<p><strong>What runs as DaemonSets:</strong> Log collection (Fluent Bit), monitoring (Node Exporter, Datadog), network plugins (Calico, Cilium), storage drivers (CSI), security agents (Falco).</p>
+<p>Use <code>nodeSelector</code> or <code>tolerations</code> to restrict to specific node types (e.g., GPU nodes only).</p>
+<div class="interview"><strong>Interview Answer:</strong> "DaemonSets ensure one Pod per node for infrastructure plumbing: log collectors, monitoring agents, CNI plugins, storage drivers. Use nodeSelector and tolerations for targeting."</div>
+</div></div>
+
+<div class="topic" id="t-job"><div class="th"><h4>Job &amp; CronJob</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Jobs run Pods to completion (one-time tasks). CronJobs run Jobs on a schedule.</div>
+<p><strong>Key settings:</strong> <code>backoffLimit</code> (retries), <code>activeDeadlineSeconds</code> (timeout), <code>concurrencyPolicy</code> (Allow/Forbid/Replace for CronJobs), <code>restartPolicy</code> (Never or OnFailure).</p>
+<pre><code>apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-report
+spec:
+  schedule: "0 2 * * *"           # 2 AM daily
+  concurrencyPolicy: Forbid       # Skip if previous still running
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: report
+            image: report-gen:1.0</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "Jobs run to completion (migrations, batch). Key settings: backoffLimit, activeDeadlineSeconds, restartPolicy=Never|OnFailure. CronJobs are scheduled Jobs with concurrencyPolicy controlling overlap. For complex DAGs, use Argo Workflows."</div>
+</div></div>
+
+<div class="topic" id="t-replicaset"><div class="th"><h4>ReplicaSet</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Maintains a specified number of identical Pod replicas. Managed by Deployments &mdash; you almost never create one directly.</div>
+<p>Deployments create new ReplicaSets on updates and scale the old one down. Old ReplicaSets are kept (default 10) for rollback capability.</p>
+<div class="interview"><strong>Interview Answer:</strong> "ReplicaSet ensures the right number of Pods. It's the backend for Deployments &mdash; never created directly. On update, a new RS scales up while the old scales down. Old RS retained for rollbacks."</div>
+</div></div>
+
+<!-- ==================== S3: NETWORKING ==================== -->
+<div class="section-anchor" id="sec-networking">
+<div class="section-header"><h2>Networking</h2><p>How Pods communicate &mdash; Services, Ingress, Gateway API, DNS, CNI, Network Policies, and Service Mesh.</p></div>
+</div>
+
+<div class="topic" id="t-service"><div class="th"><h4>Service</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> A Service provides a stable network endpoint (DNS name + IP) for ephemeral Pods. Since Pods get new IPs when recreated, a Service gives a permanent address.</div>
+<div class="flow">
+<div class="flow-title">Service Routing Flow</div>
+<div class="flow-row">
+<div class="flow-box fb-yellow">Client request</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-blue">Service IP (ClusterIP)</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">kube-proxy (iptables/IPVS)</div>
+</div>
+<div class="flow-down">&darr; routes to healthy Pods</div>
+<div class="flow-branch">
+<div class="flow-box fb-green">Pod A (10.0.1.5)</div>
+<div class="flow-box fb-green">Pod B (10.0.2.3)</div>
+<div class="flow-box fb-red">Pod C (not ready) &mdash; skipped</div>
+</div>
+</div>
+<p><strong>Types:</strong> <strong>ClusterIP</strong> (internal, default), <strong>NodePort</strong> (expose on node ports 30000-32767), <strong>LoadBalancer</strong> (cloud LB, costs money), <strong>ExternalName</strong> (CNAME alias), <strong>Headless</strong> (<code>clusterIP: None</code>, returns Pod IPs directly for StatefulSets).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Services give stable DNS/IP to ephemeral Pods. ClusterIP=internal, NodePort=node exposure, LoadBalancer=cloud LB, Headless=direct Pod IPs. Routing via kube-proxy iptables/IPVS. Use Ingress to consolidate external traffic through one LB."</div>
+<div class="real"><strong>Real-World Usage:</strong> Every microservice has a ClusterIP Service (<code>http://payment-api/charge</code>). One or two LoadBalancer Services for the Ingress Controller. ExternalName Services wrap external databases so app code uses K8s DNS everywhere.</div>
+</div></div>
+
+<div class="topic" id="t-ingress"><div class="th"><h4>Ingress &amp; Ingress Controller</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Ingress routes external HTTP/HTTPS traffic to internal Services based on hostname and URL path. An Ingress Controller (NGINX, Traefik) implements these rules.</div>
+<pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts: [api.myapp.com]
+    secretName: tls-secret
+  rules:
+  - host: api.myapp.com
+    http:
+      paths:
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service: { name: api-v1, port: { number: 80 } }
+      - path: /
+        pathType: Prefix
+        backend:
+          service: { name: frontend, port: { number: 80 } }</code></pre>
+<p><strong>Controllers:</strong> NGINX (most popular), Traefik, HAProxy, AWS ALB, Istio Gateway.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Ingress manages external HTTP/HTTPS with host/path routing, TLS termination. Requires an Ingress Controller (NGINX, Traefik). One Ingress Controller behind a single LoadBalancer replaces many individual LB Services, saving cost. Gateway API is the newer replacement."</div>
+</div></div>
+
+<div class="topic" id="t-gateway"><div class="th"><h4>Gateway API</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Next-gen Ingress replacement. Role-based separation: GatewayClass (infra), Gateway (ops), HTTPRoute (devs). Supports TCP, gRPC, traffic splitting natively.</div>
+<pre><code>apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: payment-route
+spec:
+  parentRefs:
+  - name: production-gateway
+  hostnames: ["api.myapp.com"]
+  rules:
+  - matches:
+    - path: { type: PathPrefix, value: /payments }
+    backendRefs:
+    - name: payment-v2
+      port: 80
+      weight: 90          # 90% to v2
+    - name: payment-v3
+      port: 80
+      weight: 10          # 10% canary</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "Gateway API succeeds Ingress with role-based resources: GatewayClass (infra), Gateway (ops), HTTPRoute (devs). Supports TCP/UDP/gRPC natively, traffic splitting, header-based routing. Portable across implementations (Istio, Cilium, NGINX). New projects should use Gateway API over Ingress."</div>
+</div></div>
+
+<div class="topic" id="t-dns"><div class="th"><h4>DNS (CoreDNS) &amp; kube-proxy</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> CoreDNS is the cluster's DNS server (Services reachable by name). kube-proxy handles the actual network routing from Service IPs to Pod IPs.</div>
+<p><strong>DNS format:</strong> <code>my-service.my-namespace.svc.cluster.local</code> (or just <code>my-service</code> within same namespace).</p>
+<p><strong>kube-proxy modes:</strong> iptables (O(n), default), IPVS (O(1), better at scale), eBPF/Cilium (highest performance, replaces kube-proxy).</p>
+<p><strong>East-West</strong> = service-to-service within cluster. <strong>North-South</strong> = external traffic.</p>
+<div class="interview"><strong>Interview Answer:</strong> "CoreDNS provides service discovery by name. kube-proxy implements routing via iptables (O(n)), IPVS (O(1)), or eBPF (Cilium, fastest). East-west is internal, north-south is external."</div>
+</div></div>
+
+<div class="topic" id="t-cni"><div class="th"><h4>CNI (Container Network Interface)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> CNI is the plugin standard for Pod networking. K8s doesn't do networking itself &mdash; it delegates to a CNI plugin.</div>
+<p><strong>Major plugins:</strong></p>
+<ul>
+<li><strong>Cilium</strong> &mdash; eBPF-based, highest performance, built-in observability (Hubble), service mesh. The rising star. CNCF graduated</li>
+<li><strong>Calico</strong> &mdash; Most widely deployed. BGP routing, excellent Network Policy support</li>
+<li><strong>Flannel</strong> &mdash; Simple overlay, NO Network Policy support. Dev only</li>
+<li><strong>AWS VPC CNI</strong> &mdash; Real VPC IPs on EKS. Limited by ENI capacity per node</li>
+</ul>
+<div class="interview"><strong>Interview Answer:</strong> "CNI is the plugin standard. Key choices: Cilium (eBPF, highest performance, CNCF graduated), Calico (BGP, mature), AWS VPC CNI (real VPC IPs). Choice affects performance, security features, and cloud integration."</div>
+</div></div>
+
+<div class="topic" id="t-netpol"><div class="th"><h4>Network Policy</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Firewall rules for Pods. Controls which Pods can talk to which. Default is allow-all; once a policy applies, it becomes default-deny for that Pod.</div>
+<pre><code>apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-allow-frontend
+spec:
+  podSelector:
+    matchLabels: { app: api }
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels: { app: frontend }
+    ports:
+    - port: 8080</code></pre>
+<div class="warn"><strong>Important:</strong> Requires a CNI that supports it. Calico, Cilium = yes. Flannel = no.</div>
+<div class="interview"><strong>Interview Answer:</strong> "Network Policies are Pod-level firewall rules using label selectors. Default is allow-all; applying a policy makes that direction default-deny. Best practice: default-deny per namespace, then explicit allows. Requires Calico or Cilium. Essential for micro-segmentation and compliance (PCI-DSS)."</div>
+</div></div>
+
+<div class="topic" id="t-mesh"><div class="th"><h4>Service Mesh (Istio, Linkerd)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Infrastructure layer handling service-to-service communication transparently: mTLS encryption, traffic management, observability, and authorization &mdash; without code changes.</div>
+<p><strong>Capabilities:</strong> mTLS (zero-trust), retries/timeouts/circuit breaking, traffic splitting (canary), request-level metrics and traces, fine-grained AuthorizationPolicies.</p>
+<p><strong>Options:</strong> <strong>Istio</strong> (most features, CNCF graduated, Ambient mode = sidecar-less), <strong>Linkerd</strong> (simpler, Rust proxy), <strong>Cilium</strong> (eBPF-based, no sidecars).</p>
+<p><strong>When to adopt:</strong> 10+ microservices AND you need mandatory mTLS, advanced traffic management, or request-level observability. Don't adopt for 2-3 services.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Service mesh handles service-to-service communication via sidecar proxies (Envoy). Provides mTLS, traffic management, observability, authorization. Istio=most features, Linkerd=simpler, Cilium=eBPF no sidecars. Adopt when microservices complexity justifies the overhead."</div>
+</div></div>
+
+<!-- ==================== S4: CONFIG & STORAGE ==================== -->
+<div class="section-anchor" id="sec-config">
+<div class="section-header"><h2>Configuration &amp; Storage</h2><p>ConfigMaps, Secrets, Volumes, PV/PVC, StorageClasses, and CSI.</p></div>
+</div>
+
+<div class="topic" id="t-configmap"><div class="th"><h4>ConfigMap</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Stores non-sensitive configuration as key-value pairs, separate from images. Consumed as env vars or mounted as files.</div>
+<p>Volume-mounted ConfigMaps support <strong>hot-reload</strong> (~60s). Env vars do NOT &mdash; need Pod restart. <code>immutable: true</code> for better performance at scale. 1 MB size limit.</p>
+<div class="interview"><strong>Interview Answer:</strong> "ConfigMaps decouple config from images. Consumed as env vars or files. Volume mounts support hot-reload; env vars need restart. Set immutable:true for performance. Use Secrets for sensitive data."</div>
+</div></div>
+
+<div class="topic" id="t-secret"><div class="th"><h4>Secret</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Stores sensitive data (passwords, API keys, TLS certs). Base64-encoded (NOT encrypted by default).</div>
+<p><strong>Types:</strong> Opaque, TLS, dockerconfigjson, service-account-token, basic-auth.</p>
+<div class="warn"><strong>Security:</strong> Base64 ≠ encryption! For production: enable etcd encryption at rest, use External Secrets Operator (Vault, AWS Secrets Manager), restrict RBAC, use Sealed Secrets for GitOps.</div>
+<div class="interview"><strong>Interview Answer:</strong> "Secrets store sensitive data, base64-encoded (not encrypted). Types: Opaque, TLS, docker-registry. For production: encrypt etcd at rest, use External Secrets Operator to sync from Vault/AWS, restrict RBAC, use Sealed Secrets for GitOps."</div>
+</div></div>
+
+<div class="topic" id="t-pv"><div class="th"><h4>PV, PVC &amp; StorageClass</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> PV = provisioned storage (disk). PVC = request for storage. StorageClass = category/provisioner enabling dynamic provisioning via CSI drivers.</div>
+<div class="flow">
+<div class="flow-title">Storage Provisioning Flow</div>
+<div class="flow-row">
+<div class="flow-box fb-blue">Pod needs storage</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">PVC created</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-cyan">StorageClass</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-yellow">CSI Driver</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row">
+<div class="flow-box fb-green">Cloud disk provisioned (EBS)</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">PV bound to PVC</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Mounted in Pod</div>
+</div>
+</div>
+<p><strong>Access Modes:</strong> RWO (single node), ROX (read-only many), RWX (read-write many, needs EFS/NFS), RWOP (single Pod).</p>
+<p><strong>Reclaim:</strong> Delete (default) or Retain (keep data). <strong>VolumeSnapshots</strong> for backups.</p>
+<div class="interview"><strong>Interview Answer:</strong> "PV=storage, PVC=request, StorageClass=provisioner. Dynamic provisioning: PVC triggers CSI driver to create disk. Access modes: RWO (most common), RWX (shared, needs EFS). WaitForFirstConsumer binding ensures correct AZ. Volume Snapshots for backups."</div>
+</div></div>
+
+<div class="topic" id="t-emptydir"><div class="th"><h4>emptyDir, hostPath &amp; Ephemeral Volumes</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> emptyDir = temp storage tied to Pod lifetime (shared between containers). hostPath = mounts host filesystem (security risk, DaemonSets only).</div>
+<div class="interview"><strong>Interview Answer:</strong> "emptyDir is Pod-lifetime temp storage for scratch space and inter-container sharing. hostPath mounts host filesystem &mdash; security risk, only for DaemonSets. Neither persists beyond Pod life."</div>
+</div></div>
+
+<!-- ==================== S5: SCHEDULING & SCALING ==================== -->
+<div class="section-anchor" id="sec-scaling">
+<div class="section-header"><h2>Scheduling &amp; Scaling</h2><p>How K8s places Pods, and how it auto-scales workloads and infrastructure.</p></div>
+</div>
+
+<div class="topic" id="t-resources"><div class="th"><h4>Resource Requests &amp; Limits</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Requests = guaranteed minimum (scheduler uses for placement). Limits = max allowed (CPU throttled, memory OOMKilled).</div>
+<p><strong>QoS Classes:</strong> Guaranteed (requests==limits, highest priority), Burstable (requests&lt;limits), BestEffort (none set, first evicted).</p>
+<p><strong>Units:</strong> CPU: <code>1</code>=1 core, <code>100m</code>=0.1 core. Memory: <code>128Mi</code>, <code>1Gi</code>.</p>
+<div class="warn"><strong>Tip:</strong> Many teams remove CPU limits to avoid CFS throttling. Always set memory limits to prevent node-level OOM.</div>
+<div class="interview"><strong>Interview Answer:</strong> "Requests=scheduler input (guaranteed min). Limits=max: CPU throttles, memory OOMKills. QoS: Guaranteed (requests==limits), Burstable, BestEffort. Many teams omit CPU limits to avoid throttling but always set memory limits. VPA helps right-size."</div>
+</div></div>
+
+<div class="topic" id="t-affinity"><div class="th"><h4>Node Affinity, Pod Affinity &amp; Anti-Affinity</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Node Affinity = which nodes a Pod can run on. Pod Anti-Affinity = spread replicas apart. Pod Affinity = co-locate for performance. Topology Spread = distribute evenly across zones.</div>
+<p><strong>Hard vs Soft:</strong> <code>requiredDuring...</code> (must) vs <code>preferredDuring...</code> (try).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Node Affinity uses node labels for placement (required=hard, preferred=soft). Pod Anti-Affinity spreads replicas across nodes/zones for HA. Pod Affinity co-locates for low latency. Topology Spread Constraints distribute evenly across zones with maxSkew."</div>
+</div></div>
+
+<div class="topic" id="t-taints"><div class="th"><h4>Taints &amp; Tolerations</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Taints repel Pods from nodes. Tolerations let specific Pods ignore taints. Used to dedicate nodes (GPU, Spot).</div>
+<p><strong>Effects:</strong> NoSchedule, PreferNoSchedule, NoExecute (evict existing).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Taints repel Pods; Tolerations let specific Pods ignore taints. Effects: NoSchedule, PreferNoSchedule, NoExecute. Use case: dedicate GPU nodes for ML, Spot nodes for batch jobs. K8s auto-taints unhealthy nodes."</div>
+</div></div>
+
+<div class="topic" id="t-hpa"><div class="th"><h4>HPA (Horizontal Pod Autoscaler)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Automatically scales Pod replicas based on CPU, memory, or custom metrics.</div>
+<p>v2 supports multiple metrics. <code>behavior</code> section controls scaling speed (scale up fast, down slow to prevent flapping). Requires Metrics Server.</p>
+<div class="interview"><strong>Interview Answer:</strong> "HPA scales replicas on metrics: CPU, memory, custom (Prometheus Adapter). v2 supports multiple metrics. Behavior section controls speed &mdash; fast up, slow down. Needs Metrics Server. Can't share CPU metric with VPA."</div>
+</div></div>
+
+<div class="topic" id="t-vpa"><div class="th"><h4>VPA, KEDA &amp; Cluster Autoscaler / Karpenter</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> VPA = right-size resource requests. KEDA = scale on external events + scale to zero. Karpenter = smart node provisioning replacing Cluster Autoscaler.</div>
+<pre><code># KEDA: Scale Kafka consumer to zero
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+spec:
+  scaleTargetRef: { name: kafka-consumer }
+  minReplicaCount: 0
+  maxReplicaCount: 50
+  triggers:
+  - type: kafka
+    metadata:
+      topic: orders
+      lagThreshold: "100"</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "VPA right-sizes requests (recommender mode=safe). KEDA scales on 60+ event sources (Kafka lag, SQS, Prometheus) with scale-to-zero. Karpenter replaces Cluster Autoscaler: faster provisioning, auto instance-type selection, Spot handling, node consolidation."</div>
+</div></div>
+
+<div class="topic" id="t-pdb"><div class="th"><h4>PDB (Pod Disruption Budget)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Limits how many Pods can be down during voluntary disruptions (node drains, upgrades). Specifies minAvailable or maxUnavailable.</div>
+<p>Applies to voluntary disruptions (drain, autoscaler), NOT involuntary (node crash, OOM).</p>
+<div class="interview"><strong>Interview Answer:</strong> "PDB sets minimum available or maximum unavailable Pods during voluntary disruptions. Protects against all-replicas-down during node drains and upgrades. Every production Deployment should have one."</div>
+</div></div>
+
+<!-- ==================== S6: SECURITY ==================== -->
+<div class="section-anchor" id="sec-security">
+<div class="section-header"><h2>Security</h2><p>RBAC, Pod Security, admission control, policy engines, secrets management, and runtime protection.</p></div>
+</div>
+
+<div class="topic" id="t-rbac"><div class="th"><h4>RBAC (Role-Based Access Control)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Controls who can do what. Role (namespace permissions) + ClusterRole (cluster-wide) bound to users/groups/ServiceAccounts via RoleBinding/ClusterRoleBinding.</div>
+<pre><code>apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: dev
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+---
+kind: RoleBinding
+metadata:
+  name: dev-team-reader
+  namespace: dev
+subjects:
+- kind: Group
+  name: dev-team
+roleRef:
+  kind: Role
+  name: pod-reader</code></pre>
+<p><strong>Test:</strong> <code>kubectl auth can-i create pods --namespace dev</code></p>
+<div class="interview"><strong>Interview Answer:</strong> "RBAC: Role (namespace) + ClusterRole (global), bound via RoleBinding/ClusterRoleBinding to Users, Groups, or ServiceAccounts. Best practice: least privilege, namespace-scoped Roles, dedicated ServiceAccounts per workload, audit with 'kubectl auth can-i'."</div>
+</div></div>
+
+<div class="topic" id="t-secctx"><div class="th"><h4>SecurityContext &amp; Pod Security Standards</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> SecurityContext sets container security (runAsNonRoot, readOnlyRootFilesystem, drop capabilities). PSS defines three levels: Privileged, Baseline, Restricted.</div>
+<p>Pod Security Admission enforces PSS per namespace via labels: <code>enforce</code>, <code>audit</code>, <code>warn</code>.</p>
+<div class="interview"><strong>Interview Answer:</strong> "SecurityContext: runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities, allowPrivilegeEscalation=false. PSS levels: Privileged (system), Baseline (minimum), Restricted (target for apps). Enforced via namespace labels."</div>
+</div></div>
+
+<div class="topic" id="t-admission"><div class="th"><h4>Admission Controllers &amp; Webhooks</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Plugins intercepting API requests before storage. Mutating webhooks modify requests (inject sidecars). Validating webhooks accept/reject (enforce policies).</div>
+<div class="flow">
+<div class="flow-title">API Server Request Flow</div>
+<div class="flow-row">
+<div class="flow-box fb-yellow">API Request</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-blue">Authentication</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">Authorization (RBAC)</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row">
+<div class="flow-box fb-cyan">Mutating Admission</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-gray">Schema Validation</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Validating Admission</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row"><div class="flow-box fb-green">Persist to etcd</div></div>
+</div>
+<div class="interview"><strong>Interview Answer:</strong> "Admission controllers intercept after auth, before persist. Mutating runs first (inject sidecars, add labels), then Validating (enforce policies, reject violations). Policy engines (Kyverno, OPA) work via these webhooks."</div>
+</div></div>
+
+<div class="topic" id="t-policy"><div class="th"><h4>OPA/Gatekeeper &amp; Kyverno</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Policy engines that auto-enforce rules. Kyverno = YAML policies (simple). OPA/Gatekeeper = Rego language (powerful but complex).</div>
+<pre><code># Kyverno: Block :latest tag
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: check-tag
+    match:
+      any:
+      - resources: { kinds: [Pod] }
+    validate:
+      message: "Using ':latest' is not allowed."
+      pattern:
+        spec:
+          containers:
+          - image: "!*:latest"</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "Kyverno: K8s-native YAML policies, can validate, mutate, generate. OPA/Gatekeeper: Rego language, more powerful. Common policies: require labels, block latest tag, enforce resource limits, restrict registries, mandate security contexts."</div>
+</div></div>
+
+<div class="topic" id="t-imgsec"><div class="th"><h4>Image Security &amp; Runtime Protection</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Scanning (Trivy for CVEs), signing (Cosign for provenance), SBOM generation, and runtime monitoring (Falco for anomalous behavior).</div>
+<div class="interview"><strong>Interview Answer:</strong> "Defense-in-depth: scan in CI (Trivy blocks critical CVEs), sign images (Cosign/Sigstore), verify at admission (Kyverno checks signatures), monitor runtime (Falco detects unexpected processes/network). SBOM for regulatory compliance."</div>
+</div></div>
+
+<!-- ==================== S7: OBSERVABILITY ==================== -->
+<div class="section-anchor" id="sec-observability">
+<div class="section-header"><h2>Observability</h2><p>Metrics, logging, tracing, probes, alerting, and the three pillars of understanding your systems.</p></div>
+</div>
+
+<div class="topic" id="t-prometheus"><div class="th"><h4>Prometheus &amp; Grafana</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Prometheus collects metrics (pull-based, PromQL queries). Grafana visualizes dashboards. Together = standard K8s monitoring stack.</div>
+<p><strong>Key sources:</strong> kube-state-metrics (K8s object state), Node Exporter (node hardware), Metrics Server (HPA/kubectl top), app <code>/metrics</code> endpoints.</p>
+<pre><code># PromQL examples
+rate(http_requests_total{status="500"}[5m])     # Error rate
+histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))  # P99
+sum by (service)(rate(http_requests_total[5m]))  # RPS per service</code></pre>
+<p><strong>Long-term:</strong> Thanos or Grafana Mimir for multi-cluster, long-retention storage.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Prometheus: pull-based metrics with PromQL. Alertmanager for routing alerts. kube-state-metrics + Node Exporter for infrastructure. Grafana for dashboards. Thanos/Mimir for long-term multi-cluster storage. CNCF graduated, industry standard."</div>
+</div></div>
+
+<div class="topic" id="t-logging"><div class="th"><h4>Logging (Loki, EFK, Fluent Bit)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Containers write to stdout/stderr. A DaemonSet collector (Fluent Bit) ships logs to a backend (Loki or Elasticsearch) for search and analysis.</div>
+<p><strong>Loki</strong> (Grafana) = label-based, cost-effective, Grafana integration. <strong>Elasticsearch</strong> = full-text search, powerful but heavy. Loki increasingly replacing EFK.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Containers &rarr; stdout/stderr &rarr; node files &rarr; Fluent Bit DaemonSet &rarr; backend. Loki: label-based, cheap. Elasticsearch: full-text, heavy. Structured JSON logging enables better filtering. Correlate logs with metrics on same Grafana dashboard."</div>
+</div></div>
+
+<div class="topic" id="t-tracing"><div class="th"><h4>Distributed Tracing &amp; OpenTelemetry</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Tracing follows a request across microservices showing where time is spent. OpenTelemetry (OTel) is the CNCF standard unifying metrics, logs, and traces.</div>
+<p><strong>How:</strong> Request gets trace ID &rarr; each service creates a span &rarr; propagated via headers &rarr; assembled into full trace.</p>
+<p><strong>Backends:</strong> Jaeger (CNCF), Grafana Tempo, Zipkin. <strong>OTel Collector</strong> = vendor-neutral pipeline.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Tracing uses trace IDs and spans across services. Backends: Jaeger, Tempo. OpenTelemetry = CNCF standard unifying metrics/logs/traces with vendor-neutral SDKs and Collector. Auto-instrumentation adds tracing without code changes."</div>
+</div></div>
+
+<div class="topic" id="t-probes"><div class="th"><h4>Probes: Liveness, Readiness &amp; Startup</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Liveness = alive? (kill if not). Readiness = ready for traffic? (remove from endpoints if not). Startup = still booting? (gate other probes).</div>
+<p><strong>Methods:</strong> HTTP GET, TCP Socket, gRPC, Exec command.</p>
+<div class="warn"><strong>Common mistake:</strong> Aggressive liveness probes restart healthy containers under load, causing cascading failures. Keep liveness lenient, readiness responsive.</div>
+<div class="interview"><strong>Interview Answer:</strong> "Liveness: restart dead containers. Readiness: remove unready from traffic. Startup: gate probes for slow starters. Methods: HTTP, TCP, gRPC, exec. Key: lenient liveness, responsive readiness. Every production service needs both."</div>
+</div></div>
+
+<div class="topic" id="t-slo"><div class="th"><h4>SLI, SLO &amp; SLA</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> SLI = metric (availability, latency). SLO = target (99.9% availability). SLA = customer contract with penalties. Error budget = 100% - SLO.</div>
+<p><strong>Four Golden Signals:</strong> Latency, Traffic, Errors, Saturation.</p>
+<p>SLO 99.9% = 43 min downtime/month. When error budget exhausted &rarr; freeze features, fix reliability.</p>
+<div class="interview"><strong>Interview Answer:</strong> "SLI=measurable indicator, SLO=internal target, SLA=external contract. Error budget (100%-SLO) drives prioritization. Four golden signals: latency, traffic, errors, saturation. SLOs bridge platform and product teams."</div>
+</div></div>
+
+<!-- ==================== S8: DEPLOYMENTS & GITOPS ==================== -->
+<div class="section-anchor" id="sec-deploy">
+<div class="section-header"><h2>Deployment Strategies &amp; GitOps</h2><p>Rolling, blue-green, canary, Argo CD, Flux, Helm, and Kustomize.</p></div>
+</div>
+
+<div class="topic" id="t-rolling"><div class="th"><h4>Rolling Update</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> K8s default. Replaces Pods incrementally via maxSurge/maxUnavailable. Both versions run simultaneously during transition.</div>
+<div class="interview"><strong>Interview Answer:</strong> "Rolling update replaces Pods gradually. maxSurge=extra Pods allowed, maxUnavailable=Pods that can be down. New must pass readiness before old are killed. Rollout stalls if new Pods fail &mdash; production stays safe."</div>
+</div></div>
+
+<div class="topic" id="t-bluegreen"><div class="th"><h4>Blue-Green Deployment</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Two environments (Blue=old, Green=new). Switch all traffic at once by changing Service selector. Instant rollback = switch back.</div>
+<p><strong>Pros:</strong> Atomic switchover, instant rollback. <strong>Cons:</strong> Double resources, DB schema compatibility needed.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Blue-green: two identical environments, atomic traffic switch via Service selector. Instant rollback. Cons: double infrastructure, DB compatibility. Argo Rollouts automates with health analysis."</div>
+</div></div>
+
+<div class="topic" id="t-canary"><div class="th"><h4>Canary Deployment</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Route small % of traffic to new version, monitor, gradually increase. Gold standard for risk-sensitive deployments.</div>
+<pre><code># Argo Rollouts canary
+spec:
+  strategy:
+    canary:
+      steps:
+      - setWeight: 5
+      - pause: {duration: 5m}
+      - analysis:
+          templates: [{ templateName: success-rate }]
+      - setWeight: 25
+      - pause: {duration: 10m}
+      - setWeight: 100</code></pre>
+<div class="interview"><strong>Interview Answer:</strong> "Canary routes small traffic % to new version with automated analysis (Prometheus error rate/latency). Auto-rollback on failure. Argo Rollouts or Gateway API traffic splitting. Safest strategy &mdash; catches issues before affecting all users."</div>
+</div></div>
+
+<div class="topic" id="t-gitops"><div class="th"><h4>GitOps (Argo CD &amp; Flux)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Git as single source of truth. Agents in-cluster pull state from Git and reconcile continuously. All changes via PRs.</div>
+<div class="flow">
+<div class="flow-title">GitOps CI/CD Pipeline Flow</div>
+<div class="flow-row">
+<div class="flow-box fb-blue">Code Commit</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">CI: Build &amp; Test</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-cyan">Build Image</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-yellow">Scan (Trivy)</div>
+</div>
+<div class="flow-down">&darr;</div>
+<div class="flow-row">
+<div class="flow-box fb-green">Push to Registry</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-blue">Update GitOps Repo</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-purple">Argo CD detects</div><span class="flow-arrow">&rarr;</span>
+<div class="flow-box fb-green">Deploy to Cluster</div>
+</div>
+<div class="flow-label">Rollback = revert the Git commit</div>
+</div>
+<p><strong>Argo CD:</strong> UI, SSO, ApplicationSets, auto-sync, self-healing. <strong>Flux:</strong> Toolkit approach, deeper Helm/Kustomize integration, no built-in UI.</p>
+<div class="interview"><strong>Interview Answer:</strong> "GitOps: Git=source of truth, agents pull+reconcile (not push). Benefits: audit trail, easy rollback (revert commit), no cluster creds externally, drift correction. Argo CD has UI+ApplicationSets. Flux has deeper Helm/Kustomize integration. Industry standard."</div>
+</div></div>
+
+<div class="topic" id="t-helm"><div class="th"><h4>Helm &amp; Kustomize</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Helm = package manager (templated Charts + Values). Kustomize = YAML overlays without templates (built into kubectl).</div>
+<p><strong>Use Helm for:</strong> third-party packages, complex parameterization. <strong>Use Kustomize for:</strong> your own apps, simple environment overrides. Many teams use both.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Helm: Charts with Go templates and Values for parameterization. Kustomize: overlays and patches, no template language, built into kubectl. Helm for external tools (Prometheus, NGINX), Kustomize for internal apps. Most teams use both."</div>
+</div></div>
+
+<!-- ==================== S9: CLUSTER ARCHITECTURE ==================== -->
+<div class="section-anchor" id="sec-arch">
+<div class="section-header"><h2>Cluster Architecture</h2><p>Control plane, etcd, multi-cluster, multi-tenancy, managed vs. self-managed.</p></div>
+</div>
+
+<div class="topic" id="t-controlplane"><div class="th"><h4>Control Plane Components</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> The brain: API Server (front door), etcd (memory/state), Scheduler (Pod placement), Controller Manager (reconciliation loops).</div>
+<p><strong>API Server:</strong> Auth &rarr; AuthZ &rarr; Admission &rarr; Validation &rarr; Persist. Stateless, run multiple replicas.</p>
+<p><strong>etcd:</strong> Raft consensus, 3 or 5 nodes. Fast SSDs required. <strong>Losing etcd without backup = losing everything.</strong></p>
+<p><strong>Scheduler:</strong> Filter (which nodes CAN) &rarr; Score (which is BEST). Considers resources, affinity, taints, topology.</p>
+<p><strong>Controller Manager:</strong> Runs Deployment, ReplicaSet, Node, Job, Endpoint controllers. Watch &rarr; Compare &rarr; Act.</p>
+<div class="interview"><strong>Interview Answer:</strong> "API Server: RESTful front door (auth/authz/admission). etcd: distributed KV store (needs backup). Scheduler: filter→score for Pod placement. Controller Manager: reconciliation loops. For HA: multiple API servers, 3-5 etcd nodes, leader election."</div>
+</div></div>
+
+<div class="topic" id="t-multicluster"><div class="th"><h4>Multi-Cluster &amp; Multi-Tenancy</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Multi-cluster = separate clusters for blast radius, compliance, scale. Multi-tenancy = sharing: namespace-per-tenant (cheap), vCluster (strong isolation), cluster-per-tenant (strongest).</div>
+<p><strong>Management:</strong> Cluster API (declarative lifecycle), Rancher (UI), Argo CD ApplicationSets (multi-cluster deploys).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Multi-cluster for blast radius, compliance, scale limits. Tenancy: namespace-per-tenant (RBAC+quotas), vCluster (virtual clusters), cluster-per-tenant (full isolation). Managed via Cluster API and Argo CD ApplicationSets."</div>
+</div></div>
+
+<div class="topic" id="t-managed"><div class="th"><h4>Managed vs. Self-Managed Kubernetes</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Managed (EKS/GKE/AKS) = cloud handles control plane. Self-managed (kubeadm, k3s, RKE2) = you handle everything.</div>
+<p><strong>Managed:</strong> EKS (AWS, most popular), GKE (Google, most mature), AKS (Azure, free control plane).</p>
+<p><strong>Self-managed:</strong> kubeadm (official), k3s (edge/IoT, lightweight), RKE2 (FIPS, government), OpenShift (enterprise).</p>
+<div class="interview"><strong>Interview Answer:</strong> "Managed: cloud handles control plane + etcd. 90% of orgs should use managed. Self-managed for edge (k3s), regulated (RKE2), on-prem, massive scale cost optimization. Cluster API standardizes management across both."</div>
+</div></div>
+
+<!-- ==================== S10: OPERATORS ==================== -->
+<div class="section-anchor" id="sec-operators">
+<div class="section-header"><h2>Operators &amp; CRDs</h2><p>Extending Kubernetes with custom resources and the Operator pattern.</p></div>
+</div>
+
+<div class="topic" id="t-crd"><div class="th"><h4>CRD (Custom Resource Definition)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Extends the K8s API with your own resource types. After creating a CRD, manage custom resources with kubectl like built-in ones.</div>
+<p><strong>Examples:</strong> <code>Certificate</code> (cert-manager), <code>VirtualService</code> (Istio), <code>PostgresCluster</code> (CloudNativePG).</p>
+<p>A CRD alone just stores data. A <strong>Custom Controller</strong> watches it and takes action = the Operator pattern.</p>
+<div class="interview"><strong>Interview Answer:</strong> "CRDs extend the K8s API with custom types. Managed via kubectl like built-in resources. CRD alone is just storage &mdash; a Custom Controller makes it actionable (Operator pattern). Key concepts: Finalizers (cleanup before delete), Owner References (cascading delete)."</div>
+</div></div>
+
+<div class="topic" id="t-operator"><div class="th"><h4>Operator Pattern</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> CRDs + Custom Controllers encoding human operational knowledge. Automates Day 2 ops: deploy, upgrade, backup, scale, failover for complex applications.</div>
+<p><strong>Major Operators:</strong> cert-manager (TLS), Prometheus Operator (monitoring), CloudNativePG (PostgreSQL), Strimzi (Kafka), Crossplane (cloud infra), External Secrets Operator (secrets sync).</p>
+<p><strong>Build with:</strong> Kubebuilder (Go), Operator SDK (Go/Ansible/Helm), Metacontroller (any language).</p>
+<p><strong>Core pattern:</strong> Watch &rarr; Compare desired vs actual &rarr; Act. Runs continuously. Idempotent.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Operator = CRDs + Controller encoding ops knowledge. Automates Day 2: deploy, upgrade, backup, failover. Key operators: cert-manager, Prometheus Operator, CloudNativePG, Strimzi, Crossplane. Built with Kubebuilder/Operator SDK. Core: reconciliation loop (watch→compare→act)."</div>
+<div class="real"><strong>Real-World Usage:</strong> Instead of a 47-step runbook for PostgreSQL HA, apply a 20-line Cluster CR. CloudNativePG handles StatefulSet creation, replication, automated backup to S3, and automatic failover. What took a DBA hours now takes seconds.</div>
+</div></div>
+
+<!-- ==================== S11: PLATFORM & COST ==================== -->
+<div class="section-anchor" id="sec-platform">
+<div class="section-header"><h2>Platform Engineering, Cost &amp; Strategy</h2><p>IDPs, FinOps, DR, cloud strategy, DORA metrics, and compliance.</p></div>
+</div>
+
+<div class="topic" id="t-idp"><div class="th"><h4>Internal Developer Platform (IDP)</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Self-service layer on K8s. Developers deploy without deep K8s knowledge. Golden paths, templates, guardrails.</div>
+<p><strong>Tools:</strong> Backstage (CNCF portal), Crossplane (cloud infra as CRDs), Tilt/Skaffold (inner-loop dev).</p>
+<div class="interview"><strong>Interview Answer:</strong> "IDP abstracts K8s complexity for developers. Backstage (service catalog+templates), Crossplane (cloud infra as K8s resources), golden paths (opinionated templates with CI/CD, monitoring pre-configured). Requires a platform team. Goal: developers focus on code."</div>
+</div></div>
+
+<div class="topic" id="t-finops"><div class="th"><h4>FinOps &amp; Cost Optimization</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> Managing K8s spend. Levers: right-sizing (VPA), Spot instances, KEDA scale-to-zero, Karpenter, eliminating idle resources.</div>
+<p><strong>Tools:</strong> Kubecost, OpenCost (CNCF), Goldilocks (VPA dashboard). <strong>Chargeback</strong> via labels attributes costs to teams.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Right-size with VPA (30-50% savings), Spot for stateless (60-90%), KEDA scale-to-zero, Karpenter node consolidation. Kubecost/OpenCost for visibility. ResourceQuotas cap namespaces. Chargeback via labels. Most clusters are 60-80% over-provisioned."</div>
+<div class="real"><strong>Real-World Usage:</strong> Company's $180K/mo K8s bill dropped to $70K (61% reduction): right-sizing saved $50K, Karpenter+Spot saved $35K, KEDA scale-to-zero saved $15K, shutdown dev off-hours saved $10K.</div>
+</div></div>
+
+<div class="topic" id="t-dr"><div class="th"><h4>Disaster Recovery &amp; Chaos Engineering</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> DR: Velero (backup/restore), etcd snapshots, Volume Snapshots. Chaos engineering (Chaos Mesh, Litmus) validates resilience by injecting failures.</div>
+<p><strong>RTO</strong> = max downtime. <strong>RPO</strong> = max data loss. Lower values = higher cost (multi-region).</p>
+<p><strong>Patterns:</strong> Multi-AZ (minimum), Active-Active (lowest RTO), Active-Passive (simpler).</p>
+<div class="interview"><strong>Interview Answer:</strong> "DR: Velero for K8s+volume backup, etcd snapshots for cluster state. RTO/RPO drive architecture and cost. Multi-AZ minimum for prod. Chaos engineering (Chaos Mesh, Litmus) validates DR before real incidents."</div>
+</div></div>
+
+<div class="topic" id="t-cloud"><div class="th"><h4>Cloud Strategy &amp; Vendor Lock-In</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> K8s provides compute portability. Real lock-in: managed services (RDS, BigQuery), data gravity, IAM. Hybrid via Anthos, Azure Arc, EKS Anywhere.</div>
+<div class="interview"><strong>Interview Answer:</strong> "K8s gives compute portability. Real lock-in: managed services, data gravity, IAM. Strategy: abstract where practical (PostgreSQL over Aurora), accept lock-in where value is high. Multi-cloud is expensive &mdash; most orgs are hybrid by circumstance."</div>
+</div></div>
+
+<div class="topic" id="t-dora"><div class="th"><h4>DORA Metrics, Conway's Law &amp; Organizational Impact</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> DORA = deployment frequency, lead time, MTTR, change failure rate. Conway's Law = systems mirror team structure. Platform teams enable autonomous product teams.</div>
+<p><strong>Team Topologies:</strong> Platform team (builds K8s platform), Stream-aligned (product features), Enabling (adoption help).</p>
+<p><strong>TCO:</strong> Compute + Storage + Networking + Licensing + <strong>People</strong> (biggest cost) + Opportunity cost.</p>
+<div class="interview"><strong>Interview Answer:</strong> "DORA metrics measure engineering effectiveness. K8s+GitOps should improve all four. Conway's Law: architecture mirrors teams. Inverse Conway Maneuver: shape teams for desired architecture. Platform team of 5 can support 80+ developers. TCO: people cost often exceeds infrastructure."</div>
+</div></div>
+
+<div class="topic" id="t-compliance"><div class="th"><h4>Compliance, CIS Benchmarks &amp; Zero Trust</h4></div><div class="tb">
+<div class="def"><strong>Simple Definition:</strong> CIS Benchmarks (kube-bench) for hardening. Compliance (SOC2/PCI/HIPAA) via RBAC + NetworkPolicy + mTLS + audit logs + policy engines. Zero Trust = never trust, always verify.</div>
+<p><strong>Zero Trust stack:</strong> mTLS (service mesh), least-privilege RBAC, default-deny NetworkPolicies, PSS Restricted, short-lived credentials (Vault/IRSA), signed images only.</p>
+<div class="interview"><strong>Interview Answer:</strong> "Compliance: RBAC (access), NetworkPolicy (segmentation), mTLS (encryption), audit logging (traceability), policy engines (automated enforcement). CIS benchmarks via kube-bench. Zero Trust: mTLS, least-privilege, default-deny, short-lived creds, signed images. Compliance-as-code = continuous enforcement."</div>
+</div></div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /page -->
+
+<div class="footer"><p>Kubernetes: The Complete Knowledge Map &mdash; 57 topics, 11 sections, topic-wise deep dives with interview answers and real-world usage.</p></div>
+
+<script>
+// Sidebar: highlight active item on scroll
+const items=document.querySelectorAll('.sb-item');
+const topics=document.querySelectorAll('.topic[id]');
+let ticking=false;
+window.addEventListener('scroll',()=>{
+  if(!ticking){
+    requestAnimationFrame(()=>{
+      let current='';
+      topics.forEach(topic=>{
+        const rect=topic.getBoundingClientRect();
+        if(rect.top<200) current=topic.id;
+      });
+      document.querySelectorAll('.sb-group').forEach(g=>g.classList.remove('active'));
+      let activeItem=null;
+      items.forEach(item=>{
+        const isActive=item.getAttribute('href')==='#'+current;
+        item.classList.toggle('active',isActive);
+        if(isActive){
+          activeItem=item;
+          item.closest('.sb-group').classList.add('active');
+        }
+      });
+      if(activeItem){
+        const sb=document.getElementById('sidebar');
+        const itemRect=activeItem.getBoundingClientRect();
+        const sbRect=sb.getBoundingClientRect();
+        if(itemRect.top<sbRect.top+60||itemRect.bottom>sbRect.bottom-60){
+          activeItem.scrollIntoView({block:'center',behavior:'smooth'});
+        }
+      }
+      ticking=false;
+    });
+    ticking=true;
+  }
+});
+
+// Close sidebar on mobile when clicking a link
+items.forEach(item=>{
+  item.addEventListener('click',()=>{
+    if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
