@@ -1224,29 +1224,319 @@ atomic.<span class="fn">AddInt64</span>(&amp;counter, <span class="num">1</span>
 <!-- ===================== SECTION 20: CONTEXT ===================== -->
 <h2 id="context"><span class="section-num">20</span> Context</h2>
 
-<pre><code><span class="cm">// Carries deadlines, cancellation, and request-scoped values</span>
-ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">5</span>*time.Second)  <span class="cm">// 5 second deadline</span>
-<span class="kw">defer</span> <span class="fn">cancel</span>()  <span class="cm">// always call to free resources</span>
+<p><code>context.Context</code> is an <strong>interface</strong> in Go's standard library (<code>context</code> package) that carries <strong>deadlines</strong>, <strong>cancellation signals</strong>, and <strong>request-scoped values</strong> across API boundaries and between goroutines. Think of it as a "bag" that travels with every request through your entire call chain, telling downstream functions "how long you have" and "should you stop?"</p>
 
-<span class="kw">select</span> {
-<span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>():  <span class="cm">// channel closed when cancelled/timed out</span>
-    fmt.<span class="fn">Println</span>(<span class="str">"cancelled:"</span>, ctx.<span class="fn">Err</span>())  <span class="cm">// Err() tells why it stopped</span>
-<span class="kw">case</span> result := &lt;-<span class="fn">doWork</span>(ctx):  <span class="cm">// work completed in time</span>
-    fmt.<span class="fn">Println</span>(result)
+<h3>The Context Interface</h3>
+<pre><code><span class="cm">// context.Context is an interface with 4 methods</span>
+<span class="kw">type</span> <span class="ty">Context</span> <span class="kw">interface</span> {
+    <span class="fn">Deadline</span>() (deadline time.<span class="ty">Time</span>, ok <span class="ty">bool</span>)  <span class="cm">// when this context will be cancelled (if set)</span>
+    <span class="fn">Done</span>() &lt;-<span class="kw">chan</span> <span class="kw">struct</span>{}                    <span class="cm">// closed when context is cancelled — listen on this</span>
+    <span class="fn">Err</span>() <span class="ty">error</span>                               <span class="cm">// nil if not done; DeadlineExceeded or Canceled after</span>
+    <span class="fn">Value</span>(key <span class="kw">any</span>) <span class="kw">any</span>                       <span class="cm">// returns value for key, or nil</span>
+}</code></pre>
+
+<h3>Context Types — Which Does What</h3>
+
+<pre><code><span class="cm">// 1. Background — the root context, never cancelled</span>
+<span class="cm">//    Use in: main(), init(), tests, top-level starting point</span>
+ctx := context.<span class="fn">Background</span>()  <span class="cm">// empty context, no deadline, no values</span>
+
+<span class="cm">// 2. TODO — placeholder when you're not sure which context to use yet</span>
+ctx = context.<span class="fn">TODO</span>()  <span class="cm">// same as Background but signals "I need to figure this out"</span>
+
+<span class="cm">// 3. WithCancel — manual cancellation</span>
+<span class="cm">//    Returns a copy of parent + a cancel function</span>
+ctx, cancel := context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+<span class="kw">defer</span> <span class="fn">cancel</span>()  <span class="cm">// ALWAYS defer cancel to free resources</span>
+<span class="cm">// When you call cancel(), ctx.Done() channel closes</span>
+<span class="cm">// All child contexts derived from ctx are also cancelled</span>
+
+<span class="cm">// 4. WithTimeout — auto-cancels after duration</span>
+ctx, cancel = context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">5</span>*time.Second)
+<span class="kw">defer</span> <span class="fn">cancel</span>()  <span class="cm">// cancel fires automatically after 5s, but defer is still needed</span>
+
+<span class="cm">// 5. WithDeadline — auto-cancels at specific time</span>
+deadline := time.<span class="fn">Now</span>().<span class="fn">Add</span>(<span class="num">10</span> * time.Second)  <span class="cm">// absolute time</span>
+ctx, cancel = context.<span class="fn">WithDeadline</span>(context.<span class="fn">Background</span>(), deadline)
+<span class="kw">defer</span> <span class="fn">cancel</span>()
+<span class="cm">// WithTimeout is just shorthand for WithDeadline(parent, time.Now().Add(d))</span>
+
+<span class="cm">// 6. WithValue — attach request-scoped data</span>
+<span class="kw">type</span> <span class="ty">ctxKey</span> <span class="ty">string</span>  <span class="cm">// custom type avoids key collisions between packages</span>
+ctx = context.<span class="fn">WithValue</span>(ctx, <span class="ty">ctxKey</span>(<span class="str">"requestID"</span>), <span class="str">"abc-123"</span>)
+<span class="cm">// Retrieve: ctx.Value(ctxKey("requestID")).(string) → "abc-123"</span></code></pre>
+
+<h3>Context Tree — Parent-Child Relationship</h3>
+<pre><code><span class="cm">// Contexts form a TREE — cancelling parent cancels ALL children</span>
+<span class="cm">//</span>
+<span class="cm">//   Background (root)</span>
+<span class="cm">//       |</span>
+<span class="cm">//   WithCancel (request)</span>
+<span class="cm">//      / \</span>
+<span class="cm">//  WithTimeout  WithValue</span>
+<span class="cm">//  (DB query)   (logging)</span>
+<span class="cm">//</span>
+<span class="cm">// If "request" is cancelled → DB query and logging are BOTH cancelled</span>
+<span class="cm">// But cancelling "DB query" does NOT cancel "request" or "logging"</span>
+
+parentCtx, parentCancel := context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+childCtx, childCancel := context.<span class="fn">WithTimeout</span>(parentCtx, <span class="num">3</span>*time.Second)
+<span class="kw">defer</span> <span class="fn">childCancel</span>()
+
+<span class="fn">parentCancel</span>()  <span class="cm">// cancels parentCtx AND childCtx</span>
+fmt.<span class="fn">Println</span>(childCtx.<span class="fn">Err</span>())  <span class="cm">// context canceled (inherited from parent)</span></code></pre>
+
+<h3>How to Use — Listening for Cancellation</h3>
+<pre><code><span class="cm">// Pattern 1: select on ctx.Done()</span>
+<span class="kw">func</span> <span class="fn">doWork</span>(ctx context.<span class="ty">Context</span>) <span class="ty">error</span> {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>():  <span class="cm">// context cancelled or timed out</span>
+        <span class="kw">return</span> ctx.<span class="fn">Err</span>()  <span class="cm">// context.Canceled or context.DeadlineExceeded</span>
+    <span class="kw">case</span> result := &lt;-<span class="fn">longOperation</span>():
+        fmt.<span class="fn">Println</span>(result)
+        <span class="kw">return</span> <span class="kw">nil</span>
+    }
 }
 
-<span class="cm">// Values (use sparingly)</span>
-<span class="kw">type</span> <span class="ty">ctxKey</span> <span class="ty">string</span>  <span class="cm">// custom type avoids key collisions</span>
-ctx = context.<span class="fn">WithValue</span>(ctx, <span class="ty">ctxKey</span>(<span class="str">"reqID"</span>), <span class="str">"abc-123"</span>)  <span class="cm">// attach request ID</span></code></pre>
+<span class="cm">// Pattern 2: check in loops</span>
+<span class="kw">func</span> <span class="fn">processItems</span>(ctx context.<span class="ty">Context</span>, items []<span class="ty">string</span>) <span class="ty">error</span> {
+    <span class="kw">for</span> _, item := <span class="kw">range</span> items {
+        <span class="kw">if</span> ctx.<span class="fn">Err</span>() != <span class="kw">nil</span> {  <span class="cm">// check before expensive work</span>
+            <span class="kw">return</span> ctx.<span class="fn">Err</span>()    <span class="cm">// stop early if cancelled</span>
+        }
+        <span class="fn">process</span>(item)
+    }
+    <span class="kw">return</span> <span class="kw">nil</span>
+}</code></pre>
+
+<h3>Real-World Example — HTTP Server</h3>
+<pre><code><span class="cm">// When a client disconnects, the request context is cancelled automatically</span>
+<span class="cm">// This propagates to ALL downstream work (DB, APIs, etc.)</span>
+
+<span class="kw">func</span> <span class="fn">handleOrder</span>(w http.<span class="ty">ResponseWriter</span>, r *http.<span class="ty">Request</span>) {
+    ctx := r.<span class="fn">Context</span>()  <span class="cm">// request context — cancelled if client disconnects</span>
+
+    <span class="cm">// Step 1: Query database (passes ctx — DB will abort if client gone)</span>
+    user, err := db.<span class="fn">GetUser</span>(ctx, userID)
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> }
+
+    <span class="cm">// Step 2: Call payment API with 3s timeout</span>
+    payCtx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num">3</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+    result, err := paymentAPI.<span class="fn">Charge</span>(payCtx, user, amount)  <span class="cm">// aborts after 3s</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> }
+
+    <span class="cm">// Step 3: Send notification (separate goroutine, inherits request context)</span>
+    <span class="kw">go</span> notifier.<span class="fn">Send</span>(ctx, user, result)  <span class="cm">// cancelled if client disconnects</span>
+}
+
+<span class="cm">// In the DB layer — context flows through the entire chain</span>
+<span class="kw">func</span> (db *<span class="ty">DB</span>) <span class="fn">GetUser</span>(ctx context.<span class="ty">Context</span>, id <span class="ty">int</span>) (*<span class="ty">User</span>, <span class="ty">error</span>) {
+    <span class="kw">return</span> db.conn.<span class="fn">QueryRowContext</span>(ctx,  <span class="cm">// database/sql respects context</span>
+        <span class="str">"SELECT * FROM users WHERE id = $1"</span>, id,
+    ).<span class="fn">Scan</span>(&amp;user)  <span class="cm">// if ctx cancelled → query aborted → resources freed</span>
+}</code></pre>
+
+<h3>Real-World Example — Graceful Shutdown</h3>
+<pre><code><span class="kw">func</span> <span class="fn">main</span>() {
+    srv := &amp;http.<span class="ty">Server</span>{Addr: <span class="str">":8080"</span>}
+
+    <span class="cm">// Start server in goroutine</span>
+    <span class="kw">go</span> srv.<span class="fn">ListenAndServe</span>()
+
+    <span class="cm">// Wait for interrupt signal (Ctrl+C)</span>
+    quit := <span class="fn">make</span>(<span class="kw">chan</span> os.<span class="ty">Signal</span>, <span class="num">1</span>)
+    signal.<span class="fn">Notify</span>(quit, os.Interrupt)
+    &lt;-quit  <span class="cm">// blocks until signal received</span>
+
+    <span class="cm">// Give active requests 10 seconds to finish</span>
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">10</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+    srv.<span class="fn">Shutdown</span>(ctx)  <span class="cm">// waits for handlers OR 10s timeout, whichever first</span>
+}</code></pre>
+
+<h3>Why Context Exists in Go</h3>
+<div class="tip-box">
+  <div class="box-title">Why Go Needs Context</div>
+  <ul>
+    <li><strong>Goroutine cleanup</strong> — Go has no way to "kill" a goroutine from outside. Context is the cooperative cancellation mechanism: goroutines check <code>ctx.Done()</code> and exit voluntarily</li>
+    <li><strong>Resource leaks</strong> — Without context, if a client disconnects mid-request, the server keeps running DB queries, API calls, and goroutines for a response nobody will read</li>
+    <li><strong>Timeout propagation</strong> — A single request might call 5 services. Context ensures the overall deadline flows to all of them — if the top-level 10s deadline hits, everything stops</li>
+    <li><strong>No thread-local storage</strong> — Unlike Java/Python, Go has no thread-local variables. Context is how you pass request-scoped data (request IDs, auth tokens) through the call chain</li>
+  </ul>
+</div>
 
 <div class="tip-box">
   <div class="box-title">Context Rules</div>
   <ul>
-    <li>Always pass <code>context.Context</code> as the first parameter</li>
-    <li>Never store context in a struct</li>
-    <li>Use <code>context.Background()</code> in main/init/tests</li>
-    <li>Always call <code>cancel()</code> via <code>defer cancel()</code></li>
+    <li>Always pass <code>context.Context</code> as the <strong>first parameter</strong>, named <code>ctx</code></li>
+    <li>Never store context in a struct — pass it explicitly through function calls</li>
+    <li>Use <code>context.Background()</code> in main/init/tests (the root)</li>
+    <li>Use <code>context.TODO()</code> when unsure — it's a placeholder to fix later</li>
+    <li>Always call <code>cancel()</code> via <code>defer cancel()</code> — prevents goroutine/memory leaks</li>
+    <li>Use <code>WithValue</code> sparingly — only for request-scoped data (IDs, auth), not for passing function parameters</li>
   </ul>
+</div>
+
+<h3>Full Example — WithCancel + WithValue + Goroutines</h3>
+<p>This example ties together everything: <code>Background</code> → <code>WithCancel</code> for manual cancellation, <code>WithValue</code> for request-scoped data, a worker goroutine listening on <code>ctx.Done()</code>, and a logging helper that extracts values from context.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="cm">// doWork runs in a goroutine, keeps working until context is cancelled</span>
+<span class="kw">func</span> <span class="fn">doWork</span>(ctx context.<span class="ty">Context</span>) {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>():  <span class="cm">// fires when cancel() is called</span>
+            fmt.<span class="fn">Println</span>(<span class="str">"Work cancelled:"</span>, ctx.<span class="fn">Err</span>())  <span class="cm">// "context canceled"</span>
+            <span class="kw">return</span>  <span class="cm">// exit goroutine cleanly</span>
+        <span class="kw">default</span>:
+            fmt.<span class="fn">Println</span>(<span class="str">"Working..."</span>)  <span class="cm">// keep doing work</span>
+        }
+        time.<span class="fn">Sleep</span>(<span class="num">500</span> * time.Millisecond)  <span class="cm">// simulate work interval</span>
+    }
+}
+
+<span class="cm">// logWithContext extracts request-scoped data from context for structured logging</span>
+<span class="kw">func</span> <span class="fn">logWithContext</span>(ctx context.<span class="ty">Context</span>, message <span class="ty">string</span>) {
+    requestID := ctx.<span class="fn">Value</span>(<span class="str">"requestID"</span>)  <span class="cm">// extract value — returns any (interface{})</span>
+    log.<span class="fn">Printf</span>(<span class="str">"RequestID: %v - %v"</span>, requestID, message)
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Step 1: Start with root context</span>
+    ctx := context.<span class="fn">Background</span>()  <span class="cm">// empty root — no deadline, no values</span>
+
+    <span class="cm">// Step 2: Create cancellable context (manual control)</span>
+    ctx, cancel := context.<span class="fn">WithCancel</span>(ctx)
+    <span class="cm">// Unlike WithTimeout (auto-cancels after duration),</span>
+    <span class="cm">// WithCancel requires YOU to call cancel() when ready</span>
+
+    <span class="cm">// Step 3: Simulate heavy task that cancels when done</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        time.<span class="fn">Sleep</span>(<span class="num">2</span> * time.Second)  <span class="cm">// simulate 2s of heavy work</span>
+        <span class="fn">cancel</span>()                    <span class="cm">// signal all goroutines: "stop!"</span>
+    }()
+
+    <span class="cm">// Step 4: Attach request-scoped values (chain of WithValue calls)</span>
+    <span class="cm">// Each WithValue wraps the previous context — forms a chain</span>
+    ctx = context.<span class="fn">WithValue</span>(ctx, <span class="str">"requestID"</span>, <span class="str">"hdsjf3234324234"</span>)
+    ctx = context.<span class="fn">WithValue</span>(ctx, <span class="str">"name"</span>, <span class="str">"John"</span>)
+    ctx = context.<span class="fn">WithValue</span>(ctx, <span class="str">"IP"</span>, <span class="str">"192.168.1.100"</span>)
+    ctx = context.<span class="fn">WithValue</span>(ctx, <span class="str">"OS"</span>, <span class="str">"Linux"</span>)
+
+    <span class="cm">// Step 5: Launch worker — it will print "Working..." until cancel() is called</span>
+    <span class="kw">go</span> <span class="fn">doWork</span>(ctx)
+
+    <span class="cm">// Step 6: Wait 3s so we can see the worker run then stop</span>
+    time.<span class="fn">Sleep</span>(<span class="num">3</span> * time.Second)
+
+    <span class="cm">// Step 7: Read values from context</span>
+    requestID := ctx.<span class="fn">Value</span>(<span class="str">"requestID"</span>)  <span class="cm">// values persist even after cancellation</span>
+    <span class="kw">if</span> requestID != <span class="kw">nil</span> {
+        fmt.<span class="fn">Println</span>(<span class="str">"Request ID:"</span>, requestID)  <span class="cm">// "Request ID: hdsjf3234324234"</span>
+    }
+
+    <span class="fn">logWithContext</span>(ctx, <span class="str">"This is a test log message"</span>)
+    <span class="cm">// Output: RequestID: hdsjf3234324234 - This is a test log message</span>
+}
+
+<span class="cm">// TIMELINE:</span>
+<span class="cm">// 0.0s → doWork starts: "Working..."</span>
+<span class="cm">// 0.5s → "Working..."</span>
+<span class="cm">// 1.0s → "Working..."</span>
+<span class="cm">// 1.5s → "Working..."</span>
+<span class="cm">// 2.0s → cancel() called → doWork sees ctx.Done() → "Work cancelled: context canceled"</span>
+<span class="cm">// 3.0s → main prints Request ID and log message</span></code></pre>
+
+<div class="tip-box">
+  <div class="box-title">WithCancel vs WithTimeout — When to Use Which</div>
+  <ul>
+    <li><strong>WithTimeout / WithDeadline</strong> — use when you have a fixed time limit: "this DB query must finish in 5 seconds", "this API call gets 3 seconds max"</li>
+    <li><strong>WithCancel</strong> — use when cancellation depends on a <strong>condition</strong>, not time: "cancel when the heavy task finishes", "cancel when the user disconnects", "cancel when we find the first result"</li>
+  </ul>
+</div>
+
+<h3>context.TODO vs context.Background</h3>
+<p>Functionally <strong>identical</strong> — both create an empty, never-cancelled context. The difference is <strong>intent</strong>:</p>
+
+<pre><code><span class="cm">// Background — "I deliberately want the root context here"</span>
+<span class="cm">// Use in: main(), init(), tests, or when you're the entry point</span>
+ctx := context.<span class="fn">Background</span>()
+
+<span class="cm">// TODO — "I don't know which context to use yet, I'll fix this later"</span>
+<span class="cm">// Use when: you're refactoring, prototyping, or the API doesn't pass ctx yet</span>
+ctx = context.<span class="fn">TODO</span>()
+
+<span class="cm">// Both work exactly the same way with WithValue, WithCancel, etc.</span>
+ctx1 := context.<span class="fn">WithValue</span>(context.<span class="fn">TODO</span>(), <span class="str">"name"</span>, <span class="str">"John"</span>)
+fmt.<span class="fn">Println</span>(ctx1.<span class="fn">Value</span>(<span class="str">"name"</span>))   <span class="cm">// "John"</span>
+
+ctx2 := context.<span class="fn">WithValue</span>(context.<span class="fn">Background</span>(), <span class="str">"city"</span>, <span class="str">"New York"</span>)
+fmt.<span class="fn">Println</span>(ctx2.<span class="fn">Value</span>(<span class="str">"city"</span>))   <span class="cm">// "New York"</span>
+
+<span class="cm">// So when should you use TODO?</span>
+<span class="cm">// When you KNOW a proper context should be passed from a caller,</span>
+<span class="cm">// but it's not available yet. TODO is a searchable marker:</span>
+<span class="cm">//   grep -r "context.TODO" .   ← find all the places you need to fix</span></code></pre>
+
+<h3>checkEvenOdd — Context Cancellation with Timeout</h3>
+<p>Shows how the same function behaves differently depending on whether the context is still alive or has timed out:</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">checkEvenOdd</span>(ctx context.<span class="ty">Context</span>, num <span class="ty">int</span>) <span class="ty">string</span> {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>():  <span class="cm">// context already cancelled?</span>
+        <span class="kw">return</span> <span class="str">"Operation canceled"</span>  <span class="cm">// don't bother doing work</span>
+    <span class="kw">default</span>:  <span class="cm">// context still alive, proceed</span>
+        <span class="kw">if</span> num%<span class="num">2</span> == <span class="num">0</span> {
+            <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"%d is even"</span>, num)
+        }
+        <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"%d is odd"</span>, num)
+    }
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// With TODO — works fine, never cancelled</span>
+    ctx := context.<span class="fn">TODO</span>()
+    fmt.<span class="fn">Println</span>(<span class="fn">checkEvenOdd</span>(ctx, <span class="num">5</span>))   <span class="cm">// "5 is odd"</span>
+
+    <span class="cm">// With timeout — works while alive</span>
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">1</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+
+    fmt.<span class="fn">Println</span>(<span class="fn">checkEvenOdd</span>(ctx, <span class="num">10</span>))  <span class="cm">// "10 is even" (within 1s)</span>
+
+    time.<span class="fn">Sleep</span>(<span class="num">3</span> * time.Second)          <span class="cm">// wait past the 1s timeout</span>
+
+    fmt.<span class="fn">Println</span>(<span class="fn">checkEvenOdd</span>(ctx, <span class="num">15</span>))  <span class="cm">// "Operation canceled" (timeout expired!)</span>
+    <span class="cm">// ctx.Done() channel is already closed, so select picks that case</span>
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Common Context Mistakes</div>
+<pre><code><span class="cm">// MISTAKE 1: Forgetting to cancel — leaks goroutines!</span>
+ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num">5</span>*time.Second)
+<span class="cm">// missing: defer cancel() ← timer goroutine keeps running forever</span>
+
+<span class="cm">// MISTAKE 2: Using context.Background() instead of passing parent</span>
+<span class="cm">// This breaks the cancellation chain!</span>
+<span class="kw">func</span> <span class="fn">handler</span>(ctx context.<span class="ty">Context</span>) {
+    <span class="cm">// WRONG: newCtx := context.WithTimeout(context.Background(), 5*time.Second)</span>
+    <span class="cm">// RIGHT: newCtx := context.WithTimeout(ctx, 5*time.Second)  ← inherits parent</span>
+}
+
+<span class="cm">// MISTAKE 3: Using string keys for WithValue</span>
+<span class="cm">// WRONG: ctx = context.WithValue(ctx, "userID", 123)  ← any package can collide</span>
+<span class="cm">// RIGHT: use unexported custom type as key</span>
+<span class="kw">type</span> <span class="ty">contextKey</span> <span class="ty">string</span>  <span class="cm">// unexported — only your package can create these keys</span>
+<span class="kw">const</span> <span class="ty">userIDKey</span> <span class="ty">contextKey</span> = <span class="str">"userID"</span></code></pre>
 </div>
 
 <!-- ===================== SECTION 21: GENERICS ===================== -->
