@@ -318,27 +318,50 @@
       <a href="#operators" data-section="operators">Operators</a>
       <a href="#control" data-section="control">Control Flow</a>
       <a href="#functions" data-section="functions">Functions</a>
+      <a href="#naming" data-section="naming">Naming Conventions</a>
+      <a href="#init-exit" data-section="init-exit">init() & os.Exit</a>
     </div>
     <div class="nav-group">
       <div class="nav-group-title">Core Concepts</div>
       <a href="#arrays-slices" data-section="arrays-slices">Arrays & Slices</a>
       <a href="#maps" data-section="maps">Maps</a>
       <a href="#strings" data-section="strings">Strings & Runes</a>
+      <a href="#string-funcs" data-section="string-funcs">String Functions</a>
       <a href="#structs" data-section="structs">Structs</a>
+      <a href="#struct-tags" data-section="struct-tags">Struct Tags</a>
       <a href="#pointers" data-section="pointers">Pointers</a>
       <a href="#methods" data-section="methods">Methods & Interfaces</a>
       <a href="#embedding" data-section="embedding">Embedding & Composition</a>
       <a href="#errors" data-section="errors">Error Handling</a>
+      <a href="#type-conv" data-section="type-conv">Type Conversion & Parsing</a>
     </div>
     <div class="nav-group">
       <div class="nav-group-title">Intermediate</div>
-      <a href="#goroutines" data-section="goroutines">Goroutines & Channels</a>
-      <a href="#select" data-section="select">Select Statement</a>
-      <a href="#sync" data-section="sync">Sync Package</a>
-      <a href="#context" data-section="context">Context</a>
+      <a href="#fmt-verbs" data-section="fmt-verbs">Fmt & Formatting Verbs</a>
+      <a href="#regex" data-section="regex">Regular Expressions</a>
+      <a href="#recursion" data-section="recursion">Recursion</a>
+      <a href="#random" data-section="random">Random Numbers</a>
+      <a href="#time-epoch" data-section="time-epoch">Time, Epoch & Formatting</a>
       <a href="#generics" data-section="generics">Generics</a>
       <a href="#closures" data-section="closures">Closures & Higher-Order</a>
       <a href="#defer" data-section="defer">Defer, Panic, Recover</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Concurrency</div>
+      <a href="#goroutines" data-section="goroutines">Goroutines & Channels</a>
+      <a href="#channel-deep" data-section="channel-deep">Channel Deep Dive</a>
+      <a href="#select" data-section="select">Select & Multiplexing</a>
+      <a href="#worker-pools" data-section="worker-pools">Worker Pools</a>
+      <a href="#timers-tickers" data-section="timers-tickers">Timers & Tickers</a>
+      <a href="#sync" data-section="sync">Sync Package</a>
+      <a href="#sync-deep" data-section="sync-deep">Sync Deep Dive</a>
+      <a href="#atomic" data-section="atomic">Atomic Operations</a>
+      <a href="#race-deadlock" data-section="race-deadlock">Race Conditions & Deadlocks</a>
+      <a href="#context" data-section="context">Context</a>
+      <a href="#gomaxprocs" data-section="gomaxprocs">GOMAXPROCS & Parallelism</a>
+      <a href="#stateful-goroutines" data-section="stateful-goroutines">Stateful Goroutines</a>
+      <a href="#signals" data-section="signals">OS Signals</a>
+      <a href="#rate-limiting" data-section="rate-limiting">Rate Limiting</a>
     </div>
     <div class="nav-group">
       <div class="nav-group-title">Data Structures</div>
@@ -347,14 +370,35 @@
       <a href="#tree" data-section="tree">Binary Tree / BST</a>
       <a href="#graph" data-section="graph">Graph</a>
       <a href="#hashtable" data-section="hashtable">Hash Table</a>
+      <a href="#sorting" data-section="sorting">Sorting</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">I/O & Files</div>
+      <a href="#io" data-section="io">I/O & Files</a>
+      <a href="#bufio" data-section="bufio">Bufio & Line Filters</a>
+      <a href="#file-paths" data-section="file-paths">File Paths & Directories</a>
+      <a href="#temp-files" data-section="temp-files">Temp Files & Dirs</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Encoding & Data</div>
+      <a href="#json" data-section="json">JSON & Encoding</a>
+      <a href="#xml" data-section="xml">XML Encoding</a>
+      <a href="#base64" data-section="base64">Base64 Encoding</a>
+      <a href="#hashing" data-section="hashing">Hashing & Crypto</a>
+      <a href="#url-parsing" data-section="url-parsing">URL Parsing</a>
+      <a href="#templates" data-section="templates">Text Templates</a>
+      <a href="#embed" data-section="embed">Embed Directive</a>
     </div>
     <div class="nav-group">
       <div class="nav-group-title">Advanced</div>
-      <a href="#io" data-section="io">I/O & Files</a>
-      <a href="#json" data-section="json">JSON & Encoding</a>
       <a href="#http" data-section="http">HTTP & Net</a>
       <a href="#testing" data-section="testing">Testing</a>
+      <a href="#benchmarking" data-section="benchmarking">Benchmarking</a>
       <a href="#reflection" data-section="reflection">Reflection</a>
+      <a href="#os-processes" data-section="os-processes">OS Processes & Exec</a>
+      <a href="#cli-args" data-section="cli-args">CLI Args & Flags</a>
+      <a href="#env-vars" data-section="env-vars">Environment Variables</a>
+      <a href="#logging" data-section="logging">Logging</a>
       <a href="#unsafe" data-section="unsafe">Unsafe & Cgo</a>
       <a href="#patterns" data-section="patterns">Design Patterns</a>
       <a href="#project-structure" data-section="project-structure">Project Structure</a>
@@ -820,8 +864,95 @@ fmt.<span class="fn">Println</span>(<span class="fn">double</span>(<span class="
     fmt.<span class="fn">Println</span>(<span class="str">"initializing..."</span>)
 }</code></pre>
 
-<!-- ===================== SECTION 9: ARRAYS & SLICES ===================== -->
-<h2 id="arrays-slices"><span class="section-num">09</span> Arrays & Slices</h2>
+<!-- ===================== SECTION: NAMING CONVENTIONS ===================== -->
+<h2 id="naming"><span class="section-num">09</span> Naming Conventions</h2>
+
+<p>Go has strict and opinionated naming conventions. The <strong>case of the first letter</strong> determines visibility — this replaces public/private keywords found in other languages.</p>
+
+<table>
+  <tr><th>Convention</th><th>Usage</th><th>Example</th></tr>
+  <tr><td><strong>PascalCase</strong></td><td>Exported (public) — structs, interfaces, functions, vars</td><td><code>CalculateArea</code>, <code>UserInfo</code>, <code>NewHTTPRequest</code></td></tr>
+  <tr><td><strong>camelCase</strong></td><td>Unexported (private) — internal to the package</td><td><code>calculateArea</code>, <code>userID</code>, <code>isValid</code></td></tr>
+  <tr><td><strong>ALLCAPS</strong></td><td>Constants (by convention, not enforced)</td><td><code>MAXRETRIES</code>, <code>GRAVITY</code></td></tr>
+  <tr><td><strong>Short names</strong></td><td>Loop vars, receivers, params with small scope</td><td><code>i</code>, <code>v</code>, <code>r</code>, <code>ctx</code></td></tr>
+</table>
+
+<pre><code><span class="cm">// PascalCase = EXPORTED (visible outside package)</span>
+<span class="kw">type</span> <span class="ty">EmployeeGoogle</span> <span class="kw">struct</span> {
+    FirstName <span class="ty">string</span>   <span class="cm">// exported field</span>
+    LastName  <span class="ty">string</span>   <span class="cm">// exported field</span>
+    Age       <span class="ty">int</span>      <span class="cm">// exported field</span>
+}
+
+<span class="cm">// camelCase = unexported (private to this package)</span>
+<span class="kw">var</span> employeeID = <span class="num">1001</span>  <span class="cm">// only this package can access it</span>
+
+<span class="cm">// Constants by convention</span>
+<span class="kw">const</span> MAXRETRIES = <span class="num">5</span>  <span class="cm">// screaming case for constants</span>
+<span class="kw">const</span> GRAVITY = <span class="num">9.81</span>
+
+<span class="cm">// Acronyms stay ALLCAPS: URL, HTTP, ID, API (not Url, Http, Id)</span>
+<span class="kw">type</span> <span class="ty">HTTPClient</span> <span class="kw">struct</span>{}  <span class="cm">// not HttpClient</span>
+<span class="kw">var</span> userID <span class="ty">int</span>             <span class="cm">// not userId</span></code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Visibility Rule</div>
+  <p><strong>Uppercase first letter = exported</strong> (accessible from other packages). <strong>Lowercase first letter = unexported</strong> (package-private). There is no <code>public</code>/<code>private</code> keyword in Go — the case IS the access modifier.</p>
+</div>
+
+<!-- ===================== SECTION: INIT & EXIT ===================== -->
+<h2 id="init-exit"><span class="section-num">10</span> init() & os.Exit</h2>
+
+<h3>init() Function</h3>
+<p>The <code>init()</code> function runs automatically <strong>before <code>main()</code></strong>. It's used for package-level setup like loading config, checking environment, or validating state. You can have <strong>multiple init() functions</strong> in the same file — they run in order of declaration.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> <span class="str">"fmt"</span>
+
+<span class="cm">// You can have MULTIPLE init() functions in one file!</span>
+<span class="kw">func</span> <span class="fn">init</span>() { fmt.<span class="fn">Println</span>(<span class="str">"Initializing package1..."</span>) }  <span class="cm">// runs 1st</span>
+<span class="kw">func</span> <span class="fn">init</span>() { fmt.<span class="fn">Println</span>(<span class="str">"Initializing package2..."</span>) }  <span class="cm">// runs 2nd</span>
+<span class="kw">func</span> <span class="fn">init</span>() { fmt.<span class="fn">Println</span>(<span class="str">"Initializing package3..."</span>) }  <span class="cm">// runs 3rd</span>
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"Inside the main function"</span>)
+}
+<span class="cm">// Output:
+// Initializing package1...
+// Initializing package2...
+// Initializing package3...
+// Inside the main function</span>
+
+<span class="cm">// Execution order: package-level vars → init() → main()</span></code></pre>
+
+<h3>os.Exit()</h3>
+<p><code>os.Exit()</code> terminates the program <strong>immediately</strong> with a status code. It does <strong>NOT run deferred functions</strong> — this is a key difference from a normal return.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"os"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="kw">defer</span> fmt.<span class="fn">Println</span>(<span class="str">"Deferred statement"</span>)  <span class="cm">// will NOT run!</span>
+
+    fmt.<span class="fn">Println</span>(<span class="str">"Starting the main function"</span>)
+    os.<span class="fn">Exit</span>(<span class="num">1</span>)  <span class="cm">// exit code 1 = error, 0 = success</span>
+
+    fmt.<span class="fn">Println</span>(<span class="str">"End of main function"</span>)  <span class="cm">// never reached</span>
+}
+<span class="cm">// Output:
+// Starting the main function
+// (program exits — no deferred output!)</span></code></pre>
+
+<div class="warn-box">
+  <div class="box-title">os.Exit() skips defer!</div>
+  <p>Unlike <code>return</code>, <code>os.Exit()</code> kills the process instantly. Deferred functions, cleanup code, and file flushes will NOT execute. Use it only for fatal errors or CLI tools where you need a specific exit code.</p>
+</div>
+
+<!-- ===================== SECTION 11: ARRAYS & SLICES ===================== -->
+<h2 id="arrays-slices"><span class="section-num">11</span> Arrays & Slices</h2>
 
 <h3>Arrays (fixed size — rarely used directly)</h3>
 <pre><code><span class="kw">var</span> a [<span class="num">5</span>]<span class="ty">int</span>                  <span class="cm">// [0 0 0 0 0]</span>
@@ -875,7 +1006,7 @@ _ = s3; _ = s4; _ = a; _ = b; _ = c  <span class="cm">// suppress unused-var err
 </div>
 
 <!-- ===================== SECTION 10: MAPS ===================== -->
-<h2 id="maps"><span class="section-num">10</span> Maps</h2>
+<h2 id="maps"><span class="section-num">12</span> Maps</h2>
 
 <pre><code>m1 := <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">int</span>{<span class="str">"apple"</span>: <span class="num">5</span>, <span class="str">"banana"</span>: <span class="num">3</span>}  <span class="cm">// map literal</span>
 m2 := <span class="fn">make</span>(<span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">int</span>)  <span class="cm">// empty, ready to use</span>
@@ -903,7 +1034,7 @@ graph := <span class="kw">map</span>[<span class="ty">string</span>][]<span clas
 _ = m2; _ = m3; _ = val; _ = graph  <span class="cm">// suppress unused-var errors</span></code></pre>
 
 <!-- ===================== SECTION 11: STRINGS ===================== -->
-<h2 id="strings"><span class="section-num">11</span> Strings & Runes</h2>
+<h2 id="strings"><span class="section-num">13</span> Strings & Runes</h2>
 
 <pre><code><span class="cm">// Strings are immutable byte slices</span>
 emoji := <span class="str">"Go is &#x1F525;"</span>  <span class="cm">// emoji is multi-byte (UTF-8)</span>
@@ -933,8 +1064,59 @@ raw := <span class="str">`no \n escaping here`</span>  <span class="cm">// usefu
 msg := fmt.<span class="fn">Sprintf</span>(<span class="str">"Name: %s, Age: %d"</span>, <span class="str">"Yatin"</span>, <span class="num">25</span>)  <span class="cm">// build formatted string</span>
 _ = result; _ = raw; _ = msg  <span class="cm">// suppress unused-var errors</span></code></pre>
 
-<!-- ===================== SECTION 12: STRUCTS ===================== -->
-<h2 id="structs"><span class="section-num">12</span> Structs</h2>
+<!-- ===================== SECTION: STRING FUNCTIONS ===================== -->
+<h2 id="string-funcs"><span class="section-num">14</span> String Functions & Builder</h2>
+
+<p>The <code>strings</code> package provides all string manipulation functions. For efficient concatenation in loops, always use <code>strings.Builder</code> instead of <code>+</code>.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"strings"</span>
+
+<span class="cm">// Essential string functions</span>
+strings.<span class="fn">Contains</span>(<span class="str">"Hello Go"</span>, <span class="str">"Go"</span>)       <span class="cm">// true</span>
+strings.<span class="fn">Count</span>(<span class="str">"Hello"</span>, <span class="str">"l"</span>)              <span class="cm">// 2</span>
+strings.<span class="fn">HasPrefix</span>(<span class="str">"Hello"</span>, <span class="str">"He"</span>)         <span class="cm">// true</span>
+strings.<span class="fn">HasSuffix</span>(<span class="str">"Hello"</span>, <span class="str">"lo"</span>)         <span class="cm">// true</span>
+strings.<span class="fn">ToUpper</span>(<span class="str">"hello"</span>)                <span class="cm">// "HELLO"</span>
+strings.<span class="fn">ToLower</span>(<span class="str">"HELLO"</span>)                <span class="cm">// "hello"</span>
+strings.<span class="fn">TrimSpace</span>(<span class="str">"  hi  "</span>)             <span class="cm">// "hi"</span>
+strings.<span class="fn">Repeat</span>(<span class="str">"Go "</span>, <span class="num">3</span>)               <span class="cm">// "Go Go Go "</span>
+strings.<span class="fn">Replace</span>(<span class="str">"Hello Go"</span>, <span class="str">"Go"</span>, <span class="str">"World"</span>, <span class="num">1</span>)  <span class="cm">// "Hello World"</span>
+strings.<span class="fn">ReplaceAll</span>(<span class="str">"aabaa"</span>, <span class="str">"a"</span>, <span class="str">"x"</span>)  <span class="cm">// "xxbxx"</span>
+
+<span class="cm">// Split and Join</span>
+parts := strings.<span class="fn">Split</span>(<span class="str">"apple,orange,banana"</span>, <span class="str">","</span>)  <span class="cm">// ["apple","orange","banana"]</span>
+joined := strings.<span class="fn">Join</span>(parts, <span class="str">" - "</span>)  <span class="cm">// "apple - orange - banana"</span>
+
+<span class="cm">// SplitN — split with limit</span>
+fmt.<span class="fn">Println</span>(strings.<span class="fn">SplitN</span>(<span class="str">"a=b=c=d"</span>, <span class="str">"="</span>, <span class="num">2</span>))  <span class="cm">// ["a", "b=c=d"]</span>
+fmt.<span class="fn">Println</span>(strings.<span class="fn">SplitN</span>(<span class="str">"a=b=c=d"</span>, <span class="str">"="</span>, <span class="num">3</span>))  <span class="cm">// ["a", "b", "c=d"]</span>
+
+<span class="cm">// String conversion</span>
+num := <span class="num">18</span>
+str := strconv.<span class="fn">Itoa</span>(num)  <span class="cm">// int to string: "18"</span>
+fmt.<span class="fn">Println</span>(<span class="fn">len</span>(str))     <span class="cm">// 2 (character count of "18")</span></code></pre>
+
+<h3>strings.Builder (efficient concatenation)</h3>
+<pre><code><span class="cm">// strings.Builder avoids repeated allocations in loops</span>
+<span class="cm">// Using + in a loop creates a NEW string each time = O(n²)</span>
+<span class="cm">// Builder writes to a buffer = O(n)</span>
+
+<span class="kw">var</span> builder strings.<span class="ty">Builder</span>
+
+builder.<span class="fn">WriteString</span>(<span class="str">"Hello"</span>)   <span class="cm">// append string</span>
+builder.<span class="fn">WriteString</span>(<span class="str">", "</span>)      <span class="cm">// append more</span>
+builder.<span class="fn">WriteString</span>(<span class="str">"world!"</span>)  <span class="cm">// append more</span>
+result := builder.<span class="fn">String</span>()     <span class="cm">// "Hello, world!" — convert to string</span>
+
+builder.<span class="fn">WriteRune</span>(<span class="str">' '</span>)          <span class="cm">// append a single rune/character</span>
+builder.<span class="fn">WriteString</span>(<span class="str">"How are you"</span>)
+
+builder.<span class="fn">Reset</span>()  <span class="cm">// clear the builder for reuse</span>
+builder.<span class="fn">WriteString</span>(<span class="str">"Starting fresh!"</span>)
+fmt.<span class="fn">Println</span>(builder.<span class="fn">String</span>())  <span class="cm">// "Starting fresh!"</span></code></pre>
+
+<!-- ===================== SECTION: STRUCTS ===================== -->
+<h2 id="structs"><span class="section-num">15</span> Structs</h2>
 
 <pre><code><span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {  <span class="cm">// groups related data together</span>
     ID        <span class="ty">int</span>  <span class="cm">// unique identifier</span>
@@ -970,8 +1152,84 @@ u2.FirstName  <span class="cm">// same as (*u2).FirstName</span>
 point := <span class="kw">struct</span>{ X, Y <span class="ty">int</span> }{<span class="num">10</span>, <span class="num">20</span>}  <span class="cm">// one-off struct, no type name</span>
 _ = u1; _ = u3; _ = point  <span class="cm">// suppress unused-var errors</span></code></pre>
 
-<!-- ===================== SECTION 13: POINTERS ===================== -->
-<h2 id="pointers"><span class="section-num">13</span> Pointers</h2>
+<h3>&amp;Struct{} (pointer) vs Struct{} (value)</h3>
+
+<pre><code><span class="cm">// VALUE — creates a copy on the stack</span>
+user := User{Name: <span class="str">"John"</span>, Age: <span class="num">25</span>}  <span class="cm">// type is User (value)</span>
+
+<span class="cm">// POINTER — creates on heap, returns memory address</span>
+user2 := &amp;User{Name: <span class="str">"Jane"</span>, Age: <span class="num">30</span>}  <span class="cm">// type is *User (pointer)</span>
+
+<span class="cm">// ---- What happens with VALUE (Struct{}) ----</span>
+<span class="kw">func</span> <span class="fn">updateAge</span>(u User) {
+    u.Age = <span class="num">99</span>  <span class="cm">// modifies the COPY, not the original!</span>
+}
+user := User{Name: <span class="str">"John"</span>, Age: <span class="num">25</span>}
+<span class="fn">updateAge</span>(user)
+fmt.<span class="fn">Println</span>(user.Age)  <span class="cm">// still 25! The change was LOST</span>
+
+<span class="cm">// ---- What happens with POINTER (&amp;Struct{}) ----</span>
+<span class="kw">func</span> <span class="fn">updateAgePtr</span>(u *User) {
+    u.Age = <span class="num">99</span>  <span class="cm">// modifies the ORIGINAL</span>
+}
+user2 := &amp;User{Name: <span class="str">"Jane"</span>, Age: <span class="num">30</span>}
+<span class="fn">updateAgePtr</span>(user2)
+fmt.<span class="fn">Println</span>(user2.Age)  <span class="cm">// 99! Change persisted</span></code></pre>
+
+<div class="info-box">
+  <div class="box-title">Why constructors return *Struct (pointer)</div>
+<pre><code><span class="kw">func</span> <span class="fn">NewUser</span>(name <span class="ty">string</span>) *User {
+    <span class="kw">return</span> &amp;User{Name: name, Active: <span class="kw">true</span>}
+}</code></pre>
+  <ul>
+    <li>Returns a pointer so callers can <strong>modify the struct</strong> through methods</li>
+    <li><strong>Avoids copying</strong> large structs (pointer = 8 bytes, struct could be 100s of bytes)</li>
+    <li>Allows methods with <strong>pointer receivers</strong> to work</li>
+    <li>Allows returning <code>nil</code> to indicate failure or "no value"</li>
+  </ul>
+  <p><strong>Rule of thumb:</strong> Use <code>&amp;Struct{}</code> (pointer) when you need to <strong>modify</strong> the struct or it's large. Use <code>Struct{}</code> (value) for small, <strong>immutable</strong> data (like coordinates, config constants).</p>
+</div>
+
+<!-- ===================== SECTION: STRUCT TAGS ===================== -->
+<h2 id="struct-tags"><span class="section-num">16</span> Struct Tags Deep Dive</h2>
+
+<p>Struct tags are <strong>metadata strings</strong> attached to struct fields. They don't affect Go code directly — libraries use <code>reflect</code> to read them at runtime. Most commonly used for JSON, XML, database mapping, and validation.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">Person</span> <span class="kw">struct</span> {
+    FirstName <span class="ty">string</span> <span class="str">`json:"first_name" db:"firstn" xml:"first"`</span>
+    <span class="cm">// json:"first_name" → JSON key becomes "first_name"</span>
+    <span class="cm">// db:"firstn"       → database column name</span>
+    <span class="cm">// xml:"first"       → XML element name</span>
+
+    LastName <span class="ty">string</span> <span class="str">`json:"last_name,omitempty"`</span>
+    <span class="cm">// omitempty → exclude from output if zero value ("", 0, nil, false)</span>
+
+    Age <span class="ty">int</span> <span class="str">`json:"-"`</span>
+    <span class="cm">// "-" → NEVER include in JSON output (hide sensitive data)</span>
+}
+
+person := Person{FirstName: <span class="str">"Jane"</span>, Age: <span class="num">30</span>}  <span class="cm">// LastName is empty</span>
+jsonData, _ := json.<span class="fn">Marshal</span>(person)
+fmt.<span class="fn">Println</span>(<span class="fn">string</span>(jsonData))
+<span class="cm">// {"first_name":"Jane"}</span>
+<span class="cm">// Note: last_name omitted (empty + omitempty), Age omitted (json:"-")</span></code></pre>
+
+<div class="info-box">
+  <div class="box-title">Common Tag Patterns</div>
+  <table>
+    <tr><th>Tag</th><th>Meaning</th></tr>
+    <tr><td><code>json:"name"</code></td><td>Rename field in JSON</td></tr>
+    <tr><td><code>json:",omitempty"</code></td><td>Omit if zero value</td></tr>
+    <tr><td><code>json:"-"</code></td><td>Always exclude from JSON</td></tr>
+    <tr><td><code>xml:"name,attr"</code></td><td>XML attribute instead of element</td></tr>
+    <tr><td><code>db:"column_name"</code></td><td>Database column mapping</td></tr>
+    <tr><td><code>validate:"required"</code></td><td>Validation rules</td></tr>
+    <tr><td><code>binding:"required,email"</code></td><td>Gin framework validation</td></tr>
+  </table>
+</div>
+
+<!-- ===================== SECTION: POINTERS ===================== -->
+<h2 id="pointers"><span class="section-num">17</span> Pointers</h2>
 
 <pre><code>x := <span class="num">42</span>  <span class="cm">// regular variable on stack</span>
 p := &amp;x         <span class="cm">// p is *int, points to x</span>
@@ -997,7 +1255,7 @@ fmt.<span class="fn">Println</span>(x)  <span class="cm">// 100 — changed thro
 _ = np  <span class="cm">// suppress unused-var error</span></code></pre>
 
 <!-- ===================== SECTION 14: METHODS & INTERFACES ===================== -->
-<h2 id="methods"><span class="section-num">14</span> Methods & Interfaces</h2>
+<h2 id="methods"><span class="section-num">18</span> Methods & Interfaces</h2>
 
 <h3>Methods</h3>
 <pre><code><span class="kw">type</span> <span class="ty">Rectangle</span> <span class="kw">struct</span> { Width, Height <span class="ty">float64</span> }  <span class="cm">// simple data struct</span>
@@ -1058,7 +1316,7 @@ fmt.<span class="fn">Println</span>(i == <span class="kw">nil</span>)  <span cla
 </div>
 
 <!-- ===================== SECTION 15: EMBEDDING ===================== -->
-<h2 id="embedding"><span class="section-num">15</span> Embedding & Composition</h2>
+<h2 id="embedding"><span class="section-num">19</span> Embedding & Composition</h2>
 
 <pre><code><span class="cm">// Go has NO inheritance. Uses COMPOSITION via embedding.</span>
 <span class="kw">type</span> <span class="ty">Animal</span> <span class="kw">struct</span> { Name, Sound <span class="ty">string</span> }  <span class="cm">// base struct</span>
@@ -1077,7 +1335,7 @@ d.<span class="fn">Speak</span>()    <span class="cm">// "Rex says Woof"</span>
 <span class="kw">func</span> (d <span class="ty">Dog</span>) <span class="fn">Speak</span>() <span class="ty">string</span> { <span class="kw">return</span> d.Name + <span class="str">" barks!"</span> }  <span class="cm">// shadows Animal.Speak</span></code></pre>
 
 <!-- ===================== SECTION 16: ERRORS ===================== -->
-<h2 id="errors"><span class="section-num">16</span> Error Handling</h2>
+<h2 id="errors"><span class="section-num">20</span> Error Handling</h2>
 
 <pre><code><span class="cm">// error is an interface: Error() string</span>
 err1 := errors.<span class="fn">New</span>(<span class="str">"something went wrong"</span>)  <span class="cm">// simple static error</span>
@@ -1106,8 +1364,285 @@ data, err := os.<span class="fn">ReadFile</span>(path)  <span class="cm">// retu
 <span class="kw">if</span> errors.<span class="fn">As</span>(err, &amp;ve) { fmt.<span class="fn">Println</span>(ve.Field) }  <span class="cm">// ve populated if matched</span>
 _ = err1; _ = err2; _ = data  <span class="cm">// suppress unused-var errors</span></code></pre>
 
+<!-- ===================== SECTION: TYPE CONVERSION & PARSING ===================== -->
+<h2 id="type-conv"><span class="section-num">21</span> Type Conversion & Number Parsing</h2>
+
+<h3>Type Conversion</h3>
+<p>Go has <strong>no implicit type conversion</strong>. You must explicitly convert using <code>Type(value)</code> syntax. This prevents subtle bugs that plague languages with automatic coercion.</p>
+
+<pre><code><span class="cm">// Syntax: TargetType(value)</span>
+<span class="kw">var</span> a <span class="ty">int</span> = <span class="num">32</span>
+b := <span class="ty">int32</span>(a)     <span class="cm">// int → int32</span>
+c := <span class="ty">float64</span>(b)   <span class="cm">// int32 → float64 (32.0)</span>
+
+e := <span class="num">3.14</span>
+f := <span class="ty">int</span>(e)       <span class="cm">// float64 → int (3, truncates decimal!)</span>
+
+<span class="cm">// String ↔ Byte slice</span>
+g := <span class="str">"Hello @ こんにちは 🧑 привет"</span>
+h := []<span class="ty">byte</span>(g)    <span class="cm">// string → byte slice (UTF-8 bytes)</span>
+fmt.<span class="fn">Println</span>(h)    <span class="cm">// [72 101 108 108 111 32 64 32 ...]</span>
+
+i := []<span class="ty">byte</span>{<span class="num">255</span>, <span class="num">120</span>, <span class="num">72</span>}
+j := <span class="ty">string</span>(i)    <span class="cm">// byte slice → string</span>
+
+<span class="cm">// CANNOT convert between unrelated types</span>
+<span class="cm">// d := bool("true")  // COMPILE ERROR! Use strconv.ParseBool</span></code></pre>
+
+<h3>Number Parsing (strconv package)</h3>
+<p>Use the <code>strconv</code> package to convert between strings and numbers. Always handle the error — invalid input is common.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"strconv"</span>
+
+<span class="cm">// String → Int</span>
+num, err := strconv.<span class="fn">Atoi</span>(<span class="str">"12345"</span>)  <span class="cm">// Atoi = "ASCII to Integer"</span>
+fmt.<span class="fn">Println</span>(num + <span class="num">1</span>)  <span class="cm">// 12346</span>
+
+<span class="cm">// ParseInt — control base and bit size</span>
+val, _ := strconv.<span class="fn">ParseInt</span>(<span class="str">"12345"</span>, <span class="num">10</span>, <span class="num">32</span>)  <span class="cm">// base 10, fit in int32</span>
+
+<span class="cm">// String → Float</span>
+pi, _ := strconv.<span class="fn">ParseFloat</span>(<span class="str">"3.14"</span>, <span class="num">64</span>)  <span class="cm">// 64 = float64 precision</span>
+fmt.<span class="fn">Printf</span>(<span class="str">"Parsed float: %.2f\n"</span>, pi)  <span class="cm">// 3.14</span>
+
+<span class="cm">// Binary string → Decimal</span>
+decimal, _ := strconv.<span class="fn">ParseInt</span>(<span class="str">"1010"</span>, <span class="num">2</span>, <span class="num">64</span>)  <span class="cm">// base 2</span>
+fmt.<span class="fn">Println</span>(decimal)  <span class="cm">// 10 (0+2+0+8)</span>
+
+<span class="cm">// Hex string → Decimal</span>
+hex, _ := strconv.<span class="fn">ParseInt</span>(<span class="str">"FF"</span>, <span class="num">16</span>, <span class="num">64</span>)  <span class="cm">// base 16</span>
+fmt.<span class="fn">Println</span>(hex)  <span class="cm">// 255</span>
+
+<span class="cm">// Int → String</span>
+s := strconv.<span class="fn">Itoa</span>(<span class="num">42</span>)  <span class="cm">// "42"</span>
+
+<span class="cm">// Error handling — invalid input</span>
+_, err = strconv.<span class="fn">Atoi</span>(<span class="str">"456abc"</span>)  <span class="cm">// fails!</span>
+<span class="kw">if</span> err != <span class="kw">nil</span> {
+    fmt.<span class="fn">Println</span>(<span class="str">"Error:"</span>, err)  <span class="cm">// strconv.Atoi: parsing "456abc": invalid syntax</span>
+}</code></pre>
+
+<!-- ===================== SECTION: FMT & FORMATTING VERBS ===================== -->
+<h2 id="fmt-verbs"><span class="section-num">22</span> Fmt Package & Formatting Verbs</h2>
+
+<h3>Printing Functions</h3>
+<pre><code><span class="cm">// Print — no newline, no spaces between args</span>
+fmt.<span class="fn">Print</span>(<span class="str">"Hello "</span>)
+fmt.<span class="fn">Print</span>(<span class="str">"World!"</span>)  <span class="cm">// HelloWorld! (same line)</span>
+
+<span class="cm">// Println — adds newline, spaces between args</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Hello"</span>, <span class="str">"World!"</span>)  <span class="cm">// Hello World!\n</span>
+
+<span class="cm">// Printf — formatted output (like C's printf)</span>
+name := <span class="str">"John"</span>
+age := <span class="num">25</span>
+fmt.<span class="fn">Printf</span>(<span class="str">"Name: %s, Age: %d\n"</span>, name, age)
+fmt.<span class="fn">Printf</span>(<span class="str">"Binary: %b, Hex: %X\n"</span>, age, age)  <span class="cm">// 11001, 19</span>
+
+<span class="cm">// Sprint/Sprintf — return string instead of printing</span>
+s := fmt.<span class="fn">Sprint</span>(<span class="str">"Hello"</span>, <span class="str">"World!"</span>)   <span class="cm">// "HelloWorld!"</span>
+sf := fmt.<span class="fn">Sprintf</span>(<span class="str">"Name: %s"</span>, name)  <span class="cm">// "Name: John"</span>
+
+<span class="cm">// Errorf — create formatted errors</span>
+err := fmt.<span class="fn">Errorf</span>(<span class="str">"Age %d is too young"</span>, <span class="num">15</span>)
+
+<span class="cm">// Scan — read user input</span>
+<span class="kw">var</span> input <span class="ty">string</span>
+fmt.<span class="fn">Scan</span>(&amp;input)  <span class="cm">// reads one word from stdin</span>
+fmt.<span class="fn">Scanln</span>(&amp;input)  <span class="cm">// reads until newline</span>
+fmt.<span class="fn">Scanf</span>(<span class="str">"%s"</span>, &amp;input)  <span class="cm">// reads with format</span></code></pre>
+
+<h3>Formatting Verbs Reference</h3>
+<table>
+  <tr><th>Category</th><th>Verb</th><th>Description</th><th>Example</th></tr>
+  <tr><td rowspan="4"><strong>General</strong></td><td><code>%v</code></td><td>Default format</td><td><code>42</code>, <code>[1 2 3]</code></td></tr>
+  <tr><td><code>%#v</code></td><td>Go-syntax format</td><td><code>main.User{Name:"John"}</code></td></tr>
+  <tr><td><code>%T</code></td><td>Type of value</td><td><code>int</code>, <code>string</code></td></tr>
+  <tr><td><code>%%</code></td><td>Literal percent</td><td><code>%</code></td></tr>
+  <tr><td rowspan="5"><strong>Integer</strong></td><td><code>%d</code></td><td>Decimal (base 10)</td><td><code>255</code></td></tr>
+  <tr><td><code>%b</code></td><td>Binary (base 2)</td><td><code>11111111</code></td></tr>
+  <tr><td><code>%o / %O</code></td><td>Octal / with 0o prefix</td><td><code>377 / 0o377</code></td></tr>
+  <tr><td><code>%x / %X</code></td><td>Hex lowercase/uppercase</td><td><code>ff / FF</code></td></tr>
+  <tr><td><code>%04d</code></td><td>Zero-padded width 4</td><td><code>0042</code></td></tr>
+  <tr><td rowspan="3"><strong>Float</strong></td><td><code>%f</code></td><td>Decimal point</td><td><code>3.140000</code></td></tr>
+  <tr><td><code>%.2f</code></td><td>2 decimal places</td><td><code>3.14</code></td></tr>
+  <tr><td><code>%e</code></td><td>Scientific notation</td><td><code>3.14e+00</code></td></tr>
+  <tr><td rowspan="3"><strong>String</strong></td><td><code>%s</code></td><td>Plain string</td><td><code>Hello</code></td></tr>
+  <tr><td><code>%q</code></td><td>Double-quoted</td><td><code>"Hello"</code></td></tr>
+  <tr><td><code>%10s</code></td><td>Right-justified width 10</td><td><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello</code></td></tr>
+  <tr><td><strong>Bool</strong></td><td><code>%t</code></td><td>true/false</td><td><code>true</code></td></tr>
+  <tr><td><strong>Pointer</strong></td><td><code>%p</code></td><td>Memory address</td><td><code>0xc0000b4008</code></td></tr>
+</table>
+
+<pre><code><span class="cm">// Padding and alignment</span>
+fmt.<span class="fn">Printf</span>(<span class="str">"%05d\n"</span>, <span class="num">424</span>)           <span class="cm">// 00424 (zero-padded)</span>
+fmt.<span class="fn">Printf</span>(<span class="str">"|%10s|\n"</span>, <span class="str">"Hello"</span>)    <span class="cm">// |     Hello| (right-aligned)</span>
+fmt.<span class="fn">Printf</span>(<span class="str">"|%-10s|\n"</span>, <span class="str">"Hello"</span>)   <span class="cm">// |Hello     | (left-aligned)</span>
+
+<span class="cm">// Raw strings vs interpreted strings</span>
+msg1 := <span class="str">"Hello \nWorld!"</span>   <span class="cm">// \n = actual newline</span>
+msg2 := <span class="str">`Hello \nWorld!`</span>   <span class="cm">// \n = literal text (raw string)</span></code></pre>
+
+<!-- ===================== SECTION: REGEX ===================== -->
+<h2 id="regex"><span class="section-num">23</span> Regular Expressions</h2>
+
+<p>Go's <code>regexp</code> package uses RE2 syntax (guaranteed linear time). Use <code>MustCompile</code> for known-good patterns, <code>Compile</code> when pattern might be invalid.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"regexp"</span>
+
+<span class="cm">// Compile a regex — MustCompile panics if pattern is invalid</span>
+re := regexp.<span class="fn">MustCompile</span>(<span class="str">`[a-zA-Z0-9._+%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`</span>)
+
+<span class="cm">// Match test</span>
+fmt.<span class="fn">Println</span>(re.<span class="fn">MatchString</span>(<span class="str">"user@email.com"</span>))  <span class="cm">// true</span>
+fmt.<span class="fn">Println</span>(re.<span class="fn">MatchString</span>(<span class="str">"invalid_email"</span>))   <span class="cm">// false</span>
+
+<span class="cm">// Capturing groups with FindStringSubmatch</span>
+re = regexp.<span class="fn">MustCompile</span>(<span class="str">`(\d{4})-(\d{2})-(\d{2})`</span>)
+matches := re.<span class="fn">FindStringSubmatch</span>(<span class="str">"2024-07-30"</span>)
+fmt.<span class="fn">Println</span>(matches[<span class="num">0</span>])  <span class="cm">// "2024-07-30" (full match)</span>
+fmt.<span class="fn">Println</span>(matches[<span class="num">1</span>])  <span class="cm">// "2024" (group 1)</span>
+fmt.<span class="fn">Println</span>(matches[<span class="num">2</span>])  <span class="cm">// "07" (group 2)</span>
+fmt.<span class="fn">Println</span>(matches[<span class="num">3</span>])  <span class="cm">// "30" (group 3)</span>
+
+<span class="cm">// Replace all matches</span>
+re = regexp.<span class="fn">MustCompile</span>(<span class="str">`[aeiou]`</span>)
+result := re.<span class="fn">ReplaceAllString</span>(<span class="str">"Hello World"</span>, <span class="str">"*"</span>)
+fmt.<span class="fn">Println</span>(result)  <span class="cm">// "H*ll* W*rld"</span>
+
+<span class="cm">// Case-insensitive flag (?i)</span>
+re = regexp.<span class="fn">MustCompile</span>(<span class="str">`(?i)go`</span>)
+fmt.<span class="fn">Println</span>(re.<span class="fn">MatchString</span>(<span class="str">"Golang is great"</span>))  <span class="cm">// true</span>
+
+<span class="cm">// FindAllString — find all occurrences</span>
+re = regexp.<span class="fn">MustCompile</span>(<span class="str">`\d+`</span>)  <span class="cm">// match digits</span>
+all := re.<span class="fn">FindAllString</span>(<span class="str">"Hello 123 Go 456!"</span>, -<span class="num">1</span>)  <span class="cm">// -1 = find all</span>
+fmt.<span class="fn">Println</span>(all)  <span class="cm">// ["123", "456"]</span></code></pre>
+
+<!-- ===================== SECTION: RECURSION ===================== -->
+<h2 id="recursion"><span class="section-num">24</span> Recursion</h2>
+
+<p>A function that calls itself. Every recursive function needs a <strong>base case</strong> (when to stop) and a <strong>recursive case</strong> (call itself with a smaller problem).</p>
+
+<pre><code><span class="cm">// Classic: Factorial — n! = n × (n-1) × ... × 1</span>
+<span class="kw">func</span> <span class="fn">factorial</span>(n <span class="ty">int</span>) <span class="ty">int</span> {
+    <span class="kw">if</span> n == <span class="num">0</span> { <span class="kw">return</span> <span class="num">1</span> }  <span class="cm">// base case: 0! = 1</span>
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n-<span class="num">1</span>)  <span class="cm">// recursive case</span>
+}
+<span class="cm">// factorial(5) → 5 * 4 * 3 * 2 * 1 * 1 = 120</span>
+
+<span class="cm">// Sum of digits: 12345 → 1+2+3+4+5 = 15</span>
+<span class="kw">func</span> <span class="fn">sumOfDigits</span>(n <span class="ty">int</span>) <span class="ty">int</span> {
+    <span class="kw">if</span> n &lt; <span class="num">10</span> { <span class="kw">return</span> n }  <span class="cm">// single digit = base case</span>
+    <span class="kw">return</span> n%<span class="num">10</span> + <span class="fn">sumOfDigits</span>(n/<span class="num">10</span>)  <span class="cm">// last digit + sum of rest</span>
+}
+<span class="cm">// sumOfDigits(12345):</span>
+<span class="cm">// 5 + sumOfDigits(1234)</span>
+<span class="cm">// 5 + 4 + sumOfDigits(123)</span>
+<span class="cm">// 5 + 4 + 3 + sumOfDigits(12)</span>
+<span class="cm">// 5 + 4 + 3 + 2 + sumOfDigits(1)</span>
+<span class="cm">// 5 + 4 + 3 + 2 + 1 = 15</span></code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Go has NO tail-call optimization</div>
+  <p>Unlike some languages, Go does NOT optimize tail-recursive functions. Deep recursion (~10,000+ calls) can cause stack overflow. For large inputs, prefer iterative (loop) solutions.</p>
+</div>
+
+<!-- ===================== SECTION: RANDOM NUMBERS ===================== -->
+<h2 id="random"><span class="section-num">25</span> Random Numbers</h2>
+
+<pre><code><span class="kw">import</span> <span class="str">"math/rand"</span>
+
+<span class="cm">// Random integer in range [0, n)</span>
+die := rand.<span class="fn">Intn</span>(<span class="num">6</span>) + <span class="num">1</span>  <span class="cm">// 1-6 (dice roll)</span>
+
+<span class="cm">// Random float in [0.0, 1.0)</span>
+f := rand.<span class="fn">Float64</span>()  <span class="cm">// e.g., 0.6046602879796196</span>
+
+<span class="cm">// Random number in range [min, max]</span>
+min, max := <span class="num">5</span>, <span class="num">15</span>
+val := rand.<span class="fn">Intn</span>(max-min+<span class="num">1</span>) + min  <span class="cm">// 5 to 15 inclusive</span>
+
+<span class="cm">// Seeded random (reproducible) — before Go 1.20</span>
+source := rand.<span class="fn">NewSource</span>(time.<span class="fn">Now</span>().<span class="fn">UnixNano</span>())
+random := rand.<span class="fn">New</span>(source)
+target := random.<span class="fn">Intn</span>(<span class="num">100</span>) + <span class="num">1</span>  <span class="cm">// 1-100</span>
+<span class="cm">// Go 1.20+: global rand is auto-seeded, no need for manual seeding</span></code></pre>
+
+<!-- ===================== SECTION: TIME & EPOCH ===================== -->
+<h2 id="time-epoch"><span class="section-num">26</span> Time, Epoch & Formatting</h2>
+
+<p>Go uses a unique <strong>reference time</strong> for formatting: <code>Mon Jan 2 15:04:05 MST 2006</code>. This specific date must be used in all format strings — it acts as a template.</p>
+
+<h3>Creating & Manipulating Time</h3>
+<pre><code><span class="kw">import</span> <span class="str">"time"</span>
+
+<span class="cm">// Current time</span>
+now := time.<span class="fn">Now</span>()
+fmt.<span class="fn">Println</span>(now)  <span class="cm">// 2024-07-30 12:30:45.123456789 +0530 IST</span>
+
+<span class="cm">// Specific time</span>
+t := time.<span class="fn">Date</span>(<span class="num">2024</span>, time.July, <span class="num">30</span>, <span class="num">12</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, time.UTC)
+
+<span class="cm">// Add duration</span>
+tomorrow := now.<span class="fn">Add</span>(<span class="num">24</span> * time.Hour)
+fmt.<span class="fn">Println</span>(tomorrow.<span class="fn">Weekday</span>())  <span class="cm">// e.g., "Thursday"</span>
+
+<span class="cm">// Difference between times</span>
+t1 := time.<span class="fn">Date</span>(<span class="num">2024</span>, time.July, <span class="num">4</span>, <span class="num">12</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, time.UTC)
+t2 := time.<span class="fn">Date</span>(<span class="num">2024</span>, time.July, <span class="num">4</span>, <span class="num">18</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, time.UTC)
+fmt.<span class="fn">Println</span>(t2.<span class="fn">Sub</span>(t1))  <span class="cm">// 6h0m0s</span>
+
+<span class="cm">// Compare times</span>
+fmt.<span class="fn">Println</span>(t2.<span class="fn">After</span>(t1))   <span class="cm">// true</span>
+fmt.<span class="fn">Println</span>(t1.<span class="fn">Before</span>(t2))  <span class="cm">// true</span>
+
+<span class="cm">// Time zones</span>
+loc, _ := time.<span class="fn">LoadLocation</span>(<span class="str">"America/New_York"</span>)
+nyTime := now.<span class="fn">In</span>(loc)
+fmt.<span class="fn">Println</span>(<span class="str">"New York:"</span>, nyTime)
+
+<span class="cm">// Round and Truncate</span>
+fmt.<span class="fn">Println</span>(now.<span class="fn">Round</span>(time.Hour))     <span class="cm">// round to nearest hour</span>
+fmt.<span class="fn">Println</span>(now.<span class="fn">Truncate</span>(time.Hour))  <span class="cm">// floor to hour</span></code></pre>
+
+<h3>Time Formatting & Parsing</h3>
+<pre><code><span class="cm">// Go's reference time: Mon Jan 2 15:04:05 MST 2006</span>
+<span class="cm">// You must use THESE exact values as placeholders:</span>
+<span class="cm">// Month: 01 or Jan    Day: 02        Year: 2006 or 06</span>
+<span class="cm">// Hour: 15 (24h) or 03 (12h)   Minute: 04   Second: 05</span>
+
+<span class="cm">// Format time → string</span>
+t := time.<span class="fn">Now</span>()
+fmt.<span class="fn">Println</span>(t.<span class="fn">Format</span>(<span class="str">"2006-01-02"</span>))          <span class="cm">// "2024-07-30"</span>
+fmt.<span class="fn">Println</span>(t.<span class="fn">Format</span>(<span class="str">"Monday 06-01-02 15-04"</span>))  <span class="cm">// "Tuesday 24-07-30 14-30"</span>
+
+<span class="cm">// Parse string → time</span>
+parsed, _ := time.<span class="fn">Parse</span>(<span class="str">"2006-01-02"</span>, <span class="str">"2024-07-30"</span>)
+fmt.<span class="fn">Println</span>(parsed)  <span class="cm">// 2024-07-30 00:00:00 +0000 UTC</span>
+
+<span class="cm">// Parse with time</span>
+t1, _ := time.<span class="fn">Parse</span>(<span class="str">"Jan 02, 2006 03:04 PM"</span>, <span class="str">"Jul 03, 2024 03:18 PM"</span>)
+
+<span class="cm">// ISO 8601 format</span>
+t2, _ := time.<span class="fn">Parse</span>(<span class="str">"2006-01-02T15:04:05Z07:00"</span>, <span class="str">"2024-07-04T14:30:18Z"</span>)</code></pre>
+
+<h3>Epoch / Unix Timestamps</h3>
+<pre><code><span class="cm">// Unix epoch: seconds since Jan 1, 1970 00:00:00 UTC</span>
+now := time.<span class="fn">Now</span>()
+unixTime := now.<span class="fn">Unix</span>()  <span class="cm">// e.g., 1722345600</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Unix Time:"</span>, unixTime)
+
+<span class="cm">// Convert Unix timestamp back to time.Time</span>
+t := time.<span class="fn">Unix</span>(unixTime, <span class="num">0</span>)  <span class="cm">// second arg = nanoseconds</span>
+fmt.<span class="fn">Println</span>(t.<span class="fn">Format</span>(<span class="str">"2006-01-02"</span>))  <span class="cm">// "2024-07-30"</span>
+
+<span class="cm">// Milliseconds and Nanoseconds</span>
+millis := now.<span class="fn">UnixMilli</span>()  <span class="cm">// milliseconds since epoch</span>
+nanos := now.<span class="fn">UnixNano</span>()    <span class="cm">// nanoseconds since epoch</span></code></pre>
+
 <!-- ===================== SECTION 17: GOROUTINES ===================== -->
-<h2 id="goroutines"><span class="section-num">17</span> Goroutines & Channels</h2>
+<h2 id="goroutines"><span class="section-num">27</span> Goroutines & Channels</h2>
 
 <h3>Goroutines</h3>
 <pre><code><span class="cm">// Lightweight thread (~2KB stack vs ~1MB OS thread)</span>
@@ -1165,8 +1700,154 @@ results := <span class="fn">make</span>(<span class="kw">chan</span> <span class
 }
 _ = val; _ = bch  <span class="cm">// suppress unused-var errors</span></code></pre>
 
+<!-- ===================== SECTION: CHANNEL DEEP DIVE ===================== -->
+<h2 id="channel-deep"><span class="section-num">28</span> Channel Deep Dive</h2>
+
+<h3>Unbuffered vs Buffered Channels</h3>
+<pre><code><span class="cm">// UNBUFFERED — synchronous handoff</span>
+<span class="cm">// Sender blocks UNTIL receiver is ready (and vice versa)</span>
+ch := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)  <span class="cm">// no capacity = unbuffered</span>
+<span class="kw">go</span> <span class="kw">func</span>() {
+    time.<span class="fn">Sleep</span>(<span class="num">3</span> * time.Second)
+    fmt.<span class="fn">Println</span>(&lt;-ch)  <span class="cm">// receives after 3 seconds</span>
+}()
+ch &lt;- <span class="num">1</span>  <span class="cm">// BLOCKS here for 3 seconds until receiver is ready</span>
+fmt.<span class="fn">Println</span>(<span class="str">"End of program"</span>)
+
+<span class="cm">// BUFFERED — async up to capacity</span>
+<span class="cm">// Blocks on send ONLY when buffer is FULL</span>
+<span class="cm">// Blocks on receive ONLY when buffer is EMPTY</span>
+bch := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>, <span class="num">2</span>)  <span class="cm">// capacity 2</span>
+bch &lt;- <span class="num">1</span>  <span class="cm">// doesn't block (buffer has space)</span>
+bch &lt;- <span class="num">2</span>  <span class="cm">// doesn't block (buffer has space)</span>
+<span class="cm">// bch &lt;- 3  // BLOCKS! buffer is full, needs a receiver</span>
+<span class="kw">go</span> <span class="kw">func</span>() {
+    time.<span class="fn">Sleep</span>(<span class="num">2</span> * time.Second)
+    fmt.<span class="fn">Println</span>(<span class="str">"Received:"</span>, &lt;-bch)  <span class="cm">// frees one slot</span>
+}()
+bch &lt;- <span class="num">3</span>  <span class="cm">// now this can send (after goroutine receives)</span></code></pre>
+
+<h3>Channel Directions</h3>
+<pre><code><span class="cm">// Restrict a channel to send-only or receive-only in function signatures</span>
+<span class="cm">// This catches bugs at compile time!</span>
+
+<span class="kw">func</span> <span class="fn">producer</span>(ch <span class="kw">chan</span>&lt;- <span class="ty">int</span>) {  <span class="cm">// chan&lt;- = SEND-ONLY</span>
+    <span class="kw">for</span> i := <span class="kw">range</span> <span class="num">5</span> {
+        ch &lt;- i
+    }
+    <span class="fn">close</span>(ch)  <span class="cm">// producer closes the channel when done</span>
+}
+
+<span class="kw">func</span> <span class="fn">consumer</span>(ch &lt;-<span class="kw">chan</span> <span class="ty">int</span>) {  <span class="cm">// &lt;-chan = RECEIVE-ONLY</span>
+    <span class="kw">for</span> value := <span class="kw">range</span> ch {
+        fmt.<span class="fn">Println</span>(<span class="str">"Received:"</span>, value)
+    }
+}
+
+ch := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+<span class="kw">go</span> <span class="fn">producer</span>(ch)  <span class="cm">// auto-converts to chan&lt;-</span>
+<span class="fn">consumer</span>(ch)      <span class="cm">// auto-converts to &lt;-chan</span></code></pre>
+
+<h3>Closing Channels</h3>
+<pre><code><span class="cm">// Only the SENDER should close a channel, never the receiver</span>
+<span class="cm">// Sending to a closed channel = PANIC</span>
+<span class="cm">// Receiving from a closed channel = returns zero value immediately</span>
+
+ch := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+
+<span class="cm">// Check if channel is closed using comma-ok idiom</span>
+<span class="fn">close</span>(ch)
+val, ok := &lt;-ch
+<span class="kw">if</span> !ok {
+    fmt.<span class="fn">Println</span>(<span class="str">"Channel is closed"</span>)  <span class="cm">// ok=false means closed</span>
+}
+
+<span class="cm">// Pipeline pattern: producer → filter → consumer</span>
+<span class="kw">func</span> <span class="fn">producer</span>(ch <span class="kw">chan</span>&lt;- <span class="ty">int</span>) {
+    <span class="kw">for</span> i := <span class="kw">range</span> <span class="num">5</span> { ch &lt;- i }
+    <span class="fn">close</span>(ch)
+}
+<span class="kw">func</span> <span class="fn">filter</span>(in &lt;-<span class="kw">chan</span> <span class="ty">int</span>, out <span class="kw">chan</span>&lt;- <span class="ty">int</span>) {
+    <span class="kw">for</span> val := <span class="kw">range</span> in {
+        <span class="kw">if</span> val%<span class="num">2</span> == <span class="num">0</span> { out &lt;- val }  <span class="cm">// only pass even numbers</span>
+    }
+    <span class="fn">close</span>(out)
+}
+
+ch1 := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+ch2 := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+<span class="kw">go</span> <span class="fn">producer</span>(ch1)
+<span class="kw">go</span> <span class="fn">filter</span>(ch1, ch2)
+<span class="kw">for</span> val := <span class="kw">range</span> ch2 { fmt.<span class="fn">Println</span>(val) }  <span class="cm">// 0, 2, 4</span></code></pre>
+
+<h3>Non-Blocking Channel Operations</h3>
+<pre><code><span class="cm">// Use select + default for non-blocking send/receive</span>
+
+ch := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+
+<span class="cm">// Non-blocking receive</span>
+<span class="kw">select</span> {
+<span class="kw">case</span> msg := &lt;-ch:
+    fmt.<span class="fn">Println</span>(<span class="str">"Received:"</span>, msg)
+<span class="kw">default</span>:
+    fmt.<span class="fn">Println</span>(<span class="str">"No messages available."</span>)  <span class="cm">// runs immediately</span>
+}
+
+<span class="cm">// Non-blocking send</span>
+<span class="kw">select</span> {
+<span class="kw">case</span> ch &lt;- <span class="num">1</span>:
+    fmt.<span class="fn">Println</span>(<span class="str">"Sent message."</span>)
+<span class="kw">default</span>:
+    fmt.<span class="fn">Println</span>(<span class="str">"Channel not ready."</span>)  <span class="cm">// runs if no receiver</span>
+}
+
+<span class="cm">// Real-time: poll for data with quit signal</span>
+data := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+quit := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">bool</span>)
+
+<span class="kw">go</span> <span class="kw">func</span>() {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> d := &lt;-data:
+            fmt.<span class="fn">Println</span>(<span class="str">"Data:"</span>, d)
+        <span class="kw">case</span> &lt;-quit:
+            fmt.<span class="fn">Println</span>(<span class="str">"Stopping..."</span>); <span class="kw">return</span>
+        <span class="kw">default</span>:
+            fmt.<span class="fn">Println</span>(<span class="str">"Waiting..."</span>)
+            time.<span class="fn">Sleep</span>(<span class="num">500</span> * time.Millisecond)
+        }
+    }
+}()</code></pre>
+
+<h3>Channel Synchronization</h3>
+<pre><code><span class="cm">// Use channels to synchronize goroutine completion</span>
+
+<span class="cm">// Simple done signal</span>
+done := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+<span class="kw">go</span> <span class="kw">func</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"Working..."</span>)
+    time.<span class="fn">Sleep</span>(<span class="num">2</span> * time.Second)
+    done &lt;- <span class="num">0</span>  <span class="cm">// signal completion</span>
+}()
+&lt;-done  <span class="cm">// block until goroutine is done</span>
+
+<span class="cm">// Wait for multiple goroutines</span>
+numGoroutines := <span class="num">3</span>
+done = <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>, numGoroutines)
+<span class="kw">for</span> i := <span class="kw">range</span> numGoroutines {
+    <span class="kw">go</span> <span class="kw">func</span>(id <span class="ty">int</span>) {
+        fmt.<span class="fn">Printf</span>(<span class="str">"Goroutine %d working...\n"</span>, id)
+        time.<span class="fn">Sleep</span>(time.Second)
+        done &lt;- id  <span class="cm">// signal completion</span>
+    }(i)
+}
+<span class="kw">for</span> <span class="kw">range</span> numGoroutines {
+    &lt;-done  <span class="cm">// wait for each one</span>
+}
+fmt.<span class="fn">Println</span>(<span class="str">"All goroutines complete"</span>)</code></pre>
+
 <!-- ===================== SECTION 18: SELECT ===================== -->
-<h2 id="select"><span class="section-num">18</span> Select Statement</h2>
+<h2 id="select"><span class="section-num">29</span> Select & Multiplexing</h2>
 
 <pre><code><span class="cm">// select — wait on multiple channel operations</span>
 <span class="kw">select</span> {  <span class="cm">// blocks until one case is ready</span>
@@ -1190,8 +1871,123 @@ ticker := time.<span class="fn">NewTicker</span>(<span class="num">500</span> * 
     }
 }</code></pre>
 
+<!-- ===================== SECTION: WORKER POOLS ===================== -->
+<h2 id="worker-pools"><span class="section-num">30</span> Worker Pools</h2>
+
+<p>Worker pools limit concurrency by spinning up a <strong>fixed number of goroutines</strong> that read from a shared jobs channel. This prevents spawning unlimited goroutines and controls resource usage.</p>
+
+<pre><code><span class="cm">// Basic worker pool pattern</span>
+<span class="kw">func</span> <span class="fn">worker</span>(id <span class="ty">int</span>, tasks &lt;-<span class="kw">chan</span> <span class="ty">int</span>, results <span class="kw">chan</span>&lt;- <span class="ty">int</span>) {
+    <span class="kw">for</span> task := <span class="kw">range</span> tasks {
+        fmt.<span class="fn">Printf</span>(<span class="str">"Worker %d processing task %d\n"</span>, id, task)
+        time.<span class="fn">Sleep</span>(time.Second)  <span class="cm">// simulate work</span>
+        results &lt;- task * <span class="num">2</span>  <span class="cm">// send result</span>
+    }
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    numWorkers := <span class="num">3</span>
+    numJobs := <span class="num">10</span>
+    tasks := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>, numJobs)
+    results := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>, numJobs)
+
+    <span class="cm">// Start 3 workers — they all read from same channel</span>
+    <span class="kw">for</span> i := <span class="kw">range</span> numWorkers {
+        <span class="kw">go</span> <span class="fn">worker</span>(i, tasks, results)
+    }
+
+    <span class="cm">// Send 10 tasks</span>
+    <span class="kw">for</span> i := <span class="kw">range</span> numJobs { tasks &lt;- i }
+    <span class="fn">close</span>(tasks)  <span class="cm">// signal no more tasks</span>
+
+    <span class="cm">// Collect all results</span>
+    <span class="kw">for</span> <span class="kw">range</span> numJobs {
+        fmt.<span class="fn">Println</span>(<span class="str">"Result:"</span>, &lt;-results)
+    }
+}</code></pre>
+
+<h3>Real-World Example: Ticket Processor</h3>
+<pre><code><span class="kw">type</span> <span class="ty">ticketRequest</span> <span class="kw">struct</span> {
+    personID   <span class="ty">int</span>
+    numTickets <span class="ty">int</span>
+    cost       <span class="ty">int</span>
+}
+
+<span class="kw">func</span> <span class="fn">ticketProcessor</span>(requests &lt;-<span class="kw">chan</span> ticketRequest, results <span class="kw">chan</span>&lt;- <span class="ty">int</span>) {
+    <span class="kw">for</span> req := <span class="kw">range</span> requests {
+        fmt.<span class="fn">Printf</span>(<span class="str">"Processing %d ticket(s) for person %d, cost $%d\n"</span>,
+            req.numTickets, req.personID, req.cost)
+        time.<span class="fn">Sleep</span>(time.Second)  <span class="cm">// simulate processing</span>
+        results &lt;- req.personID
+    }
+}
+
+<span class="cm">// 3 workers process 5 ticket requests concurrently</span>
+ticketRequests := <span class="fn">make</span>(<span class="kw">chan</span> ticketRequest, <span class="num">5</span>)
+ticketResults := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+<span class="kw">for</span> <span class="kw">range</span> <span class="num">3</span> { <span class="kw">go</span> <span class="fn">ticketProcessor</span>(ticketRequests, ticketResults) }</code></pre>
+
+<!-- ===================== SECTION: TIMERS & TICKERS ===================== -->
+<h2 id="timers-tickers"><span class="section-num">31</span> Timers & Tickers</h2>
+
+<h3>Timers (fire once)</h3>
+<pre><code><span class="cm">// Timer fires ONCE after a duration</span>
+timer := time.<span class="fn">NewTimer</span>(<span class="num">2</span> * time.Second)
+&lt;-timer.C  <span class="cm">// blocks until timer fires (timer.C is a channel)</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Timer expired"</span>)
+
+<span class="cm">// Stop a timer before it fires</span>
+timer2 := time.<span class="fn">NewTimer</span>(<span class="num">5</span> * time.Second)
+stopped := timer2.<span class="fn">Stop</span>()  <span class="cm">// returns true if successfully stopped</span>
+<span class="kw">if</span> stopped { fmt.<span class="fn">Println</span>(<span class="str">"Timer stopped before firing"</span>) }
+
+<span class="cm">// Reset a timer</span>
+timer2.<span class="fn">Reset</span>(time.Second)  <span class="cm">// restart with new duration</span>
+
+<span class="cm">// Timeout pattern with select</span>
+timeout := time.<span class="fn">After</span>(<span class="num">3</span> * time.Second)  <span class="cm">// returns &lt;-chan time.Time</span>
+done := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">bool</span>)
+<span class="kw">go</span> <span class="kw">func</span>() { longRunningTask(); done &lt;- <span class="kw">true</span> }()
+
+<span class="kw">select</span> {
+<span class="kw">case</span> &lt;-timeout:
+    fmt.<span class="fn">Println</span>(<span class="str">"Operation timed out!"</span>)
+<span class="kw">case</span> &lt;-done:
+    fmt.<span class="fn">Println</span>(<span class="str">"Operation completed"</span>)
+}
+
+<span class="cm">// Racing two timers</span>
+t1 := time.<span class="fn">NewTimer</span>(<span class="num">1</span> * time.Second)
+t2 := time.<span class="fn">NewTimer</span>(<span class="num">2</span> * time.Second)
+<span class="kw">select</span> {
+<span class="kw">case</span> &lt;-t1.C: fmt.<span class="fn">Println</span>(<span class="str">"Timer1 won"</span>)  <span class="cm">// fires first</span>
+<span class="kw">case</span> &lt;-t2.C: fmt.<span class="fn">Println</span>(<span class="str">"Timer2 won"</span>)
+}</code></pre>
+
+<h3>Tickers (fire repeatedly)</h3>
+<pre><code><span class="cm">// Ticker fires REPEATEDLY at intervals</span>
+ticker := time.<span class="fn">NewTicker</span>(time.Second)
+<span class="kw">defer</span> ticker.<span class="fn">Stop</span>()  <span class="cm">// ALWAYS stop tickers to free resources</span>
+stop := time.<span class="fn">After</span>(<span class="num">5</span> * time.Second)
+
+<span class="kw">for</span> {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> tick := &lt;-ticker.C:
+        fmt.<span class="fn">Println</span>(<span class="str">"Tick at:"</span>, tick)  <span class="cm">// fires every 1s</span>
+    <span class="kw">case</span> &lt;-stop:
+        fmt.<span class="fn">Println</span>(<span class="str">"Stopping ticker."</span>); <span class="kw">return</span>
+    }
+}
+
+<span class="cm">// Use case: periodic health checks, polling, heartbeats</span>
+<span class="kw">func</span> <span class="fn">periodicTask</span>() { fmt.<span class="fn">Println</span>(<span class="str">"Health check at:"</span>, time.<span class="fn">Now</span>()) }
+
+ticker := time.<span class="fn">NewTicker</span>(<span class="num">2</span> * time.Second)
+<span class="kw">defer</span> ticker.<span class="fn">Stop</span>()
+<span class="kw">for</span> <span class="kw">range</span> ticker.C { <span class="fn">periodicTask</span>() }  <span class="cm">// runs forever</span></code></pre>
+
 <!-- ===================== SECTION 19: SYNC ===================== -->
-<h2 id="sync"><span class="section-num">19</span> Sync Package</h2>
+<h2 id="sync"><span class="section-num">32</span> Sync Package</h2>
 
 <pre><code><span class="cm">// Mutex</span>
 <span class="kw">type</span> <span class="ty">SafeCounter</span> <span class="kw">struct</span> {
@@ -1221,8 +2017,229 @@ once.<span class="fn">Do</span>(<span class="kw">func</span>() { <span class="cm
 <span class="kw">var</span> counter <span class="ty">int64</span>  <span class="cm">// shared counter</span>
 atomic.<span class="fn">AddInt64</span>(&amp;counter, <span class="num">1</span>)  <span class="cm">// increment atomically, no mutex needed</span></code></pre>
 
+<!-- ===================== SECTION: SYNC DEEP DIVE ===================== -->
+<h2 id="sync-deep"><span class="section-num">33</span> Sync Deep Dive</h2>
+
+<h3>RWMutex — Multiple Readers OR One Writer</h3>
+<p>Unlike <code>Mutex</code>, <code>RWMutex</code> allows <strong>concurrent reads</strong> but exclusive writes. Use when reads far outnumber writes (e.g., caches, config).</p>
+
+<pre><code><span class="kw">var</span> (
+    rwmu    sync.<span class="ty">RWMutex</span>
+    counter <span class="ty">int</span>
+)
+
+<span class="kw">func</span> <span class="fn">readCounter</span>(wg *sync.<span class="ty">WaitGroup</span>) {
+    <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+    rwmu.<span class="fn">RLock</span>()          <span class="cm">// multiple goroutines can RLock simultaneously</span>
+    fmt.<span class="fn">Println</span>(<span class="str">"Read:"</span>, counter)
+    rwmu.<span class="fn">RUnlock</span>()
+}
+
+<span class="kw">func</span> <span class="fn">writeCounter</span>(wg *sync.<span class="ty">WaitGroup</span>, value <span class="ty">int</span>) {
+    <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+    rwmu.<span class="fn">Lock</span>()           <span class="cm">// exclusive — blocks ALL readers and writers</span>
+    counter = value
+    fmt.<span class="fn">Printf</span>(<span class="str">"Written: %d\n"</span>, value)
+    rwmu.<span class="fn">Unlock</span>()
+}
+
+<span class="cm">// 5 concurrent readers, then 1 writer, all safe</span></code></pre>
+
+<h3>sync.Once — Run Exactly Once</h3>
+<pre><code><span class="cm">// sync.Once guarantees a function runs only ONCE, even across goroutines</span>
+<span class="cm">// Perfect for: singleton initialization, one-time setup</span>
+
+<span class="kw">var</span> once sync.<span class="ty">Once</span>
+
+<span class="kw">func</span> <span class="fn">initialize</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"This runs only ONCE no matter how many goroutines call it"</span>)
+}
+
+<span class="kw">var</span> wg sync.<span class="ty">WaitGroup</span>
+<span class="kw">for</span> i := <span class="kw">range</span> <span class="num">5</span> {
+    wg.<span class="fn">Add</span>(<span class="num">1</span>)
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+        fmt.<span class="fn">Println</span>(<span class="str">"Goroutine #"</span>, i)
+        once.<span class="fn">Do</span>(initialize)  <span class="cm">// only first goroutine runs initialize()</span>
+    }()
+}
+wg.<span class="fn">Wait</span>()</code></pre>
+
+<h3>sync.Cond — Condition Variables</h3>
+<p><code>sync.Cond</code> allows goroutines to <strong>wait for a condition</strong> and be woken up by another goroutine. Classic use: producer-consumer with bounded buffer.</p>
+
+<pre><code><span class="kw">const</span> bufferSize = <span class="num">5</span>
+
+<span class="kw">type</span> <span class="ty">buffer</span> <span class="kw">struct</span> {
+    items []<span class="ty">int</span>
+    mu    sync.<span class="ty">Mutex</span>
+    cond  *sync.<span class="ty">Cond</span>
+}
+
+<span class="kw">func</span> <span class="fn">newBuffer</span>() *<span class="ty">buffer</span> {
+    b := &amp;buffer{items: <span class="fn">make</span>([]<span class="ty">int</span>, <span class="num">0</span>, bufferSize)}
+    b.cond = sync.<span class="fn">NewCond</span>(&amp;b.mu)  <span class="cm">// cond is linked to the mutex</span>
+    <span class="kw">return</span> b
+}
+
+<span class="kw">func</span> (b *buffer) <span class="fn">produce</span>(item <span class="ty">int</span>) {
+    b.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> b.mu.<span class="fn">Unlock</span>()
+    <span class="kw">for</span> <span class="fn">len</span>(b.items) == bufferSize {
+        b.cond.<span class="fn">Wait</span>()  <span class="cm">// wait until consumer frees space</span>
+    }
+    b.items = <span class="fn">append</span>(b.items, item)
+    fmt.<span class="fn">Println</span>(<span class="str">"Produced:"</span>, item)
+    b.cond.<span class="fn">Signal</span>()  <span class="cm">// wake up one waiting goroutine</span>
+}
+
+<span class="kw">func</span> (b *buffer) <span class="fn">consume</span>() <span class="ty">int</span> {
+    b.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> b.mu.<span class="fn">Unlock</span>()
+    <span class="kw">for</span> <span class="fn">len</span>(b.items) == <span class="num">0</span> {
+        b.cond.<span class="fn">Wait</span>()  <span class="cm">// wait until producer adds items</span>
+    }
+    item := b.items[<span class="num">0</span>]
+    b.items = b.items[<span class="num">1</span>:]
+    fmt.<span class="fn">Println</span>(<span class="str">"Consumed:"</span>, item)
+    b.cond.<span class="fn">Signal</span>()  <span class="cm">// wake up producer if it was waiting</span>
+    <span class="kw">return</span> item
+}</code></pre>
+
+<h3>sync.Pool — Object Reuse</h3>
+<p><code>sync.Pool</code> caches allocated objects for reuse, reducing GC pressure. Objects may be garbage collected at any time — don't store things you need to keep.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">person</span> <span class="kw">struct</span> { name <span class="ty">string</span>; age <span class="ty">int</span> }
+
+<span class="kw">var</span> pool = sync.<span class="ty">Pool</span>{
+    New: <span class="kw">func</span>() <span class="kw">interface</span>{} {
+        fmt.<span class="fn">Println</span>(<span class="str">"Creating a new Person."</span>)
+        <span class="kw">return</span> &amp;person{}  <span class="cm">// factory for new objects</span>
+    },
+}
+
+<span class="cm">// Put an object into the pool</span>
+pool.<span class="fn">Put</span>(&amp;person{name: <span class="str">"John"</span>, age: <span class="num">81</span>})
+
+<span class="cm">// Get reuses an existing object (or creates new via New func)</span>
+p1 := pool.<span class="fn">Get</span>().(*person)
+fmt.<span class="fn">Println</span>(p1)  <span class="cm">// &{John 81}</span>
+
+<span class="cm">// Return to pool when done</span>
+pool.<span class="fn">Put</span>(p1)
+
+<span class="cm">// If pool is empty and no New func: Get() returns nil</span>
+p2 := pool.<span class="fn">Get</span>()
+<span class="kw">if</span> p2 != <span class="kw">nil</span> {
+    fmt.<span class="fn">Println</span>(<span class="str">"Reused:"</span>, p2)
+} <span class="kw">else</span> {
+    fmt.<span class="fn">Println</span>(<span class="str">"Pool is empty"</span>)
+}</code></pre>
+
+<!-- ===================== SECTION: ATOMIC ===================== -->
+<h2 id="atomic"><span class="section-num">34</span> Atomic Operations</h2>
+
+<p>The <code>sync/atomic</code> package provides <strong>lock-free</strong> operations for simple counters and flags. Faster than mutex for single-value operations.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"sync/atomic"</span>
+
+<span class="kw">type</span> <span class="ty">AtomicCounter</span> <span class="kw">struct</span> {
+    count <span class="ty">int64</span>
+}
+
+<span class="kw">func</span> (ac *<span class="ty">AtomicCounter</span>) <span class="fn">increment</span>() {
+    atomic.<span class="fn">AddInt64</span>(&amp;ac.count, <span class="num">1</span>)  <span class="cm">// thread-safe increment, no mutex needed</span>
+}
+
+<span class="kw">func</span> (ac *<span class="ty">AtomicCounter</span>) <span class="fn">getValue</span>() <span class="ty">int64</span> {
+    <span class="kw">return</span> atomic.<span class="fn">LoadInt64</span>(&amp;ac.count)  <span class="cm">// thread-safe read</span>
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="kw">var</span> wg sync.<span class="ty">WaitGroup</span>
+    counter := &amp;<span class="ty">AtomicCounter</span>{}
+
+    <span class="kw">for</span> <span class="kw">range</span> <span class="num">10</span> {
+        wg.<span class="fn">Add</span>(<span class="num">1</span>)
+        <span class="kw">go</span> <span class="kw">func</span>() {
+            <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+            <span class="kw">for</span> <span class="kw">range</span> <span class="num">1000</span> { counter.<span class="fn">increment</span>() }
+        }()
+    }
+
+    wg.<span class="fn">Wait</span>()
+    fmt.<span class="fn">Println</span>(<span class="str">"Final:"</span>, counter.<span class="fn">getValue</span>())  <span class="cm">// always 10000</span>
+}
+
+<span class="cm">// Without atomic/mutex: result would be random (race condition!)</span>
+<span class="cm">// Atomic ops: AddInt64, LoadInt64, StoreInt64, CompareAndSwapInt64</span></code></pre>
+
+<!-- ===================== SECTION: RACE CONDITIONS & DEADLOCKS ===================== -->
+<h2 id="race-deadlock"><span class="section-num">35</span> Race Conditions & Deadlocks</h2>
+
+<h3>Race Conditions</h3>
+<p>A race condition occurs when multiple goroutines access shared data and at least one modifies it, without synchronization. Go has a built-in race detector.</p>
+
+<pre><code><span class="cm">// DETECT races: go run -race filename.go</span>
+
+<span class="cm">// BUG: Race condition — unpredictable result</span>
+<span class="kw">var</span> count <span class="ty">int</span>
+<span class="kw">for</span> <span class="kw">range</span> <span class="num">10</span> {
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">for</span> <span class="kw">range</span> <span class="num">1000</span> { count++ }  <span class="cm">// UNSAFE! multiple goroutines write</span>
+    }()
+}
+<span class="cm">// count might be 8523, 9101, 10000 — never predictable</span>
+
+<span class="cm">// FIX: Use mutex</span>
+<span class="kw">var</span> mu sync.<span class="ty">Mutex</span>
+<span class="kw">for</span> <span class="kw">range</span> <span class="num">10</span> {
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">for</span> <span class="kw">range</span> <span class="num">1000</span> {
+            mu.<span class="fn">Lock</span>()
+            count++
+            mu.<span class="fn">Unlock</span>()
+        }
+    }()
+}
+<span class="cm">// count will always be 10000</span></code></pre>
+
+<h3>Deadlocks</h3>
+<p>A deadlock happens when goroutines wait for each other forever. Classic cause: acquiring multiple locks in different order.</p>
+
+<pre><code><span class="cm">// DEADLOCK: goroutine 1 locks A then waits for B</span>
+<span class="cm">//           goroutine 2 locks B then waits for A</span>
+
+<span class="kw">var</span> mu1, mu2 sync.<span class="ty">Mutex</span>
+
+<span class="kw">go</span> <span class="kw">func</span>() {
+    mu1.<span class="fn">Lock</span>()
+    fmt.<span class="fn">Println</span>(<span class="str">"Goroutine 1 locked mu1"</span>)
+    time.<span class="fn">Sleep</span>(time.Second)
+    mu2.<span class="fn">Lock</span>()  <span class="cm">// waits for mu2... but goroutine 2 has it</span>
+    mu1.<span class="fn">Unlock</span>(); mu2.<span class="fn">Unlock</span>()
+}()
+
+<span class="kw">go</span> <span class="kw">func</span>() {
+    mu2.<span class="fn">Lock</span>()
+    fmt.<span class="fn">Println</span>(<span class="str">"Goroutine 2 locked mu2"</span>)
+    time.<span class="fn">Sleep</span>(time.Second)
+    mu1.<span class="fn">Lock</span>()  <span class="cm">// waits for mu1... but goroutine 1 has it</span>
+    mu2.<span class="fn">Unlock</span>(); mu1.<span class="fn">Unlock</span>()
+}()
+<span class="cm">// DEADLOCK! Both goroutines wait forever</span>
+
+<span class="cm">// FIX: Always acquire locks in the SAME order</span>
+<span class="cm">// Both goroutines should lock mu1 first, then mu2</span></code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Go Deadlock Detection</div>
+  <p>Go's runtime detects deadlocks when ALL goroutines are blocked: <code>fatal error: all goroutines are asleep - deadlock!</code>. But it can't detect partial deadlocks where only some goroutines are stuck. Always use <code>go run -race</code> during development.</p>
+</div>
+
 <!-- ===================== SECTION 20: CONTEXT ===================== -->
-<h2 id="context"><span class="section-num">20</span> Context</h2>
+<h2 id="context"><span class="section-num">36</span> Context</h2>
 
 <p><code>context.Context</code> is an <strong>interface</strong> in Go's standard library (<code>context</code> package) that carries <strong>deadlines</strong>, <strong>cancellation signals</strong>, and <strong>request-scoped values</strong> across API boundaries and between goroutines. Think of it as a "bag" that travels with every request through your entire call chain, telling downstream functions "how long you have" and "should you stop?"</p>
 
@@ -1539,8 +2556,215 @@ ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num
 <span class="kw">const</span> <span class="ty">userIDKey</span> <span class="ty">contextKey</span> = <span class="str">"userID"</span></code></pre>
 </div>
 
+<!-- ===================== SECTION: GOMAXPROCS ===================== -->
+<h2 id="gomaxprocs"><span class="section-num">37</span> GOMAXPROCS & Parallelism</h2>
+
+<p><strong>Concurrency</strong> is about dealing with multiple things at once (structure). <strong>Parallelism</strong> is about doing multiple things at once (execution). Go's scheduler multiplexes goroutines onto OS threads controlled by <code>GOMAXPROCS</code>.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"runtime"</span>
+
+<span class="cm">// GOMAXPROCS sets how many OS threads can execute Go code simultaneously</span>
+<span class="cm">// Default: number of CPU cores</span>
+fmt.<span class="fn">Println</span>(<span class="str">"CPUs:"</span>, runtime.<span class="fn">NumCPU</span>())  <span class="cm">// e.g., 12</span>
+
+<span class="cm">// Set to 1 = concurrency (goroutines take turns on 1 thread)</span>
+runtime.<span class="fn">GOMAXPROCS</span>(<span class="num">1</span>)
+
+<span class="cm">// Set to N = parallelism (goroutines run on N threads simultaneously)</span>
+runtime.<span class="fn">GOMAXPROCS</span>(<span class="num">12</span>)  <span class="cm">// use all 12 cores</span>
+
+<span class="cm">// CPU-bound tasks benefit from more threads</span>
+<span class="kw">func</span> <span class="fn">heavyTask</span>(id <span class="ty">int</span>, wg *sync.<span class="ty">WaitGroup</span>) {
+    <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+    fmt.<span class="fn">Printf</span>(<span class="str">"Task %d starting\n"</span>, id)
+    <span class="kw">for</span> <span class="kw">range</span> <span class="num">100_000_000</span> {}  <span class="cm">// CPU-heavy work</span>
+    fmt.<span class="fn">Printf</span>(<span class="str">"Task %d finished\n"</span>, id)
+}
+
+numThreads := runtime.<span class="fn">NumCPU</span>()
+runtime.<span class="fn">GOMAXPROCS</span>(numThreads)
+<span class="kw">var</span> wg sync.<span class="ty">WaitGroup</span>
+<span class="kw">for</span> i := <span class="kw">range</span> numThreads {
+    wg.<span class="fn">Add</span>(<span class="num">1</span>)
+    <span class="kw">go</span> <span class="fn">heavyTask</span>(i, &amp;wg)  <span class="cm">// runs on all cores in parallel</span>
+}
+wg.<span class="fn">Wait</span>()</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Concurrency vs Parallelism</div>
+  <p><strong>Concurrency</strong>: 1 cook switching between 5 dishes. <strong>Parallelism</strong>: 5 cooks each making 1 dish. Go makes concurrency easy with goroutines. <code>GOMAXPROCS</code> controls how many goroutines can truly run in parallel. For I/O-bound work, concurrency alone is enough. For CPU-bound work, parallelism gives real speedup.</p>
+</div>
+
+<!-- ===================== SECTION: STATEFUL GOROUTINES ===================== -->
+<h2 id="stateful-goroutines"><span class="section-num">38</span> Stateful Goroutines</h2>
+
+<p>Instead of sharing state with mutexes, let a <strong>single goroutine own the state</strong> and communicate via channels. This is the "share memory by communicating" philosophy.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">StatefulWorker</span> <span class="kw">struct</span> {
+    count <span class="ty">int</span>
+    ch    <span class="kw">chan</span> <span class="ty">int</span>
+}
+
+<span class="kw">func</span> (w *<span class="ty">StatefulWorker</span>) <span class="fn">Start</span>() {
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">for</span> {
+            <span class="kw">select</span> {
+            <span class="kw">case</span> value := &lt;-w.ch:
+                w.count += value  <span class="cm">// only THIS goroutine modifies count</span>
+                fmt.<span class="fn">Println</span>(<span class="str">"Current count:"</span>, w.count)
+            }
+        }
+    }()
+}
+
+<span class="kw">func</span> (w *<span class="ty">StatefulWorker</span>) <span class="fn">Send</span>(value <span class="ty">int</span>) {
+    w.ch &lt;- value  <span class="cm">// other goroutines communicate via channel</span>
+}
+
+worker := &amp;<span class="ty">StatefulWorker</span>{ch: <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)}
+worker.<span class="fn">Start</span>()
+
+<span class="kw">for</span> i := <span class="kw">range</span> <span class="num">5</span> {
+    worker.<span class="fn">Send</span>(i)  <span class="cm">// safe: no shared memory, just channels</span>
+    time.<span class="fn">Sleep</span>(<span class="num">500</span> * time.Millisecond)
+}
+<span class="cm">// Output: Current count: 0, 1, 3, 6, 10</span></code></pre>
+
+<!-- ===================== SECTION: OS SIGNALS ===================== -->
+<h2 id="signals"><span class="section-num">39</span> OS Signals</h2>
+
+<p>Handle OS signals (SIGINT, SIGTERM) for <strong>graceful shutdown</strong> — close database connections, flush logs, finish in-progress requests before exiting.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"os"</span>
+    <span class="str">"os/signal"</span>
+    <span class="str">"syscall"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    sigs := <span class="fn">make</span>(<span class="kw">chan</span> os.<span class="ty">Signal</span>, <span class="num">1</span>)
+    done := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">bool</span>, <span class="num">1</span>)
+
+    <span class="cm">// Listen for interrupt (Ctrl+C) and terminate signals</span>
+    signal.<span class="fn">Notify</span>(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        sig := &lt;-sigs  <span class="cm">// block until signal received</span>
+        fmt.<span class="fn">Println</span>(<span class="str">"\nReceived signal:"</span>, sig)
+        <span class="cm">// Cleanup: close DB, flush logs, etc.</span>
+        done &lt;- <span class="kw">true</span>
+    }()
+
+    fmt.<span class="fn">Println</span>(<span class="str">"Server running... Press Ctrl+C to stop"</span>)
+    &lt;-done  <span class="cm">// wait for shutdown signal</span>
+    fmt.<span class="fn">Println</span>(<span class="str">"Graceful shutdown complete"</span>)
+}
+
+<span class="cm">// Common signals:</span>
+<span class="cm">// SIGINT  (2)  — Ctrl+C interrupt</span>
+<span class="cm">// SIGTERM (15) — graceful termination request</span>
+<span class="cm">// SIGHUP  (1)  — terminal closed / config reload</span>
+<span class="cm">// SIGUSR1 (10) — user-defined signal</span></code></pre>
+
+<!-- ===================== SECTION: RATE LIMITING ===================== -->
+<h2 id="rate-limiting"><span class="section-num">40</span> Rate Limiting</h2>
+
+<p>Rate limiting controls how frequently operations are allowed. Essential for APIs, preventing abuse, and resource management. Three classic algorithms:</p>
+
+<h3>1. Fixed Window Algorithm</h3>
+<p>Counts requests in a fixed time window. Simple but can allow burst at window boundaries.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">FixedWindowLimiter</span> <span class="kw">struct</span> {
+    mu        sync.<span class="ty">Mutex</span>
+    count     <span class="ty">int</span>
+    limit     <span class="ty">int</span>            <span class="cm">// max requests per window</span>
+    window    time.<span class="ty">Duration</span>   <span class="cm">// window size</span>
+    resetTime time.<span class="ty">Time</span>       <span class="cm">// when current window ends</span>
+}
+
+<span class="kw">func</span> (rl *<span class="ty">FixedWindowLimiter</span>) <span class="fn">Allow</span>() <span class="ty">bool</span> {
+    rl.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> rl.mu.<span class="fn">Unlock</span>()
+
+    now := time.<span class="fn">Now</span>()
+    <span class="kw">if</span> now.<span class="fn">After</span>(rl.resetTime) {  <span class="cm">// window expired, reset</span>
+        rl.resetTime = now.<span class="fn">Add</span>(rl.window)
+        rl.count = <span class="num">0</span>
+    }
+    <span class="kw">if</span> rl.count &lt; rl.limit {
+        rl.count++
+        <span class="kw">return</span> <span class="kw">true</span>  <span class="cm">// allowed</span>
+    }
+    <span class="kw">return</span> <span class="kw">false</span>  <span class="cm">// denied</span>
+}
+
+limiter := &amp;<span class="ty">FixedWindowLimiter</span>{limit: <span class="num">3</span>, window: time.Second}</code></pre>
+
+<h3>2. Token Bucket Algorithm</h3>
+<p>Tokens are added at a steady rate. Each request consumes a token. Allows short bursts up to bucket capacity.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">TokenBucket</span> <span class="kw">struct</span> {
+    tokens     <span class="kw">chan</span> <span class="kw">struct</span>{}  <span class="cm">// buffered channel = bucket</span>
+    refillTime time.<span class="ty">Duration</span>
+}
+
+<span class="kw">func</span> <span class="fn">NewTokenBucket</span>(capacity <span class="ty">int</span>, refill time.<span class="ty">Duration</span>) *<span class="ty">TokenBucket</span> {
+    tb := &amp;<span class="ty">TokenBucket</span>{
+        tokens:     <span class="fn">make</span>(<span class="kw">chan</span> <span class="kw">struct</span>{}, capacity),
+        refillTime: refill,
+    }
+    <span class="kw">for</span> <span class="kw">range</span> capacity { tb.tokens &lt;- <span class="kw">struct</span>{}{} }  <span class="cm">// fill bucket</span>
+    <span class="kw">go</span> tb.<span class="fn">startRefill</span>()
+    <span class="kw">return</span> tb
+}
+
+<span class="kw">func</span> (tb *<span class="ty">TokenBucket</span>) <span class="fn">startRefill</span>() {
+    ticker := time.<span class="fn">NewTicker</span>(tb.refillTime)
+    <span class="kw">defer</span> ticker.<span class="fn">Stop</span>()
+    <span class="kw">for</span> <span class="kw">range</span> ticker.C {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> tb.tokens &lt;- <span class="kw">struct</span>{}{}:  <span class="cm">// add token if not full</span>
+        <span class="kw">default</span>:  <span class="cm">// bucket full, skip</span>
+        }
+    }
+}
+
+<span class="kw">func</span> (tb *<span class="ty">TokenBucket</span>) <span class="fn">Allow</span>() <span class="ty">bool</span> {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> &lt;-tb.tokens: <span class="kw">return</span> <span class="kw">true</span>   <span class="cm">// consumed a token</span>
+    <span class="kw">default</span>:          <span class="kw">return</span> <span class="kw">false</span>  <span class="cm">// no tokens available</span>
+    }
+}
+
+rl := <span class="fn">NewTokenBucket</span>(<span class="num">5</span>, time.Second)  <span class="cm">// 5 tokens, refill 1/sec</span></code></pre>
+
+<h3>3. Leaky Bucket Algorithm</h3>
+<p>Processes requests at a fixed rate. Excess requests are queued (or dropped). Smoothest output rate of the three.</p>
+
+<pre><code><span class="kw">type</span> <span class="ty">LeakyBucket</span> <span class="kw">struct</span> {
+    capacity <span class="ty">int</span>
+    leakRate time.<span class="ty">Duration</span>  <span class="cm">// time between leaks</span>
+    tokens   <span class="ty">int</span>
+    lastLeak time.<span class="ty">Time</span>
+    mu       sync.<span class="ty">Mutex</span>
+}
+
+<span class="kw">func</span> (lb *<span class="ty">LeakyBucket</span>) <span class="fn">Allow</span>() <span class="ty">bool</span> {
+    lb.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> lb.mu.<span class="fn">Unlock</span>()
+
+    elapsed := time.<span class="fn">Since</span>(lb.lastLeak)
+    tokensToAdd := <span class="ty">int</span>(elapsed / lb.leakRate)
+    lb.tokens += tokensToAdd
+    <span class="kw">if</span> lb.tokens > lb.capacity { lb.tokens = lb.capacity }
+    lb.lastLeak = lb.lastLeak.<span class="fn">Add</span>(time.<span class="fn">Duration</span>(tokensToAdd) * lb.leakRate)
+
+    <span class="kw">if</span> lb.tokens > <span class="num">0</span> { lb.tokens--; <span class="kw">return</span> <span class="kw">true</span> }
+    <span class="kw">return</span> <span class="kw">false</span>
+}</code></pre>
+
 <!-- ===================== SECTION 21: GENERICS ===================== -->
-<h2 id="generics"><span class="section-num">21</span> Generics (Go 1.18+)</h2>
+<h2 id="generics"><span class="section-num">41</span> Generics (Go 1.18+)</h2>
 
 <pre><code><span class="cm">// Generic function</span>
 <span class="kw">func</span> <span class="fn">Min</span>[<span class="ty">T</span> constraints.Ordered](a, b <span class="ty">T</span>) <span class="ty">T</span> {  <span class="cm">// T must support < operator</span>
@@ -1574,7 +2798,7 @@ ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num
 }</code></pre>
 
 <!-- ===================== SECTION 22: CLOSURES ===================== -->
-<h2 id="closures"><span class="section-num">22</span> Closures & Higher-Order Functions</h2>
+<h2 id="closures"><span class="section-num">42</span> Closures & Higher-Order Functions</h2>
 
 <pre><code><span class="cm">// Closure — captures variables from outer scope</span>
 <span class="kw">func</span> <span class="fn">counter</span>() <span class="kw">func</span>() <span class="ty">int</span> {  <span class="cm">// returns a function</span>
@@ -1593,7 +2817,7 @@ double := <span class="fn">multiplier</span>(<span class="num">2</span>)  <span 
 double(<span class="num">5</span>)  <span class="cm">// 10</span></code></pre>
 
 <!-- ===================== SECTION 23: DEFER PANIC RECOVER ===================== -->
-<h2 id="defer"><span class="section-num">23</span> Defer, Panic, Recover</h2>
+<h2 id="defer"><span class="section-num">43</span> Defer, Panic, Recover</h2>
 
 <pre><code><span class="cm">// defer — executes when function returns (LIFO order)</span>
 f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <span class="cm">// open file, ignoring error for brevity</span>
@@ -1622,7 +2846,7 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
 }</code></pre>
 
 <!-- ===================== SECTION 24: LINKED LIST ===================== -->
-<h2 id="linked-list"><span class="section-num">24</span> Linked List</h2>
+<h2 id="linked-list"><span class="section-num">44</span> Linked List</h2>
 
 <pre><code><span class="kw">type</span> <span class="ty">Node</span>[<span class="ty">T</span> <span class="ty">any</span>] <span class="kw">struct</span> {  <span class="cm">// generic node for any type T</span>
     Val  <span class="ty">T</span>  <span class="cm">// the data stored in this node</span>
@@ -1671,7 +2895,7 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
 }</code></pre>
 
 <!-- ===================== SECTION 25: STACK & QUEUE ===================== -->
-<h2 id="stack-queue"><span class="section-num">25</span> Stack & Queue</h2>
+<h2 id="stack-queue"><span class="section-num">45</span> Stack & Queue</h2>
 
 <pre><code><span class="cm">// Stack (LIFO)</span>
 <span class="kw">type</span> <span class="ty">Stack</span>[<span class="ty">T</span> <span class="ty">any</span>] <span class="kw">struct</span> { items []<span class="ty">T</span> }  <span class="cm">// backed by a slice</span>
@@ -1713,7 +2937,7 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
 }</code></pre>
 
 <!-- ===================== SECTION 26: BST ===================== -->
-<h2 id="tree"><span class="section-num">26</span> Binary Tree / BST</h2>
+<h2 id="tree"><span class="section-num">46</span> Binary Tree / BST</h2>
 
 <pre><code><span class="kw">type</span> <span class="ty">TreeNode</span> <span class="kw">struct</span> {
     Val         <span class="ty">int</span>  <span class="cm">// node value</span>
@@ -1764,7 +2988,7 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
 }</code></pre>
 
 <!-- ===================== SECTION 27: GRAPH ===================== -->
-<h2 id="graph"><span class="section-num">27</span> Graph</h2>
+<h2 id="graph"><span class="section-num">47</span> Graph</h2>
 
 <pre><code><span class="kw">type</span> <span class="ty">Graph</span> <span class="kw">struct</span> {
     adj      <span class="kw">map</span>[<span class="ty">string</span>][]<span class="ty">string</span>  <span class="cm">// adjacency list</span>
@@ -1808,7 +3032,7 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
 }</code></pre>
 
 <!-- ===================== SECTION 28: HASH TABLE ===================== -->
-<h2 id="hashtable"><span class="section-num">28</span> Hash Table (from scratch)</h2>
+<h2 id="hashtable"><span class="section-num">48</span> Hash Table (from scratch)</h2>
 
 <pre><code><span class="cm">// Go maps ARE hash tables. This is for understanding.</span>
 <span class="kw">const</span> tableSize = <span class="num">64</span>  <span class="cm">// number of buckets</span>
@@ -1838,8 +3062,66 @@ f, _ := os.<span class="fn">Open</span>(<span class="str">"file.txt"</span>)  <s
     <span class="kw">return</span> <span class="num">0</span>, <span class="kw">false</span>  <span class="cm">// not found</span>
 }</code></pre>
 
+<!-- ===================== SECTION: SORTING ===================== -->
+<h2 id="sorting"><span class="section-num">49</span> Sorting</h2>
+
+<p>The <code>sort</code> package provides sorting for built-in types and custom sorting via the <code>sort.Interface</code> or <code>sort.Slice</code>.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"sort"</span>
+
+<span class="cm">// Built-in sorts</span>
+numbers := []<span class="ty">int</span>{<span class="num">5</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">1</span>, <span class="num">2</span>}
+sort.<span class="fn">Ints</span>(numbers)  <span class="cm">// [1, 2, 3, 4, 5]</span>
+
+names := []<span class="ty">string</span>{<span class="str">"John"</span>, <span class="str">"Anthony"</span>, <span class="str">"Steve"</span>}
+sort.<span class="fn">Strings</span>(names)  <span class="cm">// ["Anthony", "John", "Steve"]</span>
+
+<span class="cm">// Custom sort with sort.Slice (most common)</span>
+<span class="kw">type</span> <span class="ty">Person</span> <span class="kw">struct</span> { Name <span class="ty">string</span>; Age <span class="ty">int</span> }
+people := []Person{
+    {<span class="str">"Alice"</span>, <span class="num">30</span>}, {<span class="str">"Bob"</span>, <span class="num">25</span>}, {<span class="str">"Anna"</span>, <span class="num">35</span>},
+}
+
+<span class="cm">// Sort by age ascending</span>
+sort.<span class="fn">Slice</span>(people, <span class="kw">func</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span> {
+    <span class="kw">return</span> people[i].Age &lt; people[j].Age
+})
+<span class="cm">// [{Bob 25} {Alice 30} {Anna 35}]</span>
+
+<span class="cm">// Sort by name</span>
+sort.<span class="fn">Slice</span>(people, <span class="kw">func</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span> {
+    <span class="kw">return</span> people[i].Name &lt; people[j].Name
+})
+
+<span class="cm">// Sort by last character of string</span>
+fruits := []<span class="ty">string</span>{<span class="str">"banana"</span>, <span class="str">"apple"</span>, <span class="str">"cherry"</span>}
+sort.<span class="fn">Slice</span>(fruits, <span class="kw">func</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span> {
+    <span class="kw">return</span> fruits[i][<span class="fn">len</span>(fruits[i])-<span class="num">1</span>] &lt; fruits[j][<span class="fn">len</span>(fruits[j])-<span class="num">1</span>]
+})</code></pre>
+
+<h3>Custom Sort with sort.Interface</h3>
+<pre><code><span class="cm">// Implement Len(), Less(), Swap() for full control</span>
+<span class="kw">type</span> <span class="ty">By</span> <span class="kw">func</span>(p1, p2 *Person) <span class="ty">bool</span>
+
+<span class="kw">type</span> <span class="ty">personSorter</span> <span class="kw">struct</span> {
+    people []Person
+    by     <span class="kw">func</span>(p1, p2 *Person) <span class="ty">bool</span>
+}
+
+<span class="kw">func</span> (s *<span class="ty">personSorter</span>) <span class="fn">Len</span>() <span class="ty">int</span>           { <span class="kw">return</span> <span class="fn">len</span>(s.people) }
+<span class="kw">func</span> (s *<span class="ty">personSorter</span>) <span class="fn">Less</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span> { <span class="kw">return</span> s.<span class="fn">by</span>(&amp;s.people[i], &amp;s.people[j]) }
+<span class="kw">func</span> (s *<span class="ty">personSorter</span>) <span class="fn">Swap</span>(i, j <span class="ty">int</span>)      { s.people[i], s.people[j] = s.people[j], s.people[i] }
+
+<span class="kw">func</span> (by <span class="ty">By</span>) <span class="fn">Sort</span>(people []Person) {
+    sort.<span class="fn">Sort</span>(&amp;personSorter{people, by})
+}
+
+<span class="cm">// Usage: define sort criteria as functions</span>
+ageAsc := <span class="kw">func</span>(a, b *Person) <span class="ty">bool</span> { <span class="kw">return</span> a.Age &lt; b.Age }
+<span class="ty">By</span>(ageAsc).<span class="fn">Sort</span>(people)  <span class="cm">// sort by age ascending</span></code></pre>
+
 <!-- ===================== SECTION 29: I/O ===================== -->
-<h2 id="io"><span class="section-num">29</span> I/O & Files</h2>
+<h2 id="io"><span class="section-num">50</span> I/O & Files</h2>
 
 <pre><code><span class="cm">// Read entire file</span>
 data, err := os.<span class="fn">ReadFile</span>(<span class="str">"config.json"</span>)  <span class="cm">// returns []byte</span>
@@ -1867,8 +3149,131 @@ os.<span class="fn">MkdirAll</span>(<span class="str">"path/to/dir"</span>, <spa
 entries, _ := os.<span class="fn">ReadDir</span>(<span class="str">"."</span>)  <span class="cm">// list current directory</span>
 _ = data; _ = err; _ = entries  <span class="cm">// suppress unused-var errors</span></code></pre>
 
+<!-- ===================== SECTION: BUFIO ===================== -->
+<h2 id="bufio"><span class="section-num">51</span> Bufio & Line Filters</h2>
+
+<p>The <code>bufio</code> package wraps <code>io.Reader</code>/<code>io.Writer</code> with a buffer for efficient I/O. Essential for reading files line-by-line or writing many small pieces.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"bufio"</span>
+
+<span class="cm">// Buffered Writer — batches small writes</span>
+writer := bufio.<span class="fn">NewWriter</span>(os.Stdout)
+writer.<span class="fn">Write</span>([]<span class="ty">byte</span>(<span class="str">"Hello, bufio!\n"</span>))  <span class="cm">// writes to buffer, not stdout yet</span>
+writer.<span class="fn">WriteString</span>(<span class="str">"Direct string\n"</span>)   <span class="cm">// also buffered</span>
+writer.<span class="fn">Flush</span>()  <span class="cm">// FLUSH sends buffer to actual writer. Don't forget!</span>
+
+<span class="cm">// Buffered Reader — efficient reads</span>
+reader := bufio.<span class="fn">NewReader</span>(file)
+data := <span class="fn">make</span>([]<span class="ty">byte</span>, <span class="num">20</span>)
+n, _ := reader.<span class="fn">Read</span>(data)  <span class="cm">// read up to 20 bytes</span>
+line, _ := reader.<span class="fn">ReadString</span>(<span class="str">'\n'</span>)  <span class="cm">// read until newline</span>
+
+<span class="cm">// Scanner — most common way to read line-by-line</span>
+scanner := bufio.<span class="fn">NewScanner</span>(file)
+<span class="kw">for</span> scanner.<span class="fn">Scan</span>() {
+    line := scanner.<span class="fn">Text</span>()  <span class="cm">// current line (without \n)</span>
+    fmt.<span class="fn">Println</span>(<span class="str">"Line:"</span>, line)
+}
+<span class="kw">if</span> err := scanner.<span class="fn">Err</span>(); err != <span class="kw">nil</span> {
+    fmt.<span class="fn">Println</span>(<span class="str">"Error:"</span>, err)
+}</code></pre>
+
+<h3>Line Filter Example</h3>
+<pre><code><span class="cm">// Read a file, filter lines containing a keyword, replace text</span>
+file, _ := os.<span class="fn">Open</span>(<span class="str">"example.txt"</span>)
+<span class="kw">defer</span> file.<span class="fn">Close</span>()
+
+scanner := bufio.<span class="fn">NewScanner</span>(file)
+keyword := <span class="str">"important"</span>
+
+<span class="kw">for</span> scanner.<span class="fn">Scan</span>() {
+    line := scanner.<span class="fn">Text</span>()
+    <span class="kw">if</span> strings.<span class="fn">Contains</span>(line, keyword) {
+        updated := strings.<span class="fn">ReplaceAll</span>(line, <span class="str">"important"</span>, <span class="str">"necessary"</span>)
+        fmt.<span class="fn">Println</span>(<span class="str">"Original:"</span>, line)
+        fmt.<span class="fn">Println</span>(<span class="str">"Updated:"</span>, updated)
+    }
+}</code></pre>
+
+<!-- ===================== SECTION: FILE PATHS ===================== -->
+<h2 id="file-paths"><span class="section-num">52</span> File Paths & Directories</h2>
+
+<pre><code><span class="kw">import</span> <span class="str">"path/filepath"</span>
+
+<span class="cm">// Join paths (OS-aware separators)</span>
+p := filepath.<span class="fn">Join</span>(<span class="str">"home"</span>, <span class="str">"Documents"</span>, <span class="str">"file.zip"</span>)
+<span class="cm">// Linux: "home/Documents/file.zip"</span>
+<span class="cm">// Windows: "home\Documents\file.zip"</span>
+
+<span class="cm">// Split into directory and file</span>
+dir, file := filepath.<span class="fn">Split</span>(<span class="str">"/home/user/docs/file.txt"</span>)
+<span class="cm">// dir: "/home/user/docs/"   file: "file.txt"</span>
+
+<span class="cm">// Get parts</span>
+filepath.<span class="fn">Base</span>(<span class="str">"/home/user/docs/"</span>)    <span class="cm">// "docs"</span>
+filepath.<span class="fn">Ext</span>(<span class="str">"file.txt"</span>)             <span class="cm">// ".txt"</span>
+filepath.<span class="fn">IsAbs</span>(<span class="str">"/home/user"</span>)         <span class="cm">// true</span>
+filepath.<span class="fn">IsAbs</span>(<span class="str">"./data"</span>)             <span class="cm">// false</span>
+
+<span class="cm">// Normalize messy paths</span>
+filepath.<span class="fn">Clean</span>(<span class="str">"./data/../data/file.txt"</span>)  <span class="cm">// "data/file.txt"</span>
+
+<span class="cm">// Relative path between two paths</span>
+rel, _ := filepath.<span class="fn">Rel</span>(<span class="str">"a/b"</span>, <span class="str">"a/b/t/file"</span>)  <span class="cm">// "t/file"</span>
+
+<span class="cm">// Convert relative to absolute</span>
+abs, _ := filepath.<span class="fn">Abs</span>(<span class="str">"./data/file.txt"</span>)
+
+<span class="cm">// Remove extension from filename</span>
+name := strings.<span class="fn">TrimSuffix</span>(<span class="str">"file.txt"</span>, filepath.<span class="fn">Ext</span>(<span class="str">"file.txt"</span>))  <span class="cm">// "file"</span></code></pre>
+
+<h3>Directory Operations</h3>
+<pre><code><span class="cm">// Create directories</span>
+os.<span class="fn">Mkdir</span>(<span class="str">"subdir"</span>, <span class="num">0755</span>)                    <span class="cm">// single directory</span>
+os.<span class="fn">MkdirAll</span>(<span class="str">"subdir/parent/child"</span>, <span class="num">0755</span>)     <span class="cm">// create all parents too</span>
+
+<span class="cm">// List directory contents</span>
+entries, _ := os.<span class="fn">ReadDir</span>(<span class="str">"subdir"</span>)
+<span class="kw">for</span> _, entry := <span class="kw">range</span> entries {
+    fmt.<span class="fn">Println</span>(entry.<span class="fn">Name</span>(), entry.<span class="fn">IsDir</span>())
+}
+
+<span class="cm">// Walk entire directory tree recursively</span>
+filepath.<span class="fn">WalkDir</span>(<span class="str">"subdir"</span>, <span class="kw">func</span>(path <span class="ty">string</span>, d fs.<span class="ty">DirEntry</span>, err <span class="ty">error</span>) <span class="ty">error</span> {
+    fmt.<span class="fn">Println</span>(path)
+    <span class="kw">return</span> <span class="kw">nil</span>
+})
+
+<span class="cm">// Get/change working directory</span>
+dir, _ := os.<span class="fn">Getwd</span>()  <span class="cm">// current working directory</span>
+os.<span class="fn">Chdir</span>(<span class="str">"subdir"</span>)    <span class="cm">// change directory</span>
+
+<span class="cm">// Remove</span>
+os.<span class="fn">Remove</span>(<span class="str">"file.txt"</span>)       <span class="cm">// single file/empty dir</span>
+os.<span class="fn">RemoveAll</span>(<span class="str">"subdir"</span>)     <span class="cm">// recursive delete (like rm -rf)</span></code></pre>
+
+<!-- ===================== SECTION: TEMP FILES ===================== -->
+<h2 id="temp-files"><span class="section-num">53</span> Temp Files & Directories</h2>
+
+<pre><code><span class="cm">// Create a temporary file</span>
+tempFile, err := os.<span class="fn">CreateTemp</span>(<span class="str">""</span>, <span class="str">"myprefix"</span>)  <span class="cm">// "" = OS temp dir</span>
+<span class="kw">if</span> err != <span class="kw">nil</span> { panic(err) }
+fmt.<span class="fn">Println</span>(<span class="str">"Temp file:"</span>, tempFile.<span class="fn">Name</span>())  <span class="cm">// e.g., /tmp/myprefix123456</span>
+<span class="kw">defer</span> os.<span class="fn">Remove</span>(tempFile.<span class="fn">Name</span>())  <span class="cm">// clean up when done</span>
+<span class="kw">defer</span> tempFile.<span class="fn">Close</span>()
+
+<span class="cm">// Create a temporary directory</span>
+tempDir, err := os.<span class="fn">MkdirTemp</span>(<span class="str">""</span>, <span class="str">"GoCourseTempDir"</span>)
+<span class="kw">if</span> err != <span class="kw">nil</span> { panic(err) }
+fmt.<span class="fn">Println</span>(<span class="str">"Temp dir:"</span>, tempDir)
+<span class="kw">defer</span> os.<span class="fn">RemoveAll</span>(tempDir)  <span class="cm">// clean up recursively</span>
+
+<span class="cm">// Use case: write temp data, process it, then clean up</span>
+<span class="cm">// The "" first arg means use the system's default temp directory</span>
+<span class="cm">// You can pass a specific directory path instead</span></code></pre>
+
 <!-- ===================== SECTION 30: JSON ===================== -->
-<h2 id="json"><span class="section-num">30</span> JSON & Encoding</h2>
+<h2 id="json"><span class="section-num">54</span> JSON & Encoding</h2>
 
 <pre><code><span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {
     ID    <span class="ty">int</span>    <span class="str">`json:"id"`</span>  <span class="cm">// maps Go field to JSON key</span>
@@ -1894,8 +3299,233 @@ json.<span class="fn">NewEncoder</span>(w).<span class="fn">Encode</span>(user) 
 json.<span class="fn">NewDecoder</span>(r.Body).<span class="fn">Decode</span>(&amp;u)  <span class="cm">// read from io.Reader</span>
 _ = jsonBytes; _ = data  <span class="cm">// suppress unused-var errors</span></code></pre>
 
+<!-- ===================== SECTION: XML ===================== -->
+<h2 id="xml"><span class="section-num">55</span> XML Encoding</h2>
+
+<p>Works exactly like JSON encoding but uses <code>encoding/xml</code>. Struct tags control element names, attributes, and omission.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"encoding/xml"</span>
+
+<span class="kw">type</span> <span class="ty">Person</span> <span class="kw">struct</span> {
+    XMLName xml.<span class="ty">Name</span> <span class="str">`xml:"person"`</span>  <span class="cm">// root element name</span>
+    Name    <span class="ty">string</span>   <span class="str">`xml:"name"`</span>
+    Age     <span class="ty">int</span>      <span class="str">`xml:"age,omitempty"`</span>  <span class="cm">// omit if zero</span>
+    Email   <span class="ty">string</span>   <span class="str">`xml:"-"`</span>              <span class="cm">// always exclude</span>
+    Address Address  <span class="str">`xml:"address"`</span>        <span class="cm">// nested element</span>
+}
+
+<span class="cm">// Marshal struct → XML</span>
+person := Person{Name: <span class="str">"John"</span>, Address: Address{City: <span class="str">"Oakland"</span>, State: <span class="str">"CA"</span>}}
+xmlData, _ := xml.<span class="fn">MarshalIndent</span>(person, <span class="str">""</span>, <span class="str">"  "</span>)
+fmt.<span class="fn">Println</span>(<span class="fn">string</span>(xmlData))
+<span class="cm">// &lt;person&gt;</span>
+<span class="cm">//   &lt;name&gt;John&lt;/name&gt;</span>
+<span class="cm">//   &lt;address&gt;</span>
+<span class="cm">//     &lt;city&gt;Oakland&lt;/city&gt;</span>
+<span class="cm">//     &lt;state&gt;CA&lt;/state&gt;</span>
+<span class="cm">//   &lt;/address&gt;</span>
+<span class="cm">// &lt;/person&gt;</span>
+
+<span class="cm">// Unmarshal XML → struct</span>
+raw := <span class="str">`&lt;person&gt;&lt;name&gt;Jane&lt;/name&gt;&lt;age&gt;25&lt;/age&gt;&lt;/person&gt;`</span>
+<span class="kw">var</span> p Person
+xml.<span class="fn">Unmarshal</span>([]<span class="ty">byte</span>(raw), &amp;p)
+
+<span class="cm">// XML attributes with ,attr tag</span>
+<span class="kw">type</span> <span class="ty">Book</span> <span class="kw">struct</span> {
+    XMLName xml.<span class="ty">Name</span> <span class="str">`xml:"book"`</span>
+    ISBN    <span class="ty">string</span>   <span class="str">`xml:"isbn,attr"`</span>   <span class="cm">// becomes attribute, not element</span>
+    Title   <span class="ty">string</span>   <span class="str">`xml:"title,attr"`</span>  <span class="cm">// &lt;book isbn="..." title="..."&gt;</span>
+}</code></pre>
+
+<!-- ===================== SECTION: BASE64 ===================== -->
+<h2 id="base64"><span class="section-num">56</span> Base64 Encoding</h2>
+
+<p>Base64 converts binary data to ASCII text. Used for embedding images, transmitting binary in JSON/XML, and basic data encoding.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"encoding/base64"</span>
+
+data := []<span class="ty">byte</span>(<span class="str">"Hello, Base64 Encoding"</span>)
+
+<span class="cm">// Encode to Base64</span>
+encoded := base64.StdEncoding.<span class="fn">EncodeToString</span>(data)
+fmt.<span class="fn">Println</span>(encoded)  <span class="cm">// "SGVsbG8sIEJhc2U2NCBFbmNvZGluZw=="</span>
+
+<span class="cm">// Decode from Base64</span>
+decoded, err := base64.StdEncoding.<span class="fn">DecodeString</span>(encoded)
+<span class="kw">if</span> err != <span class="kw">nil</span> { fmt.<span class="fn">Println</span>(<span class="str">"Error:"</span>, err); <span class="kw">return</span> }
+fmt.<span class="fn">Println</span>(<span class="fn">string</span>(decoded))  <span class="cm">// "Hello, Base64 Encoding"</span>
+
+<span class="cm">// URL-safe encoding (avoids / and + which break URLs)</span>
+urlSafe := base64.URLEncoding.<span class="fn">EncodeToString</span>(data)
+fmt.<span class="fn">Println</span>(<span class="str">"URL Safe:"</span>, urlSafe)
+
+<span class="cm">// StdEncoding: uses + and / (standard)</span>
+<span class="cm">// URLEncoding: uses - and _ (safe for URLs and filenames)</span></code></pre>
+
+<!-- ===================== SECTION: HASHING ===================== -->
+<h2 id="hashing"><span class="section-num">57</span> Hashing & Cryptography</h2>
+
+<p>Hashing creates a fixed-size fingerprint of data. One-way (can't reverse), deterministic (same input = same hash), and collision-resistant.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"crypto/rand"</span>
+    <span class="str">"crypto/sha256"</span>
+    <span class="str">"encoding/base64"</span>
+    <span class="str">"io"</span>
+)
+
+<span class="cm">// Simple SHA-256 hash</span>
+hash := sha256.<span class="fn">Sum256</span>([]<span class="ty">byte</span>(<span class="str">"password123"</span>))
+fmt.<span class="fn">Printf</span>(<span class="str">"SHA-256: %x\n"</span>, hash)
+
+<span class="cm">// Password hashing with SALT (proper way)</span>
+<span class="kw">func</span> <span class="fn">generateSalt</span>() ([]<span class="ty">byte</span>, <span class="ty">error</span>) {
+    salt := <span class="fn">make</span>([]<span class="ty">byte</span>, <span class="num">16</span>)
+    _, err := io.<span class="fn">ReadFull</span>(rand.Reader, salt)  <span class="cm">// crypto-secure random</span>
+    <span class="kw">return</span> salt, err
+}
+
+<span class="kw">func</span> <span class="fn">hashPassword</span>(password <span class="ty">string</span>, salt []<span class="ty">byte</span>) <span class="ty">string</span> {
+    salted := <span class="fn">append</span>(salt, []<span class="ty">byte</span>(password)...)
+    hash := sha256.<span class="fn">Sum256</span>(salted)
+    <span class="kw">return</span> base64.StdEncoding.<span class="fn">EncodeToString</span>(hash[:])
+}
+
+<span class="cm">// Sign-up: generate salt, hash password, store both</span>
+salt, _ := <span class="fn">generateSalt</span>()
+signUpHash := <span class="fn">hashPassword</span>(<span class="str">"password123"</span>, salt)
+<span class="cm">// Store salt + signUpHash in database</span>
+
+<span class="cm">// Login: retrieve salt from DB, hash input, compare</span>
+loginHash := <span class="fn">hashPassword</span>(<span class="str">"password123"</span>, salt)
+<span class="kw">if</span> signUpHash == loginHash {
+    fmt.<span class="fn">Println</span>(<span class="str">"Login successful!"</span>)
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Never hash passwords with SHA alone in production!</div>
+  <p>Use <code>bcrypt</code> or <code>argon2</code> for real password hashing. SHA-256 is too fast — attackers can brute-force billions of hashes/second. bcrypt is intentionally slow. This example teaches the concept; use <code>golang.org/x/crypto/bcrypt</code> in production.</p>
+</div>
+
+<!-- ===================== SECTION: URL PARSING ===================== -->
+<h2 id="url-parsing"><span class="section-num">58</span> URL Parsing</h2>
+
+<pre><code><span class="kw">import</span> <span class="str">"net/url"</span>
+
+<span class="cm">// Parse a URL into components</span>
+<span class="cm">// [scheme://][userinfo@]host[:port][/path][?query][#fragment]</span>
+
+raw := <span class="str">"https://example.com:8080/path?query=param#fragment"</span>
+u, _ := url.<span class="fn">Parse</span>(raw)
+
+fmt.<span class="fn">Println</span>(u.Scheme)    <span class="cm">// "https"</span>
+fmt.<span class="fn">Println</span>(u.Host)      <span class="cm">// "example.com:8080"</span>
+fmt.<span class="fn">Println</span>(u.<span class="fn">Port</span>())    <span class="cm">// "8080"</span>
+fmt.<span class="fn">Println</span>(u.Path)      <span class="cm">// "/path"</span>
+fmt.<span class="fn">Println</span>(u.RawQuery)  <span class="cm">// "query=param"</span>
+fmt.<span class="fn">Println</span>(u.Fragment)  <span class="cm">// "fragment"</span>
+
+<span class="cm">// Parse query parameters</span>
+u2, _ := url.<span class="fn">Parse</span>(<span class="str">"https://example.com?name=John&amp;age=30"</span>)
+params := u2.<span class="fn">Query</span>()
+fmt.<span class="fn">Println</span>(params.<span class="fn">Get</span>(<span class="str">"name"</span>))  <span class="cm">// "John"</span>
+fmt.<span class="fn">Println</span>(params.<span class="fn">Get</span>(<span class="str">"age"</span>))   <span class="cm">// "30"</span>
+
+<span class="cm">// Build a URL programmatically</span>
+baseURL := &amp;url.<span class="ty">URL</span>{Scheme: <span class="str">"https"</span>, Host: <span class="str">"example.com"</span>, Path: <span class="str">"/search"</span>}
+q := baseURL.<span class="fn">Query</span>()
+q.<span class="fn">Set</span>(<span class="str">"name"</span>, <span class="str">"John"</span>)
+q.<span class="fn">Set</span>(<span class="str">"city"</span>, <span class="str">"London"</span>)
+baseURL.RawQuery = q.<span class="fn">Encode</span>()
+fmt.<span class="fn">Println</span>(baseURL.<span class="fn">String</span>())  <span class="cm">// "https://example.com/search?city=London&amp;name=John"</span>
+
+<span class="cm">// url.Values — encode query strings manually</span>
+values := url.<span class="ty">Values</span>{}
+values.<span class="fn">Add</span>(<span class="str">"name"</span>, <span class="str">"Jane"</span>)
+values.<span class="fn">Add</span>(<span class="str">"age"</span>, <span class="str">"30"</span>)
+encoded := values.<span class="fn">Encode</span>()  <span class="cm">// "age=30&amp;name=Jane"</span></code></pre>
+
+<!-- ===================== SECTION: TEMPLATES ===================== -->
+<h2 id="templates"><span class="section-num">59</span> Text Templates</h2>
+
+<p>Go's <code>text/template</code> and <code>html/template</code> packages render dynamic text from templates. HTML templates auto-escape to prevent XSS.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"html/template"</span>
+
+<span class="cm">// Parse and execute a template</span>
+tmpl := template.<span class="fn">Must</span>(
+    template.<span class="fn">New</span>(<span class="str">"greeting"</span>).<span class="fn">Parse</span>(<span class="str">"Welcome, {{.name}}! Age: {{.age}}\n"</span>),
+)
+
+data := <span class="kw">map</span>[<span class="ty">string</span>]<span class="kw">interface</span>{}{
+    <span class="str">"name"</span>: <span class="str">"John"</span>,
+    <span class="str">"age"</span>:  <span class="num">25</span>,
+}
+tmpl.<span class="fn">Execute</span>(os.Stdout, data)  <span class="cm">// Welcome, John! Age: 25</span>
+
+<span class="cm">// template.Must panics if Parse fails — use for known-good templates</span>
+<span class="cm">// template.New("name").Parse("...") returns (Template, error)</span>
+
+<span class="cm">// Multiple named templates</span>
+templates := <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>{
+    <span class="str">"welcome"</span>:      <span class="str">"Welcome, {{.name}}!"</span>,
+    <span class="str">"notification"</span>: <span class="str">"{{.name}}, you have: {{.msg}}"</span>,
+    <span class="str">"error"</span>:        <span class="str">"Oops! Error: {{.err}}"</span>,
+}
+parsed := <span class="fn">make</span>(<span class="kw">map</span>[<span class="ty">string</span>]*template.<span class="ty">Template</span>)
+<span class="kw">for</span> name, tmpl := <span class="kw">range</span> templates {
+    parsed[name] = template.<span class="fn">Must</span>(template.<span class="fn">New</span>(name).<span class="fn">Parse</span>(tmpl))
+}
+
+<span class="cm">// Use the right template based on context</span>
+parsed[<span class="str">"welcome"</span>].<span class="fn">Execute</span>(os.Stdout, <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>{<span class="str">"name"</span>: <span class="str">"Alice"</span>})
+<span class="cm">// Welcome, Alice!</span></code></pre>
+
+<!-- ===================== SECTION: EMBED ===================== -->
+<h2 id="embed"><span class="section-num">60</span> Embed Directive</h2>
+
+<p>Go 1.16+ lets you <strong>embed files directly into your binary</strong> at compile time. No external files needed at runtime — perfect for templates, config, static assets.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"embed"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"io/fs"</span>
+)
+
+<span class="cm">// Embed a single file as string</span>
+<span class="cm">//go:embed config.txt</span>
+<span class="kw">var</span> configContent <span class="ty">string</span>  <span class="cm">// file content loaded at compile time</span>
+
+<span class="cm">// Embed a single file as bytes</span>
+<span class="cm">//go:embed logo.png</span>
+<span class="kw">var</span> logoBytes []<span class="ty">byte</span>
+
+<span class="cm">// Embed entire directory</span>
+<span class="cm">//go:embed templates</span>
+<span class="kw">var</span> templatesFS embed.<span class="ty">FS</span>
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"Config:"</span>, configContent)
+
+    <span class="cm">// Read a file from embedded filesystem</span>
+    content, _ := templatesFS.<span class="fn">ReadFile</span>(<span class="str">"templates/index.html"</span>)
+    fmt.<span class="fn">Println</span>(<span class="fn">string</span>(content))
+
+    <span class="cm">// Walk embedded directory</span>
+    fs.<span class="fn">WalkDir</span>(templatesFS, <span class="str">"templates"</span>, <span class="kw">func</span>(path <span class="ty">string</span>, d fs.<span class="ty">DirEntry</span>, err <span class="ty">error</span>) <span class="ty">error</span> {
+        fmt.<span class="fn">Println</span>(path)
+        <span class="kw">return</span> <span class="kw">nil</span>
+    })
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">The //go:embed directive must be on the line directly above the var</div>
+  <p>No blank lines between the comment and the variable declaration. The comment is NOT a regular comment — it's a compiler directive. The embedded files are included in the compiled binary, making your app truly self-contained.</p>
+</div>
+
 <!-- ===================== SECTION 31: HTTP ===================== -->
-<h2 id="http"><span class="section-num">31</span> HTTP & Networking</h2>
+<h2 id="http"><span class="section-num">61</span> HTTP & Networking</h2>
 
 <pre><code><span class="cm">// Simple server</span>
 http.<span class="fn">HandleFunc</span>(<span class="str">"/hello"</span>, <span class="kw">func</span>(w http.<span class="ty">ResponseWriter</span>, r *http.<span class="ty">Request</span>) {
@@ -1926,7 +3556,7 @@ resp, err := client.<span class="fn">Do</span>(req)  <span class="cm">// send re
 _ = err  <span class="cm">// handle error in real code</span></code></pre>
 
 <!-- ===================== SECTION 32: TESTING ===================== -->
-<h2 id="testing"><span class="section-num">32</span> Testing</h2>
+<h2 id="testing"><span class="section-num">62</span> Testing</h2>
 
 <div class="file-tree">
 <span class="folder">myproject/</span>
@@ -1964,8 +3594,228 @@ _ = err  <span class="cm">// handle error in real code</span></code></pre>
     <span class="kw">for</span> i := <span class="num">0</span>; i &lt; b.N; i++ { <span class="fn">Add</span>(<span class="num">2</span>, <span class="num">3</span>) }  <span class="cm">// b.N auto-tuned by framework</span>
 }</code></pre>
 
+<!-- ===================== SECTION: BENCHMARKING ===================== -->
+<h2 id="benchmarking"><span class="section-num">63</span> Benchmarking</h2>
+
+<p>Go has built-in benchmarking in the <code>testing</code> package. Benchmark functions start with <code>Benchmark</code> and use <code>b.N</code> — the framework automatically determines how many iterations to run.</p>
+
+<pre><code><span class="cm">// File: math_test.go</span>
+
+<span class="kw">func</span> <span class="fn">GenerateRandomSlice</span>(size <span class="ty">int</span>) []<span class="ty">int</span> {
+    slice := <span class="fn">make</span>([]<span class="ty">int</span>, size)
+    <span class="kw">for</span> i := <span class="kw">range</span> slice { slice[i] = rand.<span class="fn">Intn</span>(<span class="num">100</span>) }
+    <span class="kw">return</span> slice
+}
+
+<span class="kw">func</span> <span class="fn">SumSlice</span>(slice []<span class="ty">int</span>) <span class="ty">int</span> {
+    sum := <span class="num">0</span>
+    <span class="kw">for</span> _, v := <span class="kw">range</span> slice { sum += v }
+    <span class="kw">return</span> sum
+}
+
+<span class="cm">// Benchmark function — must start with Benchmark</span>
+<span class="kw">func</span> <span class="fn">BenchmarkGenerateRandomSlice</span>(b *testing.<span class="ty">B</span>) {
+    <span class="kw">for</span> <span class="kw">range</span> b.N {  <span class="cm">// b.N is set by the framework</span>
+        <span class="fn">GenerateRandomSlice</span>(<span class="num">1000</span>)
+    }
+}
+
+<span class="kw">func</span> <span class="fn">BenchmarkSumSlice</span>(b *testing.<span class="ty">B</span>) {
+    slice := <span class="fn">GenerateRandomSlice</span>(<span class="num">1000</span>)
+    b.<span class="fn">ResetTimer</span>()  <span class="cm">// exclude setup time from benchmark</span>
+    <span class="kw">for</span> <span class="kw">range</span> b.N {
+        <span class="fn">SumSlice</span>(slice)
+    }
+}</code></pre>
+
+<div class="cmd-table">
+<table>
+  <tr><th>Command</th><th>Description</th></tr>
+  <tr><td><code>go test -bench=.</code></td><td>Run all benchmarks</td></tr>
+  <tr><td><code>go test -bench=Sum</code></td><td>Run benchmarks matching "Sum"</td></tr>
+  <tr><td><code>go test -bench=. -benchmem</code></td><td>Include memory allocation stats</td></tr>
+  <tr><td><code>go test -bench=. -count=5</code></td><td>Run each benchmark 5 times</td></tr>
+  <tr><td><code>go test -bench=. -benchtime=5s</code></td><td>Run for 5 seconds minimum</td></tr>
+</table>
+</div>
+
+<!-- ===================== SECTION: OS PROCESSES ===================== -->
+<h2 id="os-processes"><span class="section-num">64</span> OS Processes & Exec</h2>
+
+<p>The <code>os/exec</code> package runs external commands from Go. You can capture output, pipe input, and manage process lifecycle.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"os/exec"</span>
+
+<span class="cm">// Run a command and capture output</span>
+cmd := exec.<span class="fn">Command</span>(<span class="str">"ls"</span>, <span class="str">"-l"</span>)
+output, err := cmd.<span class="fn">CombinedOutput</span>()  <span class="cm">// stdout + stderr combined</span>
+<span class="kw">if</span> err != <span class="kw">nil</span> { fmt.<span class="fn">Println</span>(<span class="str">"Error:"</span>, err); <span class="kw">return</span> }
+fmt.<span class="fn">Println</span>(<span class="fn">string</span>(output))
+
+<span class="cm">// Pipe input to a command</span>
+cmd = exec.<span class="fn">Command</span>(<span class="str">"grep"</span>, <span class="str">"foo"</span>)
+cmd.Stdin = strings.<span class="fn">NewReader</span>(<span class="str">"food is good\nbar\nbaz\n"</span>)
+out, _ := cmd.<span class="fn">Output</span>()  <span class="cm">// "food is good\n"</span>
+
+<span class="cm">// Read environment variable from command</span>
+cmd = exec.<span class="fn">Command</span>(<span class="str">"printenv"</span>, <span class="str">"SHELL"</span>)
+out, _ = cmd.<span class="fn">Output</span>()
+fmt.<span class="fn">Println</span>(<span class="fn">string</span>(out))  <span class="cm">// e.g., "/bin/zsh"</span>
+
+<span class="cm">// Start a long-running process and kill it</span>
+cmd = exec.<span class="fn">Command</span>(<span class="str">"sleep"</span>, <span class="str">"60"</span>)
+cmd.<span class="fn">Start</span>()  <span class="cm">// non-blocking start</span>
+time.<span class="fn">Sleep</span>(<span class="num">2</span> * time.Second)
+cmd.Process.<span class="fn">Kill</span>()  <span class="cm">// kill after 2 seconds</span>
+cmd.<span class="fn">Wait</span>()  <span class="cm">// wait for process to exit</span></code></pre>
+
+<!-- ===================== SECTION: CLI ARGS ===================== -->
+<h2 id="cli-args"><span class="section-num">65</span> Command Line Args & Flags</h2>
+
+<h3>Raw Arguments (os.Args)</h3>
+<pre><code><span class="kw">import</span> <span class="str">"os"</span>
+
+<span class="cm">// os.Args is a slice of all command-line arguments</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Command:"</span>, os.Args[<span class="num">0</span>])  <span class="cm">// program name</span>
+<span class="kw">for</span> i, arg := <span class="kw">range</span> os.Args {
+    fmt.<span class="fn">Println</span>(<span class="str">"Arg"</span>, i, <span class="str">":"</span>, arg)
+}
+<span class="cm">// go run main.go hello world</span>
+<span class="cm">// Arg 0: /tmp/go-build.../main</span>
+<span class="cm">// Arg 1: hello</span>
+<span class="cm">// Arg 2: world</span></code></pre>
+
+<h3>Flags (flag package)</h3>
+<pre><code><span class="kw">import</span> <span class="str">"flag"</span>
+
+<span class="cm">// Define flags with default values</span>
+<span class="kw">var</span> name <span class="ty">string</span>
+<span class="kw">var</span> age <span class="ty">int</span>
+<span class="kw">var</span> male <span class="ty">bool</span>
+
+flag.<span class="fn">StringVar</span>(&amp;name, <span class="str">"name"</span>, <span class="str">"John"</span>, <span class="str">"Name of the user"</span>)
+flag.<span class="fn">IntVar</span>(&amp;age, <span class="str">"age"</span>, <span class="num">18</span>, <span class="str">"Age of the user"</span>)
+flag.<span class="fn">BoolVar</span>(&amp;male, <span class="str">"male"</span>, <span class="kw">true</span>, <span class="str">"Gender of the user"</span>)
+
+flag.<span class="fn">Parse</span>()  <span class="cm">// parse the command-line flags</span>
+
+fmt.<span class="fn">Println</span>(<span class="str">"Name:"</span>, name, <span class="str">"Age:"</span>, age, <span class="str">"Male:"</span>, male)
+<span class="cm">// go run main.go -name=Alice -age=30 -male=false</span></code></pre>
+
+<h3>Subcommands</h3>
+<pre><code><span class="cm">// Create separate flag sets for subcommands</span>
+sub1 := flag.<span class="fn">NewFlagSet</span>(<span class="str">"deploy"</span>, flag.ExitOnError)
+sub2 := flag.<span class="fn">NewFlagSet</span>(<span class="str">"status"</span>, flag.ExitOnError)
+
+deployEnv := sub1.<span class="fn">String</span>(<span class="str">"env"</span>, <span class="str">"dev"</span>, <span class="str">"Target environment"</span>)
+statusVerbose := sub2.<span class="fn">Bool</span>(<span class="str">"verbose"</span>, <span class="kw">false</span>, <span class="str">"Verbose output"</span>)
+
+<span class="kw">if</span> <span class="fn">len</span>(os.Args) &lt; <span class="num">2</span> { fmt.<span class="fn">Println</span>(<span class="str">"Expected subcommand"</span>); os.<span class="fn">Exit</span>(<span class="num">1</span>) }
+
+<span class="kw">switch</span> os.Args[<span class="num">1</span>] {
+<span class="kw">case</span> <span class="str">"deploy"</span>:
+    sub1.<span class="fn">Parse</span>(os.Args[<span class="num">2</span>:])
+    fmt.<span class="fn">Println</span>(<span class="str">"Deploying to:"</span>, *deployEnv)
+<span class="kw">case</span> <span class="str">"status"</span>:
+    sub2.<span class="fn">Parse</span>(os.Args[<span class="num">2</span>:])
+    fmt.<span class="fn">Println</span>(<span class="str">"Verbose:"</span>, *statusVerbose)
+}
+<span class="cm">// go run main.go deploy -env=prod</span>
+<span class="cm">// go run main.go status -verbose</span></code></pre>
+
+<!-- ===================== SECTION: ENV VARS ===================== -->
+<h2 id="env-vars"><span class="section-num">66</span> Environment Variables</h2>
+
+<pre><code><span class="kw">import</span> <span class="str">"os"</span>
+
+<span class="cm">// Read environment variables</span>
+user := os.<span class="fn">Getenv</span>(<span class="str">"USER"</span>)   <span class="cm">// returns "" if not set</span>
+home := os.<span class="fn">Getenv</span>(<span class="str">"HOME"</span>)   <span class="cm">// e.g., "/home/john"</span>
+
+<span class="cm">// Set an environment variable (for this process only)</span>
+os.<span class="fn">Setenv</span>(<span class="str">"FRUIT"</span>, <span class="str">"APPLE"</span>)
+fmt.<span class="fn">Println</span>(os.<span class="fn">Getenv</span>(<span class="str">"FRUIT"</span>))  <span class="cm">// "APPLE"</span>
+
+<span class="cm">// Unset</span>
+os.<span class="fn">Unsetenv</span>(<span class="str">"FRUIT"</span>)
+fmt.<span class="fn">Println</span>(os.<span class="fn">Getenv</span>(<span class="str">"FRUIT"</span>))  <span class="cm">// "" (empty)</span>
+
+<span class="cm">// Check if a var exists (Getenv can't distinguish "" from unset)</span>
+val, exists := os.<span class="fn">LookupEnv</span>(<span class="str">"DATABASE_URL"</span>)
+<span class="kw">if</span> !exists { fmt.<span class="fn">Println</span>(<span class="str">"DATABASE_URL not set!"</span>) }
+
+<span class="cm">// List ALL environment variables</span>
+<span class="kw">for</span> _, e := <span class="kw">range</span> os.<span class="fn">Environ</span>() {
+    pair := strings.<span class="fn">SplitN</span>(e, <span class="str">"="</span>, <span class="num">2</span>)  <span class="cm">// split key=value</span>
+    fmt.<span class="fn">Printf</span>(<span class="str">"%s = %s\n"</span>, pair[<span class="num">0</span>], pair[<span class="num">1</span>])
+}</code></pre>
+
+<!-- ===================== SECTION: LOGGING ===================== -->
+<h2 id="logging"><span class="section-num">67</span> Logging</h2>
+
+<h3>Standard Library (log package)</h3>
+<pre><code><span class="kw">import</span> <span class="str">"log"</span>
+
+<span class="cm">// Basic logging</span>
+log.<span class="fn">Println</span>(<span class="str">"This is a log message."</span>)  <span class="cm">// 2024/07/30 12:30:45 This is a log message.</span>
+
+<span class="cm">// Customize prefix and flags</span>
+log.<span class="fn">SetPrefix</span>(<span class="str">"INFO: "</span>)
+log.<span class="fn">SetFlags</span>(log.Ldate | log.Ltime | log.Lshortfile)
+log.<span class="fn">Println</span>(<span class="str">"With file info"</span>)  <span class="cm">// INFO: 2024/07/30 12:30:45 main.go:15: With file info</span>
+
+<span class="cm">// Multiple loggers with different levels</span>
+infoLog  := log.<span class="fn">New</span>(os.Stdout, <span class="str">"INFO: "</span>, log.Ldate|log.Ltime|log.Lshortfile)
+warnLog  := log.<span class="fn">New</span>(os.Stdout, <span class="str">"WARN: "</span>, log.Ldate|log.Ltime)
+errorLog := log.<span class="fn">New</span>(os.Stderr, <span class="str">"ERROR: "</span>, log.Ldate|log.Ltime|log.Lshortfile)
+
+infoLog.<span class="fn">Println</span>(<span class="str">"Server started"</span>)
+warnLog.<span class="fn">Println</span>(<span class="str">"Cache miss"</span>)
+errorLog.<span class="fn">Println</span>(<span class="str">"Database connection failed"</span>)
+
+<span class="cm">// Log to a file</span>
+file, _ := os.<span class="fn">OpenFile</span>(<span class="str">"app.log"</span>, os.O_CREATE|os.O_WRONLY|os.O_APPEND, <span class="num">0666</span>)
+<span class="kw">defer</span> file.<span class="fn">Close</span>()
+fileLogger := log.<span class="fn">New</span>(file, <span class="str">"APP: "</span>, log.Ldate|log.Ltime)
+fileLogger.<span class="fn">Println</span>(<span class="str">"Logged to file"</span>)
+
+<span class="cm">// Fatal and Panic</span>
+log.<span class="fn">Fatal</span>(<span class="str">"Fatal error"</span>)  <span class="cm">// logs + os.Exit(1)</span>
+log.<span class="fn">Panic</span>(<span class="str">"Panic!"</span>)       <span class="cm">// logs + panic()</span></code></pre>
+
+<h3>Uber's Zap (structured logging)</h3>
+<pre><code><span class="cm">// go get go.uber.org/zap</span>
+<span class="kw">import</span> <span class="str">"go.uber.org/zap"</span>
+
+logger, _ := zap.<span class="fn">NewProduction</span>()  <span class="cm">// structured JSON output</span>
+<span class="kw">defer</span> logger.<span class="fn">Sync</span>()  <span class="cm">// flush buffered logs</span>
+
+logger.<span class="fn">Info</span>(<span class="str">"User logged in"</span>,
+    zap.<span class="fn">String</span>(<span class="str">"username"</span>, <span class="str">"John"</span>),
+    zap.<span class="fn">String</span>(<span class="str">"method"</span>, <span class="str">"GET"</span>),
+)
+<span class="cm">// {"level":"info","ts":1722345600,"msg":"User logged in","username":"John","method":"GET"}</span></code></pre>
+
+<h3>Logrus (structured + levels)</h3>
+<pre><code><span class="cm">// go get github.com/sirupsen/logrus</span>
+<span class="kw">import</span> <span class="str">"github.com/sirupsen/logrus"</span>
+
+log := logrus.<span class="fn">New</span>()
+log.<span class="fn">SetLevel</span>(logrus.InfoLevel)
+log.<span class="fn">SetFormatter</span>(&amp;logrus.<span class="ty">JSONFormatter</span>{})  <span class="cm">// JSON output</span>
+
+log.<span class="fn">Info</span>(<span class="str">"This is an info message."</span>)
+log.<span class="fn">Warn</span>(<span class="str">"This is a warning."</span>)
+log.<span class="fn">Error</span>(<span class="str">"This is an error."</span>)
+
+<span class="cm">// Structured logging with fields</span>
+log.<span class="fn">WithFields</span>(logrus.<span class="ty">Fields</span>{
+    <span class="str">"username"</span>: <span class="str">"John"</span>,
+    <span class="str">"method"</span>:   <span class="str">"GET"</span>,
+}).<span class="fn">Info</span>(<span class="str">"User logged in."</span>)</code></pre>
+
 <!-- ===================== SECTION 33: REFLECTION ===================== -->
-<h2 id="reflection"><span class="section-num">33</span> Reflection</h2>
+<h2 id="reflection"><span class="section-num">68</span> Reflection</h2>
 
 <pre><code><span class="kw">import</span> <span class="str">"reflect"</span>  <span class="cm">// runtime type inspection</span>
 
@@ -1986,7 +3836,7 @@ v.<span class="fn">FieldByName</span>(<span class="str">"Name"</span>).<span cla
 <span class="cm">// Prefer generics for type-safe generic code.</span></code></pre>
 
 <!-- ===================== SECTION 34: UNSAFE ===================== -->
-<h2 id="unsafe"><span class="section-num">34</span> Unsafe & Cgo</h2>
+<h2 id="unsafe"><span class="section-num">69</span> Unsafe & Cgo</h2>
 
 <pre><code><span class="cm">// Struct padding — field order matters!</span>
 <span class="kw">type</span> <span class="ty">Bad</span> <span class="kw">struct</span>  { a <span class="ty">bool</span>; b <span class="ty">int64</span>; c <span class="ty">bool</span> }  <span class="cm">// 24 bytes</span>
@@ -2000,7 +3850,7 @@ fmt.<span class="fn">Println</span>(unsafe.<span class="fn">Sizeof</span>(<span 
 _ = Bad{}; _ = Good{}  <span class="cm">// suppress unused-type errors</span></code></pre>
 
 <!-- ===================== SECTION 35: PATTERNS ===================== -->
-<h2 id="patterns"><span class="section-num">35</span> Design Patterns</h2>
+<h2 id="patterns"><span class="section-num">70</span> Design Patterns</h2>
 
 <pre><code><span class="cm">// Singleton (sync.Once)</span>
 <span class="kw">var</span> dbOnce sync.<span class="ty">Once</span>; <span class="kw">var</span> db *<span class="ty">DB</span>  <span class="cm">// package-level state</span>
@@ -2036,7 +3886,7 @@ srv := <span class="fn">NewServer</span>(<span class="str">"localhost"</span>, <
 _ = srv  <span class="cm">// suppress unused-var error</span></code></pre>
 
 <!-- ===================== SECTION 36: PROJECT STRUCTURE ===================== -->
-<h2 id="project-structure"><span class="section-num">36</span> Production Project Structure</h2>
+<h2 id="project-structure"><span class="section-num">71</span> Production Project Structure</h2>
 
 <div class="file-tree">
 <span class="folder">myapi/</span>
@@ -2064,7 +3914,7 @@ _ = srv  <span class="cm">// suppress unused-var error</span></code></pre>
 </div>
 
 <!-- ===================== SECTION 37: PERFORMANCE ===================== -->
-<h2 id="performance"><span class="section-num">37</span> Performance & Profiling</h2>
+<h2 id="performance"><span class="section-num">72</span> Performance & Profiling</h2>
 
 <pre><code><span class="cm">// pprof — built-in profiler</span>
 <span class="kw">import</span> _ <span class="str">"net/http/pprof"</span>  <span class="cm">// blank import registers pprof routes</span>
@@ -2084,7 +3934,7 @@ _ = srv  <span class="cm">// suppress unused-var error</span></code></pre>
 <span class="cm">// 8. Race detector: go run -race main.go</span></code></pre>
 
 <!-- ===================== SECTION 38: IMPORTANT COMMANDS ===================== -->
-<h2 id="commands"><span class="section-num">38</span> Important Commands</h2>
+<h2 id="commands"><span class="section-num">73</span> Important Commands</h2>
 
 <p>The commands you'll actually use every day. Learn these and you're set.</p>
 
@@ -2137,7 +3987,7 @@ _ = srv  <span class="cm">// suppress unused-var error</span></code></pre>
 </div>
 
 <!-- ===================== SECTION 39: INTERVIEW QUESTIONS ===================== -->
-<h2 id="interview"><span class="section-num">39</span> Interview Questions</h2>
+<h2 id="interview"><span class="section-num">74</span> Interview Questions</h2>
 
 <div style="display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:16px 0;">
   <span id="toggleLabel" style="color:var(--dim); font-size:0.82rem; font-weight:500;">Show All</span>
@@ -2461,7 +4311,7 @@ slc := []<span class="ty">int</span>{<span class="num">1</span>,<span class="num
 </div>
 
 <!-- ===================== SECTION 40: GIN PREP ===================== -->
-<h2 id="gin-prep"><span class="section-num">40</span> Ready for Gin Framework</h2>
+<h2 id="gin-prep"><span class="section-num">75</span> Ready for Gin Framework</h2>
 
 <div class="tip-box" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
   <div>
