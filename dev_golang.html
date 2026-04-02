@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Dev — Building Real Applications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b; --surface: #0c0c0e; --card: #111113;
+    --border: #1e1e22; --border2: #27272a;
+    --text: #fafafa; --muted: #a1a1aa; --dim: #71717a;
+    --accent: #00ADD8; --accent2: #CE3262;
+    --green: #22c55e; --yellow: #eab308; --orange: #f97316;
+    --purple: #a78bfa; --pink: #ec4899; --sky: #38bdf8;
+    --red: #ef4444;
+    --sidebar-w: 280px;
+    --sidebar-bg: linear-gradient(180deg, #0f0f12 0%, #0a0a0d 100%);
+    --sidebar-accent: rgba(0,173,216,0.08);
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-padding-top: 24px; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    font-size: 15px; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== SIDEBAR ========== */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: var(--sidebar-w); height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 0; z-index: 100;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    display: flex; flex-direction: column;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: #0f0f12; z-index: 2;
+  }
+  .sidebar-logo {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo .go-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #007d9c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: #fff;
+    flex-shrink: 0;
+  }
+  .sidebar-logo span { color: var(--text); }
+  .sidebar-logo .dim { color: var(--dim); font-weight: 400; }
+
+  .sidebar-nav { flex: 1; padding: 12px 0 24px; overflow-y: auto; }
+
+  .nav-group { margin-bottom: 4px; }
+  .nav-group-title {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.6px;
+    color: var(--dim); padding: 16px 20px 6px; font-weight: 600;
+    user-select: none;
+  }
+  .sidebar a {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 20px 7px 24px; color: var(--muted);
+    text-decoration: none; font-size: 0.82rem; font-weight: 450;
+    transition: all 0.15s ease; border-left: 2px solid transparent;
+    margin: 0 8px 0 0; border-radius: 0 6px 6px 0;
+    line-height: 1.4;
+  }
+  .sidebar a:hover {
+    color: var(--text); background: rgba(255,255,255,0.03);
+    border-left-color: var(--border2);
+  }
+  .sidebar a.active {
+    color: var(--accent);
+    background: var(--sidebar-accent);
+    border-left-color: var(--accent);
+    font-weight: 550;
+  }
+
+  /* ========== MAIN CONTENT ========== */
+  .main-wrapper {
+    margin-left: var(--sidebar-w);
+    display: flex; justify-content: center;
+    min-height: 100vh;
+  }
+  .main {
+    width: 100%; max-width: 820px;
+    padding: 48px 40px 120px;
+  }
+
+  /* ========== TYPOGRAPHY ========== */
+  h1 {
+    font-size: 2.6rem; font-weight: 800; letter-spacing: -1.5px;
+    margin-bottom: 8px; line-height: 1.1;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--sky) 40%, var(--purple) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: var(--dim); font-size: 1.05rem; margin-bottom: 48px; font-weight: 400; }
+
+  h2 {
+    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    margin: 64px 0 12px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border); letter-spacing: -0.5px;
+    scroll-margin-top: 24px;
+  }
+  h2 .section-num { color: var(--accent); font-weight: 800; margin-right: 6px; }
+
+  h3 {
+    font-size: 1.15rem; color: var(--text); margin: 32px 0 10px;
+    font-weight: 600; letter-spacing: -0.3px;
+  }
+  h3::before { content: ''; display: inline-block; width: 3px; height: 16px; background: var(--green); border-radius: 2px; margin-right: 10px; vertical-align: middle; }
+
+  h4 {
+    font-size: 1rem; color: var(--yellow); margin: 24px 0 8px;
+    font-weight: 600;
+  }
+  p { margin: 10px 0; color: var(--muted); }
+
+  /* ========== CODE ========== */
+  pre {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    overflow-x: auto; margin: 14px 0 18px;
+    font-size: 0.84rem; line-height: 1.65;
+  }
+  pre code {
+    color: var(--text);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.84rem;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,173,216,0.08); padding: 2px 7px; border-radius: 5px;
+    font-size: 0.84em; color: var(--accent); font-weight: 500;
+  }
+  pre code { background: none; padding: 0; font-weight: 400; }
+
+  .kw { color: var(--accent2); font-weight: 600; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cm { color: #545460; font-style: italic; }
+  .ty { color: var(--accent); }
+  .num { color: #79c0ff; }
+  .op { color: var(--accent2); }
+
+  /* ========== CALLOUT BOXES ========== */
+  .info-box, .warn-box, .tip-box {
+    padding: 16px 20px; border-radius: var(--radius);
+    margin: 18px 0; border: 1px solid var(--border);
+  }
+  .info-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(0,173,216,0.04);
+  }
+  .warn-box {
+    border-left: 3px solid var(--yellow);
+    background: rgba(234,179,8,0.04);
+  }
+  .tip-box {
+    border-left: 3px solid var(--green);
+    background: rgba(34,197,94,0.04);
+  }
+  .box-title { font-weight: 650; margin-bottom: 6px; color: var(--text); font-size: 0.92rem; }
+
+  /* ========== FILE TREE ========== */
+  .file-tree {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 22px; margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    line-height: 1.9; color: var(--dim);
+  }
+  .file-tree .folder { color: var(--accent); font-weight: 600; }
+  .file-tree .file { color: var(--green); }
+
+  /* ========== TABLE ========== */
+  table {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--card); color: var(--text); text-align: left;
+    padding: 10px 14px; border: 1px solid var(--border);
+    font-weight: 600; font-size: 0.84rem;
+  }
+  td {
+    padding: 10px 14px; border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ========== BADGES ========== */
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 9999px;
+    font-size: 0.68rem; font-weight: 600; margin: 0 3px;
+    letter-spacing: 0.3px; vertical-align: middle;
+  }
+  .badge-junior { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .badge-mid { background: rgba(0,173,216,0.1); color: var(--accent); border: 1px solid rgba(0,173,216,0.2); }
+  .badge-senior { background: rgba(234,179,8,0.1); color: var(--yellow); border: 1px solid rgba(234,179,8,0.2); }
+  .badge-staff { background: rgba(206,50,98,0.1); color: var(--accent2); border: 1px solid rgba(206,50,98,0.2); }
+  .badge-vp { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+
+  ul, ol { margin: 10px 0 10px 22px; }
+  li { margin: 4px 0; color: var(--muted); }
+  strong { color: var(--text); font-weight: 600; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* ========== ACCORDION (shadcn style) ========== */
+  .accordion {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; margin: 16px 0;
+  }
+  .accordion-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .accordion-item:last-child { border-bottom: none; }
+  .accordion-trigger {
+    width: 100%; border: none; color: var(--text);
+    background: var(--surface);
+    padding: 16px 20px; font-size: 0.92rem; font-weight: 550;
+    text-align: left; cursor: pointer; display: flex;
+    align-items: center; justify-content: space-between;
+    font-family: inherit; transition: background 0.15s;
+    line-height: 1.5;
+  }
+  .accordion-trigger:hover { background: #151518; }
+  .accordion-trigger .chevron {
+    width: 16px; height: 16px; transition: transform 0.2s ease;
+    flex-shrink: 0; margin-left: 12px; color: var(--dim);
+  }
+  .accordion-trigger[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+  }
+  .accordion-content {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: transparent;
+  }
+  .accordion-content.open {
+    max-height: 2000px;
+    background: rgba(255,255,255,0.015);
+  }
+  .accordion-body {
+    padding: 14px 20px 16px; color: var(--muted);
+    font-size: 0.88rem; line-height: 1.75;
+    border-top: 1px solid var(--border);
+  }
+  .accordion-body pre { margin: 10px 0; }
+  .accordion-body p { margin: 6px 0; }
+
+  .qa-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 2px 8px; height: 22px; border-radius: 5px;
+    font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+  }
+  .qa-q { background: rgba(0,173,216,0.1); color: var(--accent); margin-right: 12px; }
+  .qa-a { background: rgba(34,197,94,0.1); color: var(--green); margin-right: 10px; }
+
+  /* ========== COMMAND TABLE ========== */
+  .cmd-table { margin: 14px 0; }
+  .cmd-table table { font-size: 0.84rem; }
+  .cmd-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); font-size: 0.8rem; white-space: nowrap;
+    font-weight: 500;
+  }
+  .cmd-table td:last-child { color: var(--muted); }
+  .cmd-category {
+    color: var(--text); font-weight: 600; font-size: 0.9rem;
+    margin: 24px 0 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .cmd-category::before {
+    content: ''; display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--accent); flex-shrink: 0;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main-wrapper { margin-left: 0; }
+    .main { padding: 24px 20px 80px; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SIDEBAR ==================== -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="go-icon">Go</div>
+      <span>Dev <span class="dim">Guide</span></span>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-group-title">HTTP Fundamentals</div>
+      <a href="#http-client" data-section="http-client">HTTP Client</a>
+      <a href="#http-server" data-section="http-server">HTTP Server Basics</a>
+      <a href="#modern-routing" data-section="modern-routing">Modern Routing (1.22+)</a>
+      <a href="#sub-routing" data-section="sub-routing">Sub-Routing &amp; Groups</a>
+      <a href="#tls-https" data-section="tls-https">TLS, HTTPS &amp; HTTP/2</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">REST API Architecture</div>
+      <a href="#project-structure" data-section="project-structure">Project Structure</a>
+      <a href="#models" data-section="models">Models</a>
+      <a href="#db-connection" data-section="db-connection">Database Connection</a>
+      <a href="#crud" data-section="crud">CRUD Operations</a>
+      <a href="#router-setup" data-section="router-setup">Router Setup</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Middleware</div>
+      <a href="#middleware-pattern" data-section="middleware-pattern">Middleware Pattern</a>
+      <a href="#security-headers" data-section="security-headers">Security Headers</a>
+      <a href="#cors" data-section="cors">CORS Middleware</a>
+      <a href="#jwt-auth" data-section="jwt-auth">JWT Authentication</a>
+      <a href="#password-hashing" data-section="password-hashing">Password Hashing</a>
+      <a href="#rate-limiting" data-section="rate-limiting">Rate Limiting</a>
+      <a href="#compression" data-section="compression">Compression</a>
+      <a href="#xss-protection" data-section="xss-protection">XSS Protection</a>
+      <a href="#hpp" data-section="hpp">HPP Protection</a>
+      <a href="#response-time" data-section="response-time">Response Time</a>
+      <a href="#mw-exclusion" data-section="mw-exclusion">Route Exclusion</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Utilities</div>
+      <a href="#utils" data-section="utils">Utility Functions</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">gRPC &amp; Protobuf</div>
+      <a href="#protobuf" data-section="protobuf">Protocol Buffers</a>
+      <a href="#grpc-server" data-section="grpc-server">gRPC Server</a>
+      <a href="#grpc-client" data-section="grpc-client">gRPC Client</a>
+      <a href="#grpc-streaming" data-section="grpc-streaming">gRPC Streaming</a>
+      <a href="#grpc-gateway" data-section="grpc-gateway">gRPC Gateway</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Comparison</div>
+      <a href="#go-vs-node" data-section="go-vs-node">Go vs Node.js</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<div class="main-wrapper">
+<div class="main">
+
+<h1>Go Dev — Building Real Applications</h1>
+<p class="subtitle">From HTTP servers to REST APIs, middleware, gRPC &amp; production patterns — with real code from actual projects.</p>
+
+
+<!-- ===================== SECTION 01: HTTP CLIENT ===================== -->
+<h2 id="http-client"><span class="section-num">01</span> HTTP Client</h2>
+
+<p>Go's <code>net/http</code> package provides a production-grade HTTP client out of the box. Unlike most languages where you need a third-party library (axios, requests, etc.), Go's standard library is all you need. The <code>http.Client</code> struct gives you full control over timeouts, redirects, cookies, and transport-level settings.</p>
+
+<p>The pattern is straightforward: create a client, make the request, check the error, and <strong>always</strong> close the response body with <code>defer</code>. Forgetting to close the body is a classic Go bug that causes resource leaks.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"io"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Create an HTTP client (you can configure timeouts, redirects, etc.)</span>
+    client := &amp;<span class="ty">http.Client</span>{}
+
+    <span class="cm">// Make a GET request to the Star Wars API</span>
+    resp, err := client.<span class="fn">Get</span>(<span class="str">"https://swapi.dev/api/people/1"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        fmt.<span class="fn">Println</span>(<span class="str">"Error:"</span>, err)
+        <span class="kw">return</span>
+    }
+    <span class="kw">defer</span> resp.Body.<span class="fn">Close</span>()  <span class="cm">// ALWAYS close the body to prevent resource leaks</span>
+
+    <span class="cm">// Read the entire response body into a byte slice</span>
+    body, err := io.<span class="fn">ReadAll</span>(resp.Body)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        fmt.<span class="fn">Println</span>(<span class="str">"Read error:"</span>, err)
+        <span class="kw">return</span>
+    }
+
+    fmt.<span class="fn">Println</span>(<span class="fn">string</span>(body))  <span class="cm">// Convert []byte to string and print</span>
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Why defer resp.Body.Close()?</div>
+  <p>HTTP responses hold open TCP connections. If you don't close the body, the connection stays open and eventually you exhaust the connection pool. <code>defer</code> ensures it runs when the function exits, even if an error occurs later.</p>
+</div>
+
+<h3>Custom Requests with Headers</h3>
+<p>For anything beyond simple GET requests, use <code>http.NewRequest</code> to build the request manually. This gives you control over the HTTP method, headers, and body.</p>
+
+<pre><code><span class="cm">// Build a custom request with headers</span>
+req, err := http.<span class="fn">NewRequest</span>(<span class="str">"GET"</span>, <span class="str">"https://api.example.com/data"</span>, <span class="kw">nil</span>)
+<span class="kw">if</span> err != <span class="kw">nil</span> {
+    log.<span class="fn">Fatal</span>(err)
+}
+req.Header.<span class="fn">Set</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer my-token"</span>)
+req.Header.<span class="fn">Set</span>(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+
+client := &amp;<span class="ty">http.Client</span>{Timeout: <span class="num">10</span> * time.Second}
+resp, err := client.<span class="fn">Do</span>(req)
+<span class="kw">if</span> err != <span class="kw">nil</span> {
+    log.<span class="fn">Fatal</span>(err)
+}
+<span class="kw">defer</span> resp.Body.<span class="fn">Close</span>()</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Production Tip</div>
+  <p>Always set a <code>Timeout</code> on your HTTP client. The default client has <strong>no timeout</strong>, meaning a slow server can hang your application forever. A 10-30 second timeout is a sensible default.</p>
+</div>
+
+
+<!-- ===================== SECTION 02: HTTP SERVER BASICS ===================== -->
+<h2 id="http-server"><span class="section-num">02</span> HTTP Server Basics</h2>
+
+<p>Go's standard library includes a full-featured HTTP server. No framework needed. This is one of Go's biggest strengths: you can build production-ready servers with zero external dependencies. The <code>net/http</code> package handles connection pooling, keep-alive, HTTP/1.1, and graceful shutdown out of the box.</p>
+
+<p>The simplest server uses <code>http.HandleFunc</code> to register handler functions and <code>http.ListenAndServe</code> to start listening. Each incoming request runs in its own goroutine automatically, so your server is concurrent by default.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Register a handler function for the root path</span>
+    http.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Hello Server!"</span>)  <span class="cm">// Write response to client</span>
+    })
+
+    fmt.<span class="fn">Println</span>(<span class="str">"Server on :8080"</span>)
+    <span class="cm">// ListenAndServe blocks forever. log.Fatal logs the error if it returns.</span>
+    log.<span class="fn">Fatal</span>(http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>))  <span class="cm">// nil = use DefaultServeMux</span>
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">How it works under the hood</div>
+  <p>When you pass <code>nil</code> as the handler, Go uses <code>http.DefaultServeMux</code>, a global request multiplexer. Each call to <code>http.HandleFunc</code> registers a pattern on this default mux. When a request arrives, the mux finds the most specific matching pattern and calls its handler.</p>
+</div>
+
+<h3>Handler vs HandlerFunc</h3>
+<p>Go has two ways to define handlers. <code>http.HandlerFunc</code> is for quick inline functions. <code>http.Handler</code> is an interface that any struct can implement, giving you more structure for complex handlers.</p>
+
+<pre><code><span class="cm">// Method 1: HandlerFunc — quick and simple</span>
+http.<span class="fn">HandleFunc</span>(<span class="str">"/health"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    w.<span class="fn">WriteHeader</span>(http.StatusOK)
+    fmt.<span class="fn">Fprintln</span>(w, <span class="str">`{"status": "ok"}`</span>)
+})
+
+<span class="cm">// Method 2: Handler interface — for structured handlers</span>
+<span class="kw">type</span> <span class="ty">HomeHandler</span> <span class="kw">struct</span>{}
+
+<span class="kw">func</span> (h *<span class="ty">HomeHandler</span>) <span class="fn">ServeHTTP</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Welcome home"</span>)
+}
+
+<span class="cm">// Register the struct handler</span>
+http.<span class="fn">Handle</span>(<span class="str">"/home"</span>, &amp;<span class="ty">HomeHandler</span>{})</code></pre>
+
+
+<!-- ===================== SECTION 03: MODERN ROUTING ===================== -->
+<h2 id="modern-routing"><span class="section-num">03</span> Modern Routing (Go 1.22+)</h2>
+
+<p>Before Go 1.22, the standard library router was limited: no method-based routing, no path parameters. You had to use third-party routers like <code>gorilla/mux</code> or <code>chi</code>. Go 1.22 changed everything by adding <strong>method-based routing</strong>, <strong>path parameters</strong>, and <strong>wildcards</strong> directly into the standard library.</p>
+
+<p>This means for most applications, you no longer need an external router. The syntax is clean: prefix your pattern with the HTTP method, use <code>{name}</code> for parameters, and <code>{name...}</code> for catch-all wildcards.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+
+    <span class="cm">// Method-based routing — only matches the specified HTTP method</span>
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"POST /items/create"</span>, createItem)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"DELETE /items/create"</span>, deleteItem)
+
+    <span class="cm">// Path parameters with {id} — extracted via r.PathValue()</span>
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /teachers/{id}"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Teacher ID: %s"</span>, r.<span class="fn">PathValue</span>(<span class="str">"id"</span>))
+    })
+
+    <span class="cm">// Wildcard catch-all with {path...} — matches any remaining path</span>
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"/files/{path...}"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Path: %s"</span>, r.<span class="fn">PathValue</span>(<span class="str">"path"</span>))
+    })
+
+    http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, mux)
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Pattern Matching Rules</div>
+  <ul>
+    <li><code>"GET /users"</code> — matches only GET requests to /users</li>
+    <li><code>"/users"</code> — matches ALL methods to /users (like pre-1.22 behavior)</li>
+    <li><code>"GET /users/{id}"</code> — matches GET with a single path segment captured as "id"</li>
+    <li><code>"/files/{path...}"</code> — matches any method, captures everything after /files/ as "path"</li>
+    <li>More specific patterns take priority over general ones</li>
+  </ul>
+</div>
+
+<h3>PathValue vs Query Parameters</h3>
+<p>Don't confuse path parameters with query parameters. Path values are part of the URL structure (<code>/users/42</code>), while query parameters come after <code>?</code> (<code>/users?id=42</code>).</p>
+
+<pre><code><span class="cm">// Path parameter: /users/42</span>
+id := r.<span class="fn">PathValue</span>(<span class="str">"id"</span>)  <span class="cm">// "42"</span>
+
+<span class="cm">// Query parameter: /users?page=2&amp;limit=10</span>
+page := r.URL.Query().<span class="fn">Get</span>(<span class="str">"page"</span>)    <span class="cm">// "2"</span>
+limit := r.URL.Query().<span class="fn">Get</span>(<span class="str">"limit"</span>)  <span class="cm">// "10"</span></code></pre>
+
+
+<!-- ===================== SECTION 04: SUB-ROUTING ===================== -->
+<h2 id="sub-routing"><span class="section-num">04</span> Sub-Routing &amp; Route Groups</h2>
+
+<p>As your application grows, you'll want to organize routes into logical groups. Go's <code>http.ServeMux</code> supports this through <strong>sub-routing</strong> using <code>http.StripPrefix</code>. This pattern lets you build modular routers and mount them under prefixes, similar to Express.js <code>app.use("/api", router)</code>.</p>
+
+<p>The key insight is that <code>http.StripPrefix</code> removes the prefix before passing the request to the inner handler, so your sub-router's patterns don't need to include the prefix.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Create a sub-router with its own routes</span>
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /users"</span>, usersHandler)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /items"</span>, itemsHandler)
+
+    <span class="cm">// Mount under /app prefix</span>
+    app := http.<span class="fn">NewServeMux</span>()
+    app.<span class="fn">Handle</span>(<span class="str">"/app/"</span>, http.<span class="fn">StripPrefix</span>(<span class="str">"/app"</span>, mux))
+
+    <span class="cm">// Now these routes work:</span>
+    <span class="cm">// /app/users  -> usersHandler</span>
+    <span class="cm">// /app/items  -> itemsHandler</span>
+
+    http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, app)
+}</code></pre>
+
+<h3>Multiple API Versions</h3>
+<p>This pattern is especially useful for API versioning. You can maintain separate routers for <code>/v1</code> and <code>/v2</code>, each with their own handlers.</p>
+
+<pre><code><span class="cm">// Version 1 routes</span>
+v1 := http.<span class="fn">NewServeMux</span>()
+v1.<span class="fn">HandleFunc</span>(<span class="str">"GET /users"</span>, getUsersV1)
+
+<span class="cm">// Version 2 routes (different implementation)</span>
+v2 := http.<span class="fn">NewServeMux</span>()
+v2.<span class="fn">HandleFunc</span>(<span class="str">"GET /users"</span>, getUsersV2)
+
+<span class="cm">// Mount both under /api</span>
+api := http.<span class="fn">NewServeMux</span>()
+api.<span class="fn">Handle</span>(<span class="str">"/api/v1/"</span>, http.<span class="fn">StripPrefix</span>(<span class="str">"/api/v1"</span>, v1))
+api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<span class="fn">StripPrefix</span>(<span class="str">"/api/v2"</span>, v2))</code></pre>
+
+
+<!-- ===================== SECTION 05: TLS HTTPS ===================== -->
+<h2 id="tls-https"><span class="section-num">05</span> TLS, HTTPS &amp; HTTP/2</h2>
+
+<p>Production servers must use TLS (Transport Layer Security) to encrypt traffic. Go makes this straightforward with <code>ListenAndServeTLS</code>. You can also configure the minimum TLS version, cipher suites, and enable HTTP/2 for better performance.</p>
+
+<h3>TLS Configuration</h3>
+<pre><code><span class="kw">import</span> (
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"golang.org/x/net/http2"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Secure Hello!"</span>)
+    })
+
+    <span class="cm">// Configure TLS — set minimum version to TLS 1.2</span>
+    tlsConfig := &amp;<span class="ty">tls.Config</span>{
+        MinVersion: tls.VersionTLS12,
+    }
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:      <span class="str">":3000"</span>,
+        Handler:   mux,
+        TLSConfig: tlsConfig,
+    }
+
+    <span class="cm">// Enable HTTP/2 support</span>
+    http2.<span class="fn">ConfigureServer</span>(server, &amp;<span class="ty">http2.Server</span>{})
+
+    <span class="cm">// Start HTTPS server with certificate and key files</span>
+    err := server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(<span class="str">"TLS Server failed:"</span>, err)
+    }
+}</code></pre>
+
+<h3>HTTP/1.1 vs HTTP/2</h3>
+<table>
+  <tr><th>Feature</th><th>HTTP/1.1</th><th>HTTP/2</th></tr>
+  <tr><td>Connections</td><td>One request per connection (or pipelining)</td><td>Multiplexed: many requests on one connection</td></tr>
+  <tr><td>Headers</td><td>Plain text, sent every time</td><td>HPACK compressed, binary format</td></tr>
+  <tr><td>Server Push</td><td>Not supported</td><td>Server can push resources before client asks</td></tr>
+  <tr><td>Protocol</td><td>Text-based</td><td>Binary framing layer</td></tr>
+  <tr><td>Performance</td><td>Head-of-line blocking per connection</td><td>Parallel streams eliminate HOL blocking</td></tr>
+</table>
+
+<div class="info-box">
+  <div class="box-title">Generating Self-Signed Certificates for Development</div>
+  <pre><code>openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes</code></pre>
+  <p>For production, use <strong>Let's Encrypt</strong> with Go's <code>autocert</code> package for automatic certificate management.</p>
+</div>
+
+
+<!-- ===================== SECTION 06: PROJECT STRUCTURE ===================== -->
+<h2 id="project-structure"><span class="section-num">06</span> REST API Project Structure</h2>
+
+<p>Go projects follow a conventional layout using <code>cmd/</code>, <code>internal/</code>, and <code>pkg/</code> directories. This structure comes from the Go community standard and is used by most production Go applications. The key idea: <code>internal/</code> packages cannot be imported by external projects (enforced by the Go compiler), while <code>pkg/</code> packages are shareable.</p>
+
+<div class="file-tree">
+<span class="folder">rest_api_go/</span>
+├── <span class="folder">cmd/</span>
+│   └── <span class="folder">api/</span>
+│       └── <span class="file">server.go</span>          <span class="cm">← entry point (main package)</span>
+├── <span class="folder">internal/</span>
+│   ├── <span class="folder">models/</span>                <span class="cm">← data structs &amp; validation</span>
+│   │   ├── <span class="file">student.go</span>
+│   │   └── <span class="file">exec.go</span>
+│   ├── <span class="folder">api/</span>
+│   │   ├── <span class="folder">handlers/</span>          <span class="cm">← request handlers (controllers)</span>
+│   │   ├── <span class="folder">router/</span>            <span class="cm">← route definitions</span>
+│   │   └── <span class="folder">middlewares/</span>       <span class="cm">← middleware chain</span>
+│   └── <span class="folder">repository/</span>
+│       └── <span class="folder">sqlconnect/</span>        <span class="cm">← database operations</span>
+└── <span class="folder">pkg/</span>
+    └── <span class="folder">utils/</span>                 <span class="cm">← shared utilities</span>
+</div>
+
+<div class="tip-box">
+  <div class="box-title">Why this structure?</div>
+  <ul>
+    <li><strong>cmd/</strong> — Each subdirectory is a separate binary. <code>cmd/api/</code> builds the API server, <code>cmd/worker/</code> could build a background worker.</li>
+    <li><strong>internal/</strong> — Go enforces that these packages can only be imported by code within this module. This prevents external projects from depending on your internal implementation details.</li>
+    <li><strong>pkg/</strong> — Optional. Contains utilities that could theoretically be used by other projects. Some teams skip this and put everything in <code>internal/</code>.</li>
+    <li><strong>handlers/</strong> — HTTP handlers that parse requests and call business logic. Thin layer.</li>
+    <li><strong>repository/</strong> — Database access layer. Isolates SQL queries from business logic.</li>
+  </ul>
+</div>
+
+
+<!-- ===================== SECTION 07: MODELS ===================== -->
+<h2 id="models"><span class="section-num">07</span> Models</h2>
+
+<p>Models define the shape of your data. In Go, we use struct tags to control how data is serialized to JSON and mapped to database columns. The <code>json</code> tag controls JSON field names, and the <code>db</code> tag (used by libraries like <code>sqlx</code>) maps to database columns.</p>
+
+<h3>Student Model</h3>
+<pre><code><span class="kw">package</span> models
+
+<span class="kw">type</span> <span class="ty">Student</span> <span class="kw">struct</span> {
+    ID        <span class="ty">int</span>    <span class="str">`json:"id,omitempty" db:"id,omitempty"`</span>
+    FirstName <span class="ty">string</span> <span class="str">`json:"first_name,omitempty" db:"first_name,omitempty"`</span>
+    LastName  <span class="ty">string</span> <span class="str">`json:"last_name,omitempty" db:"last_name,omitempty"`</span>
+    Email     <span class="ty">string</span> <span class="str">`json:"email,omitempty" db:"email,omitempty"`</span>
+    Class     <span class="ty">string</span> <span class="str">`json:"class,omitempty" db:"class,omitempty"`</span>
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">What does omitempty do?</div>
+  <p><code>omitempty</code> tells the JSON encoder to skip fields that have zero values (empty string, 0, nil, false). This is useful for PATCH requests where you only want to send changed fields, and for responses where you don't want to expose empty data.</p>
+</div>
+
+<h3>Exec Model (with nullable fields)</h3>
+<p>Real databases have nullable columns. Go's <code>sql.NullString</code> handles this by wrapping a string with a <code>Valid</code> boolean. When the database value is NULL, <code>Valid</code> is false and <code>String</code> is empty.</p>
+
+<pre><code><span class="kw">package</span> models
+
+<span class="kw">import</span> <span class="str">"database/sql"</span>
+
+<span class="kw">type</span> <span class="ty">Exec</span> <span class="kw">struct</span> {
+    ID         <span class="ty">int</span>            <span class="str">`json:"id,omitempty" db:"id,omitempty"`</span>
+    FirstName  <span class="ty">sql.NullString</span> <span class="str">`json:"first_name,omitempty" db:"first_name,omitempty"`</span>
+    LastName   <span class="ty">sql.NullString</span> <span class="str">`json:"last_name,omitempty" db:"last_name,omitempty"`</span>
+    Email      <span class="ty">sql.NullString</span> <span class="str">`json:"email,omitempty" db:"email,omitempty"`</span>
+    Department <span class="ty">sql.NullString</span> <span class="str">`json:"department,omitempty" db:"department,omitempty"`</span>
+}
+
+<span class="cm">// Usage: checking if a NullString has a value</span>
+<span class="kw">if</span> exec.Email.Valid {
+    fmt.<span class="fn">Println</span>(<span class="str">"Email:"</span>, exec.Email.String)
+} <span class="kw">else</span> {
+    fmt.<span class="fn">Println</span>(<span class="str">"Email is NULL"</span>)
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">JSON Gotcha with sql.NullString</div>
+  <p><code>sql.NullString</code> serializes to JSON as <code>{"String": "...", "Valid": true}</code> — not what you want! You need a custom <code>MarshalJSON</code> method or use a library like <code>guregu/null</code> for clean JSON output.</p>
+</div>
+
+
+<!-- ===================== SECTION 08: DB CONNECTION ===================== -->
+<h2 id="db-connection"><span class="section-num">08</span> Database Connection (MySQL)</h2>
+
+<p>Go's <code>database/sql</code> package provides a generic interface for SQL databases. The actual driver (MySQL, PostgreSQL, SQLite) is imported as a side effect using the blank identifier <code>_</code>. The connection pool is managed automatically — <code>sql.Open</code> doesn't actually connect; it prepares the pool. The first real query triggers the connection.</p>
+
+<pre><code><span class="kw">package</span> sqlconnect
+
+<span class="kw">import</span> (
+    <span class="str">"database/sql"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"os"</span>
+
+    _ <span class="str">"github.com/go-sql-driver/mysql"</span>  <span class="cm">// Import driver as side effect</span>
+)
+
+<span class="kw">const</span> (
+    host   = <span class="str">"localhost"</span>
+    dbport = <span class="str">"3306"</span>
+)
+
+<span class="kw">func</span> <span class="fn">ConnectDb</span>() (*<span class="ty">sql.DB</span>, <span class="ty">error</span>) {
+    <span class="cm">// Read credentials from environment variables (never hardcode!)</span>
+    user := os.<span class="fn">Getenv</span>(<span class="str">"DB_USER"</span>)
+    password := os.<span class="fn">Getenv</span>(<span class="str">"DB_PASSWORD"</span>)
+    dbname := os.<span class="fn">Getenv</span>(<span class="str">"DB_NAME"</span>)
+
+    <span class="cm">// Build the MySQL connection string: user:password@tcp(host:port)/dbname</span>
+    connectionString := fmt.<span class="fn">Sprintf</span>(<span class="str">"%s:%s@tcp(%s:%s)/%s"</span>,
+        user, password, host, dbport, dbname)
+
+    <span class="cm">// sql.Open doesn't connect — it prepares the connection pool</span>
+    db, err := sql.<span class="fn">Open</span>(<span class="str">"mysql"</span>, connectionString)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"failed to open database: %w"</span>, err)
+    }
+
+    <span class="cm">// Ping to verify the connection actually works</span>
+    <span class="kw">if</span> err := db.<span class="fn">Ping</span>(); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"failed to ping database: %w"</span>, err)
+    }
+
+    <span class="cm">// Configure the connection pool</span>
+    db.<span class="fn">SetMaxOpenConns</span>(<span class="num">25</span>)                  <span class="cm">// Max open connections</span>
+    db.<span class="fn">SetMaxIdleConns</span>(<span class="num">5</span>)                   <span class="cm">// Max idle connections in pool</span>
+    db.<span class="fn">SetConnMaxLifetime</span>(<span class="num">5</span> * time.Minute)  <span class="cm">// Max lifetime of a connection</span>
+
+    <span class="kw">return</span> db, <span class="kw">nil</span>
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Security: Never Hardcode Credentials</div>
+  <p>Always read database credentials from environment variables or a secrets manager. Hardcoded passwords in source code will end up in version control and eventually get leaked.</p>
+</div>
+
+
+<!-- ===================== SECTION 09: CRUD ===================== -->
+<h2 id="crud"><span class="section-num">09</span> CRUD Operations</h2>
+
+<p>CRUD (Create, Read, Update, Delete) operations form the backbone of any REST API. Each operation maps to an HTTP method: POST (Create), GET (Read), PUT/PATCH (Update), DELETE (Delete). Let's build real handlers that talk to a MySQL database.</p>
+
+<h3>GET with Pagination</h3>
+<p>Always paginate list endpoints. Without pagination, a table with millions of rows will crash your server. Use <code>page</code> and <code>limit</code> query parameters with sensible defaults.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">GetStudents</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    <span class="cm">// Parse pagination parameters with defaults</span>
+    page, _ := strconv.<span class="fn">Atoi</span>(r.URL.Query().<span class="fn">Get</span>(<span class="str">"page"</span>))
+    limit, _ := strconv.<span class="fn">Atoi</span>(r.URL.Query().<span class="fn">Get</span>(<span class="str">"limit"</span>))
+    <span class="kw">if</span> page &lt; <span class="num">1</span> { page = <span class="num">1</span> }
+    <span class="kw">if</span> limit &lt; <span class="num">1</span> || limit &gt; <span class="num">100</span> { limit = <span class="num">10</span> }
+
+    offset := (page - <span class="num">1</span>) * limit
+
+    <span class="cm">// Query the database with LIMIT and OFFSET</span>
+    query := <span class="str">"SELECT id, first_name, last_name, email, class FROM students LIMIT ? OFFSET ?"</span>
+    rows, err := db.<span class="fn">Query</span>(query, limit, offset)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Database error"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+    <span class="kw">defer</span> rows.<span class="fn">Close</span>()
+
+    <span class="kw">var</span> students []<span class="ty">models.Student</span>
+    <span class="kw">for</span> rows.<span class="fn">Next</span>() {
+        <span class="kw">var</span> s <span class="ty">models.Student</span>
+        <span class="kw">if</span> err := rows.<span class="fn">Scan</span>(&amp;s.ID, &amp;s.FirstName, &amp;s.LastName, &amp;s.Email, &amp;s.Class); err != <span class="kw">nil</span> {
+            http.<span class="fn">Error</span>(w, <span class="str">"Scan error"</span>, http.StatusInternalServerError)
+            <span class="kw">return</span>
+        }
+        students = <span class="fn">append</span>(students, s)
+    }
+
+    w.Header().<span class="fn">Set</span>(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+    json.<span class="fn">NewEncoder</span>(w).<span class="fn">Encode</span>(students)
+}</code></pre>
+
+<h3>POST with Validation</h3>
+<pre><code><span class="kw">func</span> <span class="fn">CreateStudent</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    <span class="kw">var</span> s <span class="ty">models.Student</span>
+
+    <span class="cm">// Decode JSON body into struct</span>
+    <span class="kw">if</span> err := json.<span class="fn">NewDecoder</span>(r.Body).<span class="fn">Decode</span>(&amp;s); err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Invalid JSON"</span>, http.StatusBadRequest)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Validate required fields</span>
+    <span class="kw">if</span> s.FirstName == <span class="str">""</span> || s.Email == <span class="str">""</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"first_name and email are required"</span>, http.StatusBadRequest)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Insert into database</span>
+    result, err := db.<span class="fn">Exec</span>(
+        <span class="str">"INSERT INTO students (first_name, last_name, email, class) VALUES (?, ?, ?, ?)"</span>,
+        s.FirstName, s.LastName, s.Email, s.Class,
+    )
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Insert failed"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Get the auto-generated ID</span>
+    id, _ := result.<span class="fn">LastInsertId</span>()
+    s.ID = <span class="fn">int</span>(id)
+
+    w.Header().<span class="fn">Set</span>(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+    w.<span class="fn">WriteHeader</span>(http.StatusCreated)  <span class="cm">// 201 for resource creation</span>
+    json.<span class="fn">NewEncoder</span>(w).<span class="fn">Encode</span>(s)
+}</code></pre>
+
+<h3>PUT — Full Update</h3>
+<p>PUT replaces the entire resource. All fields must be provided. If a field is missing, it gets set to its zero value.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">UpdateStudent</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    id := r.<span class="fn">PathValue</span>(<span class="str">"id"</span>)
+
+    <span class="kw">var</span> s <span class="ty">models.Student</span>
+    <span class="kw">if</span> err := json.<span class="fn">NewDecoder</span>(r.Body).<span class="fn">Decode</span>(&amp;s); err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Invalid JSON"</span>, http.StatusBadRequest)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Update ALL fields — this is what makes it PUT, not PATCH</span>
+    _, err := db.<span class="fn">Exec</span>(
+        <span class="str">"UPDATE students SET first_name=?, last_name=?, email=?, class=? WHERE id=?"</span>,
+        s.FirstName, s.LastName, s.Email, s.Class, id,
+    )
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Update failed"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+
+    w.<span class="fn">WriteHeader</span>(http.StatusOK)
+    json.<span class="fn">NewEncoder</span>(w).<span class="fn">Encode</span>(<span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>{<span class="str">"status"</span>: <span class="str">"updated"</span>})
+}</code></pre>
+
+<h3>PATCH — Partial Update (using Reflection)</h3>
+<p>PATCH is trickier than PUT. You only update the fields that were sent in the request. Using Go's <code>reflect</code> package, you can dynamically build the SQL SET clause based on which fields have non-zero values.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">PatchStudent</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    id := r.<span class="fn">PathValue</span>(<span class="str">"id"</span>)
+
+    <span class="kw">var</span> s <span class="ty">models.Student</span>
+    <span class="kw">if</span> err := json.<span class="fn">NewDecoder</span>(r.Body).<span class="fn">Decode</span>(&amp;s); err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Invalid JSON"</span>, http.StatusBadRequest)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Use reflection to build dynamic SET clause</span>
+    v := reflect.<span class="fn">ValueOf</span>(s)
+    t := v.<span class="fn">Type</span>()
+    <span class="kw">var</span> setClauses []<span class="ty">string</span>
+    <span class="kw">var</span> values []<span class="kw">interface</span>{}
+
+    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; v.<span class="fn">NumField</span>(); i++ {
+        field := v.<span class="fn">Field</span>(i)
+        <span class="cm">// Skip zero-value fields (they weren't in the JSON body)</span>
+        <span class="kw">if</span> !field.<span class="fn">IsZero</span>() {
+            dbTag := t.<span class="fn">Field</span>(i).Tag.<span class="fn">Get</span>(<span class="str">"db"</span>)
+            column := strings.<span class="fn">Split</span>(dbTag, <span class="str">","</span>)[<span class="num">0</span>]
+            <span class="kw">if</span> column != <span class="str">""</span> &amp;&amp; column != <span class="str">"id"</span> {
+                setClauses = <span class="fn">append</span>(setClauses, column+<span class="str">"=?"</span>)
+                values = <span class="fn">append</span>(values, field.<span class="fn">Interface</span>())
+            }
+        }
+    }
+
+    <span class="kw">if</span> <span class="fn">len</span>(setClauses) == <span class="num">0</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"No fields to update"</span>, http.StatusBadRequest)
+        <span class="kw">return</span>
+    }
+
+    values = <span class="fn">append</span>(values, id)
+    query := fmt.<span class="fn">Sprintf</span>(<span class="str">"UPDATE students SET %s WHERE id=?"</span>,
+        strings.<span class="fn">Join</span>(setClauses, <span class="str">", "</span>))
+    db.<span class="fn">Exec</span>(query, values...)
+}</code></pre>
+
+<h3>DELETE with Transaction</h3>
+<p>For destructive operations, use transactions. This ensures either all operations succeed or none do. If deleting a student also requires cleaning up related records, a transaction keeps your data consistent.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">DeleteStudent</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    id := r.<span class="fn">PathValue</span>(<span class="str">"id"</span>)
+
+    <span class="cm">// Begin a transaction</span>
+    tx, err := db.<span class="fn">Begin</span>()
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        http.<span class="fn">Error</span>(w, <span class="str">"Transaction start failed"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Delete related records first (foreign key constraints)</span>
+    _, err = tx.<span class="fn">Exec</span>(<span class="str">"DELETE FROM enrollments WHERE student_id = ?"</span>, id)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        tx.<span class="fn">Rollback</span>()  <span class="cm">// Undo everything if this fails</span>
+        http.<span class="fn">Error</span>(w, <span class="str">"Failed to delete enrollments"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Delete the student</span>
+    result, err := tx.<span class="fn">Exec</span>(<span class="str">"DELETE FROM students WHERE id = ?"</span>, id)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        tx.<span class="fn">Rollback</span>()
+        http.<span class="fn">Error</span>(w, <span class="str">"Failed to delete student"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+
+    rowsAffected, _ := result.<span class="fn">RowsAffected</span>()
+    <span class="kw">if</span> rowsAffected == <span class="num">0</span> {
+        tx.<span class="fn">Rollback</span>()
+        http.<span class="fn">Error</span>(w, <span class="str">"Student not found"</span>, http.StatusNotFound)
+        <span class="kw">return</span>
+    }
+
+    <span class="cm">// Commit the transaction — all operations succeed together</span>
+    tx.<span class="fn">Commit</span>()
+    w.<span class="fn">WriteHeader</span>(http.StatusNoContent)  <span class="cm">// 204 — deleted, no body</span>
+}</code></pre>
+
+
+<!-- ===================== SECTION 10: ROUTER SETUP ===================== -->
+<h2 id="router-setup"><span class="section-num">10</span> Routing &amp; Router Setup</h2>
+
+<p>In a real project, you don't define all routes in <code>main()</code>. Instead, you create router functions for each domain (students, teachers, execs) and compose them together. This keeps each file focused and makes it easy to add new route groups without touching existing code.</p>
+
+<pre><code><span class="kw">package</span> router
+
+<span class="kw">import</span> <span class="str">"net/http"</span>
+
+<span class="cm">// MainRouter composes all sub-routers into one</span>
+<span class="kw">func</span> <span class="fn">MainRouter</span>() *<span class="ty">http.ServeMux</span> {
+    tRouter := <span class="fn">teachersRouter</span>()  <span class="cm">// handles /teachers/*</span>
+    sRouter := <span class="fn">studentsRouter</span>()  <span class="cm">// handles /students/*</span>
+
+    <span class="cm">// Mount execs router under students router</span>
+    sRouter.<span class="fn">Handle</span>(<span class="str">"/"</span>, <span class="fn">execsRouter</span>())
+
+    <span class="cm">// Mount students router (with execs) under teachers router</span>
+    tRouter.<span class="fn">Handle</span>(<span class="str">"/"</span>, sRouter)
+
+    <span class="kw">return</span> tRouter
+}
+
+<span class="cm">// Each sub-router defines its own routes</span>
+<span class="kw">func</span> <span class="fn">studentsRouter</span>() *<span class="ty">http.ServeMux</span> {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /students"</span>, handlers.GetStudents)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /students/{id}"</span>, handlers.GetStudent)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"POST /students"</span>, handlers.CreateStudent)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"PUT /students/{id}"</span>, handlers.UpdateStudent)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"PATCH /students/{id}"</span>, handlers.PatchStudent)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"DELETE /students/{id}"</span>, handlers.DeleteStudent)
+    <span class="kw">return</span> mux
+}
+
+<span class="kw">func</span> <span class="fn">teachersRouter</span>() *<span class="ty">http.ServeMux</span> {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /teachers"</span>, handlers.GetTeachers)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /teachers/{id}"</span>, handlers.GetTeacher)
+    <span class="kw">return</span> mux
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">How Router Composition Works</div>
+  <p>When you call <code>tRouter.Handle("/", sRouter)</code>, any request that doesn't match a teachers route falls through to the students router. This creates a priority chain: teachers routes > students routes > execs routes. The <code>"/"</code> catch-all pattern acts as a fallback.</p>
+</div>
+
+
+<!-- ===================== SECTION 11: MIDDLEWARE PATTERN ===================== -->
+<h2 id="middleware-pattern"><span class="section-num">11</span> Middleware Pattern</h2>
+
+<p>Middleware is the backbone of any production Go server. A middleware is simply a function that wraps an <code>http.Handler</code>, does something before/after the request, and calls the next handler in the chain. This pattern is composable: you stack middlewares like layers, and each request passes through all of them in order.</p>
+
+<p>The signature is always the same: take a handler, return a handler. This makes every middleware interchangeable and stackable.</p>
+
+<pre><code><span class="kw">package</span> utils
+
+<span class="kw">import</span> <span class="str">"net/http"</span>
+
+<span class="cm">// Middleware is a function that wraps an http.Handler</span>
+<span class="kw">type</span> <span class="ty">Middleware</span> <span class="kw">func</span>(<span class="ty">http.Handler</span>) <span class="ty">http.Handler</span>
+
+<span class="cm">// ApplyMiddlewares chains multiple middlewares around a handler.</span>
+<span class="cm">// Middlewares are applied in reverse order so they execute left-to-right.</span>
+<span class="kw">func</span> <span class="fn">ApplyMiddlewares</span>(handler <span class="ty">http.Handler</span>, middlewares ...<span class="ty">Middleware</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">for</span> _, mw := <span class="kw">range</span> middlewares {
+        handler = <span class="fn">mw</span>(handler)
+    }
+    <span class="kw">return</span> handler
+}</code></pre>
+
+<h3>Using the Middleware Chain</h3>
+<pre><code><span class="kw">func</span> <span class="fn">main</span>() {
+    router := router.<span class="fn">MainRouter</span>()
+
+    <span class="cm">// Stack middlewares — order matters!</span>
+    <span class="cm">// Outermost (first listed) runs first on request, last on response</span>
+    secureMux := utils.<span class="fn">ApplyMiddlewares</span>(router,
+        mw.SecurityHeaders,         <span class="cm">// Set security headers on every response</span>
+        mw.Compression,             <span class="cm">// Gzip compress responses</span>
+        mw.XSSMiddleware,           <span class="cm">// Sanitize input</span>
+        jwtMiddleware,              <span class="cm">// Authenticate requests</span>
+        mw.ResponseTimeMiddleware,  <span class="cm">// Track response times</span>
+        mw.Cors,                    <span class="cm">// Handle CORS preflight</span>
+    )
+
+    http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, secureMux)
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Middleware Execution Order</div>
+  <p>Because each middleware wraps the previous one, the <strong>first middleware in the list</strong> is the outermost layer. It runs first on the request and last on the response. Think of it like an onion: <code>CORS -> ResponseTime -> JWT -> XSS -> Compression -> SecurityHeaders -> [handler] -> SecurityHeaders -> Compression -> XSS -> JWT -> ResponseTime -> CORS</code>.</p>
+</div>
+
+
+<!-- ===================== SECTION 12: SECURITY HEADERS ===================== -->
+<h2 id="security-headers"><span class="section-num">12</span> Security Headers Middleware</h2>
+
+<p>Security headers tell the browser how to behave when handling your site's content. Without these headers, your application is vulnerable to clickjacking, XSS, MIME sniffing, and other attacks. This middleware sets all recommended headers on every response.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> <span class="str">"net/http"</span>
+
+<span class="kw">func</span> <span class="fn">SecurityHeaders</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// Prevent the page from being embedded in an iframe (clickjacking)</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"X-Frame-Options"</span>, <span class="str">"SAMEORIGIN"</span>)
+
+        <span class="cm">// Prevent MIME type sniffing — browser must trust Content-Type</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"X-Content-Type-Options"</span>, <span class="str">"nosniff"</span>)
+
+        <span class="cm">// Enable browser's built-in XSS filter</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"X-XSS-Protection"</span>, <span class="str">"1; mode=block"</span>)
+
+        <span class="cm">// HSTS — force HTTPS for 1 year, include subdomains</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"Strict-Transport-Security"</span>,
+            <span class="str">"max-age=31536000; includeSubDomains; preload"</span>)
+
+        <span class="cm">// Content Security Policy — restrict resource origins</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"Content-Security-Policy"</span>,
+            <span class="str">"default-src 'self'; script-src 'self'; style-src 'self'"</span>)
+
+        <span class="cm">// Control how much referrer info is sent with requests</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"Referrer-Policy"</span>, <span class="str">"strict-origin-when-cross-origin"</span>)
+
+        <span class="cm">// Restrict browser features (camera, microphone, etc.)</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"Permissions-Policy"</span>,
+            <span class="str">"camera=(), microphone=(), geolocation=()"</span>)
+
+        <span class="cm">// Remove server identification header</span>
+        w.Header().<span class="fn">Del</span>(<span class="str">"Server"</span>)
+
+        next.<span class="fn">ServeHTTP</span>(w, r)  <span class="cm">// Pass to next handler</span>
+    })
+}</code></pre>
+
+<div class="accordion">
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>What does each header do?</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <table>
+          <tr><th>Header</th><th>Purpose</th></tr>
+          <tr><td><code>X-Frame-Options</code></td><td>Prevents your page from being loaded in an iframe on another site (clickjacking defense)</td></tr>
+          <tr><td><code>X-Content-Type-Options</code></td><td>Stops browsers from guessing the MIME type — prevents treating a text file as JavaScript</td></tr>
+          <tr><td><code>X-XSS-Protection</code></td><td>Activates the browser's XSS auditor (legacy but still useful)</td></tr>
+          <tr><td><code>Strict-Transport-Security</code></td><td>Tells browsers to always use HTTPS, even if the user types http://</td></tr>
+          <tr><td><code>Content-Security-Policy</code></td><td>Whitelist which domains can serve scripts, styles, images, etc.</td></tr>
+          <tr><td><code>Referrer-Policy</code></td><td>Controls how much URL info is sent in the Referer header when navigating</td></tr>
+          <tr><td><code>Permissions-Policy</code></td><td>Disables browser features like camera, microphone, geolocation per origin</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== SECTION 13: CORS ===================== -->
+<h2 id="cors"><span class="section-num">13</span> CORS Middleware</h2>
+
+<p>CORS (Cross-Origin Resource Sharing) is a browser security mechanism. When your frontend at <code>localhost:3000</code> calls your API at <code>localhost:8080</code>, the browser blocks the request unless your API explicitly allows it via CORS headers. Without proper CORS, your SPA cannot talk to your API.</p>
+
+<p>The browser sends a <strong>preflight request</strong> (OPTIONS) before the actual request to check if the origin is allowed. Your middleware must handle this preflight and respond with the appropriate headers.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> <span class="str">"net/http"</span>
+
+<span class="kw">func</span> <span class="fn">Cors</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        origin := r.Header.<span class="fn">Get</span>(<span class="str">"Origin"</span>)
+
+        <span class="cm">// Define allowed origins</span>
+        allowedOrigins := <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">bool</span>{
+            <span class="str">"http://localhost:3000"</span>: <span class="kw">true</span>,
+            <span class="str">"https://myapp.com"</span>:      <span class="kw">true</span>,
+        }
+
+        <span class="kw">if</span> allowedOrigins[origin] {
+            <span class="cm">// Echo the allowed origin (not "*" — needed for credentials)</span>
+            w.Header().<span class="fn">Set</span>(<span class="str">"Access-Control-Allow-Origin"</span>, origin)
+            w.Header().<span class="fn">Set</span>(<span class="str">"Access-Control-Allow-Methods"</span>,
+                <span class="str">"GET, POST, PUT, PATCH, DELETE, OPTIONS"</span>)
+            w.Header().<span class="fn">Set</span>(<span class="str">"Access-Control-Allow-Headers"</span>,
+                <span class="str">"Content-Type, Authorization, X-Requested-With"</span>)
+            w.Header().<span class="fn">Set</span>(<span class="str">"Access-Control-Allow-Credentials"</span>, <span class="str">"true"</span>)
+            w.Header().<span class="fn">Set</span>(<span class="str">"Access-Control-Max-Age"</span>, <span class="str">"86400"</span>)  <span class="cm">// Cache preflight for 24h</span>
+        }
+
+        <span class="cm">// Handle preflight (OPTIONS) — return immediately, don't hit handler</span>
+        <span class="kw">if</span> r.Method == http.MethodOptions {
+            w.<span class="fn">WriteHeader</span>(http.StatusNoContent)  <span class="cm">// 204</span>
+            <span class="kw">return</span>
+        }
+
+        next.<span class="fn">ServeHTTP</span>(w, r)
+    })
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Why not Access-Control-Allow-Origin: *?</div>
+  <p>Using <code>*</code> as the allowed origin blocks cookies and credentials. If your API uses cookies for authentication (JWT in httpOnly cookie), you <strong>must</strong> echo the specific origin and set <code>Access-Control-Allow-Credentials: true</code>.</p>
+</div>
+
+
+<!-- ===================== SECTION 14: JWT AUTH ===================== -->
+<h2 id="jwt-auth"><span class="section-num">14</span> JWT Authentication Middleware</h2>
+
+<p>JWT (JSON Web Token) is the standard for stateless authentication in REST APIs. The token is signed by the server and contains claims (user ID, role, expiration). The middleware reads the token from an httpOnly cookie (more secure than localStorage), validates the signature, checks expiration, and passes the claims to downstream handlers via context.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"os"</span>
+
+    <span class="str">"github.com/golang-jwt/jwt/v5"</span>
+)
+
+<span class="kw">type</span> <span class="ty">contextKey</span> <span class="ty">string</span>
+<span class="kw">const</span> UserClaimsKey <span class="ty">contextKey</span> = <span class="str">"userClaims"</span>
+
+<span class="kw">func</span> <span class="fn">JWTMiddleware</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// Read token from httpOnly cookie (not from Authorization header)</span>
+        cookie, err := r.<span class="fn">Cookie</span>(<span class="str">"auth_token"</span>)
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            http.<span class="fn">Error</span>(w, <span class="str">"Unauthorized: no token"</span>, http.StatusUnauthorized)
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Parse and validate the JWT</span>
+        secret := []<span class="fn">byte</span>(os.<span class="fn">Getenv</span>(<span class="str">"JWT_SECRET"</span>))
+        token, err := jwt.<span class="fn">Parse</span>(cookie.Value, <span class="kw">func</span>(t *<span class="ty">jwt.Token</span>) (<span class="kw">interface</span>{}, <span class="ty">error</span>) {
+            <span class="cm">// Ensure the signing method is HMAC (prevent algorithm switching attack)</span>
+            <span class="kw">if</span> _, ok := t.Method.(*<span class="ty">jwt.SigningMethodHMAC</span>); !ok {
+                <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"unexpected signing method"</span>)
+            }
+            <span class="kw">return</span> secret, <span class="kw">nil</span>
+        })
+
+        <span class="kw">if</span> err != <span class="kw">nil</span> || !token.Valid {
+            http.<span class="fn">Error</span>(w, <span class="str">"Unauthorized: invalid token"</span>, http.StatusUnauthorized)
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Extract claims and add to request context</span>
+        claims, ok := token.Claims.(<span class="ty">jwt.MapClaims</span>)
+        <span class="kw">if</span> !ok {
+            http.<span class="fn">Error</span>(w, <span class="str">"Unauthorized: invalid claims"</span>, http.StatusUnauthorized)
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Pass claims downstream via context</span>
+        ctx := context.<span class="fn">WithValue</span>(r.<span class="fn">Context</span>(), UserClaimsKey, claims)
+        next.<span class="fn">ServeHTTP</span>(w, r.<span class="fn">WithContext</span>(ctx))
+    })
+}
+
+<span class="cm">// In a handler, retrieve the claims:</span>
+<span class="kw">func</span> <span class="fn">ProfileHandler</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    claims := r.<span class="fn">Context</span>().<span class="fn">Value</span>(UserClaimsKey).(<span class="ty">jwt.MapClaims</span>)
+    userID := claims[<span class="str">"user_id"</span>]  <span class="cm">// extracted from the JWT</span>
+    fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Hello user %v"</span>, userID)
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Why httpOnly Cookie instead of localStorage?</div>
+  <p>Storing JWT in localStorage is vulnerable to XSS attacks: any injected script can read <code>localStorage.getItem("token")</code>. An httpOnly cookie is <strong>invisible to JavaScript</strong>, so even if XSS occurs, the attacker cannot steal the token. The browser automatically sends the cookie with every request.</p>
+</div>
+
+
+<!-- ===================== SECTION 15: PASSWORD HASHING ===================== -->
+<h2 id="password-hashing"><span class="section-num">15</span> Password Hashing (Argon2)</h2>
+
+<p>Never store passwords in plain text. Argon2 is the winner of the 2015 Password Hashing Competition and is the recommended algorithm for password hashing. It's resistant to GPU/ASIC attacks because it requires significant memory, unlike bcrypt which is compute-bound only.</p>
+
+<p>The pattern: generate a random salt, hash the password with Argon2id, store the salt+hash together. To verify, extract the salt, re-hash the input, and compare using constant-time comparison (to prevent timing attacks).</p>
+
+<pre><code><span class="kw">package</span> utils
+
+<span class="kw">import</span> (
+    <span class="str">"crypto/rand"</span>
+    <span class="str">"crypto/subtle"</span>
+    <span class="str">"encoding/base64"</span>
+    <span class="str">"fmt"</span>
+
+    <span class="str">"golang.org/x/crypto/argon2"</span>
+)
+
+<span class="kw">const</span> (
+    argonTime    = <span class="num">1</span>       <span class="cm">// Number of iterations</span>
+    argonMemory  = <span class="num">64</span> * <span class="num">1024</span>  <span class="cm">// 64 MB memory cost</span>
+    argonThreads = <span class="num">4</span>       <span class="cm">// Parallelism factor</span>
+    argonKeyLen  = <span class="num">32</span>      <span class="cm">// Output hash length</span>
+    saltLen      = <span class="num">16</span>      <span class="cm">// Salt length in bytes</span>
+)
+
+<span class="cm">// HashPassword generates a salt and returns salt$hash (both base64)</span>
+<span class="kw">func</span> <span class="fn">HashPassword</span>(password <span class="ty">string</span>) (<span class="ty">string</span>, <span class="ty">error</span>) {
+    <span class="cm">// Generate a random salt</span>
+    salt := <span class="fn">make</span>([]<span class="ty">byte</span>, saltLen)
+    <span class="kw">if</span> _, err := rand.<span class="fn">Read</span>(salt); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="str">""</span>, err
+    }
+
+    <span class="cm">// Hash with Argon2id (recommended variant)</span>
+    hash := argon2.<span class="fn">IDKey</span>([]<span class="fn">byte</span>(password), salt,
+        argonTime, argonMemory, argonThreads, argonKeyLen)
+
+    <span class="cm">// Encode both as base64 and combine with $ separator</span>
+    saltB64 := base64.RawStdEncoding.<span class="fn">EncodeToString</span>(salt)
+    hashB64 := base64.RawStdEncoding.<span class="fn">EncodeToString</span>(hash)
+
+    <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"%s$%s"</span>, saltB64, hashB64), <span class="kw">nil</span>
+}
+
+<span class="cm">// VerifyPassword checks a password against a stored hash</span>
+<span class="kw">func</span> <span class="fn">VerifyPassword</span>(password, stored <span class="ty">string</span>) <span class="ty">bool</span> {
+    <span class="cm">// Split stored value into salt and hash</span>
+    parts := strings.<span class="fn">SplitN</span>(stored, <span class="str">"$"</span>, <span class="num">2</span>)
+    <span class="kw">if</span> <span class="fn">len</span>(parts) != <span class="num">2</span> {
+        <span class="kw">return</span> <span class="kw">false</span>
+    }
+
+    salt, _ := base64.RawStdEncoding.<span class="fn">DecodeString</span>(parts[<span class="num">0</span>])
+    expectedHash, _ := base64.RawStdEncoding.<span class="fn">DecodeString</span>(parts[<span class="num">1</span>])
+
+    <span class="cm">// Re-hash the input with the same salt</span>
+    computedHash := argon2.<span class="fn">IDKey</span>([]<span class="fn">byte</span>(password), salt,
+        argonTime, argonMemory, argonThreads, argonKeyLen)
+
+    <span class="cm">// Constant-time comparison prevents timing attacks</span>
+    <span class="kw">return</span> subtle.<span class="fn">ConstantTimeCompare</span>(expectedHash, computedHash) == <span class="num">1</span>
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Why Constant-Time Comparison?</div>
+  <p>Regular <code>==</code> comparison exits early on the first mismatched byte. An attacker can measure the time difference to determine how many bytes matched, gradually guessing the hash. <code>subtle.ConstantTimeCompare</code> always takes the same time regardless of input, eliminating this side-channel attack.</p>
+</div>
+
+
+<!-- ===================== SECTION 16: RATE LIMITING ===================== -->
+<h2 id="rate-limiting"><span class="section-num">16</span> Rate Limiting Middleware</h2>
+
+<p>Rate limiting prevents abuse by restricting how many requests a client can make in a given time window. This implementation tracks requests per IP address using a map protected by a mutex. A background goroutine periodically resets the counters.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"net/http"</span>
+    <span class="str">"sync"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">type</span> <span class="ty">visitor</span> <span class="kw">struct</span> {
+    count    <span class="ty">int</span>
+    lastSeen <span class="ty">time.Time</span>
+}
+
+<span class="kw">var</span> (
+    visitors = <span class="fn">make</span>(<span class="kw">map</span>[<span class="ty">string</span>]*<span class="ty">visitor</span>)
+    mu       <span class="ty">sync.Mutex</span>
+    rateLimit = <span class="num">100</span>  <span class="cm">// Max requests per window</span>
+)
+
+<span class="cm">// Background goroutine: clean up stale entries every minute</span>
+<span class="kw">func</span> <span class="fn">init</span>() {
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">for</span> {
+            time.<span class="fn">Sleep</span>(<span class="num">1</span> * time.Minute)
+            mu.<span class="fn">Lock</span>()
+            <span class="kw">for</span> ip, v := <span class="kw">range</span> visitors {
+                <span class="kw">if</span> time.<span class="fn">Since</span>(v.lastSeen) &gt; <span class="num">3</span>*time.Minute {
+                    <span class="fn">delete</span>(visitors, ip)
+                }
+            }
+            mu.<span class="fn">Unlock</span>()
+        }
+    }()
+}
+
+<span class="kw">func</span> <span class="fn">RateLimiter</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        ip := r.RemoteAddr
+
+        mu.<span class="fn">Lock</span>()
+        v, exists := visitors[ip]
+        <span class="kw">if</span> !exists {
+            visitors[ip] = &amp;<span class="ty">visitor</span>{count: <span class="num">1</span>, lastSeen: time.<span class="fn">Now</span>()}
+            mu.<span class="fn">Unlock</span>()
+            next.<span class="fn">ServeHTTP</span>(w, r)
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Reset count if window has passed</span>
+        <span class="kw">if</span> time.<span class="fn">Since</span>(v.lastSeen) &gt; <span class="num">1</span>*time.Minute {
+            v.count = <span class="num">0</span>
+            v.lastSeen = time.<span class="fn">Now</span>()
+        }
+
+        v.count++
+        <span class="kw">if</span> v.count &gt; rateLimit {
+            mu.<span class="fn">Unlock</span>()
+            http.<span class="fn">Error</span>(w, <span class="str">"Rate limit exceeded"</span>, http.StatusTooManyRequests)
+            <span class="kw">return</span>
+        }
+        mu.<span class="fn">Unlock</span>()
+
+        next.<span class="fn">ServeHTTP</span>(w, r)
+    })
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Production Improvements</div>
+  <ul>
+    <li>Use <code>golang.org/x/time/rate</code> for a token-bucket rate limiter</li>
+    <li>Use Redis for distributed rate limiting across multiple server instances</li>
+    <li>Extract IP from <code>X-Forwarded-For</code> or <code>X-Real-IP</code> headers when behind a reverse proxy</li>
+    <li>Return <code>Retry-After</code> header to tell clients when they can retry</li>
+  </ul>
+</div>
+
+
+<!-- ===================== SECTION 17: COMPRESSION ===================== -->
+<h2 id="compression"><span class="section-num">17</span> Compression Middleware</h2>
+
+<p>Gzip compression can reduce response sizes by 70-90% for text-based content (JSON, HTML, CSS). The middleware checks if the client supports gzip (via <code>Accept-Encoding</code> header), wraps the response writer with a gzip writer, and sets the appropriate headers.</p>
+
+<p>The key challenge is that you need a custom <code>ResponseWriter</code> that writes to the gzip stream instead of the raw connection.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"compress/gzip"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"strings"</span>
+)
+
+<span class="cm">// gzipResponseWriter wraps http.ResponseWriter to write through gzip</span>
+<span class="kw">type</span> <span class="ty">gzipResponseWriter</span> <span class="kw">struct</span> {
+    <span class="ty">http.ResponseWriter</span>
+    Writer *<span class="ty">gzip.Writer</span>
+}
+
+<span class="cm">// Write sends data through the gzip compressor</span>
+<span class="kw">func</span> (grw *<span class="ty">gzipResponseWriter</span>) <span class="fn">Write</span>(b []<span class="ty">byte</span>) (<span class="ty">int</span>, <span class="ty">error</span>) {
+    <span class="kw">return</span> grw.Writer.<span class="fn">Write</span>(b)
+}
+
+<span class="kw">func</span> <span class="fn">Compression</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// Check if client accepts gzip</span>
+        <span class="kw">if</span> !strings.<span class="fn">Contains</span>(r.Header.<span class="fn">Get</span>(<span class="str">"Accept-Encoding"</span>), <span class="str">"gzip"</span>) {
+            next.<span class="fn">ServeHTTP</span>(w, r)
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// Set headers BEFORE writing any response</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"Content-Encoding"</span>, <span class="str">"gzip"</span>)
+        w.Header().<span class="fn">Set</span>(<span class="str">"Vary"</span>, <span class="str">"Accept-Encoding"</span>)
+
+        <span class="cm">// Create gzip writer and wrap the ResponseWriter</span>
+        gz := gzip.<span class="fn">NewWriter</span>(w)
+        <span class="kw">defer</span> gz.<span class="fn">Close</span>()  <span class="cm">// Flush and close when handler returns</span>
+
+        grw := &amp;<span class="ty">gzipResponseWriter</span>{ResponseWriter: w, Writer: gz}
+        next.<span class="fn">ServeHTTP</span>(grw, r)  <span class="cm">// Downstream writes go through gzip</span>
+    })
+}</code></pre>
+
+
+<!-- ===================== SECTION 18: XSS ===================== -->
+<h2 id="xss-protection"><span class="section-num">18</span> XSS Protection Middleware</h2>
+
+<p>XSS (Cross-Site Scripting) attacks inject malicious scripts into your application. This middleware sanitizes all JSON request bodies by recursively walking the parsed JSON structure and stripping dangerous HTML/JavaScript using the <code>bluemonday</code> library.</p>
+
+<p>The key idea: parse the JSON body, recursively sanitize every string value, then re-encode the sanitized body and replace the original request body.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"bytes"</span>
+    <span class="str">"encoding/json"</span>
+    <span class="str">"io"</span>
+    <span class="str">"net/http"</span>
+
+    <span class="str">"github.com/microcosm-cc/bluemonday"</span>
+)
+
+<span class="kw">var</span> policy = bluemonday.<span class="fn">UGCPolicy</span>()  <span class="cm">// User-Generated Content policy</span>
+
+<span class="cm">// sanitizeValue recursively sanitizes all strings in a JSON structure</span>
+<span class="kw">func</span> <span class="fn">sanitizeValue</span>(v <span class="kw">interface</span>{}) <span class="kw">interface</span>{} {
+    <span class="kw">switch</span> val := v.(<span class="kw">type</span>) {
+    <span class="kw">case</span> <span class="ty">string</span>:
+        <span class="kw">return</span> policy.<span class="fn">Sanitize</span>(val)  <span class="cm">// Strip dangerous HTML/JS</span>
+    <span class="kw">case</span> <span class="kw">map</span>[<span class="ty">string</span>]<span class="kw">interface</span>{}:
+        <span class="kw">for</span> k, v := <span class="kw">range</span> val {
+            val[k] = <span class="fn">sanitizeValue</span>(v)  <span class="cm">// Recurse into objects</span>
+        }
+        <span class="kw">return</span> val
+    <span class="kw">case</span> []<span class="kw">interface</span>{}:
+        <span class="kw">for</span> i, v := <span class="kw">range</span> val {
+            val[i] = <span class="fn">sanitizeValue</span>(v)  <span class="cm">// Recurse into arrays</span>
+        }
+        <span class="kw">return</span> val
+    <span class="kw">default</span>:
+        <span class="kw">return</span> v  <span class="cm">// Numbers, booleans, null — pass through</span>
+    }
+}
+
+<span class="kw">func</span> <span class="fn">XSSMiddleware</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// Only process requests with JSON bodies</span>
+        <span class="kw">if</span> r.Body != <span class="kw">nil</span> &amp;&amp; r.Header.<span class="fn">Get</span>(<span class="str">"Content-Type"</span>) == <span class="str">"application/json"</span> {
+            body, err := io.<span class="fn">ReadAll</span>(r.Body)
+            <span class="kw">if</span> err == <span class="kw">nil</span> &amp;&amp; <span class="fn">len</span>(body) &gt; <span class="num">0</span> {
+                <span class="kw">var</span> data <span class="kw">interface</span>{}
+                <span class="kw">if</span> json.<span class="fn">Unmarshal</span>(body, &amp;data) == <span class="kw">nil</span> {
+                    sanitized := <span class="fn">sanitizeValue</span>(data)
+                    clean, _ := json.<span class="fn">Marshal</span>(sanitized)
+                    r.Body = io.<span class="fn">NopCloser</span>(bytes.<span class="fn">NewReader</span>(clean))
+                } <span class="kw">else</span> {
+                    <span class="cm">// Not valid JSON — restore original body</span>
+                    r.Body = io.<span class="fn">NopCloser</span>(bytes.<span class="fn">NewReader</span>(body))
+                }
+            }
+        }
+        next.<span class="fn">ServeHTTP</span>(w, r)
+    })
+}</code></pre>
+
+
+<!-- ===================== SECTION 19: HPP ===================== -->
+<h2 id="hpp"><span class="section-num">19</span> HPP Protection</h2>
+
+<p>HTTP Parameter Pollution (HPP) is an attack where the attacker sends duplicate query parameters to confuse your application. For example: <code>/search?category=books&amp;category=admin</code>. Depending on how the server handles duplicates, this can bypass security filters or alter query logic.</p>
+
+<p>This middleware keeps only the <strong>last</strong> value for each query parameter, preventing pollution. You can also configure a whitelist of parameters that are allowed to have multiple values (like <code>tags</code> or <code>ids</code>).</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"net/http"</span>
+    <span class="str">"net/url"</span>
+)
+
+<span class="cm">// Parameters that are allowed to have multiple values</span>
+<span class="kw">var</span> allowedDuplicates = <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">bool</span>{
+    <span class="str">"tags"</span>: <span class="kw">true</span>,
+    <span class="str">"ids"</span>:  <span class="kw">true</span>,
+}
+
+<span class="kw">func</span> <span class="fn">HPPProtection</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        query := r.URL.Query()
+        clean := url.Values{}
+
+        <span class="kw">for</span> key, values := <span class="kw">range</span> query {
+            <span class="kw">if</span> allowedDuplicates[key] {
+                clean[key] = values  <span class="cm">// Keep all values for whitelisted params</span>
+            } <span class="kw">else</span> {
+                <span class="cm">// Keep only the last value for non-whitelisted params</span>
+                clean.<span class="fn">Set</span>(key, values[<span class="fn">len</span>(values)-<span class="num">1</span>])
+            }
+        }
+
+        r.URL.RawQuery = clean.<span class="fn">Encode</span>()
+        next.<span class="fn">ServeHTTP</span>(w, r)
+    })
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Why the last value?</div>
+  <p>Taking the last value is a common convention that matches PHP and Express.js behavior. Some frameworks take the first value. The important thing is to be <strong>consistent</strong> and prevent attackers from injecting unexpected values through duplicates.</p>
+</div>
+
+
+<!-- ===================== SECTION 20: RESPONSE TIME ===================== -->
+<h2 id="response-time"><span class="section-num">20</span> Response Time Middleware</h2>
+
+<p>Tracking response time is essential for monitoring and debugging. This middleware records when the request started, lets the handler run, then calculates the elapsed time and adds it as a response header. You can also log slow requests for alerting.</p>
+
+<pre><code><span class="kw">package</span> middlewares
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">func</span> <span class="fn">ResponseTimeMiddleware</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+    <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        start := time.<span class="fn">Now</span>()
+
+        <span class="cm">// Run the actual handler</span>
+        next.<span class="fn">ServeHTTP</span>(w, r)
+
+        <span class="cm">// Calculate elapsed time</span>
+        duration := time.<span class="fn">Since</span>(start)
+
+        <span class="cm">// Add response time header (useful for debugging)</span>
+        w.Header().<span class="fn">Set</span>(<span class="str">"X-Response-Time"</span>,
+            fmt.<span class="fn">Sprintf</span>(<span class="str">"%dms"</span>, duration.<span class="fn">Milliseconds</span>()))
+
+        <span class="cm">// Log slow requests (&gt; 500ms)</span>
+        <span class="kw">if</span> duration &gt; <span class="num">500</span>*time.Millisecond {
+            log.<span class="fn">Printf</span>(<span class="str">"SLOW REQUEST: %s %s took %v"</span>,
+                r.Method, r.URL.Path, duration)
+        }
+    })
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Header Ordering Gotcha</div>
+  <p>Note that <code>w.Header().Set()</code> after <code>next.ServeHTTP(w, r)</code> only works if the handler hasn't already called <code>w.WriteHeader()</code> or <code>w.Write()</code>. Once headers are sent, they can't be modified. For guaranteed header delivery, use a custom ResponseWriter wrapper to capture the status code.</p>
+</div>
+
+
+<!-- ===================== SECTION 21: MW EXCLUSION ===================== -->
+<h2 id="mw-exclusion"><span class="section-num">21</span> Middleware Route Exclusion</h2>
+
+<p>Not every route needs every middleware. For example, your login and register endpoints shouldn't require JWT authentication, and your health check endpoint probably doesn't need rate limiting. This helper wraps a middleware and skips it for specified paths.</p>
+
+<pre><code><span class="kw">package</span> utils
+
+<span class="kw">import</span> (
+    <span class="str">"net/http"</span>
+    <span class="str">"strings"</span>
+)
+
+<span class="cm">// MiddlewaresExcludePaths wraps a middleware to skip it for certain paths</span>
+<span class="kw">func</span> <span class="fn">MiddlewaresExcludePaths</span>(mw <span class="ty">Middleware</span>, excludePaths ...<span class="ty">string</span>) <span class="ty">Middleware</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+        <span class="cm">// Apply the middleware to the handler</span>
+        wrapped := <span class="fn">mw</span>(next)
+
+        <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+            <span class="cm">// Check if current path should be excluded</span>
+            <span class="kw">for</span> _, path := <span class="kw">range</span> excludePaths {
+                <span class="kw">if</span> strings.<span class="fn">HasPrefix</span>(r.URL.Path, path) {
+                    next.<span class="fn">ServeHTTP</span>(w, r)  <span class="cm">// Skip middleware</span>
+                    <span class="kw">return</span>
+                }
+            }
+            wrapped.<span class="fn">ServeHTTP</span>(w, r)  <span class="cm">// Apply middleware</span>
+        })
+    }
+}
+
+<span class="cm">// Usage: JWT middleware skips login and register routes</span>
+jwtMiddleware := utils.<span class="fn">MiddlewaresExcludePaths</span>(
+    mw.JWTMiddleware,
+    <span class="str">"/auth/login"</span>,
+    <span class="str">"/auth/register"</span>,
+    <span class="str">"/health"</span>,
+)</code></pre>
+
+
+<!-- ===================== SECTION 22: UTILS ===================== -->
+<h2 id="utils"><span class="section-num">22</span> Utility Functions</h2>
+
+<p>These are the helper functions that keep your handlers clean. Instead of repeating SQL generation, error handling, and reflection logic in every handler, extract them into reusable utilities.</p>
+
+<h3>GenerateInsertQuery</h3>
+<p>Dynamically builds an INSERT SQL query from a struct, using reflection to read struct tags.</p>
+
+<pre><code><span class="cm">// GenerateInsertQuery builds "INSERT INTO table (col1, col2) VALUES (?, ?)"</span>
+<span class="cm">// from any struct using its `db` tags</span>
+<span class="kw">func</span> <span class="fn">GenerateInsertQuery</span>(table <span class="ty">string</span>, model <span class="kw">interface</span>{}) <span class="ty">string</span> {
+    t := reflect.<span class="fn">TypeOf</span>(model)
+    v := reflect.<span class="fn">ValueOf</span>(model)
+
+    <span class="kw">var</span> columns []<span class="ty">string</span>
+    <span class="kw">var</span> placeholders []<span class="ty">string</span>
+
+    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; t.<span class="fn">NumField</span>(); i++ {
+        field := t.<span class="fn">Field</span>(i)
+        value := v.<span class="fn">Field</span>(i)
+
+        <span class="cm">// Skip zero-value fields and ID (auto-increment)</span>
+        <span class="kw">if</span> value.<span class="fn">IsZero</span>() { <span class="kw">continue</span> }
+
+        dbTag := field.Tag.<span class="fn">Get</span>(<span class="str">"db"</span>)
+        column := strings.<span class="fn">Split</span>(dbTag, <span class="str">","</span>)[<span class="num">0</span>]
+        <span class="kw">if</span> column == <span class="str">"id"</span> { <span class="kw">continue</span> }
+
+        columns = <span class="fn">append</span>(columns, column)
+        placeholders = <span class="fn">append</span>(placeholders, <span class="str">"?"</span>)
+    }
+
+    <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"INSERT INTO %s (%s) VALUES (%s)"</span>,
+        table,
+        strings.<span class="fn">Join</span>(columns, <span class="str">", "</span>),
+        strings.<span class="fn">Join</span>(placeholders, <span class="str">", "</span>),
+    )
+}</code></pre>
+
+<h3>GetStructValues (Reflection-based)</h3>
+<pre><code><span class="cm">// GetStructValues extracts non-zero field values from a struct</span>
+<span class="cm">// Returns values in the same order as GenerateInsertQuery columns</span>
+<span class="kw">func</span> <span class="fn">GetStructValues</span>(model <span class="kw">interface</span>{}) []<span class="kw">interface</span>{} {
+    v := reflect.<span class="fn">ValueOf</span>(model)
+    t := reflect.<span class="fn">TypeOf</span>(model)
+
+    <span class="kw">var</span> values []<span class="kw">interface</span>{}
+    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; v.<span class="fn">NumField</span>(); i++ {
+        field := v.<span class="fn">Field</span>(i)
+        dbTag := t.<span class="fn">Field</span>(i).Tag.<span class="fn">Get</span>(<span class="str">"db"</span>)
+        column := strings.<span class="fn">Split</span>(dbTag, <span class="str">","</span>)[<span class="num">0</span>]
+
+        <span class="kw">if</span> !field.<span class="fn">IsZero</span>() &amp;&amp; column != <span class="str">"id"</span> {
+            values = <span class="fn">append</span>(values, field.<span class="fn">Interface</span>())
+        }
+    }
+    <span class="kw">return</span> values
+}</code></pre>
+
+<h3>AddSorting &amp; AddFilters</h3>
+<pre><code><span class="cm">// AddSorting appends ORDER BY to a query from ?sort=name&amp;order=desc</span>
+<span class="kw">func</span> <span class="fn">AddSorting</span>(query <span class="ty">string</span>, r *<span class="ty">http.Request</span>, allowedColumns <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">bool</span>) <span class="ty">string</span> {
+    sortBy := r.URL.Query().<span class="fn">Get</span>(<span class="str">"sort"</span>)
+    order := r.URL.Query().<span class="fn">Get</span>(<span class="str">"order"</span>)
+
+    <span class="cm">// Whitelist columns to prevent SQL injection</span>
+    <span class="kw">if</span> allowedColumns[sortBy] {
+        <span class="kw">if</span> order != <span class="str">"desc"</span> { order = <span class="str">"asc"</span> }
+        query += fmt.<span class="fn">Sprintf</span>(<span class="str">" ORDER BY %s %s"</span>, sortBy, order)
+    }
+    <span class="kw">return</span> query
+}
+
+<span class="cm">// AddFilters appends WHERE clauses from query parameters</span>
+<span class="kw">func</span> <span class="fn">AddFilters</span>(query <span class="ty">string</span>, r *<span class="ty">http.Request</span>,
+    allowedFilters <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (<span class="ty">string</span>, []<span class="kw">interface</span>{}) {
+
+    <span class="kw">var</span> conditions []<span class="ty">string</span>
+    <span class="kw">var</span> values []<span class="kw">interface</span>{}
+
+    <span class="kw">for</span> param, column := <span class="kw">range</span> allowedFilters {
+        <span class="kw">if</span> val := r.URL.Query().<span class="fn">Get</span>(param); val != <span class="str">""</span> {
+            conditions = <span class="fn">append</span>(conditions, column+<span class="str">" = ?"</span>)
+            values = <span class="fn">append</span>(values, val)
+        }
+    }
+
+    <span class="kw">if</span> <span class="fn">len</span>(conditions) &gt; <span class="num">0</span> {
+        query += <span class="str">" WHERE "</span> + strings.<span class="fn">Join</span>(conditions, <span class="str">" AND "</span>)
+    }
+    <span class="kw">return</span> query, values
+}</code></pre>
+
+<h3>ErrorHandler</h3>
+<pre><code><span class="cm">// ErrorHandler sends a consistent JSON error response</span>
+<span class="kw">func</span> <span class="fn">ErrorHandler</span>(w <span class="ty">http.ResponseWriter</span>, status <span class="ty">int</span>, message <span class="ty">string</span>) {
+    w.Header().<span class="fn">Set</span>(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+    w.<span class="fn">WriteHeader</span>(status)
+    json.<span class="fn">NewEncoder</span>(w).<span class="fn">Encode</span>(<span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>{
+        <span class="str">"error"</span>:   http.<span class="fn">StatusText</span>(status),
+        <span class="str">"message"</span>: message,
+    })
+}
+
+<span class="cm">// AuthorizeUser checks if the JWT user matches the requested resource</span>
+<span class="kw">func</span> <span class="fn">AuthorizeUser</span>(r *<span class="ty">http.Request</span>, resourceOwnerID <span class="ty">int</span>) <span class="ty">bool</span> {
+    claims := r.<span class="fn">Context</span>().<span class="fn">Value</span>(UserClaimsKey).(<span class="ty">jwt.MapClaims</span>)
+    userID := <span class="fn">int</span>(claims[<span class="str">"user_id"</span>].(<span class="ty">float64</span>))
+    <span class="kw">return</span> userID == resourceOwnerID
+}</code></pre>
+
+
+<!-- ===================== SECTION 23: PROTOBUF ===================== -->
+<h2 id="protobuf"><span class="section-num">23</span> Protocol Buffers</h2>
+
+<p>Protocol Buffers (protobuf) is Google's language-neutral, platform-neutral mechanism for serializing structured data. Think of it as JSON, but binary, smaller, faster, and with a strict schema. You define your data structures in <code>.proto</code> files, then the <code>protoc</code> compiler generates Go code (structs and methods) automatically.</p>
+
+<p>Protobuf is the foundation of gRPC. While REST APIs use JSON over HTTP, gRPC uses protobuf over HTTP/2 for much better performance.</p>
+
+<h3>.proto File Syntax</h3>
+<pre><code><span class="cm">// calculator.proto</span>
+<span class="kw">syntax</span> = <span class="str">"proto3"</span>;         <span class="cm">// Use proto3 syntax (latest)</span>
+<span class="kw">package</span> calculator;         <span class="cm">// Package namespace</span>
+<span class="kw">option</span> go_package = <span class="str">"/proto/gen;mainpb"</span>;  <span class="cm">// Go package path</span>
+
+<span class="cm">// Service defines the RPC methods</span>
+<span class="kw">service</span> <span class="ty">Calculate</span> {
+    <span class="kw">rpc</span> <span class="fn">Add</span> (<span class="ty">AddRequest</span>) <span class="kw">returns</span> (<span class="ty">AddResponse</span>);
+}
+
+<span class="cm">// Messages define the data structures</span>
+<span class="kw">message</span> <span class="ty">AddRequest</span> {
+    <span class="ty">int32</span> a = <span class="num">1</span>;  <span class="cm">// Field number 1 (not value — used for binary encoding)</span>
+    <span class="ty">int32</span> b = <span class="num">2</span>;  <span class="cm">// Field number 2</span>
+}
+
+<span class="kw">message</span> <span class="ty">AddResponse</span> {
+    <span class="ty">int32</span> sum = <span class="num">1</span>;
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Field Numbers Are Critical</div>
+  <p>The numbers (1, 2, etc.) are <strong>not default values</strong> — they're field identifiers used in the binary encoding. Once a field number is assigned and deployed, it must never change. Numbers 1-15 use 1 byte in the encoding, 16-2047 use 2 bytes. Put your most frequently used fields in 1-15.</p>
+</div>
+
+<h3>Generating Go Code</h3>
+<pre><code><span class="cm"># Install the protoc compiler and Go plugins</span>
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+<span class="cm"># Generate Go code from .proto file</span>
+protoc --go_out=. --go-grpc_out=. calculator.proto
+
+<span class="cm"># This generates:</span>
+<span class="cm">#   calculator.pb.go       — message structs (AddRequest, AddResponse)</span>
+<span class="cm">#   calculator_grpc.pb.go  — service interface &amp; client stub</span></code></pre>
+
+<h3>Common Protobuf Types</h3>
+<table>
+  <tr><th>Protobuf Type</th><th>Go Type</th><th>Notes</th></tr>
+  <tr><td><code>int32</code></td><td><code>int32</code></td><td>Variable-length encoding</td></tr>
+  <tr><td><code>int64</code></td><td><code>int64</code></td><td>Variable-length encoding</td></tr>
+  <tr><td><code>string</code></td><td><code>string</code></td><td>Must be valid UTF-8</td></tr>
+  <tr><td><code>bool</code></td><td><code>bool</code></td><td></td></tr>
+  <tr><td><code>bytes</code></td><td><code>[]byte</code></td><td>Arbitrary byte sequences</td></tr>
+  <tr><td><code>float</code> / <code>double</code></td><td><code>float32</code> / <code>float64</code></td><td></td></tr>
+  <tr><td><code>repeated T</code></td><td><code>[]T</code></td><td>Lists/arrays</td></tr>
+  <tr><td><code>map&lt;K,V&gt;</code></td><td><code>map[K]V</code></td><td>Key-value maps</td></tr>
+</table>
+
+
+<!-- ===================== SECTION 24: GRPC SERVER ===================== -->
+<h2 id="grpc-server"><span class="section-num">24</span> gRPC Server</h2>
+
+<p>gRPC is a high-performance RPC framework that uses HTTP/2 for transport and Protocol Buffers for serialization. Unlike REST where you manually serialize/deserialize JSON and define URL patterns, gRPC generates the entire client-server boilerplate from your <code>.proto</code> file. You just implement the business logic.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net"</span>
+
+    pb <span class="str">"myapp/proto/gen"</span>  <span class="cm">// Import generated protobuf code</span>
+
+    <span class="str">"google.golang.org/grpc"</span>
+    <span class="str">"google.golang.org/grpc/credentials"</span>
+)
+
+<span class="cm">// Server implements the Calculate service interface</span>
+<span class="kw">type</span> <span class="ty">Server</span> <span class="kw">struct</span> {
+    pb.<span class="ty">UnimplementedCalculateServer</span>  <span class="cm">// Embed for forward compatibility</span>
+}
+
+<span class="cm">// Add implements the Add RPC method</span>
+<span class="kw">func</span> (s *<span class="ty">Server</span>) <span class="fn">Add</span>(ctx <span class="ty">context.Context</span>, req *<span class="ty">pb.AddRequest</span>) (*<span class="ty">pb.AddResponse</span>, <span class="ty">error</span>) {
+    sum := req.<span class="fn">GetA</span>() + req.<span class="fn">GetB</span>()
+    <span class="kw">return</span> &amp;<span class="ty">pb.AddResponse</span>{Sum: sum}, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Load TLS certificate</span>
+    creds, err := credentials.<span class="fn">NewServerTLSFromFile</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Failed to load TLS: %v"</span>, err)
+    }
+
+    <span class="cm">// Create gRPC server with TLS</span>
+    grpcServer := grpc.<span class="fn">NewServer</span>(grpc.<span class="fn">Creds</span>(creds))
+
+    <span class="cm">// Register our service implementation</span>
+    pb.<span class="fn">RegisterCalculateServer</span>(grpcServer, &amp;<span class="ty">Server</span>{})
+
+    <span class="cm">// Listen on TCP port</span>
+    lis, err := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":50051"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Failed to listen: %v"</span>, err)
+    }
+
+    log.<span class="fn">Println</span>(<span class="str">"gRPC server listening on :50051"</span>)
+    <span class="kw">if</span> err := grpcServer.<span class="fn">Serve</span>(lis); err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Server failed: %v"</span>, err)
+    }
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Why UnimplementedCalculateServer?</div>
+  <p>Embedding <code>UnimplementedCalculateServer</code> ensures forward compatibility. If you add new RPC methods to your <code>.proto</code> file but haven't implemented them yet, the server will return an "unimplemented" error instead of failing to compile. This lets you evolve your API incrementally.</p>
+</div>
+
+
+<!-- ===================== SECTION 25: GRPC CLIENT ===================== -->
+<h2 id="grpc-client"><span class="section-num">25</span> gRPC Client</h2>
+
+<p>The gRPC client is auto-generated from the same <code>.proto</code> file. You create a connection, get a typed client stub, and call methods as if they were local function calls. The serialization, HTTP/2 framing, and error handling are all handled by the framework.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"log"</span>
+    <span class="str">"time"</span>
+
+    pb <span class="str">"myapp/proto/gen"</span>
+
+    <span class="str">"google.golang.org/grpc"</span>
+    <span class="str">"google.golang.org/grpc/credentials"</span>
+    <span class="str">"google.golang.org/grpc/metadata"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Load TLS credentials</span>
+    creds, err := credentials.<span class="fn">NewClientTLSFromFile</span>(<span class="str">"cert.pem"</span>, <span class="str">""</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Failed to load TLS: %v"</span>, err)
+    }
+
+    <span class="cm">// Connect to gRPC server</span>
+    conn, err := grpc.<span class="fn">Dial</span>(<span class="str">"localhost:50051"</span>, grpc.<span class="fn">WithTransportCredentials</span>(creds))
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Failed to connect: %v"</span>, err)
+    }
+    <span class="kw">defer</span> conn.<span class="fn">Close</span>()
+
+    <span class="cm">// Create a typed client stub</span>
+    client := pb.<span class="fn">NewCalculateClient</span>(conn)
+
+    <span class="cm">// Add metadata (like HTTP headers)</span>
+    md := metadata.<span class="fn">New</span>(<span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>{
+        <span class="str">"authorization"</span>: <span class="str">"Bearer my-token"</span>,
+    })
+    ctx := metadata.<span class="fn">NewOutgoingContext</span>(context.<span class="fn">Background</span>(), md)
+
+    <span class="cm">// Set a timeout</span>
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num">5</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+
+    <span class="cm">// Call the Add RPC — looks like a local function call!</span>
+    resp, err := client.<span class="fn">Add</span>(ctx, &amp;<span class="ty">pb.AddRequest</span>{A: <span class="num">10</span>, B: <span class="num">20</span>})
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"RPC failed: %v"</span>, err)
+    }
+
+    log.<span class="fn">Printf</span>(<span class="str">"10 + 20 = %d"</span>, resp.<span class="fn">GetSum</span>())  <span class="cm">// Output: 10 + 20 = 30</span>
+}</code></pre>
+
+
+<!-- ===================== SECTION 26: GRPC STREAMING ===================== -->
+<h2 id="grpc-streaming"><span class="section-num">26</span> gRPC Streaming</h2>
+
+<p>gRPC supports four communication patterns. Unary (request-response) is the simplest. But gRPC's real power comes from its three streaming modes: server-side, client-side, and bidirectional. Streaming is ideal for real-time data, large file transfers, and chat applications.</p>
+
+<h3>Proto Definitions for Streaming</h3>
+<pre><code><span class="kw">service</span> <span class="ty">StreamService</span> {
+    <span class="cm">// Server-side streaming: client sends one request, server sends many responses</span>
+    <span class="kw">rpc</span> <span class="fn">Fibonacci</span> (<span class="ty">FibRequest</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="ty">FibResponse</span>);
+
+    <span class="cm">// Client-side streaming: client sends many requests, server sends one response</span>
+    <span class="kw">rpc</span> <span class="fn">SendNumbers</span> (<span class="kw">stream</span> <span class="ty">NumberRequest</span>) <span class="kw">returns</span> (<span class="ty">SumResponse</span>);
+
+    <span class="cm">// Bidirectional streaming: both sides send streams simultaneously</span>
+    <span class="kw">rpc</span> <span class="fn">Chat</span> (<span class="kw">stream</span> <span class="ty">ChatMessage</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="ty">ChatMessage</span>);
+}
+
+<span class="kw">message</span> <span class="ty">FibRequest</span> { <span class="ty">int32</span> count = <span class="num">1</span>; }
+<span class="kw">message</span> <span class="ty">FibResponse</span> { <span class="ty">int64</span> value = <span class="num">1</span>; }
+<span class="kw">message</span> <span class="ty">NumberRequest</span> { <span class="ty">int32</span> number = <span class="num">1</span>; }
+<span class="kw">message</span> <span class="ty">SumResponse</span> { <span class="ty">int64</span> total = <span class="num">1</span>; }
+<span class="kw">message</span> <span class="ty">ChatMessage</span> { <span class="ty">string</span> user = <span class="num">1</span>; <span class="ty">string</span> text = <span class="num">2</span>; }</code></pre>
+
+<h3>Server-Side Streaming (Fibonacci)</h3>
+<p>The server sends multiple responses for a single request. The client reads from the stream until it receives an EOF (End of File) signal.</p>
+
+<pre><code><span class="cm">// Server implementation: sends N Fibonacci numbers</span>
+<span class="kw">func</span> (s *<span class="ty">Server</span>) <span class="fn">Fibonacci</span>(req *<span class="ty">pb.FibRequest</span>, stream <span class="ty">pb.StreamService_FibonacciServer</span>) <span class="ty">error</span> {
+    a, b := <span class="ty">int64</span>(<span class="num">0</span>), <span class="ty">int64</span>(<span class="num">1</span>)
+    <span class="kw">for</span> i := <span class="ty">int32</span>(<span class="num">0</span>); i &lt; req.<span class="fn">GetCount</span>(); i++ {
+        <span class="cm">// Send each number as a separate message</span>
+        <span class="kw">if</span> err := stream.<span class="fn">Send</span>(&amp;<span class="ty">pb.FibResponse</span>{Value: a}); err != <span class="kw">nil</span> {
+            <span class="kw">return</span> err
+        }
+        a, b = b, a+b
+    }
+    <span class="kw">return</span> <span class="kw">nil</span>  <span class="cm">// Returning nil closes the stream</span>
+}
+
+<span class="cm">// Client: reads the stream</span>
+stream, err := client.<span class="fn">Fibonacci</span>(ctx, &amp;<span class="ty">pb.FibRequest</span>{Count: <span class="num">10</span>})
+<span class="kw">for</span> {
+    resp, err := stream.<span class="fn">Recv</span>()
+    <span class="kw">if</span> err == io.EOF {
+        <span class="kw">break</span>  <span class="cm">// Server closed the stream</span>
+    }
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)
+    }
+    fmt.<span class="fn">Println</span>(resp.<span class="fn">GetValue</span>())
+}</code></pre>
+
+<h3>Client-Side Streaming (SendNumbers)</h3>
+<p>The client sends multiple messages, and the server responds once after the client finishes.</p>
+
+<pre><code><span class="cm">// Server: receives numbers and returns the sum</span>
+<span class="kw">func</span> (s *<span class="ty">Server</span>) <span class="fn">SendNumbers</span>(stream <span class="ty">pb.StreamService_SendNumbersServer</span>) <span class="ty">error</span> {
+    <span class="kw">var</span> total <span class="ty">int64</span>
+    <span class="kw">for</span> {
+        req, err := stream.<span class="fn">Recv</span>()
+        <span class="kw">if</span> err == io.EOF {
+            <span class="cm">// Client finished sending — return the result</span>
+            <span class="kw">return</span> stream.<span class="fn">SendAndClose</span>(&amp;<span class="ty">pb.SumResponse</span>{Total: total})
+        }
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            <span class="kw">return</span> err
+        }
+        total += <span class="ty">int64</span>(req.<span class="fn">GetNumber</span>())
+    }
+}
+
+<span class="cm">// Client: sends numbers one by one</span>
+stream, _ := client.<span class="fn">SendNumbers</span>(ctx)
+<span class="kw">for</span> _, n := <span class="kw">range</span> []<span class="ty">int32</span>{<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>} {
+    stream.<span class="fn">Send</span>(&amp;<span class="ty">pb.NumberRequest</span>{Number: n})
+}
+resp, _ := stream.<span class="fn">CloseAndRecv</span>()
+fmt.<span class="fn">Println</span>(<span class="str">"Sum:"</span>, resp.<span class="fn">GetTotal</span>())  <span class="cm">// 15</span></code></pre>
+
+<h3>Bidirectional Streaming (Chat)</h3>
+<p>Both sides send and receive simultaneously. This is ideal for chat, gaming, and real-time collaboration.</p>
+
+<pre><code><span class="cm">// Server: echoes messages back with a prefix</span>
+<span class="kw">func</span> (s *<span class="ty">Server</span>) <span class="fn">Chat</span>(stream <span class="ty">pb.StreamService_ChatServer</span>) <span class="ty">error</span> {
+    <span class="kw">for</span> {
+        msg, err := stream.<span class="fn">Recv</span>()
+        <span class="kw">if</span> err == io.EOF {
+            <span class="kw">return</span> <span class="kw">nil</span>
+        }
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            <span class="kw">return</span> err
+        }
+
+        <span class="cm">// Echo back with modification</span>
+        reply := &amp;<span class="ty">pb.ChatMessage</span>{
+            User: <span class="str">"server"</span>,
+            Text: fmt.<span class="fn">Sprintf</span>(<span class="str">"Echo: %s"</span>, msg.<span class="fn">GetText</span>()),
+        }
+        <span class="kw">if</span> err := stream.<span class="fn">Send</span>(reply); err != <span class="kw">nil</span> {
+            <span class="kw">return</span> err
+        }
+    }
+}
+
+<span class="cm">// Client: send and receive concurrently using goroutines</span>
+stream, _ := client.<span class="fn">Chat</span>(ctx)
+
+<span class="cm">// Goroutine to receive messages</span>
+<span class="kw">go</span> <span class="kw">func</span>() {
+    <span class="kw">for</span> {
+        msg, err := stream.<span class="fn">Recv</span>()
+        <span class="kw">if</span> err == io.EOF { <span class="kw">return</span> }
+        fmt.<span class="fn">Printf</span>(<span class="str">"[%s]: %s\n"</span>, msg.<span class="fn">GetUser</span>(), msg.<span class="fn">GetText</span>())
+    }
+}()
+
+<span class="cm">// Send messages from main goroutine</span>
+messages := []<span class="ty">string</span>{<span class="str">"Hello"</span>, <span class="str">"How are you?"</span>, <span class="str">"Goodbye"</span>}
+<span class="kw">for</span> _, text := <span class="kw">range</span> messages {
+    stream.<span class="fn">Send</span>(&amp;<span class="ty">pb.ChatMessage</span>{User: <span class="str">"client"</span>, Text: text})
+}
+stream.<span class="fn">CloseSend</span>()</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">When to use each pattern</div>
+  <table>
+    <tr><th>Pattern</th><th>Use Case</th></tr>
+    <tr><td><strong>Unary</strong></td><td>Simple request-response (CRUD, auth, calculations)</td></tr>
+    <tr><td><strong>Server streaming</strong></td><td>Real-time feeds, log tailing, large result sets</td></tr>
+    <tr><td><strong>Client streaming</strong></td><td>File uploads, sensor data batching, bulk operations</td></tr>
+    <tr><td><strong>Bidirectional</strong></td><td>Chat, gaming, collaborative editing, live dashboards</td></tr>
+  </table>
+</div>
+
+
+<!-- ===================== SECTION 27: GRPC GATEWAY ===================== -->
+<h2 id="grpc-gateway"><span class="section-num">27</span> gRPC Gateway</h2>
+
+<p>Sometimes you need both gRPC and REST on the same server. The <strong>grpc-gateway</strong> project generates a reverse proxy that translates RESTful JSON API calls into gRPC calls. This lets you serve gRPC clients (internal microservices) and REST clients (web browsers, mobile apps) from the same backend.</p>
+
+<h3>How It Works</h3>
+<p>You annotate your <code>.proto</code> file with HTTP rules, then <code>protoc</code> generates a REST proxy that forwards requests to your gRPC server.</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"google/api/annotations.proto"</span>;
+
+<span class="kw">service</span> <span class="ty">Calculate</span> {
+    <span class="kw">rpc</span> <span class="fn">Add</span> (<span class="ty">AddRequest</span>) <span class="kw">returns</span> (<span class="ty">AddResponse</span>) {
+        <span class="kw">option</span> (google.api.http) = {
+            post: <span class="str">"/v1/add"</span>
+            body: <span class="str">"*"</span>
+        };
+    }
+}</code></pre>
+
+<h3>Running gRPC + REST Together</h3>
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net"</span>
+    <span class="str">"net/http"</span>
+
+    <span class="str">"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"</span>
+    <span class="str">"google.golang.org/grpc"</span>
+    <span class="str">"google.golang.org/grpc/credentials/insecure"</span>
+
+    pb <span class="str">"myapp/proto/gen"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// 1. Start gRPC server on port 50051</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        lis, _ := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":50051"</span>)
+        grpcServer := grpc.<span class="fn">NewServer</span>()
+        pb.<span class="fn">RegisterCalculateServer</span>(grpcServer, &amp;<span class="ty">Server</span>{})
+        log.<span class="fn">Println</span>(<span class="str">"gRPC server on :50051"</span>)
+        grpcServer.<span class="fn">Serve</span>(lis)
+    }()
+
+    <span class="cm">// 2. Start REST gateway on port 8080</span>
+    ctx := context.<span class="fn">Background</span>()
+    mux := runtime.<span class="fn">NewServeMux</span>()
+
+    <span class="cm">// Connect the gateway to the gRPC server</span>
+    opts := []grpc.DialOption{grpc.<span class="fn">WithTransportCredentials</span>(insecure.<span class="fn">NewCredentials</span>())}
+    err := pb.<span class="fn">RegisterCalculateHandlerFromEndpoint</span>(ctx, mux, <span class="str">"localhost:50051"</span>, opts)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)
+    }
+
+    log.<span class="fn">Println</span>(<span class="str">"REST gateway on :8080"</span>)
+    http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, mux)
+
+    <span class="cm">// Now both work:</span>
+    <span class="cm">// gRPC:  client.Add(ctx, &amp;AddRequest{A: 10, B: 20})</span>
+    <span class="cm">// REST:  POST http://localhost:8080/v1/add {"a": 10, "b": 20}</span>
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Architecture Flow</div>
+  <p>REST Client -> JSON/HTTP -> grpc-gateway (reverse proxy) -> Protobuf/HTTP2 -> gRPC Server. The gateway handles JSON <-> protobuf conversion automatically. Your gRPC server code stays the same.</p>
+</div>
+
+
+<!-- ===================== SECTION 28: GO VS NODE ===================== -->
+<h2 id="go-vs-node"><span class="section-num">28</span> Go vs Node.js</h2>
+
+<p>Both Go and Node.js are popular for building web servers, but they take fundamentally different approaches. Go compiles to a single binary with built-in concurrency. Node.js runs on V8 with an event loop and requires external packages for most functionality. Let's compare them head-to-head.</p>
+
+<h3>HTTP Server Comparison</h3>
+<h4>Go — net/http (standard library)</h4>
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    http.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Hello from Go!"</span>)
+    })
+    http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>)
+}
+<span class="cm">// Build: go build -o server . (single binary, ~6MB)</span>
+<span class="cm">// Deploy: copy binary to server, run it. Done.</span></code></pre>
+
+<h4>Node.js — Native http module</h4>
+<pre><code><span class="kw">const</span> http = <span class="fn">require</span>(<span class="str">'http'</span>);
+
+http.<span class="fn">createServer</span>((req, res) =&gt; {
+    res.<span class="fn">end</span>(<span class="str">'Hello from Node!'</span>);
+}).<span class="fn">listen</span>(<span class="num">8080</span>);
+<span class="cm">// Requires: Node.js runtime installed</span>
+<span class="cm">// No routing, no middleware — need Express/Fastify</span></code></pre>
+
+<h4>Node.js — Express (most popular framework)</h4>
+<pre><code><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+app.<span class="fn">get</span>(<span class="str">'/'</span>, (req, res) =&gt; {
+    res.<span class="fn">send</span>(<span class="str">'Hello from Express!'</span>);
+});
+app.<span class="fn">listen</span>(<span class="num">8080</span>);
+<span class="cm">// Requires: npm install express + node_modules (~30MB)</span></code></pre>
+
+<h3>Key Differences</h3>
+<table>
+  <tr><th>Aspect</th><th>Go (net/http)</th><th>Node.js (Express/Fastify)</th></tr>
+  <tr><td><strong>Concurrency</strong></td><td>Goroutines — lightweight threads managed by Go runtime. Thousands of concurrent connections with minimal memory</td><td>Single-threaded event loop. CPU-heavy tasks block everything. Use clustering for multi-core</td></tr>
+  <tr><td><strong>Deployment</strong></td><td>Single static binary. No runtime needed. Copy and run.</td><td>Requires Node.js runtime, node_modules, package.json</td></tr>
+  <tr><td><strong>Routing</strong></td><td>Built into stdlib (Go 1.22+). Method routing, path params, wildcards.</td><td>Need Express/Fastify/Koa. Native http has nothing.</td></tr>
+  <tr><td><strong>Type Safety</strong></td><td>Static typing, compile-time checks</td><td>Dynamic typing (unless using TypeScript)</td></tr>
+  <tr><td><strong>Memory</strong></td><td>~10MB for a typical server</td><td>~50-100MB for Express with middleware</td></tr>
+  <tr><td><strong>CPU-bound Tasks</strong></td><td>Excellent — goroutines spread across all CPU cores</td><td>Poor — blocks event loop. Need worker threads or child processes</td></tr>
+  <tr><td><strong>Error Handling</strong></td><td>Explicit <code>if err != nil</code> checks</td><td>try/catch, callbacks, .catch() chains</td></tr>
+  <tr><td><strong>Ecosystem</strong></td><td>Smaller but high-quality. Stdlib covers most needs.</td><td>Massive npm ecosystem. Package for everything (and its problems)</td></tr>
+</table>
+
+<h3>Concurrency: Goroutines vs Event Loop</h3>
+<p>This is the fundamental difference. Go creates a new goroutine for each request automatically. Node.js processes all requests on a single thread with callbacks.</p>
+
+<pre><code><span class="cm">// Go: Each request runs in its own goroutine automatically</span>
+<span class="cm">// 10,000 concurrent requests = 10,000 goroutines (~20KB each = ~200MB)</span>
+<span class="cm">// CPU-heavy work in one goroutine doesn't block others</span>
+
+http.<span class="fn">HandleFunc</span>(<span class="str">"/heavy"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    <span class="cm">// This runs in its own goroutine — doesn't block other requests</span>
+    result := <span class="fn">heavyComputation</span>()
+    fmt.<span class="fn">Fprintln</span>(w, result)
+})</code></pre>
+
+<pre><code><span class="cm">// Node.js: Single thread — heavy computation blocks EVERYONE</span>
+app.<span class="fn">get</span>(<span class="str">'/heavy'</span>, (req, res) =&gt; {
+    <span class="cm">// This blocks the entire event loop — all other requests wait</span>
+    <span class="kw">const</span> result = <span class="fn">heavyComputation</span>();
+    res.<span class="fn">send</span>(result);
+});
+
+<span class="cm">// Fix: Use clustering to run on multiple cores</span>
+<span class="kw">const</span> cluster = <span class="fn">require</span>(<span class="str">'cluster'</span>);
+<span class="kw">if</span> (cluster.isPrimary) {
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; os.<span class="fn">cpus</span>().length; i++) {
+        cluster.<span class="fn">fork</span>();  <span class="cm">// One process per CPU core</span>
+    }
+} <span class="kw">else</span> {
+    app.<span class="fn">listen</span>(<span class="num">8080</span>);  <span class="cm">// Each process is still single-threaded</span>
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">When to choose which?</div>
+  <ul>
+    <li><strong>Choose Go</strong> when: building microservices, CLI tools, systems programming, high-concurrency APIs, CPU-intensive backends, or when you want simple deployment (single binary)</li>
+    <li><strong>Choose Node.js</strong> when: building full-stack JavaScript apps, real-time apps with Socket.io, rapid prototyping, or when your team already knows JavaScript and you need the npm ecosystem</li>
+  </ul>
+</div>
+
+
+</div><!-- /.main -->
+</div><!-- /.main-wrapper -->
+
+<script>
+// === Accordion toggle ===
+function toggleAccordion(btn) {
+  const content = btn.nextElementSibling;
+  const isOpen = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+  content.classList.toggle('open');
+}
+
+// === Sidebar Scroll Sync + URL Hash ===
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('h2[id]');
+  const navLinks = document.querySelectorAll('.sidebar a[data-section]');
+  const sidebar = document.getElementById('sidebar');
+
+  if (!sections.length) return;
+
+  let currentActive = null;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        if (currentActive !== id) {
+          currentActive = id;
+
+          // Update sidebar active state
+          navLinks.forEach(link => {
+            if (link.dataset.section === id) {
+              link.classList.add('active');
+              const sidebarNav = sidebar.querySelector('.sidebar-nav');
+              const linkTop = link.offsetTop - sidebarNav.offsetTop;
+              const sidebarHeight = sidebarNav.clientHeight;
+              if (linkTop < sidebarNav.scrollTop || linkTop > sidebarNav.scrollTop + sidebarHeight - 60) {
+                sidebarNav.scrollTo({ top: linkTop - sidebarHeight / 3, behavior: 'smooth' });
+              }
+            } else {
+              link.classList.remove('active');
+            }
+          });
+
+          // Update URL #hash (so refresh lands here)
+          history.replaceState(null, '', '#' + id);
+        }
+      }
+    });
+  }, {
+    rootMargin: '-10% 0px -80% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(section => observer.observe(section));
+
+  // Click handler — smooth scroll on clicks only
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = link.dataset.section;
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+
+  // On page load: jump to #hash instantly (not smooth)
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    const el = document.getElementById(hash);
+    if (el) {
+      // Wait for fonts/layout to settle, then force scroll
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }, 50);
+    }
+  }
+});
+</script>
+
+</body>
+</html>
