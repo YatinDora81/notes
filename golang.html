@@ -287,17 +287,102 @@
     border-radius: 50%; background: var(--accent); flex-shrink: 0;
   }
 
+  /* ========== MOBILE HAMBURGER ========== */
+  .mobile-header {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 56px; z-index: 200;
+    background: rgba(9,9,11,0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    align-items: center; gap: 12px;
+  }
+  .hamburger {
+    width: 40px; height: 40px; border: none; background: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    padding: 0; flex-shrink: 0;
+  }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--muted); border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  .hamburger.active span:nth-child(2) { opacity: 0; }
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+  .mobile-header .mobile-logo {
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mobile-header .mobile-logo .go-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), #007d9c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 12px; color: #fff; flex-shrink: 0;
+  }
+
+  /* ========== SIDEBAR OVERLAY (mobile) ========== */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .sidebar-overlay.visible { display: block; opacity: 1; }
+
   /* ========== RESPONSIVE ========== */
   @media (max-width: 900px) {
-    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 300;
+    }
+    .sidebar.open { transform: translateX(0); }
     .main-wrapper { margin-left: 0; }
-    .main { padding: 24px 20px 80px; }
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.4rem; }
+    .main { padding: 72px 18px 80px; }
+    h1 { font-size: 1.85rem; letter-spacing: -1px; }
+    h2 { font-size: 1.3rem; margin-top: 48px; }
+    h3 { font-size: 1.05rem; }
+    pre { padding: 14px 14px; font-size: 0.78rem; }
+    pre code { font-size: 0.78rem; }
+    table { font-size: 0.8rem; display: block; overflow-x: auto; }
+    th, td { padding: 8px 10px; }
+    .info-box, .warn-box, .tip-box { padding: 14px 16px; }
+    .file-tree { padding: 14px 16px; font-size: 0.78rem; }
+    .accordion-trigger { padding: 14px 16px; font-size: 0.88rem; }
+    .accordion-body { padding: 12px 16px 14px; }
+  }
+
+  @media (max-width: 480px) {
+    .main { padding: 68px 14px 60px; }
+    h1 { font-size: 1.55rem; }
+    h2 { font-size: 1.15rem; }
+    pre { padding: 12px 10px; font-size: 0.74rem; }
+    pre code { font-size: 0.74rem; }
+    .badge { font-size: 0.6rem; padding: 1px 6px; }
   }
 </style>
 </head>
 <body>
+
+<!-- ==================== MOBILE HEADER ==================== -->
+<header class="mobile-header" id="mobileHeader">
+  <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mobile-logo">
+    <div class="go-icon">Go</div>
+    <span>Mastery Guide</span>
+  </div>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- ==================== SIDEBAR ==================== -->
 <nav class="sidebar" id="sidebar">
@@ -3558,50 +3643,185 @@ _ = err  <span class="cm">// handle error in real code</span></code></pre>
 <!-- ===================== SECTION 32: TESTING ===================== -->
 <h2 id="testing"><span class="section-num">62</span> Testing</h2>
 
+<p>Go has a built-in testing framework — no third-party libraries needed. Test files <strong>must end with <code>_test.go</code></strong> and test functions <strong>must start with <code>Test</code></strong>.</p>
+
 <div class="file-tree">
 <span class="folder">myproject/</span>
-&#x251C;&#x2500;&#x2500; <span class="file">math.go</span>           &#x2190; source
+&#x251C;&#x2500;&#x2500; <span class="file">math.go</span>           &#x2190; source code
 &#x251C;&#x2500;&#x2500; <span class="file">math_test.go</span>      &#x2190; tests (MUST end with _test.go)
-&#x2514;&#x2500;&#x2500; <span class="folder">testdata/</span>          &#x2190; test fixtures (ignored by build)
+&#x2514;&#x2500;&#x2500; <span class="folder">testdata/</span>          &#x2190; test fixtures (ignored by go build)
 </div>
 
-<pre><code><span class="cm">// Table-driven tests — THE Go pattern</span>
-<span class="kw">func</span> <span class="fn">TestDivide</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// must start with Test</span>
-    tests := []<span class="kw">struct</span> {  <span class="cm">// slice of anonymous structs</span>
-        name    <span class="ty">string</span>  <span class="cm">// test case name</span>
-        a, b    <span class="ty">float64</span>  <span class="cm">// inputs</span>
-        want    <span class="ty">float64</span>  <span class="cm">// expected result</span>
-        wantErr <span class="ty">bool</span>  <span class="cm">// expect an error?</span>
-    }{
-        {<span class="str">"normal"</span>, <span class="num">10</span>, <span class="num">2</span>, <span class="num">5</span>, <span class="kw">false</span>},  <span class="cm">// 10/2 = 5, no error</span>
-        {<span class="str">"zero div"</span>, <span class="num">10</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="kw">true</span>},  <span class="cm">// divide by zero, expect error</span>
+<h3>The Function Under Test</h3>
+<pre><code><span class="cm">// math.go</span>
+<span class="kw">package</span> math
+
+<span class="kw">func</span> <span class="fn">Add</span>(a, b <span class="ty">int</span>) <span class="ty">int</span> {
+    <span class="kw">return</span> a + b
+}</code></pre>
+
+<h3>Level 1 — Basic Test (Simplest Form)</h3>
+<pre><code><span class="cm">// math_test.go</span>
+<span class="kw">package</span> math
+
+<span class="kw">import</span> <span class="str">"testing"</span>
+
+<span class="kw">func</span> <span class="fn">TestAdd</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// MUST start with Test + uppercase letter</span>
+    result := <span class="fn">Add</span>(<span class="num">2</span>, <span class="num">3</span>)
+    expected := <span class="num">5</span>
+    <span class="kw">if</span> result != expected {
+        t.<span class="fn">Errorf</span>(<span class="str">"Add(2, 3) = %d; want %d"</span>, result, expected)  <span class="cm">// marks test as FAILED</span>
     }
+}
+<span class="cm">// t.Errorf — logs error but continues running</span>
+<span class="cm">// t.Fatalf — logs error and STOPS this test immediately</span>
+<span class="cm">// t.Log    — logs info (only shown if test fails or -v flag)</span></code></pre>
+
+<h3>Level 2 — Table-Driven Tests (Idiomatic Go)</h3>
+<p>Run <strong>multiple test cases</strong> from a single function. The Go community standard.</p>
+<pre><code><span class="kw">func</span> <span class="fn">TestAddTableDriven</span>(t *testing.<span class="ty">T</span>) {
+    tests := []<span class="kw">struct</span>{ a, b, expected <span class="ty">int</span> }{  <span class="cm">// slice of anonymous structs</span>
+        {<span class="num">2</span>, <span class="num">3</span>, <span class="num">5</span>},
+        {<span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>},
+        {-<span class="num">1</span>, <span class="num">1</span>, <span class="num">0</span>},
+        {<span class="num">100</span>, <span class="num">200</span>, <span class="num">300</span>},
+    }
+
+    <span class="kw">for</span> _, test := <span class="kw">range</span> tests {
+        result := <span class="fn">Add</span>(test.a, test.b)
+        <span class="kw">if</span> result != test.expected {
+            t.<span class="fn">Errorf</span>(<span class="str">"Add(%d, %d) = %d; want %d"</span>, test.a, test.b, result, test.expected)
+        }
+    }
+}</code></pre>
+
+<h3>Level 3 — Subtests with t.Run (Named Test Cases)</h3>
+<p>Each case gets its own name — you can run individual subtests and see which specific case failed.</p>
+<pre><code><span class="kw">func</span> <span class="fn">TestAddSubtests</span>(t *testing.<span class="ty">T</span>) {
+    tests := []<span class="kw">struct</span> {
+        name     <span class="ty">string</span>
+        a, b     <span class="ty">int</span>
+        expected <span class="ty">int</span>
+    }{
+        {<span class="str">"positive"</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">5</span>},
+        {<span class="str">"zeros"</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>},
+        {<span class="str">"negative"</span>, -<span class="num">1</span>, <span class="num">1</span>, <span class="num">0</span>},
+    }
+
     <span class="kw">for</span> _, tt := <span class="kw">range</span> tests {
-        t.<span class="fn">Run</span>(tt.name, <span class="kw">func</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// subtest for each case</span>
-            got, err := <span class="fn">Divide</span>(tt.a, tt.b)  <span class="cm">// call the function</span>
-            <span class="kw">if</span> (err != <span class="kw">nil</span>) != tt.wantErr {  <span class="cm">// error presence check</span>
-                t.<span class="fn">Errorf</span>(<span class="str">"error = %v, wantErr %v"</span>, err, tt.wantErr)
-            }
-            <span class="kw">if</span> got != tt.want {  <span class="cm">// value check</span>
-                t.<span class="fn">Errorf</span>(<span class="str">"got %v, want %v"</span>, got, tt.want)
+        t.<span class="fn">Run</span>(tt.name, <span class="kw">func</span>(t *testing.<span class="ty">T</span>) {  <span class="cm">// creates subtest with name</span>
+            result := <span class="fn">Add</span>(tt.a, tt.b)
+            <span class="kw">if</span> result != tt.expected {
+                t.<span class="fn">Errorf</span>(<span class="str">"result = %d; want %d"</span>, result, tt.expected)
             }
         })
     }
 }
+<span class="cm">// Run specific subtest: go test -run TestAddSubtests/positive</span></code></pre>
 
-<span class="cm">// Benchmark</span>
-<span class="kw">func</span> <span class="fn">BenchmarkAdd</span>(b *testing.<span class="ty">B</span>) {  <span class="cm">// must start with Benchmark</span>
-    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; b.N; i++ { <span class="fn">Add</span>(<span class="num">2</span>, <span class="num">3</span>) }  <span class="cm">// b.N auto-tuned by framework</span>
+<h3>Level 4 — Real-World Test with Error Handling</h3>
+<pre><code><span class="kw">func</span> <span class="fn">TestDivide</span>(t *testing.<span class="ty">T</span>) {
+    tests := []<span class="kw">struct</span> {
+        name    <span class="ty">string</span>
+        a, b    <span class="ty">float64</span>
+        want    <span class="ty">float64</span>
+        wantErr <span class="ty">bool</span>  <span class="cm">// do we EXPECT an error for this case?</span>
+    }{
+        {<span class="str">"normal"</span>, <span class="num">10</span>, <span class="num">2</span>, <span class="num">5</span>, <span class="kw">false</span>},       <span class="cm">// 10/2 = 5, no error</span>
+        {<span class="str">"zero div"</span>, <span class="num">10</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="kw">true</span>},     <span class="cm">// divide by zero, expect error</span>
+        {<span class="str">"negatives"</span>, -<span class="num">6</span>, <span class="num">3</span>, -<span class="num">2</span>, <span class="kw">false</span>},  <span class="cm">// -6/3 = -2, no error</span>
+    }
+    <span class="kw">for</span> _, tt := <span class="kw">range</span> tests {
+        t.<span class="fn">Run</span>(tt.name, <span class="kw">func</span>(t *testing.<span class="ty">T</span>) {
+            got, err := <span class="fn">Divide</span>(tt.a, tt.b)
+            <span class="kw">if</span> (err != <span class="kw">nil</span>) != tt.wantErr {  <span class="cm">// check error presence matches expectation</span>
+                t.<span class="fn">Errorf</span>(<span class="str">"error = %v, wantErr %v"</span>, err, tt.wantErr)
+            }
+            <span class="kw">if</span> got != tt.want {
+                t.<span class="fn">Errorf</span>(<span class="str">"got %v, want %v"</span>, got, tt.want)
+            }
+        })
+    }
 }</code></pre>
+
+<h3>Testing Helper Functions</h3>
+<pre><code><span class="cm">// Validate a slice generation function</span>
+<span class="kw">func</span> <span class="fn">TestGenerateRandomSlice</span>(t *testing.<span class="ty">T</span>) {
+    size := <span class="num">100</span>
+    slice := <span class="fn">GenerateRandomSlice</span>(size)
+    <span class="kw">if</span> <span class="fn">len</span>(slice) != size {
+        t.<span class="fn">Errorf</span>(<span class="str">"expected slice size %d, received %d"</span>, size, <span class="fn">len</span>(slice))
+    }
+
+    <span class="cm">// Verify all values are in expected range</span>
+    <span class="kw">for</span> i, v := <span class="kw">range</span> slice {
+        <span class="kw">if</span> v &lt; <span class="num">0</span> || v >= <span class="num">100</span> {
+            t.<span class="fn">Errorf</span>(<span class="str">"slice[%d] = %d; want 0-99"</span>, i, v)
+        }
+    }
+}</code></pre>
+
+<div class="cmd-table">
+<table>
+  <tr><th>Command</th><th>Description</th></tr>
+  <tr><td><code>go test</code></td><td>Run all tests in current package</td></tr>
+  <tr><td><code>go test ./...</code></td><td>Run tests in ALL packages recursively</td></tr>
+  <tr><td><code>go test -v</code></td><td>Verbose — show every test name + PASS/FAIL</td></tr>
+  <tr><td><code>go test -run TestAdd</code></td><td>Run only tests matching "TestAdd"</td></tr>
+  <tr><td><code>go test -run TestAdd/positive</code></td><td>Run specific subtest</td></tr>
+  <tr><td><code>go test -count=1</code></td><td>Disable test caching (force re-run)</td></tr>
+  <tr><td><code>go test -race</code></td><td>Run with race detector enabled</td></tr>
+  <tr><td><code>go test -cover</code></td><td>Show test coverage percentage</td></tr>
+  <tr><td><code>go test -coverprofile=c.out</code></td><td>Generate coverage file</td></tr>
+  <tr><td><code>go tool cover -html=c.out</code></td><td>Open coverage report in browser</td></tr>
+</table>
+</div>
+
+<div class="info-box">
+  <div class="box-title">Testing Rules</div>
+  <ul>
+    <li>File must end with <code>_test.go</code> — build tool ignores test files in production builds</li>
+    <li>Function must start with <code>Test</code> + uppercase letter (e.g., <code>TestAdd</code>, not <code>Testadd</code>)</li>
+    <li>Takes exactly one parameter: <code>*testing.T</code></li>
+    <li>Go has no built-in <code>assert</code> — use <code>if</code> + <code>t.Errorf()</code> (or use <code>testify</code> package for assertions)</li>
+    <li>Tests are in the <strong>same package</strong> as the code they test — they can access unexported functions</li>
+  </ul>
+</div>
 
 <!-- ===================== SECTION: BENCHMARKING ===================== -->
 <h2 id="benchmarking"><span class="section-num">63</span> Benchmarking</h2>
 
-<p>Go has built-in benchmarking in the <code>testing</code> package. Benchmark functions start with <code>Benchmark</code> and use <code>b.N</code> — the framework automatically determines how many iterations to run.</p>
+<p>Go has built-in benchmarking in the <code>testing</code> package. Benchmark functions start with <code>Benchmark</code> and take <code>*testing.B</code>. The framework automatically determines <code>b.N</code> — how many iterations to run for stable results.</p>
 
+<h3>Basic Benchmark</h3>
 <pre><code><span class="cm">// File: math_test.go</span>
+<span class="kw">func</span> <span class="fn">BenchmarkAdd</span>(b *testing.<span class="ty">B</span>) {  <span class="cm">// must start with Benchmark</span>
+    <span class="kw">for</span> <span class="kw">range</span> b.N {  <span class="cm">// b.N is auto-tuned by framework (could be millions)</span>
+        <span class="fn">Add</span>(<span class="num">2</span>, <span class="num">3</span>)
+    }
+}
+<span class="cm">// Output: BenchmarkAdd-12  1000000000  0.3180 ns/op</span>
+<span class="cm">//         name-CPUs       iterations   time per operation</span></code></pre>
 
-<span class="kw">func</span> <span class="fn">GenerateRandomSlice</span>(size <span class="ty">int</span>) []<span class="ty">int</span> {
+<h3>Comparing Input Sizes</h3>
+<p>Run the same function with different input sizes to understand how performance scales.</p>
+<pre><code><span class="kw">func</span> <span class="fn">BenchmarkAddSmallInput</span>(b *testing.<span class="ty">B</span>) {
+    <span class="kw">for</span> <span class="kw">range</span> b.N { <span class="fn">Add</span>(<span class="num">2</span>, <span class="num">3</span>) }
+}
+
+<span class="kw">func</span> <span class="fn">BenchmarkAddMediumInput</span>(b *testing.<span class="ty">B</span>) {
+    <span class="kw">for</span> <span class="kw">range</span> b.N { <span class="fn">Add</span>(<span class="num">200</span>, <span class="num">300</span>) }
+}
+
+<span class="kw">func</span> <span class="fn">BenchmarkAddLargeInput</span>(b *testing.<span class="ty">B</span>) {
+    <span class="kw">for</span> <span class="kw">range</span> b.N { <span class="fn">Add</span>(<span class="num">2000</span>, <span class="num">3000</span>) }
+}
+<span class="cm">// For Add, all three will be similar — integer addition is O(1)</span>
+<span class="cm">// But for algorithms like sorting, you'd see clear differences</span></code></pre>
+
+<h3>Benchmark with Setup — b.ResetTimer()</h3>
+<p>Exclude setup time (slice creation, file loading, etc.) from the measurement.</p>
+<pre><code><span class="kw">func</span> <span class="fn">GenerateRandomSlice</span>(size <span class="ty">int</span>) []<span class="ty">int</span> {
     slice := <span class="fn">make</span>([]<span class="ty">int</span>, size)
     <span class="kw">for</span> i := <span class="kw">range</span> slice { slice[i] = rand.<span class="fn">Intn</span>(<span class="num">100</span>) }
     <span class="kw">return</span> slice
@@ -3613,29 +3833,39 @@ _ = err  <span class="cm">// handle error in real code</span></code></pre>
     <span class="kw">return</span> sum
 }
 
-<span class="cm">// Benchmark function — must start with Benchmark</span>
+<span class="cm">// Benchmark the generation itself</span>
 <span class="kw">func</span> <span class="fn">BenchmarkGenerateRandomSlice</span>(b *testing.<span class="ty">B</span>) {
-    <span class="kw">for</span> <span class="kw">range</span> b.N {  <span class="cm">// b.N is set by the framework</span>
+    <span class="kw">for</span> <span class="kw">range</span> b.N {
         <span class="fn">GenerateRandomSlice</span>(<span class="num">1000</span>)
     }
 }
 
+<span class="cm">// Benchmark ONLY SumSlice — exclude slice creation</span>
 <span class="kw">func</span> <span class="fn">BenchmarkSumSlice</span>(b *testing.<span class="ty">B</span>) {
-    slice := <span class="fn">GenerateRandomSlice</span>(<span class="num">1000</span>)
-    b.<span class="fn">ResetTimer</span>()  <span class="cm">// exclude setup time from benchmark</span>
+    slice := <span class="fn">GenerateRandomSlice</span>(<span class="num">1000</span>)  <span class="cm">// setup — NOT measured</span>
+    b.<span class="fn">ResetTimer</span>()                         <span class="cm">// reset timer AFTER setup</span>
     <span class="kw">for</span> <span class="kw">range</span> b.N {
-        <span class="fn">SumSlice</span>(slice)
+        <span class="fn">SumSlice</span>(slice)                    <span class="cm">// only this is measured</span>
     }
 }</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">b.ResetTimer() vs b.StopTimer() / b.StartTimer()</div>
+  <ul>
+    <li><code>b.ResetTimer()</code> — reset once after one-time setup (most common)</li>
+    <li><code>b.StopTimer()</code> / <code>b.StartTimer()</code> — pause/resume timer inside the loop for per-iteration setup that shouldn't be measured</li>
+  </ul>
+</div>
 
 <div class="cmd-table">
 <table>
   <tr><th>Command</th><th>Description</th></tr>
-  <tr><td><code>go test -bench=.</code></td><td>Run all benchmarks</td></tr>
+  <tr><td><code>go test -bench=.</code></td><td>Run all benchmarks in current package</td></tr>
   <tr><td><code>go test -bench=Sum</code></td><td>Run benchmarks matching "Sum"</td></tr>
-  <tr><td><code>go test -bench=. -benchmem</code></td><td>Include memory allocation stats</td></tr>
-  <tr><td><code>go test -bench=. -count=5</code></td><td>Run each benchmark 5 times</td></tr>
-  <tr><td><code>go test -bench=. -benchtime=5s</code></td><td>Run for 5 seconds minimum</td></tr>
+  <tr><td><code>go test -bench=. -benchmem</code></td><td>Include memory allocation stats (allocs/op, B/op)</td></tr>
+  <tr><td><code>go test -bench=. -count=5</code></td><td>Run each benchmark 5 times (for stable averages)</td></tr>
+  <tr><td><code>go test -bench=. -benchtime=5s</code></td><td>Run for 5 seconds minimum per benchmark</td></tr>
+  <tr><td><code>go test -bench=. -cpuprofile=cpu.out</code></td><td>Generate CPU profile for <code>go tool pprof</code></td></tr>
 </table>
 </div>
 
@@ -3817,23 +4047,114 @@ log.<span class="fn">WithFields</span>(logrus.<span class="ty">Fields</span>{
 <!-- ===================== SECTION 33: REFLECTION ===================== -->
 <h2 id="reflection"><span class="section-num">68</span> Reflection</h2>
 
-<pre><code><span class="kw">import</span> <span class="str">"reflect"</span>  <span class="cm">// runtime type inspection</span>
+<p>The <code>reflect</code> package lets you inspect and manipulate types and values <strong>at runtime</strong>. It powers <code>encoding/json</code>, ORMs, and any library that needs to work with arbitrary types. Two core functions: <code>reflect.TypeOf()</code> returns the <strong>type</strong>, <code>reflect.ValueOf()</code> returns the <strong>value</strong>.</p>
 
-t := reflect.<span class="fn">TypeOf</span>(u)  <span class="cm">// get the type of u</span>
-fmt.<span class="fn">Println</span>(t.Name(), t.Kind(), t.NumField())  <span class="cm">// name, kind (struct), field count</span>
+<h3>Core Concepts — Type, Value, Kind</h3>
+<pre><code><span class="kw">import</span> <span class="str">"reflect"</span>
 
-<span class="cm">// Iterate fields + read tags</span>
-<span class="kw">for</span> i := <span class="num">0</span>; i &lt; t.<span class="fn">NumField</span>(); i++ {
-    f := t.<span class="fn">Field</span>(i)  <span class="cm">// get StructField info</span>
-    fmt.<span class="fn">Println</span>(f.Name, f.Type, f.Tag.<span class="fn">Get</span>(<span class="str">"json"</span>))  <span class="cm">// read json struct tag</span>
+x := <span class="num">42</span>
+v := reflect.<span class="fn">ValueOf</span>(x)   <span class="cm">// runtime value representation</span>
+t := v.<span class="fn">Type</span>()              <span class="cm">// runtime type representation</span>
+
+fmt.<span class="fn">Println</span>(<span class="str">"Value:"</span>, v)           <span class="cm">// 42</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Type:"</span>, t)            <span class="cm">// int</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Kind:"</span>, t.<span class="fn">Kind</span>())     <span class="cm">// int (the underlying primitive kind)</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Is Zero:"</span>, v.<span class="fn">IsZero</span>()) <span class="cm">// false</span>
+
+<span class="cm">// Type = Go type name (e.g., MyInt, Person)</span>
+<span class="cm">// Kind = underlying primitive (e.g., int, struct, slice, ptr)</span>
+<span class="cm">// A custom `type MyInt int` has Type=MyInt but Kind=int</span>
+
+<span class="cm">// Interface type inspection</span>
+<span class="kw">var</span> itf <span class="kw">interface</span>{} = <span class="str">"Hello"</span>
+v3 := reflect.<span class="fn">ValueOf</span>(itf)
+<span class="kw">if</span> v3.<span class="fn">Kind</span>() == reflect.String {
+    fmt.<span class="fn">Println</span>(<span class="str">"String value:"</span>, v3.<span class="fn">String</span>())  <span class="cm">// "Hello"</span>
+}</code></pre>
+
+<h3>Modifying Values via Reflection</h3>
+<p><strong>Must pass a pointer</strong> — <code>reflect.ValueOf(x)</code> gets a copy. Use <code>reflect.ValueOf(&amp;x).Elem()</code> to get the addressable original.</p>
+
+<pre><code>y := <span class="num">10</span>
+v := reflect.<span class="fn">ValueOf</span>(&amp;y).<span class="fn">Elem</span>()  <span class="cm">// &amp;y = pointer, .Elem() = dereference</span>
+fmt.<span class="fn">Println</span>(<span class="str">"Before:"</span>, v.<span class="fn">Int</span>())    <span class="cm">// 10</span>
+
+v.<span class="fn">SetInt</span>(<span class="num">18</span>)                       <span class="cm">// modify the original y</span>
+fmt.<span class="fn">Println</span>(<span class="str">"After:"</span>, y)            <span class="cm">// 18 — y is changed!</span>
+
+<span class="cm">// Without pointer: reflect.ValueOf(y) is unaddressable — SetInt would panic</span></code></pre>
+
+<h3>Working with Structs &amp; Fields</h3>
+<pre><code><span class="kw">type</span> <span class="ty">Person</span> <span class="kw">struct</span> {
+    Name <span class="ty">string</span>  <span class="cm">// exported — CanSet() = true</span>
+    age  <span class="ty">int</span>     <span class="cm">// unexported — CanSet() = false</span>
 }
 
-<span class="cm">// Modify via reflection (need pointer)</span>
-v := reflect.<span class="fn">ValueOf</span>(&amp;u).<span class="fn">Elem</span>()  <span class="cm">// Elem() dereferences pointer</span>
-v.<span class="fn">FieldByName</span>(<span class="str">"Name"</span>).<span class="fn">SetString</span>(<span class="str">"Updated"</span>)  <span class="cm">// set field by name</span>
+p := Person{Name: <span class="str">"Alice"</span>, age: <span class="num">30</span>}
+v := reflect.<span class="fn">ValueOf</span>(p)
 
-<span class="cm">// WARNING: Reflection is slow and bypasses type safety.</span>
-<span class="cm">// Prefer generics for type-safe generic code.</span></code></pre>
+<span class="cm">// Read all fields (works for both exported and unexported)</span>
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; v.<span class="fn">NumField</span>(); i++ {
+    fmt.<span class="fn">Printf</span>(<span class="str">"Field %d: %v\n"</span>, i, v.<span class="fn">Field</span>(i))
+}
+<span class="cm">// Field 0: Alice</span>
+<span class="cm">// Field 1: 30</span>
+
+<span class="cm">// Modify exported fields (must pass pointer)</span>
+v1 := reflect.<span class="fn">ValueOf</span>(&amp;p).<span class="fn">Elem</span>()
+nameField := v1.<span class="fn">FieldByName</span>(<span class="str">"Name"</span>)
+<span class="kw">if</span> nameField.<span class="fn">CanSet</span>() {
+    nameField.<span class="fn">SetString</span>(<span class="str">"Jane"</span>)  <span class="cm">// OK — Name is exported</span>
+}
+fmt.<span class="fn">Println</span>(p)  <span class="cm">// {Jane 30}</span>
+
+<span class="cm">// ageField := v1.FieldByName("age")</span>
+<span class="cm">// ageField.CanSet() → false — unexported fields CANNOT be modified</span>
+
+<span class="cm">// Read struct tags via TypeOf</span>
+t := reflect.<span class="fn">TypeOf</span>(p)
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; t.<span class="fn">NumField</span>(); i++ {
+    f := t.<span class="fn">Field</span>(i)
+    fmt.<span class="fn">Println</span>(f.Name, f.Type, f.Tag.<span class="fn">Get</span>(<span class="str">"json"</span>))
+}</code></pre>
+
+<h3>Working with Methods — Dynamic Invocation</h3>
+<pre><code><span class="kw">type</span> <span class="ty">Greeter</span> <span class="kw">struct</span>{}
+
+<span class="kw">func</span> (g <span class="ty">Greeter</span>) <span class="fn">Greet</span>(fname, lname <span class="ty">string</span>) <span class="ty">string</span> {
+    <span class="kw">return</span> <span class="str">"Hello "</span> + fname + <span class="str">" "</span> + lname
+}
+
+g := Greeter{}
+t := reflect.<span class="fn">TypeOf</span>(g)
+v := reflect.<span class="fn">ValueOf</span>(g)
+
+<span class="cm">// List all methods</span>
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; t.<span class="fn">NumMethod</span>(); i++ {
+    method := t.<span class="fn">Method</span>(i)
+    fmt.<span class="fn">Printf</span>(<span class="str">"Method %d: %s\n"</span>, i, method.Name)  <span class="cm">// "Greet"</span>
+}
+
+<span class="cm">// Call method by name — dynamically!</span>
+m := v.<span class="fn">MethodByName</span>(<span class="str">"Greet"</span>)
+results := m.<span class="fn">Call</span>([]reflect.<span class="ty">Value</span>{
+    reflect.<span class="fn">ValueOf</span>(<span class="str">"Alice"</span>),   <span class="cm">// first arg</span>
+    reflect.<span class="fn">ValueOf</span>(<span class="str">"Doe"</span>),     <span class="cm">// second arg</span>
+})
+fmt.<span class="fn">Println</span>(results[<span class="num">0</span>].<span class="fn">String</span>())  <span class="cm">// "Hello Alice Doe"</span>
+
+<span class="cm">// Call() takes []reflect.Value and returns []reflect.Value</span>
+<span class="cm">// You must wrap every argument with reflect.ValueOf()</span></code></pre>
+
+<div class="warn-box">
+  <div class="box-title">When to Use / Avoid Reflection</div>
+  <ul>
+    <li><strong>Use:</strong> JSON/XML marshallers, ORM field mapping, dependency injection, struct tag reading</li>
+    <li><strong>Avoid:</strong> Normal application code — it's slow (10-100x), not type-safe, and errors happen at runtime instead of compile time</li>
+    <li><strong>Prefer generics</strong> (Go 1.18+) for type-safe generic code — they're faster and catch errors at compile time</li>
+    <li><code>CanSet()</code> returns false for unexported fields and non-pointer values — always check before calling <code>Set*()</code></li>
+  </ul>
+</div>
 
 <!-- ===================== SECTION 34: UNSAFE ===================== -->
 <h2 id="unsafe"><span class="section-num">69</span> Unsafe & Cgo</h2>
@@ -4461,6 +4782,36 @@ function toggleAllBtn() {
   knob.style.background = isOn ? 'var(--muted)' : '#fff';
   label.textContent = isOn ? 'Show All' : 'Hide All';
 }
+
+// === Mobile Sidebar Toggle ===
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebarEl = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+function openSidebar() {
+  sidebarEl.classList.add('open');
+  sidebarOverlay.classList.add('visible');
+  hamburgerBtn.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  sidebarEl.classList.remove('open');
+  sidebarOverlay.classList.remove('visible');
+  hamburgerBtn.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+hamburgerBtn.addEventListener('click', () => {
+  sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+// Close sidebar on nav link click (mobile)
+document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 900) closeSidebar();
+  });
+});
 
 // === Sidebar Scroll Sync + URL Hash ===
 document.addEventListener('DOMContentLoaded', () => {
