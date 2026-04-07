@@ -3205,6 +3205,44 @@ sort.<span class="fn">Slice</span>(fruits, <span class="kw">func</span>(i, j <sp
 ageAsc := <span class="kw">func</span>(a, b *Person) <span class="ty">bool</span> { <span class="kw">return</span> a.Age &lt; b.Age }
 <span class="ty">By</span>(ageAsc).<span class="fn">Sort</span>(people)  <span class="cm">// sort by age ascending</span></code></pre>
 
+<div class="info-box">
+  <div class="box-title">Why three functions? — how <code>sort.Sort</code> actually works</div>
+  <p><code>sort.Sort</code> is a single, generic sorting algorithm (an introsort — quicksort + heapsort fallback) that lives inside the <code>sort</code> package. It was written <strong>before</strong> generics existed, and it has to sort <em>anything</em>: a slice of ints, a slice of structs, a linked list, even rows in a database cursor. To do that without knowing your data, it needs you to answer three questions about your collection:</p>
+  <ul>
+    <li><strong><code>Len() int</code></strong> — "How many items are there?" The algorithm needs the bounds so it knows where to start and stop. For a slice this is trivially <code>len(s.people)</code>, but for a linked list or a paged result set the answer is different — only <em>you</em> know how to count your data.</li>
+    <li><strong><code>Less(i, j int) bool</code></strong> — "Is item <code>i</code> smaller than item <code>j</code>?" This is the <em>ordering rule</em>. The sort algorithm has no idea whether you want to sort by age, name, or distance from the moon. <code>Less</code> is the hook where you encode that decision.</li>
+    <li><strong><code>Swap(i, j int)</code></strong> — "Exchange the items at positions <code>i</code> and <code>j</code>." The algorithm needs to physically rearrange your data, but it can't touch your slice directly because it doesn't know its element type. <code>Swap</code> is the hook that lets the algorithm move things around without knowing what they are.</li>
+  </ul>
+  <p>Together, these three methods are the <strong>contract</strong> defined by <code>sort.Interface</code>:</p>
+<pre><code><span class="cm">// From the standard library:</span>
+<span class="kw">type</span> <span class="ty">Interface</span> <span class="kw">interface</span> {
+    <span class="fn">Len</span>() <span class="ty">int</span>
+    <span class="fn">Less</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span>
+    <span class="fn">Swap</span>(i, j <span class="ty">int</span>)
+}
+
+<span class="kw">func</span> <span class="fn">Sort</span>(data <span class="ty">Interface</span>) { <span class="cm">/* generic algorithm uses the 3 methods */</span> }</code></pre>
+  <p>Anything that implements those three methods can be passed to <code>sort.Sort</code>. The algorithm calls <code>Len()</code> once to learn the size, then repeatedly asks <code>Less(i, j)</code> to compare positions and <code>Swap(i, j)</code> to reorder them — and that's literally all it needs.</p>
+  <p><strong>Why the wrapper struct (<code>personSorter</code>)?</strong> Because <code>sort.Interface</code> is implemented on a <em>type</em>, not on a slice literal. You can't directly attach methods to <code>[]Person</code> from outside its package, so you wrap the slice (and the comparison function) in a struct and hang the methods off that. The <code>by</code> field is what makes the same wrapper reusable for different sort orders — change <code>by</code> and you sort by name instead of age, with zero new types.</p>
+  <p><strong>Do you really have to write all three every time?</strong> No — <code>sort.Sort</code> is the low-level / "full control" path. In modern Go you almost always use the shortcut:</p>
+<pre><code><span class="cm">// One-liner — no struct, no Len/Less/Swap, no wrapper</span>
+sort.<span class="fn">Slice</span>(people, <span class="kw">func</span>(i, j <span class="ty">int</span>) <span class="ty">bool</span> {
+    <span class="kw">return</span> people[i].Age &lt; people[j].Age
+})
+
+<span class="cm">// Or with generics (Go 1.21+):</span>
+slices.<span class="fn">SortFunc</span>(people, <span class="kw">func</span>(a, b Person) <span class="ty">int</span> { <span class="kw">return</span> a.Age - b.Age })</code></pre>
+  <p>Under the hood, <code>sort.Slice</code> still does the same thing — it builds a hidden adapter that implements <code>Len</code>/<code>Less</code>/<code>Swap</code> for you using reflection on the slice. The three-method dance is the <em>foundation</em> everything else is built on.</p>
+  <p><strong>When you'd still hand-roll the three methods:</strong></p>
+  <ul>
+    <li>You're sorting something that <em>isn't</em> a slice (a database cursor, a tree's flattened view, a custom container).</li>
+    <li>You want a named, reusable sorter type — e.g., <code>ByAge</code>, <code>ByName</code> — exported from a package.</li>
+    <li>You need <code>sort.Stable</code> on a non-slice type, or you're writing a library that takes <code>sort.Interface</code> as a parameter.</li>
+    <li>Performance: <code>sort.Slice</code> uses reflection internally and is measurably slower than a hand-written <code>sort.Interface</code> in tight loops.</li>
+  </ul>
+  <p>For 95% of day-to-day code, reach for <code>sort.Slice</code> or <code>slices.SortFunc</code>. Understand the three-method version because it explains <em>how</em> Go's sort works and shows up in older codebases and library APIs.</p>
+</div>
+
 <!-- ===================== SECTION 29: I/O ===================== -->
 <h2 id="io"><span class="section-num">50</span> I/O & Files</h2>
 
@@ -4071,6 +4109,62 @@ v3 := reflect.<span class="fn">ValueOf</span>(itf)
 <span class="kw">if</span> v3.<span class="fn">Kind</span>() == reflect.String {
     fmt.<span class="fn">Println</span>(<span class="str">"String value:"</span>, v3.<span class="fn">String</span>())  <span class="cm">// "Hello"</span>
 }</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Type vs Kind — what's the actual difference?</div>
+  <p><code>Type</code> is the <strong>declared Go type</strong> (the name you wrote in your source code). <code>Kind</code> is the <strong>underlying category</strong> Go uses internally — one of a fixed set of ~26 values like <code>Int</code>, <code>String</code>, <code>Struct</code>, <code>Slice</code>, <code>Ptr</code>, <code>Map</code>, <code>Chan</code>, <code>Func</code>, <code>Interface</code>.</p>
+  <p>For a built-in like <code>int</code>, both look identical — that's why the example above prints <code>int</code> twice. The difference shows up the moment you define a custom type:</p>
+<pre><code><span class="kw">type</span> <span class="ty">UserID</span> <span class="ty">int</span>           <span class="cm">// custom type built on int</span>
+<span class="kw">type</span> <span class="ty">Person</span> <span class="kw">struct</span> { Name <span class="ty">string</span> }
+
+id := UserID(<span class="num">42</span>)
+p  := Person{Name: <span class="str">"Alice"</span>}
+
+t1 := reflect.<span class="fn">TypeOf</span>(id)
+fmt.<span class="fn">Println</span>(t1)              <span class="cm">// main.UserID   ← the declared name</span>
+fmt.<span class="fn">Println</span>(t1.<span class="fn">Kind</span>())       <span class="cm">// int           ← the underlying primitive</span>
+
+t2 := reflect.<span class="fn">TypeOf</span>(p)
+fmt.<span class="fn">Println</span>(t2)              <span class="cm">// main.Person   ← the declared name</span>
+fmt.<span class="fn">Println</span>(t2.<span class="fn">Kind</span>())       <span class="cm">// struct        ← the category</span>
+
+t3 := reflect.<span class="fn">TypeOf</span>(&amp;p)
+fmt.<span class="fn">Println</span>(t3)              <span class="cm">// *main.Person  ← pointer to Person</span>
+fmt.<span class="fn">Println</span>(t3.<span class="fn">Kind</span>())       <span class="cm">// ptr           ← it's a pointer</span></code></pre>
+  <p><strong>When to use which:</strong></p>
+  <ul>
+    <li>Use <code>Type</code> when you care about <em>identity</em> — "is this exactly a <code>time.Time</code>?", reading struct field names, comparing two types for equality, reading struct tags.</li>
+    <li>Use <code>Kind</code> when you care about <em>shape</em> — "is this any kind of integer?", "is this a struct so I can iterate fields?", "is this a pointer so I need to call <code>.Elem()</code>?". <code>Kind</code> is what you switch on.</li>
+  </ul>
+<pre><code><span class="cm">// Typical reflect dispatch — branch on Kind, not Type</span>
+<span class="kw">switch</span> v.<span class="fn">Kind</span>() {
+<span class="kw">case</span> reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+    fmt.<span class="fn">Println</span>(<span class="str">"some integer:"</span>, v.<span class="fn">Int</span>())
+<span class="kw">case</span> reflect.String:
+    fmt.<span class="fn">Println</span>(<span class="str">"string:"</span>, v.<span class="fn">String</span>())
+<span class="kw">case</span> reflect.Struct:
+    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; v.<span class="fn">NumField</span>(); i++ { <span class="cm">/* walk fields */</span> }
+<span class="kw">case</span> reflect.Ptr:
+    v = v.<span class="fn">Elem</span>()  <span class="cm">// unwrap and recurse</span>
+}</code></pre>
+  <p>If you switched on <code>Type</code> instead, you'd have to list every possible named type in the universe — including <code>UserID</code>, <code>OrderID</code>, etc. <code>Kind</code> collapses all of those into the single bucket <code>reflect.Int</code>, which is exactly what a JSON encoder or ORM needs.</p>
+</div>
+
+<div class="tip-box">
+  <div class="box-title">Why reflect exists at all — what problem it solves</div>
+  <p>Go is <strong>statically typed</strong>: normally the compiler knows every type at compile time and you write code against specific types. But sometimes you need to write a function that works on <em>any</em> type — and you don't know what that type is until the program is running. That's the gap <code>reflect</code> fills.</p>
+  <p>Concrete examples where you literally cannot avoid reflection:</p>
+  <ul>
+    <li><strong><code>json.Marshal(anyValue)</code></strong> — the standard library doesn't know about <em>your</em> structs. At runtime it walks the value with reflect, reads each field's name and <code>json:"..."</code> tag, and emits the right output. Same for <code>yaml</code>, <code>xml</code>, <code>protobuf</code>, <code>bson</code>.</li>
+    <li><strong>ORMs &amp; database libraries</strong> (GORM, sqlx, ent) — given a <code>User</code> struct, they need to figure out column names, scan rows into fields, and build SQL — all without you hand-writing mapping code for every model.</li>
+    <li><strong>Validation libraries</strong> (<code>go-playground/validator</code>) — read tags like <code>validate:"required,email"</code> off arbitrary structs.</li>
+    <li><strong>Dependency injection / wire frameworks</strong> — inspect a constructor's parameter types and supply matching instances from a registry.</li>
+    <li><strong>Test helpers</strong> like <code>reflect.DeepEqual</code> — compare two values of unknown type field by field.</li>
+    <li><strong>Generic printers / debuggers</strong> — <code>fmt.Printf("%+v", x)</code> uses reflect under the hood to walk into structs and print field names.</li>
+  </ul>
+  <p><strong>The key insight:</strong> without reflect, every library author would have to ask <em>you</em> to write a <code>ToJSON()</code> method on every struct, a <code>Scan()</code> method for every database row, a <code>Validate()</code> method for every form, and so on. Reflect is the escape hatch that lets one library work with types it has never seen.</p>
+  <p><strong>When NOT to reach for reflect:</strong> in your own application code. It's 10–100× slower than direct calls, errors surface only at runtime, and the code is hard to read. Since Go 1.18, <strong>generics</strong> cover most "works for any type" needs in a type-safe, compile-time way — use generics first, reach for reflect only when you genuinely need to inspect <em>unknown</em> types (e.g., reading user-defined struct tags).</p>
+</div>
 
 <h3>Modifying Values via Reflection</h3>
 <p><strong>Must pass a pointer</strong> — <code>reflect.ValueOf(x)</code> gets a copy. Use <code>reflect.ValueOf(&amp;x).Elem()</code> to get the addressable original.</p>

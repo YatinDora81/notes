@@ -430,10 +430,26 @@
         .timeline-item strong { font-size: 14px; }
         .timeline-item p { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
 
+        /* MOBILE OVERLAY */
+        .nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 99;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .nav-overlay.visible { display: block; opacity: 1; }
+
         /* RESPONSIVE */
         @media (max-width: 900px) {
-            .side-nav { transform: translateX(-280px); }
-            .nav-toggle { left: 0; }
+            .side-nav { transform: translateX(-280px); z-index: 300; }
+            .side-nav.open { transform: translateX(0); }
+            .nav-toggle { left: 0; z-index: 301; }
+            .nav-toggle.open { left: 280px; border-radius: 0 8px 8px 0; }
             .main { margin-left: 0; }
             .section { padding: 40px 20px; }
             .hero { padding: 60px 20px 40px; }
@@ -571,6 +587,7 @@
 </nav>
 
 <button class="nav-toggle" id="navToggle" onclick="toggleNav()">&#9776;</button>
+<div class="nav-overlay" id="navOverlay" onclick="toggleNav()"></div>
 
 <!-- MAIN -->
 <div class="main" id="mainContent">
@@ -4810,14 +4827,24 @@ server.listen(<span class="num">3000</span>, () => {
 </div><!-- /main -->
 
 <script>
-    // Nav toggle
+    // Nav toggle — different behavior on desktop vs mobile
     function toggleNav() {
         const nav = document.getElementById('sideNav');
         const toggle = document.getElementById('navToggle');
         const main = document.getElementById('mainContent');
-        nav.classList.toggle('collapsed');
-        toggle.classList.toggle('collapsed');
-        main.classList.toggle('expanded');
+        const overlay = document.getElementById('navOverlay');
+        if (window.innerWidth <= 900) {
+            // Mobile: slide-in/out using .open class
+            nav.classList.toggle('open');
+            toggle.classList.toggle('open');
+            overlay.classList.toggle('visible');
+            document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+        } else {
+            // Desktop: collapse to give more reading width
+            nav.classList.toggle('collapsed');
+            toggle.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+        }
     }
 
     // Active nav link on scroll

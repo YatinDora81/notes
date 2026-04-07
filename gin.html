@@ -164,16 +164,88 @@
   .qa-a { background: rgba(34,197,94,0.1); color: var(--green); margin-right: 10px; }
   .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--dim); text-decoration: none; font-size: 0.82rem; margin-bottom: 24px; transition: color 0.15s; }
   .back-link:hover { color: var(--accent); }
+  /* ========== MOBILE HAMBURGER ========== */
+  .mobile-header {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 56px; z-index: 200;
+    background: rgba(9,9,11,0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    align-items: center; gap: 12px;
+  }
+  .hamburger {
+    width: 40px; height: 40px; border: none; background: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    padding: 0; flex-shrink: 0;
+  }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--muted); border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+  .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger.active span:nth-child(2) { opacity: 0; }
+  .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+  .mobile-header .mobile-logo {
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mobile-header .mobile-logo .go-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), #007d9c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px; color: #fff; flex-shrink: 0;
+  }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .sidebar-overlay.visible { display: block; opacity: 1; }
+
   @media (max-width: 900px) {
-    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 300;
+    }
+    .sidebar.open { transform: translateX(0); }
     .main-wrapper { margin-left: 0; }
-    .main { padding: 24px 20px 80px; }
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.4rem; }
+    .main { padding: 72px 18px 80px; }
+    h1 { font-size: 1.85rem; letter-spacing: -1px; }
+    h2 { font-size: 1.3rem; margin-top: 48px; }
+    h3 { font-size: 1.05rem; }
+    pre { padding: 14px 14px; font-size: 0.78rem; }
+    pre code { font-size: 0.78rem; }
+    table { font-size: 0.8rem; display: block; overflow-x: auto; }
+  }
+  @media (max-width: 480px) {
+    .main { padding: 68px 14px 60px; }
+    h1 { font-size: 1.55rem; }
+    h2 { font-size: 1.15rem; }
+    pre { padding: 12px 10px; font-size: 0.74rem; }
+    pre code { font-size: 0.74rem; }
   }
 </style>
 </head>
 <body>
+
+<!-- ==================== MOBILE HEADER ==================== -->
+<header class="mobile-header" id="mobileHeader">
+  <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mobile-logo">
+    <div class="go-icon">Gin</div>
+    <span>Gin Mastery</span>
+  </div>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
@@ -1275,6 +1347,33 @@ docker run -p 8080:8080 --env-file .env gin-api  <span class="cm"># run, expose 
 </div>
 
 <script>
+// === Mobile Sidebar Toggle ===
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebarEl = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+function openSidebar() {
+  sidebarEl.classList.add('open');
+  sidebarOverlay.classList.add('visible');
+  hamburgerBtn.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  sidebarEl.classList.remove('open');
+  sidebarOverlay.classList.remove('visible');
+  hamburgerBtn.classList.remove('active');
+  document.body.style.overflow = '';
+}
+hamburgerBtn.addEventListener('click', () => {
+  sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+sidebarOverlay.addEventListener('click', closeSidebar);
+document.querySelectorAll('.sidebar a[data-section]').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 900) closeSidebar();
+  });
+});
+
 function toggleAccordion(btn) {
   const content = btn.nextElementSibling;
   const isOpen = btn.getAttribute('aria-expanded') === 'true';

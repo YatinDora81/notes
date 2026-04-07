@@ -48,10 +48,53 @@ tr:hover{background:#1a1a1a}
 .flow-diagram .arrow{color:#00bcd4}
 .flow-diagram .node{color:#ff9800;font-weight:bold}
 .flow-diagram .highlight{color:#4caf50;font-weight:bold}
-@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:20px}.comparison-grid{grid-template-columns:1fr}}
+
+/* ===== MOBILE HEADER + HAMBURGER ===== */
+.mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:56px;z-index:200;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:0 16px;align-items:center;gap:12px}
+.hamburger{width:40px;height:40px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0;flex-shrink:0}
+.hamburger span{display:block;width:22px;height:2px;background:#aaa;border-radius:2px;transition:all .25s ease}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-logo{font-size:1rem;font-weight:700;color:#e0e0e0;display:flex;align-items:center;gap:8px}
+.mobile-logo .es-icon{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#00bcd4,#0d7a8c);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .25s ease}
+.sidebar-overlay.visible{display:block;opacity:1}
+
+@media(max-width:900px){
+  .mobile-header{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .3s cubic-bezier(0.4,0,0.2,1);z-index:300}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .content{padding:72px 20px 60px}
+  .comparison-grid{grid-template-columns:1fr}
+  h1{font-size:30px}
+  .hero h1{font-size:32px}
+  h2{font-size:20px}
+  table{font-size:12px;display:block;overflow-x:auto}
+  pre{padding:12px;font-size:12px}
+}
+@media(max-width:480px){
+  .content{padding:68px 14px 50px}
+  h1{font-size:24px}
+  .hero h1{font-size:26px}
+  h2{font-size:17px}
+}
 </style>
 </head>
 <body>
+
+<!-- ===== MOBILE HEADER ===== -->
+<header class="mobile-header" id="mobileHeader">
+  <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mobile-logo">
+    <div class="es-icon">⚡</div>
+    <span>ES Guide</span>
+  </div>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <nav class="sidebar" id="sidebar">
 <h2>⚡ ES Guide</h2>
@@ -1422,8 +1465,29 @@ navLinks.forEach(link => {
         e.preventDefault();
         const target = document.querySelector(link.getAttribute('href'));
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (window.innerWidth <= 900) closeSidebar();
     });
 });
+
+// ===== Mobile Sidebar Toggle =====
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+function openSidebar(){
+  sidebar.classList.add('open');
+  sidebarOverlay.classList.add('visible');
+  hamburgerBtn.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar(){
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('visible');
+  hamburgerBtn.classList.remove('active');
+  document.body.style.overflow = '';
+}
+hamburgerBtn.addEventListener('click', () => {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+sidebarOverlay.addEventListener('click', closeSidebar);
 </script>
 </body>
 </html>
