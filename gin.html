@@ -231,6 +231,55 @@
     pre { padding: 12px 10px; font-size: 0.74rem; }
     pre code { font-size: 0.74rem; }
   }
+  .concept-box {
+    border-left: 3px solid #a78bfa;
+    background: rgba(167,139,250,0.05);
+    padding: 20px 24px;
+    margin: 18px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+  .concept-box .concept-row {
+    margin: 14px 0;
+    display: block;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed rgba(167,139,250,0.15);
+  }
+  .concept-box .concept-row:first-of-type { margin-top: 4px; }
+  .concept-box .concept-row:last-child {
+    margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+  }
+  .concept-box .concept-label {
+    display: block;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.4px;
+    color: #a78bfa; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .concept-box .concept-text {
+    display: block; color: #a1a1aa; font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .concept-box .concept-text strong { color: #fafafa; font-weight: 600; }
+  .concept-box .concept-text code {
+    background: rgba(167,139,250,0.12);
+    padding: 1px 6px; border-radius: 3px;
+    color: #c4b5fd; font-size: 0.85em;
+  }
+  .concept-box .concept-text ul {
+    margin: 8px 0 0 0; padding-left: 22px;
+  }
+  .concept-box .concept-text ul li {
+    margin: 5px 0;
+  }
+  .concept-box .concept-text p { margin: 6px 0; }
+  .concept-box .concept-text pre {
+    background: rgba(0,0,0,0.3);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 0.82em;
+    margin: 8px 0;
+    overflow-x: auto;
+  }
 </style>
 </head>
 <body>
@@ -305,6 +354,36 @@
 <!-- ==================== SECTION 1: INTRO ==================== -->
 <h2 id="intro"><span class="section-num">01</span> Why Gin?</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin is a <strong>high-performance HTTP web framework</strong> for Go, built on top of the standard library's <code>net/http</code> package. At its core, Gin provides a <strong>radix-tree router</strong> (the <code>httprouter</code> fork) that matches URL paths up to <strong>40x faster</strong> than the default <code>http.ServeMux</code>, plus a rich ecosystem of middleware, request binding, validation, rendering, and error management. The framework revolves around a single central type — <code>*gin.Context</code> — which carries the request, response writer, path parameters, query values, bound data, and middleware state through the entire request lifecycle.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Martini-like API:</strong> clean, expressive syntax inspired by the earlier Martini framework but 40x faster thanks to zero-allocation routing.</li>
+    <li><strong>Middleware chain:</strong> stackable handlers via <code>r.Use(...)</code> with <code>c.Next()</code> and <code>c.Abort()</code> flow control.</li>
+    <li><strong>Built-in binding:</strong> <code>c.ShouldBindJSON</code>, <code>ShouldBindQuery</code>, <code>ShouldBindUri</code>, auto-dispatching by Content-Type via <code>ShouldBind</code>.</li>
+    <li><strong>Validation:</strong> integrated <code>go-playground/validator</code> via struct tags (<code>binding:"required,email"</code>).</li>
+    <li><strong>Rendering:</strong> JSON, XML, YAML, ProtoBuf, HTML templates, SSE, static files — all via one-line <code>c.JSON()</code>, <code>c.HTML()</code>, etc.</li>
+    <li><strong>Route grouping:</strong> nest routes under common prefixes and middleware with <code>r.Group("/api/v1")</code>.</li>
+    <li><strong>Crash-free:</strong> bundled <code>Recovery()</code> middleware catches panics and returns 500 instead of killing the server.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> Gin adds routing with path params (<code>/users/:id</code>), middleware chains, binding, and a richer context. Raw <code>net/http</code> is more verbose but has zero dependencies.</li>
+    <li><strong>vs Echo:</strong> Echo has a nearly identical API and performance, slightly more opinionated error handling (handlers return <code>error</code>), and built-in OpenAPI tooling. Gin has a larger community and more middleware plugins.</li>
+    <li><strong>vs Chi:</strong> Chi is closer to idiomatic <code>net/http</code> — handlers are <code>http.HandlerFunc</code> so any standard library middleware works unchanged. Gin uses its own <code>gin.HandlerFunc</code> signature and <code>*gin.Context</code>, so you trade compatibility for convenience.</li>
+    <li><strong>vs Fiber:</strong> Fiber mimics Express and runs on <code>fasthttp</code> (not <code>net/http</code>), trading standards compliance for raw speed. Gin works with the standard HTTP ecosystem (<code>http.Handler</code>, <code>httptest</code>, etc.).</li>
+    <li><strong>vs Beego:</strong> Beego is a full-stack MVC framework with ORM, cache, config, and scaffolding included. Gin is minimal — you pick GORM, Viper, Zap yourself.</li>
+    <li><strong>vs Express (Node):</strong> Similar middleware philosophy but Gin is compiled, statically typed, and handles concurrency via goroutines instead of an event loop.</li>
+    <li><strong>vs FastAPI (Python):</strong> FastAPI auto-generates OpenAPI/Swagger from type hints; Gin requires swaggo annotations. FastAPI is async Python; Gin is compiled Go with native concurrency.</li>
+    <li><strong>vs Spring Boot (Java):</strong> Spring Boot is a heavy DI-driven enterprise framework with annotations, AOP, and auto-config. Gin is 100x lighter — no DI container, no reflection magic, ~10ms startup vs multi-second Spring warmup.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Gin hits the sweet spot for <strong>REST APIs and microservices</strong>: fast enough for any realistic workload (tens of thousands of RPS per core), small enough to learn in an afternoon, and battle-tested in production at companies like <strong>Uber, Shopify, Tencent, and Riot Games</strong>. If you need a JSON API with middleware, auth, validation, and logging — Gin gives you all of that in ~100 lines of bootstrap code with no magic.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Don't forget <code>c.Abort()</code>:</strong> calling <code>c.JSON(401, ...)</code> in middleware without <code>Abort()</code> still runs downstream handlers — which may write a second response and panic.</li>
+    <li><strong>Context is not <code>context.Context</code>:</strong> <code>*gin.Context</code> implements the standard <code>context.Context</code> interface but they're distinct — pass <code>c.Request.Context()</code> (or <code>c</code> itself carefully) to DB/HTTP calls.</li>
+    <li><strong>Binding consumes the body:</strong> <code>ShouldBindJSON</code> reads <code>c.Request.Body</code> once. Call it twice and the second fails. Use <code>ShouldBindBodyWith</code> if you need multiple reads.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world users</span><span class="concept-text"><strong>Uber, Shopify, Tencent, Riot Games, GitLab, Zalando</strong>, and countless startups use Gin for internal REST APIs and public services. It's also the foundation of tools like <strong>swaggo/gin-swagger</strong>, <strong>gin-jwt</strong>, and thousands of open-source microservices.</span></div>
+</div>
+
 <p>Gin is the most popular Go web framework. ~81K GitHub stars, used by ~48% of Go developers. It's a thin, fast wrapper around <code>net/http</code> with routing, middleware, binding, and validation built in.</p>
 
 <ul>
@@ -326,6 +405,27 @@
 
 <!-- ==================== SECTION 2: SETUP ==================== -->
 <h2 id="setup"><span class="section-num">02</span> Setup & Hello World</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The Gin bootstrap process consists of four steps: <strong>initialize a Go module</strong> (<code>go mod init</code>), <strong>add Gin as a dependency</strong> (<code>go get github.com/gin-gonic/gin</code>), <strong>create an engine</strong> (<code>gin.Default()</code> or <code>gin.New()</code>), and <strong>call <code>r.Run(":8080")</code></strong>. The resulting server is a single statically compiled binary ready to run on any Linux/macOS/Windows host with no external runtime.</span></div>
+  <div class="concept-row"><span class="concept-label">The two constructors</span><span class="concept-text"><ul>
+    <li><code>gin.Default()</code> — returns an <code>*Engine</code> pre-loaded with <strong>Logger</strong> and <strong>Recovery</strong> middleware. Best for local development.</li>
+    <li><code>gin.New()</code> — returns a bare engine with no middleware. Use in production when you want to plug in your own structured logger (Zap, Zerolog) and custom panic recovery.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs net/http setup:</strong> raw <code>net/http</code> requires manually constructing <code>http.ServeMux</code>, registering handlers with <code>HandleFunc</code>, and starting with <code>http.ListenAndServe</code>. Gin wraps all that into <code>r := gin.Default(); r.Run()</code>.</li>
+    <li><strong>vs Echo:</strong> nearly identical — <code>e := echo.New(); e.Start(":8080")</code>. Both require manual middleware registration if you skip <code>Default()</code>.</li>
+    <li><strong>vs Express:</strong> <code>const app = express()</code> is equivalent to <code>r := gin.New()</code>; Express needs <code>body-parser</code> and <code>cors</code> installed separately, while Gin bundles binding and CORS-ready middleware hooks.</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses annotations like <code>@SpringBootApplication</code> plus a Maven/Gradle build. Gin has no classpath scanning — handlers are registered explicitly at startup.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Gin modes</span><span class="concept-text">Gin supports three modes via <code>GIN_MODE</code> environment variable: <code>debug</code> (default, verbose logs and colored output), <code>release</code> (no debug logs, faster), and <code>test</code> (for unit tests). Set with <code>gin.SetMode(gin.ReleaseMode)</code> or <code>export GIN_MODE=release</code>. Forgetting to set release mode in production is the #1 warning Gin prints on startup.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Port conflicts:</strong> <code>r.Run()</code> defaults to <code>:8080</code>. If another process holds it, you get <code>bind: address already in use</code> — kill with <code>lsof -i :8080</code>.</li>
+    <li><strong>Trusted proxies warning:</strong> Gin v1.9+ prints a warning if you don't call <code>r.SetTrustedProxies(nil)</code> — important for correct <code>c.ClientIP()</code> behind load balancers.</li>
+    <li><strong>Go version:</strong> Gin requires Go 1.20+. Older versions may compile but lose generics-based helpers.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world boilerplate</span><span class="concept-text">Production apps typically wrap <code>gin.New()</code> with custom Zap logging, Prometheus metrics middleware, Sentry panic reporting, and graceful shutdown via <code>http.Server{Handler: r}</code> instead of <code>r.Run()</code>, giving full control over timeouts (<code>ReadTimeout</code>, <code>WriteTimeout</code>, <code>IdleTimeout</code>) which <code>r.Run()</code> hides.</span></div>
+</div>
 
 <pre><code><span class="cm"># Create project</span>
 mkdir gin-api &amp;&amp; cd gin-api  <span class="cm"># create project folder &amp; enter it</span>
@@ -369,6 +469,30 @@ go get -u github.com/gin-gonic/gin  <span class="cm"># download &amp; add Gin de
 
 <!-- ==================== SECTION 3: ROUTING ==================== -->
 <h2 id="routing"><span class="section-num">03</span> Routing</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Routing in Gin is the process of mapping an <strong>HTTP method + URL path</strong> to a specific handler function. Gin uses a <strong>radix tree (prefix tree)</strong> data structure to store routes, which gives it <strong>O(log n)</strong> lookup time and zero memory allocations during matching — this is the single biggest reason Gin is fast. When a request comes in, Gin walks the tree character-by-character to find the most specific match and extracts path parameters along the way.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>All HTTP verbs:</strong> <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>, <code>HEAD</code>, <code>OPTIONS</code>, plus <code>Any()</code> to match all methods.</li>
+    <li><strong>Path parameters:</strong> <code>/users/:id</code> captures a named segment accessible via <code>c.Param("id")</code>.</li>
+    <li><strong>Wildcard / catch-all:</strong> <code>/files/*filepath</code> matches everything after the slash, useful for serving static directories.</li>
+    <li><strong>Route groups:</strong> <code>r.Group("/api/v1")</code> lets you share middleware and path prefixes across related endpoints.</li>
+    <li><strong>Method-not-allowed handling:</strong> enable with <code>r.HandleMethodNotAllowed = true</code> to auto-return 405 instead of 404 when the path exists but the verb doesn't.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> <code>http.ServeMux</code> only supports exact prefix matches — no <code>:id</code> parameters, no method routing. You'd write a big <code>switch r.Method</code> inside every handler.</li>
+    <li><strong>vs Echo:</strong> Echo uses the same radix tree approach and has nearly identical performance. API is very similar — <code>e.GET("/users/:id", h)</code> vs <code>r.GET("/users/:id", h)</code>.</li>
+    <li><strong>vs Chi:</strong> Chi uses a trie too but embraces the standard <code>http.Handler</code> interface, so Chi middleware is compatible with any Go HTTP code. Gin middleware only works inside Gin.</li>
+    <li><strong>vs Express:</strong> Express uses a linear regex-based matcher — O(n) per request. Gin is literally 40x faster on synthetic benchmarks.</li>
+    <li><strong>vs FastAPI/Spring Boot:</strong> those frameworks use decorators/annotations; Gin uses plain function calls, which means routes are visible at runtime and easier to generate programmatically.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Conflicting routes:</strong> you cannot register both <code>/users/:id</code> and <code>/users/new</code> on the same engine — Gin will panic at startup because the radix tree cannot disambiguate. Use <code>/users/new</code> and <code>/users/id/:id</code> instead, or put <code>/new</code> in a different route group.</li>
+    <li><strong>Trailing slash redirect:</strong> by default Gin auto-redirects <code>/users/</code> to <code>/users</code> with a 301. Disable via <code>r.RedirectTrailingSlash = false</code> if building a strict REST API.</li>
+    <li><strong>Case sensitivity:</strong> routes are case-sensitive — <code>/Users</code> and <code>/users</code> are different. Enable <code>r.RedirectFixedPath = true</code> to redirect case-mismatched paths.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Stripe-style REST APIs (<code>/v1/customers/:id/charges</code>), GraphQL gateways routing <code>POST /graphql</code>, static file servers with <code>/static/*filepath</code>, multi-tenant SaaS apps using <code>/:tenant/dashboard</code>. Companies like <strong>Uber, Bytedance (TikTok backend), and Medium</strong> route millions of requests/sec through Gin routers.</span></div>
+</div>
 
 <h3>All HTTP Methods</h3>
 <pre><code>r.<span class="fn">GET</span>(<span class="str">"/users"</span>, getUsers)              <span class="cm">// read list of users</span>
@@ -422,6 +546,31 @@ r.<span class="fn">StaticFS</span>(<span class="str">"/static"</span>, http.<spa
 <!-- ==================== SECTION 4: PARAMS ==================== -->
 <h2 id="params"><span class="section-num">04</span> Params & Query Strings</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Params and query strings are the two primary ways a client sends <strong>small, typed pieces of data</strong> to your Gin handler via the URL itself. <strong>Path parameters</strong> like <code>/users/:id</code> are part of the URL structure and are typically required identifiers. <strong>Query strings</strong> like <code>?page=2&sort=desc</code> live after the <code>?</code> and are typically optional filters, pagination, or flags. Gin exposes them via <code>c.Param("id")</code> and <code>c.Query("page")</code>, with variations for defaults (<code>c.DefaultQuery</code>), arrays (<code>c.QueryArray</code>), and maps (<code>c.QueryMap</code>).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><code>c.Param("id")</code> — reads a single named path param; returns empty string if missing.</li>
+    <li><code>c.Query("q")</code> — reads a single query value; returns empty if missing.</li>
+    <li><code>c.DefaultQuery("page", "1")</code> — returns a fallback when the key is absent.</li>
+    <li><code>c.QueryArray("tags")</code> — reads repeated values from <code>?tags=a&tags=b</code>.</li>
+    <li><code>c.QueryMap("filter")</code> — reads nested keys from <code>?filter[name]=go</code>.</li>
+    <li><code>c.GetQuery("q")</code> — returns <code>(value, exists bool)</code> so you can distinguish "missing" from "empty string".</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> with stdlib you do <code>r.URL.Query().Get("q")</code> which is verbose and returns typed string; Gin wraps this in one-liners plus adds path param support (stdlib has none).</li>
+    <li><strong>vs Echo:</strong> essentially identical — <code>c.QueryParam("q")</code> in Echo vs <code>c.Query("q")</code> in Gin.</li>
+    <li><strong>vs Express:</strong> Express exposes <code>req.params.id</code> and <code>req.query.page</code> as object properties; Gin uses method calls which forces you to think about the "missing" case.</li>
+    <li><strong>vs FastAPI:</strong> FastAPI uses function signature type hints (<code>page: int = 1</code>) to auto-parse and validate. Gin requires manual <code>strconv.Atoi</code> or a struct binding via <code>c.ShouldBindQuery()</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Everything is a string:</strong> <code>c.Query("page")</code> returns <code>""</code> not <code>0</code>. You must <code>strconv.Atoi</code> or use <code>ShouldBindQuery</code> with struct tags to get typed values.</li>
+    <li><strong>URL-encoded slashes:</strong> <code>:id</code> does not match a slash, so <code>/users/foo/bar</code> won't match <code>/users/:id</code>. Use <code>*wildcard</code> if you need to capture slashes.</li>
+    <li><strong>Case-sensitive query keys:</strong> <code>c.Query("Page")</code> and <code>c.Query("page")</code> are different.</li>
+    <li><strong>Query arrays:</strong> some clients send <code>?tags=a,b</code> (comma-separated) — Gin treats this as a single string "a,b", not two values. Only <code>?tags=a&tags=b</code> populates <code>QueryArray</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Best practices</span><span class="concept-text">Prefer <code>ShouldBindQuery</code> with a struct for anything beyond trivial cases — you get typed fields, default values, and validation in one shot. Use <code>c.GetQuery</code> when zero-value vs missing matters (e.g., <code>?active=false</code> is meaningful). Keep path params for required resource IDs and query params for filters/pagination.</span></div>
+</div>
+
 <pre><code><span class="cm">// Path parameters  :name</span>
 <span class="cm">// GET /users/42</span>
 r.<span class="fn">GET</span>(<span class="str">"/users/:id"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// :id is a named path param</span>
@@ -461,6 +610,33 @@ r.<span class="fn">GET</span>(<span class="str">"/info"</span>, <span class="kw"
 
 <!-- ==================== SECTION 5: BINDING ==================== -->
 <h2 id="binding"><span class="section-num">05</span> Request Binding</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Binding</strong> is Gin's mechanism for automatically parsing an incoming request (JSON, XML, form, query, headers) into a Go struct using <strong>struct tags</strong> and <strong>reflection</strong>. Instead of manually calling <code>json.NewDecoder(r.Body).Decode(&v)</code>, you write <code>c.ShouldBindJSON(&req)</code> and Gin handles content-type detection, deserialization, and (optionally) validation in one call. Gin provides two flavors: <code>Bind*</code> (aborts with 400 on error) and <code>ShouldBind*</code> (returns error so you control the response).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><code>ShouldBindJSON</code> — parses <code>application/json</code> request bodies.</li>
+    <li><code>ShouldBindXML</code> — parses <code>application/xml</code>.</li>
+    <li><code>ShouldBindQuery</code> — parses URL query string into struct fields (via <code>form:"page"</code> tag).</li>
+    <li><code>ShouldBindUri</code> — parses path parameters via <code>uri:"id"</code> tag.</li>
+    <li><code>ShouldBindHeader</code> — parses HTTP headers into a struct.</li>
+    <li><code>ShouldBind</code> — auto-detects based on <code>Content-Type</code> header (json → JSON, form → form, etc.).</li>
+    <li><code>ShouldBindWith</code> — explicit binder choice (e.g., <code>binding.MsgPack</code>).</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Bind vs ShouldBind</span><span class="concept-text">The <strong>Bind*</strong> family calls <code>c.AbortWithError(400, err)</code> internally — your handler keeps running but the response is already committed. The <strong>ShouldBind*</strong> family just returns the error and leaves the response untouched, which is almost always what you want. Rule of thumb: <strong>always use ShouldBind*</strong> so you can return custom error shapes (e.g., <code>{"error": "validation failed", "fields": [...]}</code>) that match your API contract.</span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> stdlib requires <code>json.NewDecoder(r.Body).Decode(&v)</code> plus manual validation — no unified path/query/body binding.</li>
+    <li><strong>vs Echo:</strong> Echo's <code>c.Bind(&req)</code> is similar but auto-detects less reliably; Gin's explicit methods are clearer.</li>
+    <li><strong>vs FastAPI:</strong> FastAPI uses Pydantic models via function signatures — even more automatic, with auto-generated OpenAPI docs. Gin requires explicit Swagger annotations.</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses <code>@RequestBody</code> + Jackson. Both are reflection-based, but Gin's validator syntax is more concise.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Pointer vs value:</strong> you must pass <code>&req</code>, not <code>req</code>. Passing by value silently "works" but fills a copy that's discarded.</li>
+    <li><strong>Body can only be read once:</strong> <code>c.Request.Body</code> is an <code>io.ReadCloser</code>. If middleware already read it, binding fails. Use <code>c.ShouldBindBodyWith</code> to cache the body for re-reads.</li>
+    <li><strong>Zero values vs missing:</strong> an absent JSON field and <code>"field": 0</code> both produce <code>0</code>. Use pointers (<code>*int</code>) to distinguish.</li>
+    <li><strong>Unknown fields:</strong> by default Gin ignores unknown JSON keys; enable <code>DisallowUnknownFields</code> on the decoder to reject them (you'll need a custom binder).</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">REST API endpoints accepting JSON bodies (<code>POST /users</code>, <code>PUT /orders/:id</code>), form-based login pages, file upload metadata, webhook receivers for Stripe/GitHub payloads, and API clients that send query-string filters like <code>?status=paid&limit=50</code>.</span></div>
+</div>
 
 <pre><code><span class="cm">// Binding = auto-parse request body into a struct</span>
 
@@ -523,6 +699,32 @@ r.<span class="fn">POST</span>(<span class="str">"/login"</span>, <span class="k
 <!-- ==================== SECTION 6: VALIDATION ==================== -->
 <h2 id="validation"><span class="section-num">06</span> Validation</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin delegates validation to <strong>go-playground/validator/v10</strong>, the most popular validation library in the Go ecosystem. You annotate struct fields with <code>binding:"required,email,min=3"</code> tags, and when Gin parses a request via <code>ShouldBind*</code>, it runs validator against the resulting struct. If any rule fails, binding returns a <code>validator.ValidationErrors</code> slice you can iterate over for per-field error messages. Validation happens <strong>after deserialization</strong>, so type errors (sending a string where an int is expected) show up as binding errors, not validation errors.</span></div>
+  <div class="concept-row"><span class="concept-label">Built-in rules</span><span class="concept-text"><ul>
+    <li><strong>Presence:</strong> <code>required</code>, <code>required_with</code>, <code>required_without</code>, <code>omitempty</code>.</li>
+    <li><strong>Strings:</strong> <code>min=3</code>, <code>max=100</code>, <code>len=10</code>, <code>alpha</code>, <code>alphanum</code>, <code>email</code>, <code>url</code>, <code>uuid4</code>, <code>contains=foo</code>.</li>
+    <li><strong>Numbers:</strong> <code>gt=0</code>, <code>gte=18</code>, <code>lt=100</code>, <code>lte=65</code>, <code>eq</code>, <code>ne</code>.</li>
+    <li><strong>Collections:</strong> <code>min=1,dive,required</code> (applies <code>required</code> to each slice element).</li>
+    <li><strong>Comparisons:</strong> <code>eqfield=Password</code>, <code>nefield=Old</code> (cross-field validation).</li>
+    <li><strong>Enums:</strong> <code>oneof=admin user guest</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Custom validators</span><span class="concept-text">Register your own rules via <code>binding.Validator.Engine().(*validator.Validate).RegisterValidation("phone", myPhoneFunc)</code>. Your function receives <code>validator.FieldLevel</code> and returns a bool. Use this for domain-specific rules like "valid ISO country code", "stripe customer ID format", or "future timestamp only".</span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs manual <code>if</code> checks:</strong> declarative, co-located with the type definition, and impossible to forget when you add a new endpoint.</li>
+    <li><strong>vs Echo:</strong> Echo also supports go-playground/validator but requires explicit <code>e.Validator = &MyValidator{}</code> setup. Gin wires it up automatically.</li>
+    <li><strong>vs FastAPI/Pydantic:</strong> Pydantic uses Python type hints + class-based models, which auto-generates OpenAPI schemas. Gin's validator is string-tag-based and doesn't produce schemas without a separate tool (swaggo).</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses JSR-303 (<code>@NotNull</code>, <code>@Size</code>, <code>@Email</code>) — conceptually identical, syntactically more verbose.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Zero values trip <code>required</code>:</strong> <code>required</code> means "not the zero value", so <code>int</code> field with value <code>0</code> fails required. Use <code>*int</code> if 0 is legal.</li>
+    <li><strong>Error messages are developer-facing:</strong> the default <code>err.Error()</code> string is ugly ("Key: 'User.Email' Error:Field validation for 'Email' failed on the 'email' tag"). Convert to user-friendly messages by iterating <code>err.(validator.ValidationErrors)</code>.</li>
+    <li><strong>Tag order doesn't matter</strong> for most rules, but <code>omitempty</code> must come first if you use it.</li>
+    <li><strong>Nested structs:</strong> validation descends automatically, but slices of structs need <code>dive</code> to validate each element.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Signup forms (email format, password strength), e-commerce product creation (SKU format, price &gt; 0, category enum), payment intents (amount &gt; 0, currency ISO code), and API pagination params (page &gt;= 1, limit &lt;= 100).</span></div>
+</div>
+
 <pre><code><span class="cm">// Gin uses go-playground/validator under the hood</span>
 
 <span class="kw">type</span> <span class="ty">Product</span> <span class="kw">struct</span> {  <span class="cm">// validator tags on every field</span>
@@ -581,6 +783,37 @@ r.<span class="fn">POST</span>(<span class="str">"/login"</span>, <span class="k
 <!-- ==================== SECTION 7: RESPONSE ==================== -->
 <h2 id="response"><span class="section-num">07</span> Response Types</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin's <code>*gin.Context</code> exposes a family of <strong>response rendering methods</strong> that handle status code, <code>Content-Type</code> header, serialization, and writing to the underlying <code>http.ResponseWriter</code> in a single call. Each method is a thin wrapper around a <code>render.Render</code> implementation — you can write custom renderers if you need to support exotic formats like Protocol Buffers or MessagePack.</span></div>
+  <div class="concept-row"><span class="concept-label">Key methods</span><span class="concept-text"><ul>
+    <li><code>c.JSON(200, obj)</code> — marshals to JSON, sets <code>Content-Type: application/json</code>. Most common.</li>
+    <li><code>c.IndentedJSON</code> — pretty-printed JSON (2-space indent). ~30% slower; debug only.</li>
+    <li><code>c.SecureJSON</code> — prefixes arrays with <code>while(1);</code> to defend against JSON hijacking in legacy browsers.</li>
+    <li><code>c.AsciiJSON</code> — escapes non-ASCII characters to <code>\u</code> sequences.</li>
+    <li><code>c.JSONP</code> — JSON with a callback wrapper for cross-domain JS.</li>
+    <li><code>c.XML</code>, <code>c.YAML</code>, <code>c.ProtoBuf</code> — alternative serializations.</li>
+    <li><code>c.String(200, "hi %s", name)</code> — plain text with printf-style formatting.</li>
+    <li><code>c.HTML(200, "index.tmpl", data)</code> — render a registered HTML template.</li>
+    <li><code>c.Redirect(302, "/login")</code> — HTTP redirect.</li>
+    <li><code>c.Data(200, "image/png", bytes)</code> — raw bytes with explicit Content-Type.</li>
+    <li><code>c.File("./report.pdf")</code> — stream a file from disk.</li>
+    <li><code>c.Stream(func(w io.Writer) bool {...})</code> — server-sent events or chunked streaming.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> stdlib requires 3 lines minimum: set header, set status, call <code>json.NewEncoder(w).Encode(v)</code>. Gin is one line.</li>
+    <li><strong>vs Echo:</strong> <code>c.JSON(200, obj)</code> is identical. Echo exposes slightly more formats out of the box (JSON Pretty, JSONP).</li>
+    <li><strong>vs Fiber:</strong> Fiber uses <code>c.JSON(obj)</code> (no status arg) and <code>c.Status(200).JSON(obj)</code> — a fluent chain.</li>
+    <li><strong>vs Express:</strong> <code>res.status(200).json(obj)</code> — also fluent, with the same underlying concept.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Double write:</strong> calling <code>c.JSON</code> twice in one handler silently writes the second payload after the first — producing invalid JSON. Use <code>return</code> after writing a response.</li>
+    <li><strong>Can't change status after writing:</strong> once the first byte is flushed, <code>c.Status(500)</code> is a no-op (headers are locked). Set status via the render method itself.</li>
+    <li><strong>Nil slice vs empty array:</strong> a <code>nil</code> Go slice marshals to <code>null</code> in JSON, not <code>[]</code>. Initialize with <code>make([]T, 0)</code> if clients expect an array.</li>
+    <li><strong>Time zones:</strong> <code>time.Time</code> marshals to RFC 3339 by default. Use a custom type if you need unix timestamps or a specific format.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Performance notes</span><span class="concept-text">Gin uses <code>encoding/json</code> by default. For JSON-heavy APIs, swap in <strong>jsoniter</strong> (drop-in replacement, 2x faster) by building with <code>-tags=jsoniter</code>, or use <strong>go-json</strong> / <strong>sonic</strong> for even more speed. Avoid <code>IndentedJSON</code> in production — indentation doubles the payload size and serialization cost.</span></div>
+</div>
+
 <pre><code><span class="cm">// JSON (most common)</span>
 c.<span class="fn">JSON</span>(<span class="num">200</span>, gin.<span class="ty">H</span>{<span class="str">"message"</span>: <span class="str">"ok"</span>})  <span class="cm">// send status + JSON body</span>
 c.<span class="fn">JSON</span>(<span class="num">200</span>, user)  <span class="cm">// struct with json tags</span>
@@ -622,6 +855,28 @@ val, _ := c.<span class="fn">Cookie</span>(<span class="str">"token"</span>)  <s
 
 <!-- ==================== SECTION 8: CONTEXT ==================== -->
 <h2 id="context"><span class="section-num">08</span> Gin Context Deep Dive</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><code>*gin.Context</code> is the <strong>per-request god object</strong> that flows through every middleware and handler in Gin. It is a struct (not an interface) that embeds or references: the raw <code>*http.Request</code>, the underlying <code>http.ResponseWriter</code> (wrapped to track status and bytes written), a <code>sync.RWMutex</code>-protected key-value store, the handler chain, path parameters, bound forms, query cache, and a <strong>context.Context</strong> for deadlines and cancellation. Gin allocates one <code>Context</code> per request and <strong>recycles it via sync.Pool</strong> to avoid GC pressure — this is a major performance win.</span></div>
+  <div class="concept-row"><span class="concept-label">Key capabilities</span><span class="concept-text"><ul>
+    <li><strong>Request access:</strong> <code>c.Request</code>, <code>c.ClientIP()</code>, <code>c.ContentType()</code>, <code>c.GetHeader("Auth")</code>, <code>c.Cookie("session")</code>.</li>
+    <li><strong>Parameter reads:</strong> <code>c.Param</code>, <code>c.Query</code>, <code>c.PostForm</code>, <code>c.FormFile</code>.</li>
+    <li><strong>Binding:</strong> <code>c.ShouldBindJSON</code>, <code>c.ShouldBindQuery</code>, etc.</li>
+    <li><strong>Response:</strong> <code>c.JSON</code>, <code>c.String</code>, <code>c.Status</code>, <code>c.Header</code>, <code>c.SetCookie</code>.</li>
+    <li><strong>Flow control:</strong> <code>c.Next()</code>, <code>c.Abort()</code>, <code>c.AbortWithStatus</code>, <code>c.AbortWithStatusJSON</code>.</li>
+    <li><strong>Key-value store:</strong> <code>c.Set("user", user)</code> in middleware, <code>c.MustGet("user").(User)</code> in the handler. Typed helpers: <code>GetString</code>, <code>GetInt</code>, <code>GetBool</code>.</li>
+    <li><strong>Errors:</strong> <code>c.Error(err)</code> appends to a per-request error list for centralized logging.</li>
+    <li><strong>Go context:</strong> <code>c.Request.Context()</code> — pass this to DB calls for cancellation on client disconnect.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Context pooling gotcha</span><span class="concept-text">Because Gin <strong>recycles <code>*gin.Context</code> via sync.Pool</strong>, you must NOT keep a reference to <code>c</code> after the handler returns — spawning a goroutine that reads <code>c.Query</code> asynchronously will likely read stale data from the next request. The fix: <code>cCp := c.Copy()</code> creates a detached, read-only copy safe for goroutines, or extract the values you need <em>before</em> launching the goroutine.</span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs Go's <code>context.Context</code>:</strong> Gin's Context <em>implements</em> the standard interface, so you can pass <code>c</code> directly to any function expecting <code>context.Context</code>. But it's much richer — HTTP-specific sugar, not just cancellation.</li>
+    <li><strong>vs Echo:</strong> <code>echo.Context</code> is an <em>interface</em>, not a struct, which makes mocking in tests easier but adds a virtual call per access.</li>
+    <li><strong>vs Chi:</strong> Chi doesn't have a custom context at all — you use <code>r.Context()</code> directly and read URL params via <code>chi.URLParam(r, "id")</code>.</li>
+    <li><strong>vs Express:</strong> Express's <code>req</code>/<code>res</code>/<code>next</code> triad is roughly equivalent but split into three objects instead of one.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Best practices</span><span class="concept-text">Always use <code>c.Request.Context()</code> for DB/HTTP calls so they cancel when the client disconnects. Never stash business data on <code>c.Keys</code> as a substitute for function arguments — use it only for cross-cutting concerns like the authenticated user or trace ID. If you need the context in a goroutine, call <code>c.Copy()</code> first.</span></div>
+</div>
 
 <p><code>*gin.Context</code> is the most important type in Gin. It carries the request, response writer, middleware chain, and key-value store. One context per request.</p>
 
@@ -666,6 +921,29 @@ val, _ := c.<span class="fn">Cookie</span>(<span class="str">"token"</span>)  <s
 <!-- ==================== SECTION 9: MIDDLEWARE ==================== -->
 <h2 id="middleware"><span class="section-num">09</span> Middleware Basics</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Middleware</strong> in Gin is a <code>gin.HandlerFunc</code> (a function taking <code>*gin.Context</code>) inserted into the request lifecycle <strong>before or after</strong> your actual handler. Middleware forms a chain — requests travel down the chain toward the handler, and responses travel back up. Typical uses are cross-cutting concerns: logging, authentication, rate limiting, panic recovery, CORS headers, request IDs, metrics collection, and database transaction wrapping. Gin middleware is registered with <code>r.Use(mw)</code> for global application, <code>group.Use(mw)</code> for a route group, or by passing it as an extra argument to <code>r.GET(path, mw1, mw2, handler)</code> for a single route.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Onion model:</strong> <code>c.Next()</code> inside a middleware yields control to the next middleware/handler; code after <code>c.Next()</code> runs on the way back up.</li>
+    <li><strong>Abort:</strong> <code>c.Abort()</code> stops the chain — no subsequent handlers run. Combine with <code>c.JSON</code> to short-circuit with an error response.</li>
+    <li><strong>Built-in middleware:</strong> <code>gin.Logger()</code> (access log), <code>gin.Recovery()</code> (catches panics, returns 500). <code>gin.Default()</code> = <code>gin.New() + Logger + Recovery</code>.</li>
+    <li><strong>Route groups:</strong> apply middleware to a logical set — <code>r.Group("/api", authMW, rateLimitMW)</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> stdlib middleware wraps handlers: <code>func(next http.Handler) http.Handler</code>. It works but is verbose and doesn't natively understand aborting.</li>
+    <li><strong>vs Chi:</strong> Chi middleware is stdlib-compatible (<code>func(next http.Handler) http.Handler</code>), so you can reuse any community middleware. Gin middleware is Gin-specific.</li>
+    <li><strong>vs Echo:</strong> Echo middleware signature is <code>func(next echo.HandlerFunc) echo.HandlerFunc</code> — slightly different shape but same concept.</li>
+    <li><strong>vs Express:</strong> Express uses <code>(req, res, next) =&gt; { ...; next() }</code> — the same onion model with a <code>next()</code> callback.</li>
+    <li><strong>vs Spring Boot filters/interceptors:</strong> Spring splits middleware into <code>Filter</code>, <code>HandlerInterceptor</code>, and <code>@Aspect</code>. Gin has one unified concept.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Forgetting <code>c.Next()</code>:</strong> if your middleware doesn't call <code>Next()</code>, the chain still continues because Gin auto-advances after the function returns. But if you need "post" logic (timing, logging), you MUST call <code>Next()</code> explicitly.</li>
+    <li><strong>Forgetting <code>c.Abort()</code>:</strong> writing an error response (<code>c.JSON(401, ...)</code>) without calling <code>Abort()</code> allows the handler to also run — producing a double write.</li>
+    <li><strong>Order matters:</strong> middleware registered before the route applies; registered after does not. Always <code>r.Use()</code> before <code>r.GET</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Auth (JWT verification), rate limiting (token bucket per IP), distributed tracing (OpenTelemetry span injection), request ID generation, gzip compression, API versioning, feature flags, audit logging, and database transaction lifecycle management.</span></div>
+</div>
+
 <p>Middleware = a function that runs before/after your handler. They form a chain: Request &rarr; MW1 &rarr; MW2 &rarr; Handler &rarr; MW2 &rarr; MW1 &rarr; Response.</p>
 
 <pre><code><span class="cm">// Global middleware — applies to ALL routes</span>
@@ -685,6 +963,40 @@ gin.<span class="fn">Recovery</span>()   <span class="cm">// recovers from panic
 
 <!-- ==================== SECTION 10: CUSTOM MIDDLEWARE ==================== -->
 <h2 id="custom-mw"><span class="section-num">10</span> Custom Middleware</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Custom middleware is any function you write that returns a <code>gin.HandlerFunc</code> and gets wired into the request chain via <code>r.Use</code>, a group, or a per-route argument. The classic pattern is the <strong>closure factory</strong>: an outer function takes configuration (DB handle, logger, JWT secret), and returns a closure that implements the middleware logic with that config baked in. This is Go's idiomatic alternative to dependency injection frameworks.</span></div>
+  <div class="concept-row"><span class="concept-label">Skeleton</span><span class="concept-text"><pre>func RateLimit(max int) gin.HandlerFunc {
+  bucket := newTokenBucket(max)
+  return func(c *gin.Context) {
+    if !bucket.Allow() {
+      c.AbortWithStatusJSON(429, gin.H{"error": "rate limited"})
+      return
+    }
+    c.Next()
+  }
+}</pre>The outer function runs once (at setup), the inner closure runs per request.</span></div>
+  <div class="concept-row"><span class="concept-label">Common patterns</span><span class="concept-text"><ul>
+    <li><strong>Before-only:</strong> validate, set a key on context, call <code>c.Next()</code>.</li>
+    <li><strong>After-only:</strong> call <code>c.Next()</code> first, then log status/duration from <code>c.Writer.Status()</code>.</li>
+    <li><strong>Short-circuit:</strong> call <code>c.AbortWithStatusJSON</code> to halt the chain with an error.</li>
+    <li><strong>Inject values:</strong> <code>c.Set("userID", uid)</code> before <code>Next()</code> so handlers can read it.</li>
+    <li><strong>Wrap the writer:</strong> replace <code>c.Writer</code> with a custom <code>gin.ResponseWriter</code> to capture the response body for audit logs or caching.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs stdlib wrapping:</strong> stdlib uses <code>func(next http.Handler) http.Handler</code> which composes nicely but can't easily share state across before/after phases without a context key.</li>
+    <li><strong>vs Chi:</strong> Chi middleware is stdlib-compatible, so you can literally reuse middleware from libraries like <code>github.com/felixge/httpsnoop</code> or <code>rs/cors</code>. Gin middleware is a closed ecosystem.</li>
+    <li><strong>vs Echo:</strong> Echo's <code>echo.MiddlewareFunc</code> takes and returns a <code>HandlerFunc</code> — more explicit composition, but requires returning the next call.</li>
+    <li><strong>vs Express:</strong> Express middleware takes <code>(req, res, next)</code>; the same mental model. JavaScript's dynamic typing means Express middleware is more flexible but less type-safe.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Shared state races:</strong> if your middleware mutates a shared map or counter, use <code>sync.Mutex</code> or <code>sync/atomic</code>. Remember: Gin runs handlers concurrently.</li>
+    <li><strong>Returning before <code>c.Next()</code>:</strong> if you want to cancel, call <code>c.Abort()</code> AND <code>return</code>. Otherwise the chain keeps going.</li>
+    <li><strong>Reading the request body:</strong> body is a stream and can only be read once. If your middleware reads it, cache it with <code>c.Request.Body = io.NopCloser(bytes.NewBuffer(data))</code> for downstream handlers.</li>
+    <li><strong>Heavy work in middleware:</strong> middleware runs on <em>every</em> request — don't open DB connections or parse config inside the closure. Do that in the factory.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">JWT auth with secret injected via factory, Prometheus metrics collector, OpenTelemetry tracing, request-scoped DB transaction (begin before, commit/rollback after), multi-tenant tenant resolver reading <code>X-Tenant-ID</code>, gzip compression, CSRF token checker, IP-based geoblocking, and audit log writer capturing request+response bodies.</span></div>
+</div>
 
 <pre><code><span class="cm">// Logging middleware</span>
 <span class="kw">func</span> <span class="fn">RequestLogger</span>() gin.<span class="ty">HandlerFunc</span> {  <span class="cm">// returns a HandlerFunc</span>
@@ -746,6 +1058,31 @@ gin.<span class="fn">Recovery</span>()   <span class="cm">// recovers from panic
 
 <!-- ==================== SECTION 11: AUTH ==================== -->
 <h2 id="auth"><span class="section-num">11</span> Authentication (JWT)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>JWT (JSON Web Token)</strong> is a stateless, signed token format (RFC 7519) used to transport claims — usually user identity and permissions — between client and server. A JWT has three base64url parts: <code>header.payload.signature</code>. The server signs the token with a secret (HMAC) or private key (RS256/ES256) at login, the client stores it, and sends it back with each request in an <code>Authorization: Bearer &lt;token&gt;</code> header. Gin doesn't ship JWT support itself — you use <strong>github.com/golang-jwt/jwt/v5</strong> to parse/verify tokens, then write a middleware that extracts the header, validates the signature, and stores the user ID on <code>c.Keys</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Stateless:</strong> server doesn't store sessions — the token itself is the credential.</li>
+    <li><strong>Self-contained:</strong> payload carries user ID, role, expiration, and custom claims.</li>
+    <li><strong>Signed:</strong> HMAC-SHA256 (shared secret) or RSA/ECDSA (public/private key pair).</li>
+    <li><strong>Expiration:</strong> <code>exp</code> claim — tokens auto-expire so leaked tokens have limited lifetime.</li>
+    <li><strong>Standard claims:</strong> <code>sub</code>, <code>iat</code>, <code>exp</code>, <code>nbf</code>, <code>iss</code>, <code>aud</code>, <code>jti</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs sessions:</strong> session IDs require a server-side store (Redis, DB). JWTs are stateless — no store needed — but cannot be revoked before expiration without a blocklist.</li>
+    <li><strong>vs OAuth2 access tokens:</strong> OAuth2 access tokens are often JWTs, but OAuth2 adds the whole authorization flow (authorize → code → token exchange). JWT is just the token format.</li>
+    <li><strong>vs API keys:</strong> API keys are opaque random strings; JWTs carry claims. API keys typically identify apps; JWTs typically identify users.</li>
+    <li><strong>vs Gin's <code>BasicAuth</code>:</strong> Gin ships <code>gin.BasicAuth</code> for HTTP Basic Authentication, fine for internal dashboards but not for public APIs.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Algorithm confusion (alg=none):</strong> always assert the expected algorithm in the <code>Keyfunc</code>. Not doing so lets an attacker forge tokens by setting <code>alg: none</code>.</li>
+    <li><strong>Secret leakage:</strong> never hardcode the signing secret. Use env vars or a secrets manager.</li>
+    <li><strong>Storing JWTs in <code>localStorage</code>:</strong> vulnerable to XSS. Use <code>HttpOnly</code> cookies for browser clients.</li>
+    <li><strong>No revocation:</strong> a stolen token is valid until <code>exp</code>. Mitigate with short expirations (15 min) + refresh tokens, or a Redis-backed blocklist for forced logout.</li>
+    <li><strong>Clock skew:</strong> <code>exp</code>/<code>nbf</code> checks can fail if server clocks drift — allow a small leeway with <code>jwt.WithLeeway(30*time.Second)</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Single-page apps talking to a Gin backend (React/Vue/Angular + REST), mobile apps (iOS/Android), microservice-to-microservice auth with service accounts, OAuth2 providers like Auth0/Okta/Keycloak issuing JWTs, and B2B API platforms where each customer gets a signed token scoped to their tenant.</span></div>
+</div>
 
 <pre><code><span class="cm">// go get github.com/golang-jwt/jwt/v5</span>
 
@@ -819,6 +1156,31 @@ protected.<span class="fn">Use</span>(<span class="fn">JWTAuth</span>())  <span 
 <!-- ==================== SECTION 12: CORS ==================== -->
 <h2 id="cors"><span class="section-num">12</span> CORS</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>CORS (Cross-Origin Resource Sharing)</strong> is a browser security mechanism that restricts JavaScript running on one origin (e.g., <code>https://app.example.com</code>) from making HTTP requests to a different origin (e.g., <code>https://api.example.com</code>) unless the server explicitly opts in. The server opts in by returning specific response headers: <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code>, and <code>Access-Control-Allow-Credentials</code>. For non-simple requests, the browser first sends a <strong>preflight <code>OPTIONS</code></strong> request to check permissions before the real request.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Origin allowlist:</strong> <code>AllowOrigins: []string{"https://app.example.com"}</code>.</li>
+    <li><strong>Credentials:</strong> <code>AllowCredentials: true</code> lets cookies and <code>Authorization</code> headers flow across origins (requires a specific origin, not <code>*</code>).</li>
+    <li><strong>Methods &amp; headers:</strong> <code>AllowMethods</code>, <code>AllowHeaders</code> declare what the browser can send.</li>
+    <li><strong>Exposed headers:</strong> <code>ExposeHeaders</code> lets JS read custom response headers like <code>X-Total-Count</code>.</li>
+    <li><strong>Max age:</strong> <code>MaxAge</code> caches preflight responses to reduce round trips.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Gin setup</span><span class="concept-text">Use <strong>github.com/gin-contrib/cors</strong>, the official Gin CORS middleware maintained by the Gin authors. Quick start: <code>r.Use(cors.Default())</code> (allows everything — dev only). For production, call <code>cors.New(cors.Config{...})</code> with an explicit origin list. Alternatively you can write 10 lines of middleware yourself — CORS is just a few headers.</span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs <code>rs/cors</code> (stdlib):</strong> <code>github.com/rs/cors</code> is a stdlib-compatible middleware — works with Chi, Echo, plain <code>net/http</code>. Gin's <code>gin-contrib/cors</code> is Gin-specific but integrates more cleanly.</li>
+    <li><strong>vs Express <code>cors</code>:</strong> identical config shape.</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses <code>@CrossOrigin</code> annotations per-controller, or a global <code>CorsConfiguration</code> bean.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong><code>*</code> + credentials is illegal:</strong> browsers reject <code>Access-Control-Allow-Origin: *</code> when <code>Allow-Credentials: true</code>. You must return the exact origin instead.</li>
+    <li><strong>Preflight fails silently:</strong> if <code>OPTIONS</code> returns 404, the browser aborts the real request with a cryptic CORS error. Ensure your CORS middleware is <em>before</em> any route registration.</li>
+    <li><strong>Custom headers need explicit allowlisting:</strong> sending <code>X-My-Custom-Header</code> requires it in <code>AllowHeaders</code>, otherwise the preflight fails.</li>
+    <li><strong>SameSite cookies:</strong> cross-origin cookies need <code>SameSite=None; Secure</code> — CORS config alone isn't enough.</li>
+    <li><strong>Server-side requests don't need CORS:</strong> CORS is a browser-only concept. curl, Postman, and server-to-server calls ignore it entirely.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Single-page apps hosted on a CDN (<code>https://app.example.com</code>) calling an API on a separate subdomain (<code>https://api.example.com</code>), public read-only APIs that allow any origin (<code>*</code>), and multi-tenant SaaS where each customer has their own subdomain and the API allowlists a regex pattern.</span></div>
+</div>
+
 <pre><code><span class="cm">// go get github.com/gin-contrib/cors</span>
 
 <span class="kw">import</span> <span class="str">"github.com/gin-contrib/cors"</span>  <span class="cm">// official Gin CORS package</span>
@@ -838,6 +1200,30 @@ r.<span class="fn">Use</span>(cors.<span class="fn">New</span>(cors.<span class=
 
 <!-- ==================== SECTION 13: ERROR HANDLING ==================== -->
 <h2 id="errors"><span class="section-num">13</span> Error Handling</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin doesn't dictate an error-handling style — Go's explicit <code>if err != nil</code> applies in handlers too. But Gin provides two helpful primitives: <strong><code>c.Error(err)</code></strong>, which appends to a per-request <code>c.Errors</code> slice (useful for logging), and <strong><code>gin.Recovery()</code></strong>, a built-in middleware that catches panics and converts them to 500 responses so one buggy handler doesn't crash the entire server. The typical production pattern is a <strong>centralized error middleware</strong> that inspects <code>c.Errors</code> after the handler runs and formats a consistent JSON error response.</span></div>
+  <div class="concept-row"><span class="concept-label">Key patterns</span><span class="concept-text"><ul>
+    <li><strong>Inline error response:</strong> <code>c.JSON(400, gin.H{"error": err.Error()}); return</code> — simple and explicit.</li>
+    <li><strong>Abort with status:</strong> <code>c.AbortWithStatusJSON(500, gin.H{...})</code> — stops the chain AND writes a response.</li>
+    <li><strong>Error accumulation:</strong> <code>c.Error(err)</code> appends without writing a response; a later middleware reads <code>c.Errors</code> to format.</li>
+    <li><strong>Typed errors:</strong> define sentinel errors (<code>var ErrNotFound = errors.New(...)</code>) and switch on them in middleware to map to HTTP status codes.</li>
+    <li><strong>Panic recovery:</strong> <code>r.Use(gin.Recovery())</code> (or <code>CustomRecovery</code>) catches panics and returns 500.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs Go 1.20+ error wrapping:</strong> Gin predates <code>errors.Is/As</code> but composes perfectly with them. Use <code>errors.Is(err, ErrNotFound)</code> to unwrap wrapped errors in your centralized handler.</li>
+    <li><strong>vs Echo:</strong> Echo has <code>e.HTTPErrorHandler</code> — a single function set globally that handles all errors, cleaner than Gin's <code>c.Errors</code> accumulation approach.</li>
+    <li><strong>vs FastAPI:</strong> FastAPI raises <code>HTTPException(status_code, detail)</code> which bubbles to a global handler. Gin requires explicit middleware.</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses <code>@ControllerAdvice</code> + <code>@ExceptionHandler</code> for global exception mapping. Gin's equivalent is middleware + switch/type-assertion.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Leaking internals:</strong> <code>err.Error()</code> may contain stack traces, SQL queries, or file paths. Log the full error server-side but return a sanitized message to clients.</li>
+    <li><strong>Forgetting to <code>return</code>:</strong> after <code>c.JSON(400, ...)</code>, you MUST <code>return</code> or the handler keeps running and may write another response.</li>
+    <li><strong>Panic in goroutines:</strong> <code>gin.Recovery()</code> only catches panics in the request goroutine. Panics in goroutines you spawn are NOT caught — wrap them in their own <code>defer recover()</code>.</li>
+    <li><strong>Nil pointer panics:</strong> the most common panic source. Always check pointers before dereferencing.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Best practices</span><span class="concept-text">Define a small set of typed errors (<code>ErrNotFound</code>, <code>ErrUnauthorized</code>, <code>ErrValidation</code>) and map them to HTTP status in one place. Return a consistent JSON shape: <code>{"error": {"code": "NOT_FOUND", "message": "..."}}</code>. Log the full error with request ID for correlation. Never expose stack traces in production responses — use Sentry/Datadog/etc. for server-side visibility.</span></div>
+</div>
 
 <pre><code><span class="cm">// Standard JSON error response</span>
 <span class="kw">type</span> <span class="ty">APIError</span> <span class="kw">struct</span> {  <span class="cm">// consistent error shape across API</span>
@@ -892,6 +1278,35 @@ r.<span class="fn">Use</span>(gin.<span class="fn">CustomRecovery</span>(<span c
 
 <!-- ==================== SECTION 14: DATABASE ==================== -->
 <h2 id="db"><span class="section-num">14</span> Database (GORM)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>GORM (gorm.io/gorm)</strong> is the most popular <strong>ORM (Object-Relational Mapper)</strong> in the Go ecosystem. It maps Go structs to database tables, supports <strong>Postgres, MySQL, SQLite, SQL Server, ClickHouse</strong>, and provides a fluent query builder, auto-migrations, associations (has-one/has-many/many-to-many), hooks (BeforeCreate, AfterUpdate), soft deletes, transactions, and eager loading. Gin and GORM are completely independent — you just create a <code>*gorm.DB</code> once at startup and inject it into your handlers via a closure, middleware, or a repository struct.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Struct-to-table mapping:</strong> <code>type User struct { ID uint; Name string }</code> becomes the <code>users</code> table.</li>
+    <li><strong>Auto-migrate:</strong> <code>db.AutoMigrate(&User{})</code> creates/updates the schema to match the struct.</li>
+    <li><strong>CRUD helpers:</strong> <code>db.Create</code>, <code>db.First</code>, <code>db.Find</code>, <code>db.Where(...).Find(&users)</code>, <code>db.Save</code>, <code>db.Delete</code>.</li>
+    <li><strong>Associations:</strong> <code>Preload("Orders")</code> eager-loads related rows in one extra query.</li>
+    <li><strong>Transactions:</strong> <code>db.Transaction(func(tx *gorm.DB) error {...})</code> with auto commit/rollback.</li>
+    <li><strong>Hooks:</strong> <code>BeforeCreate</code>, <code>AfterUpdate</code> for business logic (e.g., hash password before save).</li>
+    <li><strong>Soft delete:</strong> add <code>gorm.DeletedAt</code> field — deletes set the timestamp instead of removing the row.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs <code>database/sql</code>:</strong> stdlib is low-level — you write raw SQL and manually scan rows. GORM is high-level and concise but can hide expensive queries.</li>
+    <li><strong>vs sqlx:</strong> <code>jmoiron/sqlx</code> extends <code>database/sql</code> with struct scanning but no query builder or migrations. Faster and more predictable than GORM.</li>
+    <li><strong>vs sqlc:</strong> sqlc generates type-safe Go code <em>from</em> SQL queries you write — best of both worlds (raw SQL + type safety) but no runtime query builder.</li>
+    <li><strong>vs ent:</strong> Facebook's ent is a schema-first ORM with code generation and graph-like API. More opinionated than GORM.</li>
+    <li><strong>vs Hibernate/JPA:</strong> Java's Hibernate is conceptually similar but much heavier; GORM is leaner but supports fewer advanced features.</li>
+    <li><strong>vs ActiveRecord (Rails):</strong> GORM borrows the ActiveRecord pattern — chainable query builder, implicit persistence — but with Go's type safety.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>N+1 queries:</strong> iterating over a slice and calling <code>db.First</code> per row is the #1 GORM performance trap. Use <code>Preload</code> or <code>Joins</code>.</li>
+    <li><strong>Zero-value updates are ignored:</strong> <code>db.Updates(&User{Name: "", Age: 0})</code> skips zero fields. Use <code>map[string]any{...}</code> or <code>Select("Name", "Age")</code> to update zero values.</li>
+    <li><strong>Context cancellation:</strong> always use <code>db.WithContext(c.Request.Context())</code> so queries abort when the client disconnects.</li>
+    <li><strong>Connection pooling:</strong> configure <code>sqlDB.SetMaxOpenConns</code>, <code>SetMaxIdleConns</code>, <code>SetConnMaxLifetime</code> — defaults are often wrong for production.</li>
+    <li><strong>Auto-migrate in production:</strong> safe for adding columns, dangerous for schema changes. Use proper migrations (goose, atlas, golang-migrate).</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">CRUD REST APIs for SaaS dashboards, e-commerce product catalogs, multi-tenant apps with <code>db.Scopes(tenantScope)</code>, event sourcing backends, and admin panels. Used in production by hundreds of Go teams; generally considered acceptable up to medium-traffic workloads (10k RPS). For extreme performance, teams migrate to sqlx/sqlc + hand-tuned SQL.</span></div>
+</div>
 
 <pre><code><span class="cm">// go get gorm.io/gorm</span>
 <span class="cm">// go get gorm.io/driver/postgres</span>
@@ -953,6 +1368,34 @@ r.<span class="fn">Use</span>(gin.<span class="fn">CustomRecovery</span>(<span c
 <!-- ==================== SECTION 15: FILES ==================== -->
 <h2 id="files"><span class="section-num">15</span> File Upload/Download</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">File uploads in HTTP use the <code>multipart/form-data</code> content type — the browser splits the body into boundary-separated "parts", each with its own headers and payload. Gin wraps Go's standard <code>mime/multipart</code> parsing with friendly helpers: <code>c.FormFile("file")</code> returns a <code>*multipart.FileHeader</code> for a single upload, <code>c.MultipartForm()</code> gives you all files and fields at once, and <code>c.SaveUploadedFile(fh, dst)</code> writes a file to disk in one line. For downloads, <code>c.File("./report.pdf")</code> streams a file with the correct <code>Content-Type</code>, and <code>c.FileAttachment</code> forces a browser download with a custom filename.</span></div>
+  <div class="concept-row"><span class="concept-label">Key methods</span><span class="concept-text"><ul>
+    <li><code>c.FormFile("file")</code> — single file upload. Returns <code>*multipart.FileHeader</code>.</li>
+    <li><code>c.MultipartForm()</code> — parses the entire form; access files via <code>form.File["files"]</code>.</li>
+    <li><code>c.SaveUploadedFile(fh, dst)</code> — one-line disk save.</li>
+    <li><code>c.File(path)</code> — streams a file to the response.</li>
+    <li><code>c.FileAttachment(path, name)</code> — forces <code>Content-Disposition: attachment</code>.</li>
+    <li><code>c.FileFromFS(path, fs)</code> — serve from an <code>http.FileSystem</code> (useful with <code>embed.FS</code>).</li>
+    <li><code>r.Static("/assets", "./public")</code> — serve a whole directory as static files.</li>
+    <li><code>r.StaticFS("/embedded", http.FS(embedFS))</code> — serve an embedded filesystem.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs raw <code>net/http</code>:</strong> stdlib requires <code>r.ParseMultipartForm(maxMemory)</code>, then <code>r.FormFile</code>, then manual <code>io.Copy</code> to save — 10+ lines vs Gin's 3.</li>
+    <li><strong>vs Echo:</strong> <code>c.FormFile</code>, <code>c.SaveUploadedFile</code> — identical.</li>
+    <li><strong>vs Express multer:</strong> Express needs a separate <code>multer</code> middleware; Gin has it built-in.</li>
+    <li><strong>vs FastAPI:</strong> FastAPI uses <code>UploadFile</code> as a type hint — more declarative.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Memory limit:</strong> default <code>MaxMultipartMemory</code> is 32 MB — larger files spool to disk, but extremely large uploads can still exhaust disk. Set <code>r.MaxMultipartMemory = 8 &lt;&lt; 20</code> (8 MB) explicitly.</li>
+    <li><strong>Filename trust:</strong> <code>file.Filename</code> comes from the client — sanitize before using as a path! An attacker can send <code>../../etc/passwd</code>.</li>
+    <li><strong>Content-type trust:</strong> a file claiming <code>image/png</code> might be an executable. Sniff with <code>http.DetectContentType</code> on the first 512 bytes.</li>
+    <li><strong>Disk usage:</strong> save to a temp directory with cleanup logic, or stream directly to S3/GCS instead of touching local disk.</li>
+    <li><strong>Virus scanning:</strong> integrate with ClamAV or a commercial scanner before accepting files.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Image upload endpoints (profile pics, product photos), CSV bulk import, PDF report generation + download, invoice attachments, resume uploads for job boards, and video upload with S3 pre-signed URLs (client uploads directly to S3, skipping your Gin server).</span></div>
+</div>
+
 <pre><code><span class="cm">// Single file upload</span>
 r.<span class="fn">POST</span>(<span class="str">"/upload"</span>, <span class="kw">func</span>(c *gin.<span class="ty">Context</span>) {  <span class="cm">// accepts multipart form data</span>
     file, err := c.<span class="fn">FormFile</span>(<span class="str">"file"</span>)  <span class="cm">// get the "file" form field</span>
@@ -986,6 +1429,31 @@ r.<span class="fn">GET</span>(<span class="str">"/download/:name"</span>, <span 
 <!-- ==================== SECTION 16: TEMPLATES ==================== -->
 <h2 id="templates"><span class="section-num">16</span> HTML Templates</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin's HTML rendering is a thin wrapper around Go's standard <strong><code>html/template</code></strong> package. You load templates once at startup with <code>r.LoadHTMLGlob("templates/*")</code> or <code>r.LoadHTMLFiles(...)</code>, and render them inside a handler with <code>c.HTML(200, "index.html", data)</code>. The <code>html/template</code> engine provides <strong>automatic context-aware escaping</strong> — it understands whether you're inserting into HTML text, an attribute, a URL, a CSS block, or JavaScript, and escapes accordingly to prevent XSS.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+    <li><strong>Template actions:</strong> <code>{{.User.Name}}</code>, <code>{{if .Active}}...{{end}}</code>, <code>{{range .Items}}...{{end}}</code>, <code>{{with .Profile}}...{{end}}</code>.</li>
+    <li><strong>Template inheritance:</strong> <code>{{define "base"}}</code> + <code>{{template "content" .}}</code> for layouts.</li>
+    <li><strong>Custom funcs:</strong> <code>r.SetFuncMap(template.FuncMap{"upper": strings.ToUpper})</code> — then <code>{{.Name | upper}}</code>.</li>
+    <li><strong>Multi-template:</strong> use <code>multitemplate</code> (gin-contrib) for Django-style layouts with multiple blocks.</li>
+    <li><strong>Hot reload in dev:</strong> call <code>r.LoadHTMLGlob</code> on every request in debug mode.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs <code>text/template</code>:</strong> <code>text/template</code> doesn't escape — use it for config files, emails, YAML. Never use it for HTML output (XSS risk).</li>
+    <li><strong>vs Jinja2/Twig:</strong> Go templates are more restrictive by design — no arbitrary expressions, fewer built-in filters. This keeps logic out of templates.</li>
+    <li><strong>vs Handlebars/Mustache:</strong> Go templates support conditionals and loops; Mustache is strictly "logic-less".</li>
+    <li><strong>vs React/Vue:</strong> Go templates are server-rendered — no client-side JS runtime. Pair with HTMX for modern interactive server-rendered apps.</li>
+    <li><strong>vs templ:</strong> <strong>a-h/templ</strong> is a newer type-safe alternative — Go code generates HTML with compile-time checks. No runtime parsing. Highly recommended for greenfield projects.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Unescaping with <code>template.HTML</code>:</strong> wrapping a string in <code>template.HTML(s)</code> bypasses escaping. Only do this for trusted content.</li>
+    <li><strong>Template name clashes:</strong> <code>LoadHTMLGlob("templates/*")</code> uses the filename as the template name, so two files named <code>index.html</code> in different subdirs collide.</li>
+    <li><strong>Missing fields:</strong> referencing a field that doesn't exist on the data struct is a runtime error. Consider using <code>{{with}}</code> or default values.</li>
+    <li><strong>Performance:</strong> templates are parsed once and cached. Don't call <code>LoadHTMLGlob</code> inside handlers in production.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Admin dashboards, email templates (using <code>html/template</code> separately), server-rendered marketing sites (Hugo is Go-templated), HTMX apps, and the classic "login page + form post" flow for simple CRUD admin tools.</span></div>
+</div>
+
 <pre><code><span class="cm">// Load templates</span>
 r.<span class="fn">LoadHTMLGlob</span>(<span class="str">"templates/*"</span>)  <span class="cm">// load all files in templates/</span>
 <span class="cm">// or specific files:</span>
@@ -1007,6 +1475,37 @@ r.<span class="fn">GET</span>(<span class="str">"/"</span>, <span class="kw">fun
 
 <!-- ==================== SECTION 17: TESTING ==================== -->
 <h2 id="testing"><span class="section-num">17</span> Testing</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Gin apps are tested using Go's standard <code>testing</code> package plus <strong><code>net/http/httptest</code></strong>, which provides an <strong>in-memory response recorder</strong> so you can exercise handlers without binding to a real port. The typical flow: create a router with your routes, wrap it in a test, call <code>router.ServeHTTP(recorder, request)</code>, and assert on <code>recorder.Code</code> and <code>recorder.Body</code>. Because Gin is just an <code>http.Handler</code>, every tool that works with stdlib HTTP works with Gin.</span></div>
+  <div class="concept-row"><span class="concept-label">Key patterns</span><span class="concept-text"><ul>
+    <li><strong>Set test mode:</strong> <code>gin.SetMode(gin.TestMode)</code> silences log output during tests.</li>
+    <li><strong>Build request:</strong> <code>req := httptest.NewRequest("POST", "/users", strings.NewReader(body))</code>.</li>
+    <li><strong>Record response:</strong> <code>w := httptest.NewRecorder()</code>; then <code>router.ServeHTTP(w, req)</code>.</li>
+    <li><strong>Assert:</strong> <code>assert.Equal(t, 200, w.Code)</code>, <code>assert.JSONEq(t, expected, w.Body.String())</code> (using <code>github.com/stretchr/testify</code>).</li>
+    <li><strong>Table-driven tests:</strong> define a slice of test cases and loop — idiomatic Go pattern.</li>
+    <li><strong>Mocks:</strong> inject interfaces for DB/HTTP clients so handlers can be tested without real dependencies.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs <code>supertest</code> (Node):</strong> same concept — spin up the app in-memory, send requests, assert responses.</li>
+    <li><strong>vs pytest + FastAPI TestClient:</strong> FastAPI's TestClient uses <code>httpx</code> under the hood; same idea.</li>
+    <li><strong>vs Spring <code>MockMvc</code>:</strong> Spring tests inject a mock dispatcher servlet; conceptually identical.</li>
+    <li><strong>vs Rack::Test (Ruby):</strong> same in-memory pattern.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Libraries</span><span class="concept-text"><ul>
+    <li><strong>testify (stretchr/testify):</strong> <code>assert</code>, <code>require</code>, <code>mock</code>, <code>suite</code>. De facto standard for Go tests.</li>
+    <li><strong>gomock (uber-go/mock):</strong> interface mocking with code generation.</li>
+    <li><strong>httpexpect:</strong> fluent HTTP test DSL — <code>e.POST("/users").WithJSON(u).Expect().Status(201)</code>.</li>
+    <li><strong>testcontainers-go:</strong> spin up real Postgres/Redis in Docker for integration tests.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Forgetting to set Content-Type:</strong> <code>req.Header.Set("Content-Type", "application/json")</code> — without it, Gin's <code>ShouldBind</code> may choose the wrong binder.</li>
+    <li><strong>Global state:</strong> tests that share a singleton DB or logger can cross-contaminate. Prefer per-test setup.</li>
+    <li><strong>Parallel tests:</strong> use <code>t.Parallel()</code> to speed up I/O-bound tests, but only when handlers have no shared mutable state.</li>
+    <li><strong>Flaky time-based tests:</strong> inject a clock interface instead of calling <code>time.Now()</code> directly.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Unit tests per handler (happy path, validation error, auth failure), integration tests against a real Postgres via testcontainers, contract tests against OpenAPI specs, and load tests with <code>vegeta</code> or <code>k6</code>.</span></div>
+</div>
 
 <pre><code><span class="kw">import</span> (
     <span class="str">"net/http"</span>            <span class="cm">// http.NewRequest, http.StatusOK…</span>
@@ -1082,6 +1581,41 @@ r.<span class="fn">GET</span>(<span class="str">"/"</span>, <span class="kw">fun
 <!-- ==================== SECTION 18: PROJECT STRUCTURE ==================== -->
 <h2 id="structure"><span class="section-num">18</span> Project Structure</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Go doesn't enforce a project layout, but the community has converged on a loose convention led by the <strong>golang-standards/project-layout</strong> repository. A typical Gin app organizes code by <strong>responsibility</strong> rather than by framework layer: <code>cmd/</code> holds the <code>main.go</code> entry points, <code>internal/</code> holds private packages, <code>pkg/</code> holds reusable packages, and domain-specific folders like <code>handlers/</code>, <code>services/</code>, <code>repositories/</code>, <code>models/</code>, and <code>middleware/</code> split concerns. The goal is simple dependency flow: handlers depend on services, services depend on repositories, repositories depend on the database.</span></div>
+  <div class="concept-row"><span class="concept-label">Key directories</span><span class="concept-text"><ul>
+    <li><strong><code>cmd/api/main.go</code></strong> — thin entry point that wires dependencies and starts the server.</li>
+    <li><strong><code>internal/</code></strong> — private packages, not importable by other modules. Go enforces this at compile time.</li>
+    <li><strong><code>internal/handlers/</code></strong> — HTTP handlers (thin layer, no business logic).</li>
+    <li><strong><code>internal/services/</code></strong> — business logic, orchestration.</li>
+    <li><strong><code>internal/repositories/</code></strong> — database access (or <code>internal/store/</code>).</li>
+    <li><strong><code>internal/models/</code></strong> — domain types and DTOs.</li>
+    <li><strong><code>internal/middleware/</code></strong> — custom Gin middleware.</li>
+    <li><strong><code>internal/config/</code></strong> — config loading (env vars, files).</li>
+    <li><strong><code>migrations/</code></strong> — SQL migration files.</li>
+    <li><strong><code>pkg/</code></strong> — public reusable packages (optional).</li>
+    <li><strong><code>api/</code></strong> — OpenAPI/protobuf specs.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Architectural patterns</span><span class="concept-text"><ul>
+    <li><strong>Flat (small apps):</strong> everything in <code>main</code> or 2-3 files — fastest to start, fine up to ~500 LOC.</li>
+    <li><strong>Layered (MVC-ish):</strong> handlers → services → repositories. Easy to understand, works for most CRUD apps.</li>
+    <li><strong>Clean Architecture / Hexagonal:</strong> domain types at the center, infrastructure on the outside. Enforces testability via interfaces. Overkill for small apps.</li>
+    <li><strong>Domain-Driven Design:</strong> group by bounded context (e.g., <code>billing/</code>, <code>catalog/</code>, <code>auth/</code>) instead of by technical layer.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs Django/Rails:</strong> those frameworks enforce a layout (<code>models/</code>, <code>views/</code>, <code>controllers/</code>). Go gives you freedom — and responsibility.</li>
+    <li><strong>vs Spring Boot:</strong> Spring uses package-based organization too, but relies heavily on annotations and dependency injection containers. Go uses explicit construction in <code>main</code>.</li>
+    <li><strong>vs Node/Express:</strong> Node is equally unopinionated, but NPM's flat dependency model differs from Go modules.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Over-engineering:</strong> don't copy Uber-scale layouts for a 500-line API. Start flat, refactor when pain appears.</li>
+    <li><strong>Circular imports:</strong> Go forbids them. Careful with shared types — put them in a <code>models</code> or <code>domain</code> package that nothing else imports from.</li>
+    <li><strong>Global state:</strong> avoid package-level variables for DB/config. Pass dependencies explicitly via constructors.</li>
+    <li><strong><code>pkg/</code> is controversial:</strong> some Go teams consider <code>pkg/</code> unnecessary — everything that's not <code>cmd/</code> or <code>internal/</code> is implicitly "public". Use it only if you publish reusable libraries.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Production Gin apps at Monzo, Cloudflare, and Twitch follow variations of layered or hexagonal architecture. Open-source reference projects: <strong>github.com/bxcodec/go-clean-arch</strong>, <strong>github.com/golang-standards/project-layout</strong>, and Mat Ryer's <strong>"How I write HTTP services after 13 years"</strong> blog post.</span></div>
+</div>
+
 <div class="file-tree">
 <span class="folder">gin-api/</span>
 &#x251C;&#x2500;&#x2500; <span class="file">go.mod</span> / <span class="file">go.sum</span>
@@ -1122,6 +1656,32 @@ r.<span class="fn">GET</span>(<span class="str">"/"</span>, <span class="kw">fun
 
 <!-- ==================== SECTION 19: GRACEFUL SHUTDOWN ==================== -->
 <h2 id="graceful"><span class="section-num">19</span> Graceful Shutdown</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Graceful shutdown</strong> is the process of stopping your Gin server <em>without abruptly killing in-flight requests</em>. Instead of exiting immediately on <code>SIGTERM</code>, the server: (1) stops accepting new connections, (2) waits for existing requests to finish (up to a timeout), (3) closes the listener, and (4) exits cleanly. This is essential for zero-downtime deploys, where Kubernetes or a load balancer sends <code>SIGTERM</code>, waits a few seconds, then removes the pod.</span></div>
+  <div class="concept-row"><span class="concept-label">How it works in Go</span><span class="concept-text">Gin itself doesn't provide graceful shutdown — you use Go's standard <strong><code>http.Server.Shutdown(ctx)</code></strong>. The pattern: create an <code>http.Server</code> manually (don't call <code>r.Run()</code>), start it in a goroutine, listen for <code>SIGINT</code>/<code>SIGTERM</code> on a channel, and when received, call <code>srv.Shutdown(ctx)</code> with a timeout context. The shutdown method blocks until all active connections finish or the context is cancelled.</span></div>
+  <div class="concept-row"><span class="concept-label">Key steps</span><span class="concept-text"><ul>
+    <li><strong>Build <code>http.Server</code>:</strong> <code>srv := &amp;http.Server{Addr: ":8080", Handler: r}</code>.</li>
+    <li><strong>Start in goroutine:</strong> <code>go srv.ListenAndServe()</code> so main can wait on the signal.</li>
+    <li><strong>Trap signals:</strong> <code>signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)</code>.</li>
+    <li><strong>Shutdown with timeout:</strong> <code>ctx, _ := context.WithTimeout(ctx, 30*time.Second); srv.Shutdown(ctx)</code>.</li>
+    <li><strong>Close resources:</strong> after shutdown returns, close DB pools, flush logs, drain background workers.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs <code>r.Run()</code>:</strong> the one-liner <code>r.Run()</code> blocks forever and has no shutdown hook. Fine for scripts, bad for production.</li>
+    <li><strong>vs Node.js:</strong> <code>server.close()</code> is the equivalent, but Node requires extra care because pending callbacks keep the event loop alive.</li>
+    <li><strong>vs nginx <code>quit</code>:</strong> nginx's graceful quit is similar — stop accepting, drain, exit.</li>
+    <li><strong>vs Kubernetes:</strong> K8s sends <code>SIGTERM</code>, waits for <code>terminationGracePeriodSeconds</code> (default 30s), then <code>SIGKILL</code>. Your shutdown timeout must be shorter.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>SIGKILL can't be trapped:</strong> if you only handle SIGTERM, <code>kill -9</code> still kills abruptly.</li>
+    <li><strong>Long-running requests block shutdown:</strong> a 60s database query blocks shutdown past the timeout. Propagate <code>c.Request.Context()</code> to the DB so it cancels.</li>
+    <li><strong>WebSocket/SSE connections:</strong> <code>Shutdown()</code> doesn't close hijacked connections. Track them manually and close them before calling Shutdown.</li>
+    <li><strong>Pre-stop hook:</strong> in Kubernetes, use a <code>preStop</code> sleep of ~5s before SIGTERM so the service removal can propagate through the LB before you stop accepting.</li>
+    <li><strong>Goroutines leaking past shutdown:</strong> Shutdown doesn't wait for background goroutines you spawned — track them with <code>sync.WaitGroup</code>.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Essential in Kubernetes deployments (rolling updates, autoscaling pod termination), blue-green deploys, and long-lived services handling streaming uploads or WebSocket connections. Every production Gin service MUST implement graceful shutdown.</span></div>
+</div>
 
 <pre><code><span class="kw">package</span> main  <span class="cm">// executable entry point</span>
 
@@ -1173,6 +1733,37 @@ r.<span class="fn">GET</span>(<span class="str">"/"</span>, <span class="kw">fun
 <!-- ==================== SECTION 20: DEPLOY ==================== -->
 <h2 id="deploy"><span class="section-num">20</span> Docker & Deploy</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Deploying a Gin app means producing a <strong>runnable artifact</strong> — usually a Docker image or a static binary — and running it in a production environment (Kubernetes, ECS, Cloud Run, Fly.io, bare metal). Go's static single-binary output makes Gin deployment uniquely simple: there's no Python venv, no <code>node_modules</code>, no JVM runtime. A production Dockerfile for Gin is typically <strong>~10 lines</strong> and produces an image under <strong>15 MB</strong> using <code>scratch</code> or <code>distroless</code> as the base.</span></div>
+  <div class="concept-row"><span class="concept-label">Multi-stage build pattern</span><span class="concept-text"><ul>
+    <li><strong>Stage 1 (builder):</strong> <code>FROM golang:1.22-alpine</code> — compile with the full toolchain.</li>
+    <li><strong>Stage 2 (runtime):</strong> <code>FROM scratch</code> or <code>gcr.io/distroless/static</code> — copy only the compiled binary.</li>
+    <li><strong>Build flags:</strong> <code>CGO_ENABLED=0</code> for a fully static binary, <code>-ldflags="-s -w"</code> to strip debug symbols (~30% smaller).</li>
+    <li><strong>Cache optimization:</strong> copy <code>go.mod</code>/<code>go.sum</code> before source so <code>go mod download</code> is cached when only code changes.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Deployment targets</span><span class="concept-text"><ul>
+    <li><strong>Kubernetes:</strong> the de facto standard for Gin services. Use Deployments, Services, Ingress, HPA.</li>
+    <li><strong>Cloud Run / App Runner:</strong> serverless containers — pay per request, auto-scale to zero. Great for low-traffic APIs.</li>
+    <li><strong>Fly.io / Railway / Render:</strong> developer-friendly PaaS that runs your Dockerfile directly.</li>
+    <li><strong>Lambda:</strong> Gin works via the <code>awslabs/aws-lambda-go-api-proxy</code> adapter — it translates Lambda events to <code>http.Request</code>.</li>
+    <li><strong>systemd:</strong> a plain binary + systemd unit file is perfectly valid for small deployments.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+    <li><strong>vs Node.js:</strong> Go images are 10-20x smaller because there's no runtime bundled. A Node Docker image is typically 100-300 MB; Gin can be ~10 MB.</li>
+    <li><strong>vs Java/Spring:</strong> Spring Boot images are 200-500 MB (JVM + dependencies). Go apps start in milliseconds vs seconds for JVM warm-up.</li>
+    <li><strong>vs Python (FastAPI):</strong> Python images need the interpreter + pip packages (~150 MB). Go is dramatically smaller.</li>
+    <li><strong>vs serverless frameworks:</strong> Go's fast cold start (&lt;50ms) makes it ideal for Lambda/Cloud Run, whereas JVM cold starts can be seconds.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+    <li><strong>Timezones:</strong> <code>scratch</code> has no <code>/usr/share/zoneinfo</code>. Either use <code>alpine</code>, copy tzdata into scratch, or import <code>_ "time/tzdata"</code> to embed it in the binary.</li>
+    <li><strong>CA certificates:</strong> <code>scratch</code> also lacks CA certs — outbound HTTPS fails. Copy <code>/etc/ssl/certs/ca-certificates.crt</code> from the builder, or use distroless which includes them.</li>
+    <li><strong>Health checks:</strong> expose <code>/healthz</code> for Kubernetes liveness/readiness probes. Liveness should be cheap; readiness should check DB connectivity.</li>
+    <li><strong>Logging:</strong> write to stdout/stderr (not files) — containers collect logs that way. Use structured JSON logs (zap, zerolog).</li>
+    <li><strong>Config:</strong> 12-factor — read from env vars. Never bake secrets into images.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Uber's H3 service, Twitch's chat backends, Dropbox's Magic Pocket, Monzo's microservices — all deployed as Go binaries in containers on Kubernetes. Small teams often start with Fly.io or Cloud Run for zero-ops and migrate to K8s as they scale.</span></div>
+</div>
+
 <pre><code><span class="cm"># Dockerfile — multi-stage build</span>
 FROM golang:1.22-alpine AS builder  <span class="cm"># stage 1: compile with full Go toolchain</span>
 WORKDIR /app  <span class="cm"># set working dir inside container</span>
@@ -1211,6 +1802,33 @@ docker run -p 8080:8080 --env-file .env gin-api  <span class="cm"># run, expose 
 
 <!-- ==================== SECTION 21: INTERVIEW ==================== -->
 <h2 id="interview"><span class="section-num">21</span> Interview Questions</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A curated set of <strong>Gin and Go web-development interview questions</strong> covering the full stack: routing internals, middleware design, context lifecycle, binding/validation, JWT auth, testing, deployment, and system design. These questions mirror what you'd be asked in backend interviews at companies using Go — <strong>Uber, Twitch, Monzo, Cloudflare, Dropbox, Bytedance, Shopify</strong>, and most cloud-native startups.</span></div>
+  <div class="concept-row"><span class="concept-label">How to use this section</span><span class="concept-text"><ul>
+    <li><strong>Self-test:</strong> toggle "Hide All" and try to answer each question from memory before peeking.</li>
+    <li><strong>Depth over breadth:</strong> interviewers care more about "why" than "what". If you know <em>why</em> Gin's radix tree beats <code>http.ServeMux</code>, you'll answer ten related questions correctly.</li>
+    <li><strong>Practice aloud:</strong> rubber-duck every answer in your own words before a real interview.</li>
+    <li><strong>Map to your experience:</strong> every concept here has a production anchor — tie each answer to something you've built or debugged.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">Topics covered</span><span class="concept-text"><ul>
+    <li><strong>Core concepts:</strong> what is Gin, how does it compare to Echo/Chi/Fiber, what is <code>*gin.Context</code>, how does middleware work.</li>
+    <li><strong>Routing:</strong> radix tree, path params vs query params, route groups, route conflicts.</li>
+    <li><strong>Request handling:</strong> Bind vs ShouldBind, validation tags, file uploads, multipart forms.</li>
+    <li><strong>Middleware:</strong> custom middleware, Abort vs Next, onion model, error middleware.</li>
+    <li><strong>Auth:</strong> JWT flow, refresh tokens, storing tokens, revocation strategies.</li>
+    <li><strong>Production concerns:</strong> graceful shutdown, logging, health checks, observability, rate limiting.</li>
+    <li><strong>Testing:</strong> httptest, mocking, integration vs unit tests.</li>
+    <li><strong>System design:</strong> multi-tenant SaaS APIs, rate-limited public APIs, real-time WebSocket services, high-throughput event ingestion.</li>
+  </ul></span></div>
+  <div class="concept-row"><span class="concept-label">How it differs from other guides</span><span class="concept-text">Most online "Gin interview question" lists are shallow — they ask "what is <code>gin.H</code>?" and stop. This section focuses on <strong>reasoning questions</strong>: why does Gin pool contexts, what breaks if you capture <code>c</code> in a goroutine, how would you implement per-tenant rate limiting, what's the difference between <code>c.Abort</code> and <code>return</code>. These are the questions senior Go engineers actually get asked.</span></div>
+  <div class="concept-row"><span class="concept-label">Preparation tips</span><span class="concept-text"><ul>
+    <li><strong>Read the Gin source:</strong> <code>gin.go</code>, <code>context.go</code>, and <code>tree.go</code> together are fewer than 3000 lines. You'll understand the framework better than 90% of candidates.</li>
+    <li><strong>Build something non-trivial:</strong> a REST API with JWT + GORM + tests + Docker. Reference it in interviews.</li>
+    <li><strong>Benchmarks:</strong> be able to explain why Gin is fast (radix tree + sync.Pool + minimal allocations) and where it isn't (JSON encoding is the bottleneck).</li>
+    <li><strong>Compare frameworks honestly:</strong> know when Chi or Echo might be a better fit so you can answer "why Gin?" confidently.</li>
+  </ul></span></div>
+</div>
 
 <div style="display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:16px 0;">
   <span id="toggleLabel" style="color:var(--dim); font-size:0.82rem; font-weight:500;">Show All</span>

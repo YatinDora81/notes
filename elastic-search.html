@@ -80,6 +80,49 @@ tr:hover{background:#1a1a1a}
   .hero h1{font-size:26px}
   h2{font-size:17px}
 }
+
+/* ===== CONCEPT BOX ===== */
+.concept-box {
+  border-left: 3px solid #a78bfa;
+  background: rgba(167,139,250,0.05);
+  padding: 20px 24px;
+  margin: 18px 0;
+  border-radius: 8px;
+  border: 1px solid rgba(167,139,250,0.2);
+}
+.concept-box .concept-row {
+  margin: 14px 0;
+  display: block;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(167,139,250,0.15);
+}
+.concept-box .concept-row:first-of-type { margin-top: 4px; }
+.concept-box .concept-row:last-child {
+  margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+}
+.concept-box .concept-label {
+  display: block;
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.4px;
+  color: #a78bfa; font-weight: 700;
+  margin-bottom: 8px;
+}
+.concept-box .concept-text {
+  display: block; color: #a1a1aa; font-size: 0.92rem;
+  line-height: 1.7;
+}
+.concept-box .concept-text strong { color: #fafafa; font-weight: 600; }
+.concept-box .concept-text code {
+  background: rgba(167,139,250,0.12);
+  padding: 1px 6px; border-radius: 3px;
+  color: #c4b5fd; font-size: 0.85em;
+}
+.concept-box .concept-text ul {
+  margin: 8px 0 0 0; padding-left: 22px;
+}
+.concept-box .concept-text ul li {
+  margin: 5px 0;
+}
+.concept-box .concept-text p { margin: 6px 0; }
 </style>
 </head>
 <body>
@@ -156,6 +199,31 @@ tr:hover{background:#1a1a1a}
 <section id="what-is-es">
 <h2>1. What is Elasticsearch?</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Elasticsearch (ES) is a <strong>distributed, document-oriented, RESTful search and analytics engine</strong> built on top of <strong>Apache Lucene</strong> — the same Java library that powers Solr, Nutch, and half the search bars on the internet. It stores data as <strong>schema-flexible JSON documents</strong>, automatically builds an <strong>inverted index</strong> over every field, and lets you query it via HTTP with a powerful JSON <strong>Query DSL</strong>. ES is <strong>near real-time</strong>: documents become searchable roughly <code>1s</code> after indexing (the default <code>refresh_interval</code>). It was created by Shay Banon in 2010 as a rewrite of his earlier project "Compass", and is now maintained by Elastic N.V.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Distributed by default:</strong> an index is split into <code>shards</code>, each shard is a self-contained Lucene index, and shards are spread across nodes for horizontal scale.</li>
+      <li><strong>Full-text search:</strong> tokenization, stemming, synonyms, fuzzy matching, phrase queries, highlighting, relevance scoring via <strong>BM25</strong>.</li>
+      <li><strong>Analytics engine:</strong> real-time <code>aggregations</code> (bucket + metric) over billions of docs — the reason Kibana works.</li>
+      <li><strong>RESTful JSON API:</strong> everything is an HTTP call — <code>GET /products/_search</code>, <code>POST /products/_doc</code>.</li>
+      <li><strong>Schema-flexible:</strong> dynamic mapping auto-detects field types on first index, but you can also define strict <code>mappings</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs MySQL / Postgres:</strong> SQL DBs use B-tree indexes (great for exact + range, terrible for <code>LIKE '%phrase%'</code>). ES uses inverted indexes — O(1) term lookup, relevance ranking built in.</li>
+      <li><strong>vs MongoDB:</strong> Both store JSON docs, but Mongo is a general-purpose DB (transactions, strong consistency). ES is a search engine — eventually consistent, optimized for read-heavy search workloads.</li>
+      <li><strong>vs Apache Solr:</strong> Same Lucene core. Solr is older, XML-config-heavy, strong in enterprise/library catalogs. ES has a slicker REST API, easier clustering, bigger ecosystem (ELK stack).</li>
+      <li><strong>vs OpenSearch:</strong> OpenSearch is the AWS-led Apache 2.0 fork of ES 7.10, created after Elastic changed licenses in 2021. APIs are 95% identical; OpenSearch adds its own ML/anomaly features.</li>
+      <li><strong>vs Algolia / Meilisearch:</strong> Those are hosted, dev-friendly, UX-first. ES is more powerful, more complex, self-hostable, and scales to petabytes.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You reach for ES whenever you need <strong>fast full-text search, faceted filtering, or log/metric analytics at scale</strong>. Typical architecture: <strong>Postgres as source of truth</strong>, then stream changes into ES for the search layer. It's the default choice for product search, site search, autocomplete, observability dashboards, SIEM, and anything where users type words and expect relevance-ranked results in &lt;100ms.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">ES is <strong>not</strong> an ACID database — no multi-document transactions, eventual consistency across replicas, and you can lose in-flight writes during a network partition. It's also <strong>RAM-hungry</strong> (rule of thumb: JVM heap = 50% of RAM, max 32GB), and mappings are mostly immutable — you can't change a field type without reindexing.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>GitHub</strong> uses ES to search 200M+ repositories and billions of code lines. <strong>Wikipedia</strong> uses it (via CirrusSearch) for its search box. <strong>Stack Overflow</strong>, <strong>Shopify</strong>, <strong>Uber</strong>, <strong>Netflix</strong>, <strong>Slack</strong>, <strong>Cisco</strong>, and <strong>eBay</strong> all run ES in production. The <strong>ELK stack</strong> (Elasticsearch + Logstash + Kibana) is the de-facto open-source observability stack — powering log pipelines at companies from tiny startups to the NYT.</span></div>
+</div>
+
 <p>Elasticsearch is a <strong>distributed, open-source, RESTful search and analytics engine</strong> built on top of <strong>Apache Lucene</strong>. It stores data as JSON documents and provides <strong>near real-time search</strong> — meaning data you index becomes searchable within ~1 second.</p>
 
 <div class="interview-box">
@@ -189,6 +257,30 @@ tr:hover{background:#1a1a1a}
 <section id="why-es">
 <h2>2. Why Use Elasticsearch?</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">This is the "when do I actually need ES?" question. Elasticsearch is a <strong>purpose-built search layer</strong> that sits alongside (not replacing) your primary database. You use it when the queries your users want — <strong>word-based, typo-tolerant, relevance-ranked, aggregated, sub-100ms</strong> — are the exact queries a row-store DB is worst at. The decision usually comes down to: <em>"Can I do this with a Postgres <code>LIKE</code> or a <code>GIN</code> index and still sleep at night?"</em> If the answer is no, you need ES.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Relevance scoring (BM25):</strong> results come back ordered by how well they match — not just "matched / didn't match".</li>
+      <li><strong>Typo tolerance:</strong> <code>fuzziness: "AUTO"</code> handles "iphnoe" → "iphone" at query time.</li>
+      <li><strong>Faceted search:</strong> ES aggregations power the "filter by brand / price / rating" sidebars on every e-commerce site.</li>
+      <li><strong>Real-time analytics:</strong> aggregate billions of log lines or metrics into dashboards with sub-second latency.</li>
+      <li><strong>Horizontal scale:</strong> add a node, rebalance shards, keep serving traffic — no downtime, no schema migrations.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs MySQL / Postgres:</strong> B-tree indexes scan rows in order — <code>LIKE '%phone%'</code> can't use the index at all. Postgres has <code>tsvector</code> + <code>GIN</code>, which helps, but doesn't do BM25 ranking, fuzzy match, or distributed aggregations.</li>
+      <li><strong>vs MongoDB text search:</strong> Mongo has basic <code>$text</code> search but no analyzers, no synonyms, no custom scoring, no faceting. It's fine for tiny datasets, falls over past a few million docs.</li>
+      <li><strong>vs Redis / KV stores:</strong> Redis is O(1) by exact key — no full-text search, no ranking. You can bolt on RediSearch, but you're essentially adding an ES-lite.</li>
+      <li><strong>vs Algolia:</strong> Algolia is hosted, dead simple, and wildly expensive past a few million records. ES is BYO-ops but cheaper and more flexible.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">The killer use cases: <strong>(1)</strong> product/site search with relevance + facets, <strong>(2)</strong> log aggregation (the "L" and "K" in ELK stack), <strong>(3)</strong> application performance monitoring / observability, <strong>(4)</strong> security information and event management (SIEM), <strong>(5)</strong> geospatial queries like "restaurants within 2km", <strong>(6)</strong> autocomplete/suggest-as-you-type. If your feature spec contains the word "search" or "dashboard", ES is probably in your future.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">Teams reach for ES prematurely. If you have &lt;1M rows and users run 10 searches a minute, <strong>Postgres full-text search is fine</strong> — adding ES doubles your ops burden. Also, ES is a <strong>secondary store</strong>: always keep your source of truth in a real DB and stream changes to ES via CDC (Debezium, Kafka Connect) or app-level dual-writes.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Uber</strong> uses ES for driver/rider search and geospatial matching. <strong>Stack Overflow</strong> indexes every question + answer for its search. <strong>Netflix</strong> uses ES for log analytics across thousands of microservices. <strong>Shopify</strong> powers storefront search with it. <strong>Tinder</strong> uses ES for its recommendation filtering layer. Every major cloud provider (AWS OpenSearch, Elastic Cloud, GCP) offers managed ES.</span></div>
+</div>
+
 <p>Traditional databases (MySQL, PostgreSQL) use <strong>B-tree indexes</strong> which are great for exact lookups and range queries, but terrible for full-text search. Searching "best noise cancelling headphones" across millions of product descriptions would require a full table scan or a slow LIKE query.</p>
 
 <p>Elasticsearch solves this with an <strong>inverted index</strong> — the same data structure used by Google, Wikipedia search, and every search engine.</p>
@@ -211,6 +303,30 @@ tr:hover{background:#1a1a1a}
 <!-- 3 -->
 <section id="behind-inverted-index">
 <h2>3. Inverted Index — Deep Dive</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>inverted index</strong> is a data structure that maps each <strong>term (word)</strong> back to the list of documents that contain it — the opposite of a traditional row-store where you go from doc → fields. It's the same core idea Google uses to index the web, and the reason ES can find "fast" in 10 billion documents in milliseconds. Each entry in the inverted index is called a <strong>postings list</strong> and stores not just doc IDs but also <strong>term frequency, positions, offsets, and field length</strong> — everything BM25 needs for scoring, phrase matching, and highlighting.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Term dictionary:</strong> sorted list of unique terms, stored on disk as a Finite State Transducer (<code>FST</code>) — extremely compact and cache-friendly.</li>
+      <li><strong>Postings lists:</strong> for each term, the docs containing it, compressed with techniques like <strong>delta encoding + Frame of Reference</strong>.</li>
+      <li><strong>Per-term stats:</strong> term frequency (TF), document frequency (DF), positions, offsets — enabling BM25 scoring and phrase queries.</li>
+      <li><strong>Immutable segments:</strong> once written, a segment's inverted index is read-only, which is what makes it so fast — no locking, no updates in place.</li>
+      <li><strong>Skip lists:</strong> allow fast intersection of postings lists for boolean AND queries across multiple terms.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs B-tree (MySQL/Postgres):</strong> B-trees map <code>primary_key → row</code>. Perfect for <code>WHERE id=123</code>, useless for "find the word <em>fast</em> anywhere in any row".</li>
+      <li><strong>vs Postgres GIN / tsvector:</strong> Postgres's <code>GIN</code> index is effectively an inverted index too — but single-node, no BM25 ranking (uses <code>ts_rank</code>, much weaker), no distributed scoring.</li>
+      <li><strong>vs Trigram index:</strong> trigrams (<code>pg_trgm</code>) split text into 3-char chunks for fuzzy match. Works for <code>ILIKE</code>, but doesn't understand language or relevance.</li>
+      <li><strong>vs MongoDB text index:</strong> Mongo has a basic inverted index for <code>$text</code> but lacks analyzers, multi-language stemming, and custom scoring.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">The inverted index is the entire reason ES exists. It turns a full-text search problem from <strong>O(n × document_length)</strong> into <strong>O(log(terms) + postings_intersection)</strong>. You pay for this at <em>write time</em> — indexing is expensive because every field gets analyzed and stored in the term dictionary — but reads become blazingly fast. The moment your search requirements include "ranking", "typo tolerance", or "phrase match", you need an inverted index.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">Inverted indexes are <strong>not great for high-cardinality exact matches</strong> (like UUIDs) — that's what <strong>doc values</strong> (column-stored format) are for. Also: every segment has its own inverted index, and <strong>merges are expensive</strong>. Too many small segments = slow search. Too few big segments = slow indexing. ES handles this via background <code>TieredMergePolicy</code>, but you need enough disk headroom (2-3x index size).</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">The inverted index concept dates back to <strong>1950s library science</strong>. <strong>Google</strong>'s PageRank sits on top of a distributed inverted index across thousands of machines. <strong>Lucene</strong> (created by Doug Cutting in 1999) is the open-source reference implementation — Solr, Elasticsearch, OpenSearch, Nutch, and even some parts of Amazon CloudSearch all rely on it. Every major search product on earth uses some variant of this data structure.</span></div>
+</div>
 
 <p>This is the single most important concept in Elasticsearch. Every feature — search speed, relevance scoring, fuzzy matching — exists because of the inverted index.</p>
 
@@ -276,6 +392,30 @@ This is how ES calculates <strong>relevance scores</strong> — using BM25 algor
 <section id="core-concepts">
 <h2>4. Core Concepts</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The ES vocabulary you <strong>must</strong> have internalized: <code>cluster</code>, <code>node</code>, <code>index</code>, <code>document</code>, <code>field</code>, <code>mapping</code>, <code>shard</code>, <code>replica</code>, and <code>segment</code>. Think of the hierarchy as: <strong>cluster → nodes → indices → shards → segments → documents → fields</strong>. A <strong>cluster</strong> is the whole deployment, a <strong>node</strong> is one JVM process, an <strong>index</strong> is like a "table" (collection of JSON docs), a <strong>shard</strong> is a self-contained Lucene index that is a partition of an index, and a <strong>segment</strong> is an immutable mini-index on disk inside a shard.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Cluster:</strong> named collection of nodes (<code>cluster.name: prod-es</code>). Master node manages cluster state; data nodes hold shards.</li>
+      <li><strong>Node:</strong> single ES process. Can have roles: <code>master</code>, <code>data</code>, <code>ingest</code>, <code>coordinating</code>, <code>ml</code>.</li>
+      <li><strong>Index:</strong> logical namespace pointing to primary + replica shards. Has a mapping (schema) and settings.</li>
+      <li><strong>Document:</strong> JSON object with a unique <code>_id</code>. Has system fields: <code>_index</code>, <code>_id</code>, <code>_version</code>, <code>_source</code>.</li>
+      <li><strong>Shard:</strong> a full Lucene index. Primary shards hold the data; replica shards are copies for HA + read throughput.</li>
+      <li><strong>Segment:</strong> immutable chunk of a shard's data on disk. Periodically merged in the background.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs MySQL / Postgres:</strong> index ≈ table, document ≈ row, field ≈ column, mapping ≈ schema. But unlike SQL tables, indices can't be JOINed (you denormalize instead).</li>
+      <li><strong>vs MongoDB:</strong> ES index ≈ Mongo collection, ES document ≈ Mongo document. Sharding concepts are similar, but ES shards are Lucene indexes, Mongo shards are BSON chunks.</li>
+      <li><strong>vs Cassandra:</strong> Both distribute by shard/partition. Cassandra uses consistent hashing; ES uses <code>hash(routing) % num_primary_shards</code> which is why you can't change shard count without reindexing.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Understanding this hierarchy is what separates people who <em>use</em> ES from people who <em>can operate</em> ES. Nearly every production problem — hot shards, slow queries, mapping explosions, cluster red state — traces back to misunderstanding how documents flow through shards → segments, or how the cluster state coordinates nodes.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Old ES had "types" within an index (like sub-tables) — <strong>removed in ES 8.x</strong>, one index = one type. <strong>(2)</strong> Number of <code>primary shards</code> is <strong>fixed at index creation</strong> — you cannot change it without reindexing. <strong>(3)</strong> Each shard has overhead (~a few hundred MB RAM), so don't over-shard — rule of thumb: shard size 10-50GB, max ~600 shards per node. <strong>(4)</strong> Segments multiply with every refresh — keep an eye on <code>_cat/segments</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Typical production cluster at a mid-size company: 3 master nodes + 6-12 data nodes, 50-200 indices, 100-500 shards per node. <strong>Uber</strong> runs clusters with thousands of nodes and petabytes of data. <strong>GitHub</strong>'s code search cluster holds billions of code tokens across massive shards. Logging clusters (ELK) often use <strong>one index per day</strong> (<code>logs-2026.04.08</code>) with ILM policies rolling them through hot/warm/cold tiers.</span></div>
+</div>
+
 <table>
 <tr><th>ES Term</th><th>RDBMS Equivalent</th><th>Definition (say this in interview)</th></tr>
 <tr><td><strong>Cluster</strong></td><td>Database Server</td><td>A group of one or more nodes working together. Identified by a unique name. Holds ALL your data.</td></tr>
@@ -308,6 +448,29 @@ This immutable segment design is WHY ES is so fast — no locks needed for reads
 <!-- 5 -->
 <section id="es-vs-db">
 <h2>5. Elasticsearch vs Traditional Database</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The side-by-side comparison of ES vs a relational DB like MySQL/Postgres. The short version: <strong>ES is a read-optimized, distributed, eventually-consistent search engine</strong>; a SQL DB is a <strong>write-optimized, single-node (typically), strongly-consistent ACID store</strong>. They solve different problems and, in most real architectures, <strong>you run both</strong> — SQL as source of truth, ES as the search/analytics layer fed by change streams.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>ES:</strong> inverted index, BM25 scoring, distributed by default, JSON docs, eventual consistency, no joins, no transactions.</li>
+      <li><strong>SQL DB:</strong> B-tree indexes, ACID transactions, foreign keys, JOINs across tables, strong consistency, mature tooling.</li>
+      <li><strong>Both:</strong> you can query, filter, aggregate. Both scale — but SQL scales vertically/sharded with effort, ES scales horizontally by design.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>Transactions:</strong> Postgres: full ACID, multi-row, MVCC. ES: single-document atomicity only, no multi-doc transactions.</li>
+      <li><strong>Joins:</strong> Postgres: unlimited JOIN types. ES: no joins — you denormalize, use <code>nested</code>, or <code>parent-child</code> (expensive).</li>
+      <li><strong>Search:</strong> Postgres <code>LIKE</code> is full scan; <code>tsvector</code> is decent; still no BM25 ranking, no fuzzy, no custom analyzers. ES wins by a mile.</li>
+      <li><strong>Consistency:</strong> Postgres: strong (serializable, if you ask). ES: eventually consistent — a doc may be visible on one replica and not yet on another.</li>
+      <li><strong>Schema:</strong> Postgres: rigid, migrations required. ES: dynamic by default, but mapping changes require reindexing.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Use SQL as your <strong>system of record</strong> — anything where you'd cry if data was lost (orders, users, payments). Use ES as the <strong>search/analytics layer</strong> on top — product search, logs, dashboards, autocomplete. The integration pattern: use <strong>Debezium</strong> or <strong>Kafka Connect</strong> to stream changes from Postgres WAL into ES indices in near-real-time.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">Don't use ES as a primary store — no transactions means money can vanish. Don't use Postgres for search past a few million rows unless you're OK with <code>ts_rank</code>. And don't try to keep both perfectly in sync — design for eventual consistency, show stale data gracefully, handle ES outages by falling back to SQL with <code>LIKE</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Typical stack at scale: <strong>Postgres + ES</strong> (Shopify, Etsy, Basecamp), <strong>MySQL + ES</strong> (GitHub, Uber), or <strong>MongoDB + ES</strong> (some startups). <strong>Stripe</strong> uses Postgres for payments and ES for their logs/dashboards. <strong>Slack</strong> uses MySQL + ES for message search. <strong>The New York Times</strong> uses Postgres + ES for article search.</span></div>
+</div>
 
 <div class="comparison-grid">
 <div class="comparison-card">
@@ -353,6 +516,30 @@ In ES, "noise cancelling" was already broken into tokens ["noise", "cancelling"]
 <section id="how-write-works">
 <h2>6. How a Write (Index) Works — Behind the Scenes</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The path a single <code>POST /products/_doc/1</code> takes from your HTTP client to durable, searchable storage. The journey involves a <strong>coordinating node</strong>, a <strong>routing function</strong>, a <strong>translog</strong>, an <strong>in-memory buffer</strong>, a <strong>refresh</strong>, <strong>replication</strong>, a <strong>flush</strong>, and eventually a <strong>segment merge</strong>. Each step exists for a reason — durability, search visibility, or performance — and understanding them is what lets you debug "why isn't my doc showing up?" or "why are my writes slow?".</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Routing:</strong> primary shard = <code>hash(_routing) % number_of_primary_shards</code> (default routing = <code>_id</code>). This is why shard count is immutable.</li>
+      <li><strong>Translog (write-ahead log):</strong> every write is appended to the translog first — if the node crashes, ES replays the translog on startup.</li>
+      <li><strong>Refresh:</strong> every <code>1s</code> (default), the in-memory buffer becomes a new searchable segment. This is the "near real-time" delay.</li>
+      <li><strong>Replication:</strong> primary forwards the op to all in-sync replicas in parallel. Write returns only after replicas ack (configurable via <code>wait_for_active_shards</code>).</li>
+      <li><strong>Flush:</strong> every 30 min or when translog hits 512MB — segments are fsync'd, translog is truncated.</li>
+      <li><strong>Merge:</strong> background thread combines small segments into bigger ones, purges deleted docs.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres INSERT:</strong> Postgres writes to WAL → shared buffers → eventually to heap page. ES's translog is analogous to WAL, but segments are immutable (no in-place updates).</li>
+      <li><strong>vs MongoDB:</strong> Mongo has oplog + journal, similar idea. Mongo updates are in-place (MVCC); ES "updates" = mark old as deleted + write new doc.</li>
+      <li><strong>vs Kafka:</strong> both use append-only logs for durability, but Kafka keeps the log forever (it IS the data); ES's translog is throwaway once flushed.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Understanding this path matters when tuning bulk indexing. If you're ingesting millions of docs/sec (e.g. log pipelines), you'll want to tweak <code>refresh_interval: -1</code> during bulk load, disable replicas, and re-enable after — that alone can 5x throughput. You'll also understand why <code>_bulk</code> is dramatically faster than single-doc indexing: you amortize the coordinating + routing + network overhead.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> "Why is my doc not visible yet?" — because refresh hasn't happened yet. Force with <code>?refresh=true</code>, but never in hot paths (expensive). <strong>(2)</strong> Changing a doc doesn't actually modify it; ES writes a new version and marks the old as deleted, wasting disk until the next merge. <strong>(3)</strong> Setting <code>refresh_interval</code> too low kills throughput; too high delays search visibility.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix</strong> ingests millions of log events per second into ES, relying on bulk API + tuned refresh intervals. <strong>Uber</strong>'s M3 + ES pipeline handles enormous write volumes by batching at the client. <strong>GitHub</strong>'s code search uses custom routing (<code>_routing</code>) so all files in a repo land on the same shard — making repo-scoped queries hit one shard instead of fanning out.</span></div>
+</div>
+
 <p>When you send a document to Elasticsearch, here's <strong>every single step</strong> that happens internally:</p>
 
 <div class="flow-diagram">
@@ -395,6 +582,30 @@ In ES, "noise cancelling" was already broken into tokens ["noise", "cancelling"]
 <section id="how-search-works">
 <h2>7. How a Search Works — Behind the Scenes</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A distributed search in ES is a <strong>two-phase scatter-gather</strong>: <strong>Query phase</strong> (every shard scores its local docs, returns top N doc IDs + scores) and <strong>Fetch phase</strong> (coordinating node picks the global top N, then pulls <code>_source</code> from only the shards that own those docs). This "query then fetch" pattern minimizes network bandwidth — you don't ship full docs from every shard, only the ones that survive the global merge.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Scatter-gather:</strong> coordinating node fans out the query to all relevant shards in parallel.</li>
+      <li><strong>Local scoring:</strong> each shard runs the <code>match</code>/<code>term</code>/<code>bool</code> query against its local inverted index, applies BM25 scoring.</li>
+      <li><strong>Global merge:</strong> coordinating node heap-merges the top-N from each shard to produce the true global top-N.</li>
+      <li><strong>Fetch phase:</strong> only the winning doc IDs are re-fetched for <code>_source</code>, highlighting, and field extraction.</li>
+      <li><strong>Adaptive replica selection (ARS):</strong> ES picks the fastest replica based on recent response times — not round-robin.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL SELECT:</strong> Postgres does a single-node query plan with index scans. ES coordinates a distributed plan across shards and combines partial results.</li>
+      <li><strong>vs MongoDB find:</strong> Mongo also scatter-gathers across shards but doesn't have BM25 scoring — sort is usually by user-provided field.</li>
+      <li><strong>vs Solr:</strong> Solr has the same two-phase model (both built on Lucene). The APIs differ, the distributed coordination is similar.</li>
+      <li><strong>vs Google Search:</strong> similar principles at a massively larger scale — sharded inverted index, partial scoring per shard, global merge.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Knowing the two-phase model explains a lot of surprising ES behavior. Why is deep pagination slow? Because <code>from: 10000, size: 10</code> forces every shard to return <strong>10,010</strong> results to be merged. Why do aggregations sometimes show approximate counts? Because each shard returns its local top-K terms, and the coordinator merges — rare-but-globally-common terms can be lost. Why does adding replicas increase search throughput? Because queries can be served from any replica.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Deep pagination is O(N × shards) — use <code>search_after</code> or <code>scroll</code>. <strong>(2)</strong> Aggregation <code>terms</code> buckets are approximate by default — bump <code>shard_size</code> for accuracy. <strong>(3)</strong> <code>preference</code> parameter controls which replica serves the query — useful for sticky sessions. <strong>(4)</strong> Hot shards happen when one shard has much more data or traffic than others — look at <code>_cat/shards</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>GitHub code search</strong> (the old ES-based version) used custom routing so the query could target a specific shard, skipping scatter-gather entirely. <strong>Wikipedia</strong>'s CirrusSearch handles ~50k QPS with this model. <strong>Shopify</strong> optimizes storefront search by aggressively caching the query phase and tuning <code>request_cache</code> and <code>preference</code> for consistent replica routing.</span></div>
+</div>
+
 <p>Search is a <strong>two-phase process</strong>: Query phase and Fetch phase.</p>
 
 <div class="flow-diagram">
@@ -434,6 +645,29 @@ If you request <code>from: 10000, size: 10</code>, EVERY shard must return its t
 <!-- 8 -->
 <section id="analyzers">
 <h2>8. Analyzers & Tokenizers</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>analyzer</strong> is the text-processing pipeline ES runs on a field — both at <strong>index time</strong> (when the doc is stored) and at <strong>query time</strong> (when you search) — to convert raw strings into <strong>normalized tokens</strong> that land in the inverted index. An analyzer is always made of three stages: <strong>character filters</strong> (pre-processing), a single <strong>tokenizer</strong> (splits text into tokens), and zero or more <strong>token filters</strong> (post-processing). This pipeline is why searching <em>"Running"</em> matches <em>"run"</em> — both sides get stemmed to the same root.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Character filters:</strong> <code>html_strip</code>, <code>mapping</code>, <code>pattern_replace</code> — operate on raw string.</li>
+      <li><strong>Tokenizers:</strong> <code>standard</code> (Unicode word boundaries), <code>whitespace</code>, <code>keyword</code> (no split), <code>edge_ngram</code> (for autocomplete), <code>pattern</code> (regex split).</li>
+      <li><strong>Token filters:</strong> <code>lowercase</code>, <code>stop</code> (remove "the", "a", "is"), <code>stemmer</code> (run/runs/running → "run"), <code>synonym</code> (NYC → "new york city"), <code>asciifolding</code> (café → cafe).</li>
+      <li><strong>Built-in analyzers:</strong> <code>standard</code> (default), <code>english</code>, <code>simple</code>, <code>keyword</code>, <code>whitespace</code>, <code>pattern</code>, plus ~30 language-specific ones.</li>
+      <li><strong>Custom analyzers:</strong> compose your own in <code>settings.analysis</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres tsvector:</strong> Postgres has a fixed set of dictionaries + stemmers (snowball). ES has vastly more — plus custom per-field analyzers, which Postgres can't do cleanly.</li>
+      <li><strong>vs Solr:</strong> same Lucene analyzer infrastructure. Solr configures via XML; ES via JSON index settings.</li>
+      <li><strong>vs Algolia:</strong> Algolia auto-tunes analysis with sensible defaults but doesn't expose the pipeline. ES gives you full control.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Analyzers are where search quality is won or lost. A good analyzer handles: <strong>casing</strong> (iPhone / iphone), <strong>morphology</strong> (run/running/ran), <strong>synonyms</strong> (NYC/New York), <strong>accents</strong> (café/cafe), <strong>HTML noise</strong> (strip tags), and <strong>partial prefixes</strong> (autocomplete). Tune the analyzer, and your search feels magic. Ignore it, and users complain "I searched for 'runners' but got nothing."</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> The analyzer is applied at <em>both</em> index and query time — they must match. Using <code>term</code> query on a <code>text</code> field hits the un-analyzed query against analyzed tokens = no match. Use <code>match</code> for text. <strong>(2)</strong> Changing an analyzer requires reindexing. <strong>(3)</strong> <code>edge_ngram</code> should be applied at <em>index time only</em>, with <code>standard</code> at search time — otherwise queries get ngram'd too and relevance breaks. <strong>(4)</strong> Stop-word removal can hurt phrase search ("to be or not to be").</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Wikipedia</strong>'s CirrusSearch has dozens of language-specific analyzers tuned per-wiki. <strong>Stack Overflow</strong> uses custom synonyms (JS → JavaScript) and code-friendly tokenization. <strong>Airbnb</strong> tunes analyzers per locale for property search. Use the <code>_analyze</code> API (<code>POST /_analyze {"analyzer": "english", "text": "Running fast"}</code>) to see exactly what tokens a string produces — essential for debugging.</span></div>
+</div>
 
 <p>An analyzer is the <strong>text processing pipeline</strong> that runs BOTH at index time (when you store data) and at search time (when you query). It determines how text is broken into searchable terms.</p>
 
@@ -490,6 +724,29 @@ Both the indexed text AND the search query go through the same analyzer. So when
 <section id="mappings">
 <h2>9. Mappings (Schema Definition)</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>mapping</strong> is ES's answer to "schema" — a JSON document that describes each field's type, analyzer, indexing options, and doc values behavior. It's mostly declared once per index at creation time (<code>PUT /products {"mappings": {...}}</code>). Unlike a relational schema, the same raw value can be indexed multiple ways simultaneously using <strong>multi-fields</strong> (e.g., <code>name</code> as <code>text</code> for search and <code>name.keyword</code> as <code>keyword</code> for sorting).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Field types:</strong> <code>text</code> (full-text, analyzed), <code>keyword</code> (exact, not analyzed), <code>long</code>/<code>integer</code>/<code>double</code>, <code>date</code>, <code>boolean</code>, <code>object</code>, <code>nested</code>, <code>geo_point</code>, <code>ip</code>, <code>dense_vector</code> (for kNN search).</li>
+      <li><strong>Multi-fields:</strong> one raw field, multiple indexed representations. Default ES dynamic mapping gives every string both <code>text</code> and <code>.keyword</code>.</li>
+      <li><strong>Dynamic vs explicit:</strong> dynamic = ES auto-detects on first doc. Explicit = you declare. Production: always explicit.</li>
+      <li><strong>Analyzer per field:</strong> <code>"body": {"type": "text", "analyzer": "english"}</code>.</li>
+      <li><strong>Doc values:</strong> columnar storage used for sort/agg on <code>keyword</code>/numeric fields.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres DDL:</strong> SQL schemas are fully rigid (add column = migration). ES mappings are additive — you can add new fields on the fly, but can't change an existing field's type.</li>
+      <li><strong>vs MongoDB:</strong> Mongo is fully schemaless (chaos at scale). ES has a middle ground: flexible JSON, but mapping rules are enforced per field.</li>
+      <li><strong>vs Solr:</strong> Solr has <code>schema.xml</code>; ES has JSON mappings. Both describe fields + analyzers, but ES's multi-field design is cleaner.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Explicit mapping is how you avoid the two classic ES disasters: <strong>(1)</strong> your "42" got auto-detected as <code>text</code> instead of <code>long</code>, breaking range queries; <strong>(2)</strong> your dynamic mapping explosion — every new field in dynamic JSON becomes a mapping entry, and with uncontrolled input you can hit the 1000-field limit and crash the cluster. A well-designed mapping is also how you enable features like autocomplete (<code>edge_ngram</code>), synonyms, and custom scoring.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <strong>text vs keyword</strong> is the #1 ES pitfall — use <code>text</code> for search, <code>keyword</code> for exact/sort/agg. <strong>(2)</strong> Once set, a field type is immutable — changing it requires reindexing to a new index. <strong>(3)</strong> <strong>Mapping explosion</strong>: never index raw user JSON with dynamic mapping — set <code>"dynamic": "strict"</code> or <code>"false"</code>. <strong>(4)</strong> <code>nested</code> vs <code>object</code>: arrays of objects flatten by default, losing cross-field relationships. Use <code>nested</code> if you need "find products where a variant with color:red has size:M".</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">A typical e-commerce product index has ~30-50 fields: <code>name</code> (text + keyword multi-field), <code>description</code> (text, english analyzer), <code>sku</code> (keyword), <code>price</code> (double), <code>created_at</code> (date), <code>category_ids</code> (keyword array), <code>location</code> (geo_point), and <code>variants</code> (nested). <strong>GitHub</strong>'s code search uses custom tokenization fields to handle camelCase and snake_case. <strong>Meilisearch</strong> and <strong>Typesense</strong> (ES competitors) auto-configure these — ES makes you declare them, trading convenience for power.</span></div>
+</div>
+
 <p>Mapping defines <strong>how each field is stored and indexed</strong>. It's like a database schema, but more powerful because the same field can be indexed multiple ways simultaneously.</p>
 
 <h3>Field Types</h3>
@@ -531,6 +788,30 @@ Now use <code>name</code> for full-text search and <code>name.keyword</code> for
 <!-- 10 -->
 <section id="query-dsl">
 <h2>10. Query DSL — Complete Guide</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The <strong>Query DSL</strong> (Domain Specific Language) is ES's JSON-based query language — the equivalent of SQL's <code>SELECT ... WHERE</code> but for search. Every query is a nested JSON object passed to <code>POST /index/_search</code>. The DSL splits queries into two families: <strong>leaf queries</strong> (<code>match</code>, <code>term</code>, <code>range</code>, <code>prefix</code>, etc. — operate on a single field) and <strong>compound queries</strong> (<code>bool</code>, <code>constant_score</code>, <code>function_score</code>, <code>dis_max</code> — combine leaves). Crucially, every query runs in either <strong>query context</strong> (scores results by relevance via BM25) or <strong>filter context</strong> (binary match/no-match, cached, much faster).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Leaf queries:</strong> <code>match</code> (full-text, analyzed), <code>term</code> (exact, no analysis), <code>terms</code> (IN list), <code>range</code> (numeric/date), <code>prefix</code>, <code>wildcard</code>, <code>regexp</code>, <code>fuzzy</code>, <code>exists</code>.</li>
+      <li><strong>Compound queries:</strong> <code>bool</code> (<code>must</code> / <code>should</code> / <code>must_not</code> / <code>filter</code>), <code>function_score</code> (custom scoring), <code>dis_max</code> (disjunction max — best-of-several).</li>
+      <li><strong>Specialized:</strong> <code>match_phrase</code> (exact order + slop), <code>multi_match</code> (same query across multiple fields, with boosts like <code>"name^3"</code>).</li>
+      <li><strong>Geo/Nested/Joins:</strong> <code>geo_distance</code>, <code>nested</code>, <code>has_parent</code>, <code>has_child</code>.</li>
+      <li><strong>Query vs Filter context:</strong> filters skip scoring and are cached in bitsets — use for "must-be-true" predicates.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL WHERE:</strong> SQL is flat. ES's <code>bool</code> query nests arbitrarily — <code>bool.must[bool.should[...], range, nested]</code>. Way more expressive for scoring and fuzziness, less ergonomic for simple equality.</li>
+      <li><strong>vs MongoDB query language:</strong> Mongo uses a similar JSON shape (<code>$and</code>, <code>$or</code>, <code>$gt</code>) but lacks relevance scoring, analysis, or the query/filter-context distinction.</li>
+      <li><strong>vs Solr:</strong> Solr uses URL query strings (<code>q=title:apple AND price:[100 TO 500]</code>) — more compact, less structured.</li>
+      <li><strong>vs Algolia:</strong> Algolia has a much simpler API with fewer knobs; ES gives you every knob at the cost of complexity.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Nearly every non-trivial production search query is a <code>bool</code> query combining <strong>relevance signals</strong> in <code>should</code>, <strong>hard filters</strong> in <code>filter</code>, and <strong>exclusions</strong> in <code>must_not</code>. Example: "products matching 'iphone', priced between $500-1500, in stock, preferring brand='Apple'". That's a single <code>bool</code> with a <code>match</code> in <code>must</code>, a <code>range</code> + <code>term</code> in <code>filter</code>, and a boosted <code>term</code> in <code>should</code>. Learning the DSL deeply is the single highest-leverage ES skill.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <code>term</code> on a <code>text</code> field rarely works — the field is tokenized/lowercased but the query is not. Use <code>match</code> or <code>.keyword</code>. <strong>(2)</strong> Putting everything in <code>must</code> = everything contributes to score (slow). Move non-ranking predicates to <code>filter</code>. <strong>(3)</strong> <code>should</code> with no <code>must</code> has implicit <code>minimum_should_match: 1</code>; with a <code>must</code>, <code>should</code> clauses become optional boosters. <strong>(4)</strong> Leading wildcard (<code>*phone</code>) is catastrophically slow — use <code>reverse</code> tokenizer or edge_ngram.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Amazon-like product search</strong>: <code>multi_match</code> across name/description/brand with field boosts, filter on in-stock + category, function_score for popularity. <strong>GitHub code search</strong>: <code>bool.must[match_phrase]</code> + <code>filter[language, repo]</code>. <strong>Log dashboards</strong> (Kibana): almost entirely <code>filter</code>-context queries (time range + level + service) because scoring is irrelevant.</span></div>
+</div>
 
 <p>Query DSL (Domain Specific Language) is ES's JSON-based query language. Two categories: <strong>Leaf queries</strong> (search a single field) and <strong>Compound queries</strong> (combine multiple queries).</p>
 
@@ -661,6 +942,30 @@ ES doesn't just check if all terms exist — it checks their <strong>positions</
 <section id="aggregations">
 <h2>11. Aggregations (Analytics Engine)</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Aggregations</strong> are ES's analytics engine — a distributed, JSON-based version of SQL's <code>GROUP BY</code>, <code>COUNT</code>, <code>AVG</code>, <code>SUM</code>, plus percentiles, histograms, cardinality estimation, and anomaly detection. They're what powers Kibana dashboards. Aggregations come in three families: <strong>bucket</strong> (group docs into buckets — like GROUP BY), <strong>metric</strong> (compute a value across a set of docs — like AVG), and <strong>pipeline</strong> (operate on the output of another agg — like moving averages). They can be nested arbitrarily deeply.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Bucket aggs:</strong> <code>terms</code>, <code>range</code>, <code>date_histogram</code>, <code>histogram</code>, <code>filters</code>, <code>geo_distance</code>, <code>nested</code>.</li>
+      <li><strong>Metric aggs:</strong> <code>avg</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>stats</code>, <code>extended_stats</code>, <code>percentiles</code>, <code>cardinality</code> (HyperLogLog++).</li>
+      <li><strong>Pipeline aggs:</strong> <code>cumulative_sum</code>, <code>derivative</code>, <code>moving_avg</code>, <code>bucket_sort</code>, <code>bucket_selector</code>.</li>
+      <li><strong>Nestable:</strong> "group by brand → within each brand, group by color → within each color, average price".</li>
+      <li><strong>Use doc_values:</strong> columnar on-disk format, read row-by-row only for matching docs — extremely cache-friendly.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL GROUP BY:</strong> SQL is flat — one GROUP BY level. ES aggs nest arbitrarily. SQL is exact; ES <code>terms</code> is approximate by default (shard-local top-K merged).</li>
+      <li><strong>vs ClickHouse / Druid:</strong> ClickHouse is purpose-built for analytical queries and is faster at pure OLAP. ES is slower but integrates search + aggs in one query.</li>
+      <li><strong>vs MongoDB aggregation pipeline:</strong> Mongo's <code>$group</code>, <code>$match</code>, <code>$project</code> is Turing-complete but lacks BM25 integration.</li>
+      <li><strong>vs Postgres with GROUP BY:</strong> Postgres is exact and single-node. ES aggs are distributed and approximate for high-cardinality.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Aggregations are what let you ship things like: "show me a histogram of errors per hour, grouped by service, over the last 24 hours". Or: "of all products matching 'iphone', how many per brand, and what's the average price per brand?" That single query returns <strong>both search hits and facet counts</strong> — which is why ES powers nearly every faceted product search in the wild.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Aggs only work on <code>keyword</code>/numeric/date fields (need doc_values) — not on <code>text</code>. <strong>(2)</strong> <code>terms</code> aggregations are <strong>approximate</strong> for high-cardinality fields — bump <code>shard_size</code> above <code>size</code> for better accuracy. <strong>(3)</strong> Deep nesting explodes memory — each level multiplies bucket counts. <strong>(4)</strong> Use <code>composite</code> aggregation for paginating through aggregations. <strong>(5)</strong> Watch out for <code>fielddata: true</code> on text fields — it's a memory trap.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kibana</strong> dashboards are 100% ES aggregations. <strong>Grafana</strong>'s ES data source runs aggregations for time-series metrics. <strong>Shopify</strong> uses aggs to power product facets (filter by price, color, size). <strong>Netflix</strong> uses <code>percentiles</code> aggs to compute P95/P99 latencies across billions of log events in seconds. Compare to trying to calculate percentiles in Postgres — it's technically possible but painful past a few million rows.</span></div>
+</div>
+
 <p>Aggregations are ES's analytics engine — like SQL GROUP BY, COUNT, AVG, SUM on steroids. You can nest them infinitely and combine with any query.</p>
 
 <h3>Three Types</h3>
@@ -687,6 +992,28 @@ When you ask "group by brand", ES reads the brand doc_values column for all matc
 <section id="pagination">
 <h2>12. Pagination Strategies</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">How to walk through a large result set in ES. Unlike SQL where <code>LIMIT 1000000 OFFSET 50000</code> is just slow, ES pagination has a hard <strong>10,000-doc ceiling</strong> for naive <code>from + size</code>. Beyond that, you have three real options: <strong>search_after</strong> (stateless cursor by sort values), <strong>Point in Time (PIT) + search_after</strong> (consistent snapshot pagination), or the legacy <strong>scroll API</strong> (now deprecated in favor of PIT).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>from/size:</strong> simple offset pagination. Max <code>index.max_result_window = 10000</code>. Use for UI "page 1/2/3...".</li>
+      <li><strong>search_after:</strong> pass the sort values of the last doc as a cursor (<code>"search_after": [1234, "doc_id"]</code>). Unlimited depth, stateless, requires unique sort.</li>
+      <li><strong>PIT (Point in Time):</strong> open a snapshot with <code>POST /products/_pit?keep_alive=1m</code>, use that PIT ID with <code>search_after</code> — gives consistent pagination even while the index changes.</li>
+      <li><strong>scroll:</strong> stateful cursor, holds a snapshot server-side for <code>scroll=5m</code>. Deprecated in favor of PIT.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL OFFSET:</strong> SQL's offset pagination is O(offset) — slow but unbounded. ES <code>from + size</code> is O(from × shards) — explicitly capped because it scatter-gathers.</li>
+      <li><strong>vs Postgres keyset pagination:</strong> <code>search_after</code> is the exact ES analog. Both require a tie-breaking unique sort key to avoid skipping/duplicating docs.</li>
+      <li><strong>vs MongoDB skip/limit:</strong> Mongo has the same "offset is slow at scale" problem. The fix is the same — use a range-based cursor.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You need pagination for: infinite-scroll feeds, bulk exports, data migrations, reindex jobs, and anything showing more than 10k results. The choice matters: UI shows page 5? Use <code>from + size</code>. Export a million records to CSV? Use <code>PIT + search_after</code>. Live dashboard scrolling through today's logs? <code>search_after</code> without PIT is fine because newer docs at the top are expected.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <code>search_after</code> needs a <strong>unique</strong> sort key — otherwise docs can be skipped. Tip: always include <code>_id</code> or a unique field as the final sort tiebreaker. <strong>(2)</strong> Without PIT, newly indexed docs may appear/disappear mid-pagination. <strong>(3)</strong> <code>scroll</code> holds server-side resources — if you open many scrolls and never close them, you leak memory. <strong>(4)</strong> Increasing <code>max_result_window</code> past 10k is a footgun — it scales linearly in memory.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Reindex-from-remote</strong> (moving data between clusters) internally uses scroll/PIT. <strong>Kibana</strong>'s "Discover" uses <code>search_after</code> for infinite scroll. <strong>Log export tools</strong> like <strong>elasticdump</strong> use PIT for consistent snapshots. For search UIs, most apps limit results to the first 100-500 because users almost never click past page 5 anyway — a real-world observation from <strong>Google Search</strong>, <strong>Amazon</strong>, and every site search study ever published.</span></div>
+</div>
+
 <table>
 <tr><th>Method</th><th>Limit</th><th>Stateful?</th><th>Use Case</th></tr>
 <tr><td><strong>from/size</strong></td><td>10,000 results max</td><td>No</td><td>UI pagination (page 1, 2, 3...)</td></tr>
@@ -709,6 +1036,30 @@ Requesting <code>from:9990, size:10</code> means EVERY shard returns its top 10,
 <!-- 13 -->
 <section id="cluster">
 <h2>13. Cluster Architecture</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An ES <strong>cluster</strong> is one or more nodes working together under a single <code>cluster.name</code>. Each node runs as a JVM process and takes on one or more <strong>roles</strong>: <code>master</code> (manages cluster state, shard allocation), <code>data</code> (holds shards, runs searches), <code>ingest</code> (runs ingest pipelines), <code>coordinating</code> (routes requests), <code>ml</code> (machine learning jobs). The <strong>master node</strong> is elected via a quorum algorithm and maintains the <strong>cluster state</strong> — a metadata blob tracking every index, shard, node, and mapping.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Master election:</strong> requires quorum of master-eligible nodes — always run 3 or 5 to survive failures and avoid split-brain.</li>
+      <li><strong>Cluster state:</strong> authoritative metadata, broadcast from master to all nodes on changes (can get big with many indices).</li>
+      <li><strong>Dedicated roles:</strong> in production, separate master-only, data, and coordinating nodes for stability.</li>
+      <li><strong>Discovery:</strong> nodes find each other via <code>discovery.seed_hosts</code> (Zen Discovery in ES 7+).</li>
+      <li><strong>Health status:</strong> <strong>green</strong> (all shards assigned), <strong>yellow</strong> (primaries OK, some replicas missing), <strong>red</strong> (some primaries unassigned — data unavailable).</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres replication:</strong> Postgres has one primary + streaming replicas. ES has N nodes, each holding a mix of primary and replica shards — no single-master bottleneck for data.</li>
+      <li><strong>vs Cassandra:</strong> Cassandra is fully peer-to-peer, no master. ES has a master but only for cluster state; reads/writes go peer-to-peer.</li>
+      <li><strong>vs MongoDB replica set:</strong> similar election model. MongoDB has "primary + secondaries" per shard; ES has "primary + replicas" per shard, but the cluster-wide master is a separate role.</li>
+      <li><strong>vs Kafka:</strong> Kafka uses ZooKeeper / KRaft for coordination; ES has its own built-in consensus (moved away from ZooKeeper years ago).</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">The cluster architecture is why ES scales. Need more write throughput? Add data nodes, reshard, and primaries rebalance. Need more read QPS? Add replicas. Need HA? Spread shards across availability zones using <code>shard allocation awareness</code>. Want to keep master stable under load? Run dedicated <strong>master-only nodes</strong> (3-5) separate from data nodes.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <strong>Split-brain</strong> if you run 2 master-eligible nodes — always use an odd number. <strong>(2)</strong> The master is a single point of bottleneck for cluster-state updates — a cluster with too many indices/shards (&gt;50k shards) will have a slow-to-update cluster state and cascading failures. <strong>(3)</strong> JVM heap should be <strong>max 32GB</strong> (compressed oops cutoff), and half of system RAM — the other half is for OS file cache which Lucene depends on. <strong>(4)</strong> Don't mix node roles in large clusters — dedicated master nodes don't need much RAM but need to be stable.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix</strong> runs thousands of ES clusters across AWS regions. <strong>eBay</strong> runs clusters with hundreds of nodes and petabytes of data. <strong>Uber</strong>'s observability cluster handles trillions of events/day. The <strong>"hot-warm-cold" architecture</strong> is standard at scale: hot nodes (SSD, recent data) → warm nodes (spinning disk, older data) → cold nodes (archived, searchable snapshots). ILM (Index Lifecycle Management) automates moving data between tiers.</span></div>
+</div>
 
 <h3>Node Roles</h3>
 <table>
@@ -739,6 +1090,30 @@ Master election uses a <strong>quorum</strong>: you need a majority of master-el
 <section id="sharding">
 <h2>14. Sharding</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Sharding</strong> is how ES splits an index across multiple nodes for horizontal scale. An index is divided into N <strong>primary shards</strong> at creation time (default 1 in ES 7+); each shard is a <strong>fully self-contained Lucene index</strong> with its own inverted index, doc values, and segments. Document placement is deterministic: <code>shard_num = hash(_routing) % num_primary_shards</code>. This deterministic routing is the reason <strong>number_of_shards is immutable</strong> — change it, and every existing doc would route to the wrong shard.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Primary shards:</strong> hold the authoritative copy of a portion of the index.</li>
+      <li><strong>Routing formula:</strong> <code>hash(_routing) % number_of_primary_shards</code>; default routing = <code>_id</code>.</li>
+      <li><strong>Custom routing:</strong> pass <code>?routing=user_123</code> so all docs for a user land on the same shard — great for single-user queries.</li>
+      <li><strong>Shard rebalancing:</strong> master automatically moves shards around when nodes join/leave.</li>
+      <li><strong>Sizing:</strong> target 10-50 GB per shard; each shard has ~50-200MB heap overhead.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres partitioning:</strong> Postgres declarative partitioning is single-node. ES shards are distributed across nodes by default.</li>
+      <li><strong>vs MongoDB sharding:</strong> Mongo uses range/hash sharding on a "shard key", stored in <code>config</code> servers. ES's routing is a simpler modulo hash, but immutable.</li>
+      <li><strong>vs Cassandra tokens:</strong> Cassandra uses consistent hashing, so adding a node moves only a small slice of data. ES requires reindex to change shard count — a big operational difference.</li>
+      <li><strong>vs Kafka partitions:</strong> conceptually similar — both use hash-based partitioning and both are pain to resize.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Sharding is the only way to scale past a single node's disk/RAM/CPU. It also parallelizes search — a query to an index with 5 shards runs 5 sub-queries in parallel. More shards = more parallelism, up to a point. Custom routing lets you turn scatter-gather into a single-shard hit — if you always query "orders for user 42", route by <code>user_id</code> and ES queries exactly one shard.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <strong>Over-sharding</strong> is the most common mistake — 100 shards × 1GB each kills cluster state. Aim for shards of 10-50GB. <strong>(2)</strong> <strong>Under-sharding</strong> limits parallelism — a single 500GB shard can't be split without reindexing. <strong>(3)</strong> <strong>Hot shards</strong> happen when custom routing sends disproportionate traffic to one shard. <strong>(4)</strong> Once created, you can't change <code>number_of_shards</code> — your only options are <code>_shrink</code>, <code>_split</code>, or reindex.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Logging clusters</strong> typically use one index per day (<code>logs-2026.04.08</code>) with a small number of shards (1-3), then roll over with ILM. <strong>GitHub</strong>'s code search shards by repository ID so all files in a repo land together. <strong>eBay</strong> uses time-based indices with shard count tuned to expected daily volume. <strong>Uber</strong>'s trip-history cluster shards by region + time bucket to minimize cross-shard queries.</span></div>
+</div>
+
 <div class="bts-box">
 <p><strong>How sharding works internally:</strong><br><br>
 An index with 3 shards is actually 3 completely separate Lucene indexes, potentially on 3 different nodes. Each shard has its own inverted index, its own segments, its own doc_values.<br><br>
@@ -762,6 +1137,30 @@ By default, _routing is the document _id. This is WHY you cannot change shard co
 <section id="replication">
 <h2>15. Replication</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Replication</strong> is how ES keeps multiple copies of each shard for <strong>high availability</strong> and <strong>read throughput</strong>. Every primary shard has zero or more <strong>replica shards</strong> — exact copies held on different nodes. Writes go to the primary first, which then forwards to all in-sync replicas in parallel; reads can be served by either the primary or any replica, round-robined by the coordinating node. Replicas are never placed on the same node as their primary — the shard allocator enforces this.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Configurable at index level:</strong> <code>"number_of_replicas": 1</code> means 1 primary + 1 replica = 2 copies total.</li>
+      <li><strong>Synchronous replication:</strong> writes wait for all in-sync replicas to ack before returning (tunable via <code>wait_for_active_shards</code>).</li>
+      <li><strong>Automatic promotion:</strong> if a primary dies, master promotes a replica to primary within seconds.</li>
+      <li><strong>Read scaling:</strong> more replicas = more shards to serve search queries in parallel.</li>
+      <li><strong>Sequence numbers + primary terms:</strong> ES tracks these so it can efficiently resync a replica that falls behind.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres streaming replication:</strong> Postgres has one primary + async/sync standby. ES is multi-primary across shards — every node has both primaries and replicas of different shards.</li>
+      <li><strong>vs MongoDB replica set:</strong> Mongo's "oplog replication" is per-shard; one primary per replica set. ES model is similar but per-shard, not per-collection.</li>
+      <li><strong>vs Kafka replication:</strong> Kafka has leader/follower per partition with ISR (in-sync replicas) — very similar conceptually. Both handle network partitions via leader election.</li>
+      <li><strong>vs MySQL binlog:</strong> MySQL replicates via binlog replay; ES replicates by forwarding the raw document operation.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Two big wins: <strong>(1) HA</strong> — lose a node, lose nothing, replicas auto-promote; <strong>(2) read scale</strong> — double your replicas, roughly double your search QPS. In cloud setups, spread replicas across availability zones using <code>cluster.routing.allocation.awareness.attributes: zone</code> to survive zone failures.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Replicas <strong>double your storage cost</strong> — always budget for that. <strong>(2)</strong> <strong>During bulk indexing, set replicas to 0</strong>, then back to 1 after — because every write replicates N times = N× slower. <strong>(3)</strong> Single-node clusters show "yellow" health because unassigned replicas can't go anywhere (fine in dev, bad in prod). <strong>(4)</strong> Too many replicas stresses writes and bloats cluster state without helping much past ~2-3 copies.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Production clusters</strong> almost universally run with <code>replicas: 1</code> (2 copies total) for a balance of cost and HA. Heavy read workloads like <strong>search frontends</strong> often run <code>replicas: 2-3</code> to spread QPS. <strong>Multi-AZ deployments</strong> at AWS use <code>allocation awareness</code> to guarantee primary and replica live in different zones. <strong>Disaster recovery</strong> setups use <strong>Cross-Cluster Replication (CCR)</strong> to asynchronously replicate an index to a second cluster in another region.</span></div>
+</div>
+
 <p>Every primary shard can have 0+ <strong>replica shards</strong> — exact copies on different nodes.</p>
 
 <div class="bts-box">
@@ -784,6 +1183,31 @@ By default, _routing is the document _id. This is WHY you cannot change shard co
 <!-- 16 -->
 <section id="performance">
 <h2>16. Performance Tuning</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">ES performance tuning is a mix of <strong>query design</strong>, <strong>index design</strong>, <strong>JVM / OS tuning</strong>, and <strong>cluster topology</strong>. The levers are roughly: use <code>filter</code> over <code>query</code> context, batch writes with <code>_bulk</code>, tune <code>refresh_interval</code>, right-size shards, force-merge read-only indices, minimize <code>_source</code>, enable/disable doc_values strategically, and avoid wildcards/regex on high-cardinality fields. The order matters: <strong>always fix queries first</strong>, then indexing, then config, then hardware.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Filter context + request cache:</strong> filters are cached in bitsets per segment — repeated filters become O(1).</li>
+      <li><strong>Bulk API:</strong> batch 500-5000 docs per <code>_bulk</code> call; amortizes routing/coordinator overhead.</li>
+      <li><strong>Refresh tuning:</strong> during bulk load, set <code>refresh_interval: -1</code> and disable replicas temporarily.</li>
+      <li><strong>Force merge:</strong> <code>POST /index/_forcemerge?max_num_segments=1</code> on read-only indices consolidates segments, dropping query latency.</li>
+      <li><strong>Doc values selectively:</strong> disable on fields you never sort/aggregate to save disk.</li>
+      <li><strong>_source filtering:</strong> use <code>_source_includes</code>/<code>_source_excludes</code> to reduce network bytes.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres tuning:</strong> Postgres tunes <code>work_mem</code>, <code>effective_cache_size</code>, <code>VACUUM</code>. ES tunes JVM heap, field data cache, segment merge policy, refresh interval. Different knobs, similar philosophy.</li>
+      <li><strong>vs MongoDB:</strong> Mongo has WiredTiger cache + index hints. ES relies heavily on OS file-system cache, which is why you leave half your RAM to the OS.</li>
+      <li><strong>vs Solr:</strong> same Lucene — so same segment/merge tuning principles. Solr has auto-warming queries; ES has request/query cache.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Most "ES is slow" complaints come from <strong>fixable mistakes</strong>: using <code>must</code> where <code>filter</code> would cache, leading wildcards, deep pagination, un-tuned refresh interval during bulk load, or a single hot shard. A few hours of tuning typically yields 5-10x improvement before you need more hardware.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> JVM heap should be <strong>max 32GB</strong> (compressed oops boundary). Above that, GC overhead explodes. <strong>(2)</strong> Heap = 50% of RAM, leave the other 50% to OS page cache. <strong>(3)</strong> Wildcard queries with leading <code>*</code> are catastrophically slow — consider <code>edge_ngram</code>. <strong>(4)</strong> Deep pagination with <code>from: 50000</code> kills coordinators. <strong>(5)</strong> Over-sharding slows the master node via cluster state updates.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Elastic's own case studies</strong> frequently show 10x improvements from moving scoring queries to filter context. <strong>Netflix</strong>'s log pipeline tunes <code>refresh_interval: 30s</code> and uses bulk batches of 5MB. <strong>Uber</strong> uses force-merge on yesterday's log indices to shrink query latency on historical searches. Use the <code>_search?profile=true</code> API and Kibana's <strong>Search Profiler</strong> to see exactly where time is spent in each query.</span></div>
+</div>
+
 <ul>
 <li><strong>Use filter over query</strong> for non-scoring conditions — filters are cached in bitsets</li>
 <li><strong>Reduce _source</strong> — only fetch fields you need</li>
@@ -805,6 +1229,33 @@ By default, _routing is the document _id. This is WHY you cannot change shard co
 <!-- 17 -->
 <section id="security">
 <h2>17. Security</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">ES security is a layered model: <strong>authentication</strong> (who are you), <strong>authorization</strong> (what can you do), <strong>encryption</strong> (TLS for transport + HTTP), <strong>audit logging</strong> (who did what), and <strong>field/document-level security</strong> (which rows/cols you can see). Historically this was the paid "X-Pack" feature; since ES 6.8/7.1, basic security (auth + TLS + RBAC) is free in the default distribution. ES 8.x <strong>enables security by default</strong> — HTTPS + passwords out of the box.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Authentication:</strong> native users, API keys, SAML, OIDC, LDAP, Kerberos, PKI.</li>
+      <li><strong>Authorization:</strong> RBAC — roles with <code>cluster</code> + <code>indices</code> + <code>applications</code> privileges.</li>
+      <li><strong>Field-level security:</strong> role can only see certain fields of a doc (e.g., hide <code>ssn</code>).</li>
+      <li><strong>Document-level security:</strong> role only sees docs matching a query (e.g., <code>tenant_id: foo</code>).</li>
+      <li><strong>TLS:</strong> mandatory for node-to-node transport; recommended for HTTP layer too.</li>
+      <li><strong>API keys:</strong> scoped, revokable, time-bound — preferred over username/password for apps.</li>
+      <li><strong>Audit log:</strong> records auth, grant/deny, index ops.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres:</strong> Postgres has row-level security via policies. ES's DLS is similar but query-driven instead of policy-driven.</li>
+      <li><strong>vs MongoDB:</strong> Mongo has roles + users + SCRAM auth. ES has all that plus SSO integrations (SAML, OIDC) in the free tier.</li>
+      <li><strong>vs OpenSearch:</strong> OpenSearch forked ES 7.10 and added its own security plugin (from the "Open Distro" days) — mostly compatible features.</li>
+      <li><strong>vs plain firewall:</strong> historically, the "security" story in many deployments was "just don't expose it to the internet". Terrible — search "elasticsearch ransom" for horror stories.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Any ES cluster exposed to anything other than localhost needs auth + TLS, full stop. Multi-tenant SaaS apps need DLS/FLS. Compliance regimes (SOC2, HIPAA, PCI, GDPR) mandate audit logs. API keys let your app authenticate without hard-coding passwords and can be rotated/revoked without downtime.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Pre-8.x clusters <strong>shipped wide open</strong> — tens of thousands have been found on public internet by Shodan and wiped by attackers. <strong>(2)</strong> Enabling TLS on an existing cluster is non-trivial; plan for rolling restarts. <strong>(3)</strong> DLS/FLS has a performance cost — queries are rewritten to include role filters. <strong>(4)</strong> API keys can be scoped too narrowly and lock out users; test them.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">The <strong>2020 "Meow" attacks</strong> wiped tens of thousands of unsecured ES clusters worldwide — a wake-up call for the industry. <strong>SaaS multi-tenant platforms</strong> like Segment, Intercom, and Amplitude use DLS with <code>tenant_id</code> filters in every role. <strong>Banks and healthcare</strong> use FLS to hide PII from analysts. <strong>Kibana</strong> integrates with ES security for user login and role-based dashboard access.</span></div>
+</div>
+
 <p>ES security has 5 layers:</p>
 <ol>
 <li><strong>Authentication</strong> — Who are you? (API keys, SAML, LDAP, native users)</li>
@@ -822,6 +1273,32 @@ By default, _routing is the document _id. This is WHY you cannot change shard co
 <!-- 18 -->
 <section id="elk-stack">
 <h2>18. ELK Stack (Elastic Stack)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The <strong>ELK Stack</strong> (now officially called the <strong>Elastic Stack</strong>) is a collection of open-source tools that together form the most popular open-source observability + search pipeline. The original three: <strong>E</strong>lasticsearch (store + search), <strong>L</strong>ogstash (ETL pipeline), <strong>K</strong>ibana (visualization). Modern additions: <strong>Beats</strong> (lightweight data shippers), <strong>Elastic Agent</strong> (unified agent replacing Beats), <strong>Fleet</strong> (central management), and <strong>APM Server</strong> (application performance monitoring). The whole stack is Java + Go + Node.js under the hood.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Elasticsearch:</strong> the search/analytics engine — the "E".</li>
+      <li><strong>Logstash:</strong> heavy-duty ETL pipeline (input → filter → output) in JRuby. Grok parsing, enrichment, transforms.</li>
+      <li><strong>Kibana:</strong> web UI for dashboards, Discover, Dev Tools, alerting, ILM/index management, security config.</li>
+      <li><strong>Beats:</strong> small Go agents — Filebeat (log files), Metricbeat (system/app metrics), Packetbeat (network), Heartbeat (uptime), Auditbeat.</li>
+      <li><strong>Ingest Pipelines:</strong> lighter-weight transform inside ES itself — often replaces Logstash for simple cases.</li>
+      <li><strong>Elastic Agent + Fleet:</strong> single agent + central management, the modern replacement for individual Beats.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Grafana Loki + Promtail + Grafana:</strong> Loki is log-focused, chunk-based, cheaper to run. ELK is more powerful but heavier. Many teams now use Loki for logs + Grafana for dashboards.</li>
+      <li><strong>vs Splunk:</strong> Splunk is the commercial titan in log analytics — great UX, very expensive. ELK is the open-source alternative and dominates the non-enterprise market.</li>
+      <li><strong>vs Datadog:</strong> Datadog is a hosted, all-in-one APM + logs + metrics + traces. ELK is BYO-ops.</li>
+      <li><strong>vs OpenSearch stack:</strong> AWS fork of ELK — OpenSearch + OpenSearch Dashboards + Data Prepper. APIs are ~95% compatible.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">The ELK stack is the <strong>default choice</strong> for open-source log aggregation, application monitoring, infrastructure metrics, and security event management (SIEM). Install Filebeat on every server, ship logs to ES via Logstash or Ingest Pipelines, dashboard them in Kibana. Add Metricbeat for CPU/memory/disk. Now you have a Google-level search + dashboard over all your ops data.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Logstash is a memory hog — often simpler to use Beats + Ingest Pipelines. <strong>(2)</strong> Mapping explosions from dynamic log fields — use Data Streams + index templates to control. <strong>(3)</strong> Retention: logs are append-only, so always pair with ILM to avoid disk blowouts. <strong>(4)</strong> Kibana is a beast — spin up a dedicated node if you have many dashboards.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix, Uber, LinkedIn, eBay, Tesla, Walmart, and the NYT</strong> all run the ELK stack at massive scale. <strong>Cisco</strong>, <strong>Verizon</strong>, and most telecoms use it for SIEM. Typical deployment: thousands of Beats agents → Kafka buffer → Logstash → Elasticsearch cluster (hot/warm/cold) → Kibana. Scaling ELK to petabyte-per-day volumes is a full-time job at companies like Netflix and Uber.</span></div>
+</div>
+
 <table>
 <tr><th>Component</th><th>Role</th><th>When to Use</th></tr>
 <tr><td><strong>Beats</strong></td><td>Lightweight data shippers (Filebeat, Metricbeat)</td><td>Collect from servers/containers</td></tr>
@@ -838,6 +1315,31 @@ By default, _routing is the document _id. This is WHY you cannot change shard co
 <!-- 19 -->
 <section id="scaling">
 <h2>19. Scaling & Index Lifecycle Management</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Index Lifecycle Management (ILM)</strong> is ES's built-in automation for moving indices through hot → warm → cold → frozen → delete phases based on age, size, or document count. It's how you run a multi-petabyte log cluster without going broke: keep recent data on fast NVMe SSDs, older data on cheaper storage, and archive old data to S3-backed <strong>searchable snapshots</strong>. Paired with <strong>data streams</strong> (the modern replacement for time-based index patterns), ILM automates rollover, shrink, force merge, replica reduction, and eventual deletion.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Phases:</strong> <code>hot</code> (active writes + search), <code>warm</code> (read-only, slower storage), <code>cold</code> (rare access), <code>frozen</code> (searchable snapshots on S3), <code>delete</code>.</li>
+      <li><strong>Rollover:</strong> create a new backing index when current one hits X GB, Y docs, or Z days old.</li>
+      <li><strong>Shrink action:</strong> reduce shard count on warm tier (since writes are done).</li>
+      <li><strong>Force merge:</strong> consolidate segments on warm tier for smaller disk + faster reads.</li>
+      <li><strong>Data streams:</strong> abstraction over time-based backing indices, managed entirely by ILM.</li>
+      <li><strong>Searchable snapshots:</strong> query data directly from S3 without restoring — massive cost savings.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres partitioning:</strong> Postgres has declarative partitioning but no built-in automation for archiving cold partitions to cheaper storage.</li>
+      <li><strong>vs MongoDB:</strong> Mongo has TTL indexes for deletion but no tiered storage concept.</li>
+      <li><strong>vs S3 lifecycle policies:</strong> similar idea (move objects between storage classes), but ILM is query-aware — data stays searchable throughout.</li>
+      <li><strong>vs ClickHouse TTL:</strong> ClickHouse has TTL clauses for table partitions with disk tiering — conceptually similar, simpler API.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Without ILM, a log cluster's disk usage grows linearly forever until it crashes or costs too much. With ILM, you hit a steady state: ingest 1TB/day, delete 1TB/day of 90-day-old logs, and the rest sits on progressively cheaper storage. Searchable snapshots can reduce archive costs by 60-90% by leveraging S3 at $0.023/GB vs local NVMe at $0.25/GB.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> ILM actions run on a schedule, not instantly — <code>indices.lifecycle.poll_interval</code> defaults to 10 minutes. <strong>(2)</strong> Shrink requires all shards of an index on one node first — needs free disk. <strong>(3)</strong> Cold-tier searches against frozen indices are slow (network round-trip to S3). <strong>(4)</strong> Misconfigured rollover can create giant indices or millions of tiny ones.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Uber</strong> runs hot-warm-cold tiers with ILM across thousands of log indices. <strong>Cisco</strong>'s security products use ILM + searchable snapshots for years of SIEM retention. <strong>Walmart</strong>'s e-commerce analytics cluster tiers product event data by age. A typical ILM policy: <code>hot 7d → warm 30d → cold 90d → delete 365d</code>. Companies with compliance needs (SOX, HIPAA) often push retention out to 7 years using frozen tier.</span></div>
+</div>
 
 <h3>Hot-Warm-Cold Architecture</h3>
 <table>
@@ -862,6 +1364,33 @@ ES automatically moves indices through these phases based on age or size. This r
 <!-- 20 -->
 <section id="cost">
 <h2>20. Cost Optimization</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">ES is one of the most expensive pieces of infrastructure at scale because it needs lots of <strong>RAM</strong> (for JVM heap + OS file cache), <strong>fast SSDs</strong> (for segment I/O), and often <strong>many replicas</strong> for HA. A naïve ES cluster can cost 5-10x more than the primary database it sits next to. Cost optimization is a mix of <strong>right-sizing shards</strong>, <strong>tiered storage via ILM</strong>, <strong>searchable snapshots</strong>, <strong>replica reduction on cold data</strong>, <strong>compression</strong>, and <strong>_source pruning</strong>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Tiered storage (ILM):</strong> move old data from NVMe → HDD → S3. Biggest single lever (40-60% savings).</li>
+      <li><strong>Searchable snapshots:</strong> query data directly from S3 — 60-80% cheaper for archived data.</li>
+      <li><strong>Replicas on cold tier:</strong> drop replicas on warm/cold since the data is in snapshots already.</li>
+      <li><strong>best_compression codec:</strong> <code>"index.codec": "best_compression"</code> — ~10-15% disk savings at slight CPU cost.</li>
+      <li><strong>_source excludes:</strong> don't store fields you never retrieve (but be careful — can't reindex without them).</li>
+      <li><strong>doc_values off</strong> on fields that never need sort/agg.</li>
+      <li><strong>Right-sizing shards:</strong> avoid over/under-sharding.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres:</strong> Postgres is dramatically cheaper to run for the same data volume — but can't do ES-level search. You pay for the search engine.</li>
+      <li><strong>vs Loki:</strong> Loki stores logs as chunks in S3 and indexes only metadata. ~10x cheaper than ES for log storage, but much weaker queries.</li>
+      <li><strong>vs ClickHouse:</strong> ClickHouse is wildly more efficient for pure analytical workloads — often 10-20x cheaper for the same query volume.</li>
+      <li><strong>vs Managed (Elastic Cloud / AWS OpenSearch):</strong> managed is convenient but typically 2-3x the cost of self-hosted on the same hardware.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Cost is usually the #1 reason teams migrate off ES. A cluster ingesting 10TB/day of logs with 90-day retention at default settings can easily cost $50k-100k/month on AWS. With ILM + searchable snapshots + right-sized shards, you can often cut that by 70% without any feature loss.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Don't store what you don't need — disabling <code>_source</code> entirely is risky (breaks reindex), but excluding specific fields is fine. <strong>(2)</strong> <strong>Oversharding</strong> kills RAM — every shard eats heap overhead. <strong>(3)</strong> Searchable snapshot queries are slow — only use for rarely-accessed data. <strong>(4)</strong> Replicas cost 2x storage; consider dropping them on cold indices and relying on snapshot backups.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix</strong> publicly described moving cold log data from ES to searchable snapshots, saving millions of dollars annually. <strong>Uber</strong> built custom tooling on top of ILM for extreme log volumes. Many fintech companies (<strong>Stripe, Square</strong>) evaluate ES vs ClickHouse + Grafana + Loki for observability annually. The trend at many companies: ES for search, Loki for logs, Prometheus for metrics — each optimized for its use case.</span></div>
+</div>
+
 <table>
 <tr><th>Strategy</th><th>Savings</th><th>Effort</th></tr>
 <tr><td>ILM + Tiered Storage</td><td>40-60%</td><td>Medium</td></tr>
@@ -887,6 +1416,32 @@ ES automatically moves indices through these phases based on age or size. This r
 <!-- Node Setup -->
 <section id="node-setup">
 <h2>21. Setup & Connection</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The Node.js client for Elasticsearch is <code>@elastic/elasticsearch</code> — the official package maintained by Elastic. It's a thin wrapper around the REST API with auto-generated TypeScript types, connection pooling, retry/backoff, node sniffing, and an observable API. You instantiate a <code>Client</code> with a node URL (or cloud ID), optional auth (API key / basic / bearer), and timeout/retry settings, and then call methods like <code>client.index(...)</code>, <code>client.search(...)</code>, <code>client.indices.create(...)</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Connection pool:</strong> HTTP keep-alive, round-robin across multiple nodes, dead-node detection.</li>
+      <li><strong>Node sniffing:</strong> <code>sniffOnStart</code>, <code>sniffOnConnectionFault</code> — auto-discover all data nodes in the cluster.</li>
+      <li><strong>Auto-generated API surface:</strong> every ES REST endpoint has a matching method.</li>
+      <li><strong>TypeScript types:</strong> full typings for every request/response.</li>
+      <li><strong>Helpers:</strong> <code>client.helpers.bulk()</code>, <code>client.helpers.scrollSearch()</code> for common patterns.</li>
+      <li><strong>Elastic Cloud support:</strong> pass a <code>cloud.id</code> instead of a URL.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs raw fetch/axios:</strong> yes, ES is pure HTTP, but the client handles retries, connection pooling, and TypeScript types — well worth it.</li>
+      <li><strong>vs Python <code>elasticsearch-py</code>:</strong> same API surface conceptually. The Node client is more async/Promise-idiomatic.</li>
+      <li><strong>vs <code>@opensearch-project/opensearch</code>:</strong> OpenSearch's client is nearly identical (it was forked from the ES client).</li>
+      <li><strong>vs ORM-style libraries (like <code>elasticsearch-orm</code>):</strong> the official client is low-level. Higher-level libs add schema definitions + active-record patterns but lag behind new ES features.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">If you're writing ES code in Node.js, this is the standard. It's maintained by Elastic in lockstep with ES releases, has TS types for every endpoint, handles connection churn, and provides helpers for bulk/scroll patterns. Alternative clients lag behind or don't cover the full API surface.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> The client is <strong>version-locked to major ES version</strong> — ES 8.x needs <code>@elastic/elasticsearch@8.x</code>. Mixing causes compat warnings or breakage. <strong>(2)</strong> Default <code>requestTimeout</code> is 30s — long aggregations can exceed this. <strong>(3)</strong> Don't create a new <code>Client</code> per request — create once, reuse (the connection pool is expensive). <strong>(4)</strong> Since v8, the client returns the response body directly (no more <code>{body: ...}</code> wrapper).</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Typical setup: a single <code>Client</code> instance in a singleton module, imported everywhere. Wrap it in a repository/service layer to isolate ES-specific code. For serverless (Lambda), reuse the client across invocations by putting it in module scope — the cold-start cost of building a new connection pool is painful. Most companies using Node + ES (e.g., <strong>Algolia's competitors</strong>, <strong>Slack integrations</strong>, countless Shopify apps) use this client exactly this way.</span></div>
+</div>
+
 <pre><code><span class="cm">// Install: npm install @elastic/elasticsearch</span>
 
 <span class="kw">const</span> { Client } = <span class="fn">require</span>(<span class="st">'@elastic/elasticsearch'</span>);
@@ -918,6 +1473,31 @@ ES automatically moves indices through these phases based on age or size. This r
 <!-- Create Index -->
 <section id="node-index-create">
 <h2>22. Create Index with Mapping</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Creating an index with an explicit mapping is <strong>the most important thing you'll do in ES</strong>. It's a <code>PUT /products</code> call with a JSON body containing <code>settings</code> (shard count, replicas, refresh interval, analyzers) and <code>mappings</code> (field definitions). In the Node client: <code>client.indices.create({ index, settings, mappings })</code>. Once created, most settings are immutable — especially <code>number_of_shards</code> and field types — so you only get one shot to design this correctly.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>settings.number_of_shards:</strong> immutable after creation. Plan it based on expected data size.</li>
+      <li><strong>settings.number_of_replicas:</strong> mutable any time — bump up for more read throughput, down for less disk.</li>
+      <li><strong>settings.refresh_interval:</strong> how often the in-memory buffer becomes searchable. Tune to <code>30s</code> or <code>-1</code> during bulk ingestion.</li>
+      <li><strong>settings.analysis:</strong> define custom analyzers (<code>edge_ngram</code> for autocomplete, synonyms, etc.).</li>
+      <li><strong>mappings.dynamic:</strong> <code>"strict"</code> rejects unmapped fields — production safety.</li>
+      <li><strong>mappings.properties:</strong> field-by-field type declarations, including multi-fields.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres <code>CREATE TABLE</code>:</strong> SQL is strict from day one and requires migrations for changes. ES can be strict or dynamic but most field changes require reindex.</li>
+      <li><strong>vs MongoDB <code>createCollection</code>:</strong> Mongo collections are schemaless by default (you can add validators). ES mappings are more structured.</li>
+      <li><strong>vs Solr schema.xml:</strong> Solr uses XML config files; ES uses JSON API calls. Same concepts — field types, analyzers, copy fields.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Explicit mapping with <code>dynamic: strict</code> is how you avoid the classic dynamic-mapping disasters: typo'd field names polluting your index, "42" becoming text, date fields becoming strings, nested objects flattening. It also lets you declare custom analyzers (for autocomplete, synonyms, language processing) that are impossible to retrofit later without a full reindex.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Can't change <code>number_of_shards</code> — always reindex to fix. <strong>(2)</strong> Can't change a field's type, only add new fields. <strong>(3)</strong> Custom analyzers must be defined in <code>settings.analysis</code> <em>before</em> they're referenced in <code>mappings</code>. <strong>(4)</strong> For autocomplete, use <code>edge_ngram</code> at index time + <code>standard</code> at search time — otherwise queries get ngram'd too. <strong>(5)</strong> Always use <strong>index templates</strong> for time-based / rolling indices so the mapping auto-applies.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Production pattern: store index mappings as <strong>JSON files in your repo</strong>, check them in, and create indices via a migration script at deploy time. Use <strong>index templates</strong> (<code>_index_template</code>) for patterns like <code>logs-*</code> so new daily indices inherit the mapping automatically. <strong>Kibana's Dev Tools</strong> is invaluable for prototyping mappings before committing to code. Most ES shops have dedicated "mapping review" during code review because mistakes are hard to undo.</span></div>
+</div>
+
 <pre><code><span class="kw">async function</span> <span class="fn">createProductIndex</span>() {
     <span class="kw">await</span> client.indices.<span class="fn">create</span>({
         index: <span class="st">'products'</span>,
@@ -986,6 +1566,31 @@ ES automatically moves indices through these phases based on age or size. This r
 <!-- CRUD -->
 <section id="node-crud">
 <h2>23. CRUD Operations</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">ES exposes full CRUD semantics via REST: <code>POST/PUT</code> to index, <code>GET</code> to retrieve by ID, <code>POST _update</code> for partial updates, <code>DELETE</code> to remove. The Node client mirrors these: <code>client.index()</code>, <code>client.get()</code>, <code>client.update()</code>, <code>client.delete()</code>, plus <code>mget</code>, <code>updateByQuery</code>, and <code>deleteByQuery</code>. Under the hood, <strong>every "update" actually writes a new document and marks the old as deleted</strong> — there's no in-place mutation because segments are immutable. This has huge implications for disk usage, concurrency, and version conflicts.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>client.index():</strong> creates OR replaces a doc by ID. Omit ID = ES generates a random one.</li>
+      <li><strong>client.get():</strong> direct O(1) lookup by ID — uses routing + stored <code>_source</code>, not the inverted index.</li>
+      <li><strong>client.update():</strong> partial update. ES reads the doc, applies the changes, reindexes the new version.</li>
+      <li><strong>client.delete():</strong> marks the doc as deleted. Space is reclaimed during the next segment merge.</li>
+      <li><strong>client.updateByQuery() / deleteByQuery():</strong> bulk operations matching a query.</li>
+      <li><strong>Optimistic concurrency:</strong> <code>if_seq_no</code> + <code>if_primary_term</code> or <code>retry_on_conflict</code> for safe concurrent updates.</li>
+      <li><strong>refresh parameter:</strong> <code>true</code> / <code>"wait_for"</code> / <code>false</code> — controls when the doc becomes searchable.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres CRUD:</strong> Postgres does in-place updates (via MVCC). ES always appends — every update is a soft-delete + insert.</li>
+      <li><strong>vs MongoDB:</strong> Mongo has partial updates ($set, $push) that modify BSON in-place. ES's <code>_update</code> still reindexes the whole doc internally.</li>
+      <li><strong>vs Redis:</strong> Redis is O(1) for everything. ES <code>get</code> by ID is also O(1), but writes are heavier due to analysis, segment creation, and replication.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Understanding that updates = append-new + mark-old-deleted explains a ton: why <strong>disk usage grows after many updates</strong> (until merge), why <strong>concurrent updates need version checks</strong>, why <strong>deleteByQuery is expensive</strong>, and why you should <strong>batch with bulk</strong> wherever possible. Also: direct ID <code>get</code> is dramatically faster than <code>search</code> by a <code>term</code> filter on <code>_id</code> — use it when you can.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> <code>client.index()</code> with an existing ID <strong>fully replaces</strong> the doc — use <code>update</code> for partial. <strong>(2)</strong> <code>refresh: true</code> on every write kills throughput — reserve for tests. <strong>(3)</strong> <code>deleteByQuery</code> on a massive index can run for hours and interact badly with live writes — use PIT + script. <strong>(4)</strong> Updates over the same doc at high rate cause version conflicts; use <code>retry_on_conflict</code> or redesign with counter-style scripts. <strong>(5)</strong> <code>client.get()</code> doesn't return deleted-but-not-yet-merged docs, but may return stale data between refresh cycles unless you use <code>realtime: true</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">An e-commerce catalog that indexes 1M products overnight: use <code>client.helpers.bulk()</code> with batches of 5000, <code>refresh: false</code>, and temporarily set <code>number_of_replicas: 0</code>. A log ingestion pipeline: never update, only append — let ILM handle the deletion. A user-profile cache backed by ES: use <code>client.update()</code> with <code>retry_on_conflict: 3</code> so concurrent updates from multiple services don't fail.</span></div>
+</div>
 
 <h3>CREATE — Index a Document</h3>
 <pre><code><span class="kw">async function</span> <span class="fn">createDoc</span>() {
@@ -1084,6 +1689,32 @@ console.log(doc._version);   <span class="cm">// Version number (increments on e
 <!-- Search -->
 <section id="node-search">
 <h2>24. Search & Filters</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The <strong>search endpoint</strong> is the beating heart of ES: <code>POST /index/_search</code> with a JSON body containing <code>query</code>, optional <code>sort</code>, <code>from</code>/<code>size</code>, <code>_source</code> filtering, <code>highlight</code>, and <code>aggs</code>. In Node: <code>client.search({...})</code>. The canonical production query is a <code>bool</code> with <code>must</code> (scored full-text), <code>filter</code> (cached exact predicates), <code>should</code> (optional boosts), and <code>must_not</code> (exclusions). This separation of scoring vs filtering is the single biggest performance lever.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>bool query:</strong> combines must/filter/should/must_not — the workhorse of ES search.</li>
+      <li><strong>multi_match:</strong> run a query across several fields with per-field boosts (<code>"name^3"</code>).</li>
+      <li><strong>sort:</strong> override relevance sort by any doc_values-enabled field; always include a tiebreaker like <code>_id</code>.</li>
+      <li><strong>_source filtering:</strong> trim unused fields from the response to save network bytes.</li>
+      <li><strong>highlight:</strong> return snippets with matched terms wrapped in <code>&lt;em&gt;</code> tags.</li>
+      <li><strong>explain:</strong> <code>"explain": true</code> returns the BM25 calculation breakdown — gold for debugging relevance.</li>
+      <li><strong>profile:</strong> <code>"profile": true</code> shows per-query timings — the <code>EXPLAIN ANALYZE</code> of ES.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL SELECT:</strong> SQL is flat WHERE + ORDER BY. ES <code>bool</code> nests deeply; scoring + filtering happen in the same call.</li>
+      <li><strong>vs Mongo find:</strong> Mongo can't easily combine "matches any of these words" + BM25 scoring + facets in a single call.</li>
+      <li><strong>vs Algolia:</strong> Algolia's API is simpler and faster to integrate but gives you fewer knobs for relevance tuning.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Nearly every non-trivial app feature — product search, site search, filters, dashboards, autocomplete — is an ES search call. Getting the <code>bool</code> structure right is the difference between a 10ms query and a 2-second one. Always profile with <code>?profile=true</code> when tuning.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Putting <code>term: {brand: "x"}</code> in <code>must</code> instead of <code>filter</code> = wasted BM25 score computation and no cache benefit. <strong>(2)</strong> Sorting on a <code>text</code> field fails — need <code>.keyword</code>. <strong>(3)</strong> <code>highlight</code> re-analyzes text and can be slow on big fields — use <code>fvh</code> highlighter with <code>term_vector: "with_positions_offsets"</code>. <strong>(4)</strong> Always set a reasonable <code>size</code> — default 10, max 10,000 without special config.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Shopify storefront search</strong>: <code>multi_match</code> on name/description/tags with per-field boosts, filters on in-stock + category, function_score for popularity. <strong>Stack Overflow</strong>: <code>bool.must[match_phrase on title] + should[match on body] + filter[tags, closed]</code>. <strong>Kibana Discover</strong>: almost entirely <code>filter</code>-context queries on time range + index + level. Profile your own queries with Kibana's <strong>Search Profiler</strong> tab — it shows per-shard time breakdowns.</span></div>
+</div>
+
 <pre><code><span class="kw">async function</span> <span class="fn">searchProducts</span>({ query, brand, category, minPrice, maxPrice, inStock, page = <span class="nu">1</span>, pageSize = <span class="nu">10</span> }) {
     <span class="kw">const</span> must = [];
     <span class="kw">const</span> filter = [];
@@ -1146,6 +1777,32 @@ console.log(doc._version);   <span class="cm">// Version number (increments on e
 <!-- Aggs -->
 <section id="node-aggs">
 <h2>25. Aggregations</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Aggregations in the Node client are passed via the <code>aggs</code> (or <code>aggregations</code>) key in the search body. Set <code>size: 0</code> to skip returning documents and only compute aggs — that's the fast path. You can combine a query + aggs in one call, which is how faceted search works: the query filters, and the aggs tell you "of the filtered results, how many per brand/price/color?".</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>terms:</strong> group by field — the GROUP BY equivalent. Specify <code>size</code> for top-N buckets.</li>
+      <li><strong>range / date_histogram:</strong> bucket into numeric or time ranges.</li>
+      <li><strong>avg / sum / min / max / stats / extended_stats:</strong> metric aggs on numeric fields.</li>
+      <li><strong>cardinality:</strong> HyperLogLog++ distinct count — approximate, memory-efficient.</li>
+      <li><strong>percentiles:</strong> t-digest P50/P95/P99 — approximate, fast.</li>
+      <li><strong>nested aggs:</strong> arbitrarily nest bucket aggs and put metric aggs inside each bucket.</li>
+      <li><strong>composite:</strong> paginatable aggregation — use for exporting all buckets.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL GROUP BY + aggregate funcs:</strong> SQL returns one result per group. ES can nest aggs and return sub-aggs per bucket, essentially a tree of aggregations, in one call.</li>
+      <li><strong>vs Mongo aggregation pipeline:</strong> Mongo's pipeline is more imperative (<code>$match</code> → <code>$group</code> → <code>$project</code>). ES is declarative — you describe the shape, ES figures out execution.</li>
+      <li><strong>vs ClickHouse:</strong> ClickHouse is faster for pure analytics but can't integrate search + aggregations in the same query.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Faceted search, dashboards, real-time analytics, and log summaries are all aggregation-powered. A single search call returns ranked search results <em>and</em> facet counts — which is exactly what every e-commerce site needs. Use <code>size: 0</code> when you only want analytics (dashboards), and include a small <code>size</code> when you want both (faceted product search).</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Aggs only work on fields with doc_values (<code>keyword</code>, numeric, date) — not raw <code>text</code>. Use <code>brand.keyword</code>. <strong>(2)</strong> <code>terms</code> returns approximate top-N — bump <code>shard_size</code> for accuracy. <strong>(3)</strong> Aggregating on a high-cardinality field (UUIDs) can eat tons of RAM. <strong>(4)</strong> Deeply nested aggs multiply bucket counts — a 3-level nest with 20-20-20 buckets = 8000 buckets per query. <strong>(5)</strong> Use <code>composite</code> aggregation to paginate through large result sets.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kibana Lens</strong>, <strong>Kibana Visualize</strong>, and <strong>Kibana Maps</strong> are all aggregation UIs. <strong>Shopify</strong> product facets are <code>terms</code> aggs on category/brand/color. <strong>Netflix</strong>'s log dashboards use <code>date_histogram</code> + <code>stats</code> per service. <strong>Uber</strong> computes driver availability heatmaps with <code>geohash_grid</code> bucket aggregations. Percentiles for P95 latency monitoring are a signature use case — try computing them in Postgres without extensions (you can't, easily).</span></div>
+</div>
+
 <pre><code><span class="kw">async function</span> <span class="fn">getDashboard</span>() {
     <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>({
         index: <span class="st">'products'</span>,
@@ -1184,6 +1841,31 @@ console.log(doc._version);   <span class="cm">// Version number (increments on e
 <!-- Pagination -->
 <section id="node-pagination">
 <h2>26. Pagination (search_after + PIT)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><code>search_after</code> + <strong>Point in Time (PIT)</strong> is the modern way to paginate deeply through ES results. Instead of <code>from + size</code> (capped at 10k, O(from) per shard), you pass the sort values of the last doc from the previous page as a <strong>cursor</strong>. Each shard skips directly to that point and returns the next N. Paired with a PIT — a server-side index snapshot — you get <strong>consistent pagination</strong> even while docs are being indexed/deleted underneath you.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>search_after:</strong> array of sort values from the last doc, e.g. <code>[1712500000, "doc_id_42"]</code>.</li>
+      <li><strong>Unique sort key required:</strong> always include a tiebreaker (<code>_id</code> or unique field) — otherwise docs with equal sort values get skipped.</li>
+      <li><strong>PIT:</strong> <code>client.openPointInTime({index, keep_alive: "5m"})</code> returns a <code>pit.id</code> to pass in subsequent searches.</li>
+      <li><strong>Stateless on coordinator:</strong> search_after itself holds no state — only the PIT does.</li>
+      <li><strong>Close PIT:</strong> <code>client.closePointInTime</code> to release resources; don't leak.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs from/size:</strong> from/size has O(from) cost per shard; search_after is O(size) regardless of depth.</li>
+      <li><strong>vs scroll API:</strong> Scroll held a server-side context per cursor; resource-heavy for many concurrent scrolls. Deprecated for pagination — use PIT + search_after.</li>
+      <li><strong>vs Postgres keyset pagination:</strong> exactly the same idea — "WHERE (sort_key, id) &gt; (last_sort, last_id)".</li>
+      <li><strong>vs Mongo cursor:</strong> Mongo's cursors are server-stateful; PIT + search_after is a better model.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Use <code>search_after</code> + PIT for: <strong>(1)</strong> exporting large result sets (millions of docs to CSV), <strong>(2)</strong> reindexing between clusters, <strong>(3)</strong> infinite-scroll UIs with consistent ordering, <strong>(4)</strong> batch data processing jobs. The PIT snapshot guarantees no doc is returned twice or missed due to concurrent writes.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Forgetting the unique tiebreaker sort = missing/duplicate docs. <strong>(2)</strong> Not closing PIT = leaked server memory (eventually freed by <code>keep_alive</code>, but sloppy). <strong>(3)</strong> Very long-lived PIT prevents segment merges from releasing disk — don't set <code>keep_alive: "24h"</code>. <strong>(4)</strong> Mixing PIT with a specific index target in the search call — with PIT, the index is implicit in the PIT itself.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>elasticdump</strong> and <strong>esbulk</strong> use PIT + search_after for data exports. The <strong>Reindex API</strong> internally uses a similar mechanism. <strong>Kibana Discover</strong> uses search_after for infinite scroll. <strong>ETL jobs</strong> moving ES data into BigQuery / Snowflake use PIT for consistency — otherwise a row could be exported twice or missed.</span></div>
+</div>
+
 <pre><code><span class="cm">// Cursor-based deep pagination (unlimited, efficient)</span>
 <span class="kw">async function</span> <span class="fn">cursorPaginate</span>(lastSort = <span class="kw">null</span>) {
     <span class="kw">const</span> body = {
@@ -1226,6 +1908,31 @@ console.log(doc._version);   <span class="cm">// Version number (increments on e
 <!-- Autocomplete -->
 <section id="node-autocomplete">
 <h2>27. Autocomplete</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Autocomplete</strong> (aka search-as-you-type) is a classic ES problem with several valid solutions: <strong>(1)</strong> <code>edge_ngram</code> tokenizer at index time + standard analyzer at search time (the canonical approach), <strong>(2)</strong> the <code>completion</code> suggester with a finite state transducer (extremely fast but limited), <strong>(3)</strong> ES 7.2+'s <code>search_as_you_type</code> field type (uses shingles + edge ngrams under the hood). The first approach is most flexible and most commonly used.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>edge_ngram tokenizer:</strong> <code>"iPhone"</code> → <code>["iP", "iPh", "iPho", "iPhon", "iPhone"]</code>.</li>
+      <li><strong>Different index vs search analyzer:</strong> index with edge_ngram, search with standard — the user types <code>"ip"</code>, ES looks up exactly <code>"ip"</code> in the inverted index.</li>
+      <li><strong>completion suggester:</strong> <code>type: "completion"</code> uses a FST — sub-millisecond lookups with contexts + fuzzy.</li>
+      <li><strong>search_as_you_type:</strong> field type that auto-creates subfields <code>._2gram</code>, <code>._3gram</code>, <code>._index_prefix</code>.</li>
+      <li><strong>Multi-word prefixes:</strong> combine with phrase-prefix or bool_prefix for "macbook pr" → matches "MacBook Pro".</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres LIKE 'foo%':</strong> works with a regular B-tree on prefix, but no relevance ranking, no fuzziness, no multi-field.</li>
+      <li><strong>vs Redis sorted set prefix:</strong> Redis can do sorted-set prefix scans but without analyzers or relevance.</li>
+      <li><strong>vs Algolia:</strong> Algolia's autocomplete is the gold standard — fast, typo-tolerant, prefix-aware out of the box. ES requires manual tuning but matches performance.</li>
+      <li><strong>vs Meilisearch:</strong> Meilisearch is prefix-first by design and "just works" for autocomplete; ES gives more control but takes more effort.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Every search bar worth its salt has autocomplete. User expectation: &lt;50ms response time, tolerates typos, suggests relevant items. ES autocomplete with edge_ngram hits all three once tuned. The key insight is that <strong>you must use a different analyzer at search time</strong>, otherwise your user typing "ip" gets ngram-expanded into <code>["i", "ip"]</code> and matches too much.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Using the same analyzer at index and search time = wrong results. <strong>(2)</strong> <code>edge_ngram</code> with a large <code>max_gram</code> bloats the index dramatically. <strong>(3)</strong> The <code>completion</code> suggester is fastest but has limitations — no aggregations, no secondary sort, index rebuilds are expensive. <strong>(4)</strong> Don't forget to lowercase both analyzer outputs. <strong>(5)</strong> For multi-word prefixes ("new yor"), combine with <code>match_phrase_prefix</code> or use <code>search_as_you_type</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Shopify's product search autocomplete</strong> uses edge_ngram + lowercase + ASCII-folding for typo tolerance. <strong>GitHub's repo autocomplete</strong> is an edge_ngram variant. <strong>Wikipedia's search suggestions</strong> use a complex mix of completion suggester + phrase queries. Tune yours with real user query logs — A/B test different analyzers and measure click-through to the top suggestion.</span></div>
+</div>
+
 <pre><code><span class="kw">async function</span> <span class="fn">autocomplete</span>(query) {
     <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">search</span>({
         index: <span class="st">'products'</span>,
@@ -1248,6 +1955,30 @@ ES looks up "mac" in the inverted index → finds the edge_ngram token → match
 <!-- Bulk -->
 <section id="node-bulk">
 <h2>28. Bulk Operations</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The <strong>Bulk API</strong> (<code>POST /_bulk</code>) lets you send many index/update/delete operations in a single HTTP request. The format is unusual: <strong>NDJSON</strong> (newline-delimited JSON), alternating action-line + doc-line. In the Node client, you can use the raw <code>client.bulk({operations: [...]})</code> method, or the much friendlier <code>client.helpers.bulk()</code> helper that streams, retries, and batches for you. Bulk is <strong>10-100x faster</strong> than single-doc indexing because you amortize HTTP + coordinator + routing overhead across the batch.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>NDJSON format:</strong> action line (<code>{"index": {...}}</code>) + doc line, separated by <code>\n</code>.</li>
+      <li><strong>Mixed operations:</strong> a single bulk request can contain index, update, delete, and create ops.</li>
+      <li><strong>Partial failures:</strong> <code>result.errors === true</code> means some items failed — check <code>result.items</code> per-doc.</li>
+      <li><strong>client.helpers.bulk():</strong> streaming iterator, auto-retries on 429 (backpressure), auto-batches.</li>
+      <li><strong>Optimal batch size:</strong> 500-5000 docs or 5-15 MB per request.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres COPY / multi-INSERT:</strong> Postgres has <code>COPY</code> for bulk (fastest) and multi-row <code>INSERT</code>. ES bulk is the analog.</li>
+      <li><strong>vs MongoDB insertMany / bulkWrite:</strong> Mongo's <code>bulkWrite</code> is very similar — same mixed ops, same "ordered" vs "unordered" concept.</li>
+      <li><strong>vs Kafka producer batching:</strong> both batch for throughput; ES bulk is synchronous, Kafka is async fire-and-forget.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Bulk is mandatory for any non-trivial indexing workload. Single-doc indexing at 1000 docs/sec saturates HTTP overhead; bulk at the same hardware can do 50k+ docs/sec. Every serious ES pipeline — log ingestion, CDC from Postgres, data migrations, reindex jobs — uses bulk. The Node client's <code>helpers.bulk()</code> handles streaming, retries, and backpressure for you.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> Too-large batches (50MB+) hit the <code>http.max_content_length</code> limit (100MB default) and OOM the node. <strong>(2)</strong> Too-small batches (10 docs) don't amortize overhead. <strong>(3)</strong> <code>errors: true</code> doesn't mean the whole bulk failed — always check per-item. <strong>(4)</strong> 429 Too Many Requests = bulk queue is full; back off and retry (helpers.bulk handles this). <strong>(5)</strong> Forgetting the newline separator or mixing up action/doc lines produces cryptic errors.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Logstash</strong> and <strong>Beats</strong> ship events to ES exclusively via bulk. <strong>Netflix's</strong> log pipeline uses bulk batches of 5-10MB, with Kafka as the backpressure buffer. <strong>Reindex jobs</strong> between clusters batch at 1000-5000 docs. In the Node client, use <code>client.helpers.bulk({ datasource, onDocument, flushBytes: 5*1024*1024, concurrency: 5, retries: 3 })</code> — that's the production-ready pattern.</span></div>
+</div>
+
 <pre><code><span class="kw">async function</span> <span class="fn">bulkIndex</span>(products) {
     <span class="kw">const</span> operations = products.flatMap((doc, i) => [
         { index: { _index: <span class="st">'products'</span>, _id: String(i + <span class="nu">1</span>) } },  <span class="cm">// Action line</span>
@@ -1279,6 +2010,32 @@ ES looks up "mac" in the inverted index → finds the edge_ngram token → match
 <!-- Aliases -->
 <section id="node-aliases">
 <h2>29. Aliases & Zero-Downtime Reindex</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>alias</strong> is a named pointer that can reference one or more indices. Your app talks to the alias (<code>products</code>) instead of the physical index (<code>products_v1</code>). When you need to change the mapping — which usually requires a full reindex — you: <strong>(1)</strong> create a new index with the new mapping, <strong>(2)</strong> reindex data from old to new, <strong>(3)</strong> atomically swap the alias. Your app never notices. Aliases are also used for <strong>filtered views</strong> (alias with a query filter) and <strong>multi-index search</strong> (one alias spanning <code>logs-2026-01</code>, <code>logs-2026-02</code>, etc.).</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Atomic alias swap:</strong> <code>updateAliases</code> with remove + add in one call — zero downtime.</li>
+      <li><strong>Write alias:</strong> designate one backing index as the current write target.</li>
+      <li><strong>Filtered alias:</strong> attach a query filter so the alias only shows a subset (e.g., per-tenant view).</li>
+      <li><strong>Read alias over multiple indices:</strong> <code>logs-*</code> alias spans all monthly indices — search once, get all.</li>
+      <li><strong>Reindex API:</strong> <code>POST _reindex</code> copies data from source → dest, can apply a script to transform each doc.</li>
+      <li><strong>Rollover API:</strong> creates a new backing index when current one hits a size/age/doc threshold, updates the write alias.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs SQL views:</strong> SQL views are query aliases, not storage aliases. ES aliases point at physical indices.</li>
+      <li><strong>vs Postgres table renaming:</strong> in Postgres you <code>ALTER TABLE ... RENAME</code>, briefly unavailable. ES's alias swap is genuinely atomic.</li>
+      <li><strong>vs MongoDB collections:</strong> Mongo has no alias concept — you'd use app-side indirection or a dual-write migration.</li>
+      <li><strong>vs Solr collection aliases:</strong> very similar feature — same use cases.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Always use aliases in production. The day you need to add a field, change an analyzer, or re-shard, you'll thank yourself. Aliases are the foundation of <strong>zero-downtime reindex</strong> — the golden pattern for evolving ES schemas. They're also essential for time-based indices (<code>logs-*</code>) and multi-tenant filtered views.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> An alias pointing to multiple indices can't be a write target without designating <code>is_write_index: true</code> on exactly one. <strong>(2)</strong> <code>Reindex</code> is a long-running task — monitor via <code>_tasks</code> API, and use <code>wait_for_completion: false</code> for very large jobs. <strong>(3)</strong> Writes during reindex can be lost if you don't pause writes or use <code>version_type: external</code>. <strong>(4)</strong> Rollover requires the alias to follow a specific naming pattern (e.g., <code>my-index-000001</code>) for ILM to work.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Every mature ES deployment</strong> uses aliases. Time-based log indices: <code>logs</code> read alias → <code>logs-2026-01</code>, <code>logs-2026-02</code>, etc., with <code>logs-write</code> pointing at the current month. <strong>Multi-tenant SaaS</strong>: one filtered alias per tenant (<code>events_tenant_42</code>) with a <code>tenant_id</code> filter. <strong>Version migrations</strong>: the canonical "reindex + atomic swap" pattern is documented in every ES tutorial.</span></div>
+</div>
+
 <pre><code><span class="cm">// Step 1: Your app always uses the alias "products" (not the real index name)</span>
 <span class="kw">await</span> client.indices.<span class="fn">putAlias</span>({ index: <span class="st">'products_v1'</span>, name: <span class="st">'products'</span> });
 
@@ -1308,6 +2065,31 @@ ES looks up "mac" in the inverted index → finds the edge_ngram token → match
 <!-- Cluster Monitoring -->
 <section id="node-cluster">
 <h2>30. Cluster Monitoring</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">ES exposes a rich set of <strong>monitoring APIs</strong> for health, stats, and diagnostics: <code>_cluster/health</code>, <code>_cluster/stats</code>, <code>_cat/*</code> (human-readable), <code>_nodes/stats</code>, <code>_indices/stats</code>, and <code>_tasks</code>. These are the same endpoints Kibana's Stack Monitoring UI calls. In Node: <code>client.cluster.health()</code>, <code>client.indices.stats()</code>, <code>client.nodes.stats()</code>, etc. You use these for dashboards, alerting, and debugging "why is my cluster slow/yellow/red?".</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>cluster.health:</strong> <code>status</code> (green/yellow/red), <code>number_of_nodes</code>, <code>active_shards</code>, <code>unassigned_shards</code>, <code>active_shards_percent</code>.</li>
+      <li><strong>_cat APIs:</strong> plain-text tables — <code>_cat/nodes</code>, <code>_cat/indices</code>, <code>_cat/shards</code>, <code>_cat/segments</code>, <code>_cat/pending_tasks</code>.</li>
+      <li><strong>nodes.stats:</strong> JVM heap, GC, thread pools, indexing/search rates, disk usage per node.</li>
+      <li><strong>indices.stats:</strong> per-index doc count, store size, search rate, index rate.</li>
+      <li><strong>tasks API:</strong> see long-running operations (reindex, delete-by-query, force merge) and cancel if needed.</li>
+      <li><strong>Hot threads API:</strong> <code>_nodes/hot_threads</code> — shows threads currently consuming CPU, invaluable for debugging.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Postgres pg_stat_*:</strong> Postgres has <code>pg_stat_activity</code>, <code>pg_stat_database</code>, etc. ES has the equivalent but as REST endpoints rather than tables.</li>
+      <li><strong>vs MongoDB serverStatus:</strong> very similar philosophy — dump a huge JSON blob of metrics.</li>
+      <li><strong>vs Prometheus metrics:</strong> you can scrape ES via the official Elasticsearch exporter and pull metrics into Prometheus + Grafana.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You need monitoring the moment you go to production. Hot issues to watch: <strong>cluster status</strong> (green/yellow/red), <strong>unassigned shards</strong>, <strong>JVM heap %</strong> (should stay &lt;75%), <strong>GC pauses</strong>, <strong>disk usage</strong> (ES blocks writes at 95% disk — the "flood stage" watermark), <strong>thread pool rejections</strong>, and <strong>indexing/search latencies</strong>. Alert on any of these hitting red thresholds.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> "Yellow" in a single-node cluster is normal (no nodes for replicas) — don't page at 3am. <strong>(2)</strong> <strong>Disk watermarks</strong>: low (85%) = no new shards allocated, high (90%) = existing shards relocated away, flood (95%) = index becomes read-only. <strong>(3)</strong> High <code>unassigned_shards</code> usually means a node went down or disk hit high watermark. <strong>(4)</strong> <code>_cat/shards?v&h=index,shard,prirep,state,unassigned.reason</code> tells you exactly why.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Most production stacks use: <strong>Kibana Stack Monitoring</strong> (the built-in ES-on-ES monitoring), <strong>Prometheus + elasticsearch-exporter + Grafana</strong>, or <strong>Datadog's ES integration</strong>. <strong>Uber</strong> and <strong>Netflix</strong> built custom monitoring layers on top of these APIs. Every on-call runbook for ES includes "first, run <code>_cluster/health?pretty</code> and <code>_cat/shards</code>".</span></div>
+</div>
+
 <pre><code><span class="cm">// Cluster health</span>
 <span class="kw">const</span> health = <span class="kw">await</span> client.cluster.<span class="fn">health</span>({});
 console.log(health.status);              <span class="cm">// 'green' | 'yellow' | 'red'</span>
@@ -1325,6 +2107,33 @@ console.log(stats._all.primaries.store.size);      <span class="cm">// Disk usag
 <!-- Full Project -->
 <section id="node-fullproject">
 <h2>31. Complete Runnable Project</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An end-to-end runnable Node.js script that ties every concept together: spin up a single-node ES via Docker, create an index with a custom autocomplete analyzer + multi-field mapping, bulk-load sample product data, run full-text search, filtered search, autocomplete queries, aggregations, and a health check — all in one file. This is the "ES starter template" you'd adapt for a real app.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Docker single-node:</strong> <code>docker run -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" elasticsearch:8.12.0</code>.</li>
+      <li><strong>Index setup:</strong> custom edge_ngram analyzer for autocomplete, multi-field name (<code>name</code>, <code>name.keyword</code>, <code>name.ac</code>).</li>
+      <li><strong>Bulk seed:</strong> <code>client.bulk</code> with <code>refresh: true</code> so data is searchable immediately.</li>
+      <li><strong>Full-text + fuzzy search:</strong> <code>multi_match</code> with field boosts and <code>fuzziness: AUTO</code>.</li>
+      <li><strong>Bool filter query:</strong> category + price range filters.</li>
+      <li><strong>Autocomplete query:</strong> <code>match</code> on <code>name.ac</code>.</li>
+      <li><strong>Nested aggregations:</strong> terms by brand with sub-avg_price.</li>
+      <li><strong>Cluster health check.</strong></li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs a full production app:</strong> missing retries, error handling, secrets management, connection pool tuning, CI/CD, index templates, and ILM policies.</li>
+      <li><strong>vs a Kibana demo:</strong> this is code you can embed in your Express/Nest/Fastify API.</li>
+      <li><strong>vs <code>curl</code> examples:</strong> shows real Node client usage with TypeScript-friendly APIs.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Reading docs is one thing; <em>running</em> code is another. This script lets you experiment with every concept in 5 minutes: change the mapping and see analyzer behavior, tweak the query DSL and watch scores change, add new agg buckets and inspect the results. It's the fastest path from "I've read about ES" to "I've actually used it".</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><strong>(1)</strong> ES 8.x enables security by default — you must set <code>xpack.security.enabled=false</code> or use TLS + password. <strong>(2)</strong> Single-node clusters stay yellow (no replica targets) — totally fine for dev. <strong>(3)</strong> The Docker container needs at least 2GB RAM (<code>-e "ES_JAVA_OPTS=-Xms1g -Xmx1g"</code>). <strong>(4)</strong> On M1/M2 Macs use the <code>arm64</code> variant of the Elastic image.</span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">This style of demo is how ES is first introduced in <strong>every tutorial</strong>, from Elastic's own docs to blog posts by Baeldung, Logz.io, and Elastic's YouTube channel. Adapt it into an Express route (<code>GET /search?q=</code>) and you've built the search API layer that powers countless Shopify apps, internal tools, and SaaS products. Pair with a Postgres source-of-truth and a CDC pipeline (Debezium) for the full production-grade architecture.</span></div>
+</div>
+
 <pre><code><span class="cm">// ===== elasticsearch-demo.js =====</span>
 <span class="cm">// Run: docker run -d -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.12.0</span>
 <span class="cm">// Then: npm install @elastic/elasticsearch && node elasticsearch-demo.js</span>

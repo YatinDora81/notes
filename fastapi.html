@@ -133,6 +133,57 @@
             h2 { font-size: 24px; }
             pre { padding: 14px 16px; font-size: 12px; }
         }
+
+        /* ── Concept Box ── */
+        .concept-box {
+          border-left: 3px solid #a78bfa;
+          background: rgba(167,139,250,0.05);
+          padding: 20px 24px;
+          margin: 18px 0;
+          border-radius: 8px;
+          border: 1px solid rgba(167,139,250,0.2);
+        }
+        .concept-box .concept-row {
+          margin: 14px 0;
+          display: block;
+          padding-bottom: 12px;
+          border-bottom: 1px dashed rgba(167,139,250,0.15);
+        }
+        .concept-box .concept-row:first-of-type { margin-top: 4px; }
+        .concept-box .concept-row:last-child {
+          margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+        }
+        .concept-box .concept-label {
+          display: block;
+          font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.4px;
+          color: #a78bfa; font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .concept-box .concept-text {
+          display: block; color: #a1a1aa; font-size: 0.92rem;
+          line-height: 1.7;
+        }
+        .concept-box .concept-text strong { color: #fafafa; font-weight: 600; }
+        .concept-box .concept-text code {
+          background: rgba(167,139,250,0.12);
+          padding: 1px 6px; border-radius: 3px;
+          color: #c4b5fd; font-size: 0.85em;
+        }
+        .concept-box .concept-text ul {
+          margin: 8px 0 0 0; padding-left: 22px;
+        }
+        .concept-box .concept-text ul li {
+          margin: 5px 0;
+        }
+        .concept-box .concept-text p { margin: 6px 0; }
+        .concept-box .concept-text pre {
+          background: rgba(0,0,0,0.3);
+          padding: 10px 12px;
+          border-radius: 4px;
+          font-size: 0.82em;
+          margin: 8px 0;
+          overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -200,6 +251,39 @@
     <!-- 01 -->
     <section id="intro">
         <h2><span class="sec-num">01</span> What is FastAPI?</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>FastAPI</strong> is a modern, high-performance Python web framework for building <strong>HTTP APIs</strong>, released by Sebastián Ramírez in <strong>December 2018</strong>. It sits on top of two libraries: <code>Starlette</code> (an <strong>ASGI</strong> toolkit that handles routing, middleware, WebSockets, and the event loop) and <code>Pydantic</code> (a data validation library that uses <strong>Python type hints</strong>). The framework's entire philosophy is: <em>"you've already written type hints for your editor — let us use those for validation, serialization, and OpenAPI docs for free."</em> It requires Python 3.8+ and natively supports both <code>async def</code> and regular <code>def</code> route handlers.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+            <ul>
+              <li><strong>Type-hint driven:</strong> Function signatures become the API contract — parameters, bodies, and responses are all declared via annotations like <code>item: Item</code> or <code>q: str | None = None</code>.</li>
+              <li><strong>Automatic OpenAPI/Swagger:</strong> Every project gets a live <code>/docs</code> (Swagger UI) and <code>/redoc</code> (ReDoc) with zero configuration.</li>
+              <li><strong>Built-in validation:</strong> Invalid payloads return structured <code>422 Unprocessable Entity</code> errors without writing a single <code>if</code> statement.</li>
+              <li><strong>Async-native:</strong> Built on ASGI so it handles WebSockets, Server-Sent Events, and long-lived connections alongside normal HTTP.</li>
+              <li><strong>Dependency Injection:</strong> A first-class <code>Depends()</code> system for auth, DB sessions, and shared logic.</li>
+              <li><strong>Starlette features:</strong> Middleware, background tasks, test client, static files, template rendering.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask is a <strong>WSGI</strong> microframework — synchronous by default, no built-in validation, no auto docs. You bolt on <code>flask-restful</code>, <code>marshmallow</code>, <code>flasgger</code> yourself. FastAPI is async-first and gives you the whole stack out of the box.</li>
+              <li><strong>vs Django / DRF:</strong> Django is a "batteries-included" full-stack framework (ORM, admin, templates, auth). FastAPI is API-only and unopinionated about the DB layer. DRF serializers are more verbose than Pydantic models (~3× more code).</li>
+              <li><strong>vs Starlette:</strong> Starlette is the low-level ASGI framework FastAPI is built on. FastAPI adds Pydantic integration, DI, OpenAPI — think of it as "Starlette + batteries."</li>
+              <li><strong>vs Node.js Express:</strong> Express has no built-in validation or docs; you wire up <code>joi</code>, <code>zod</code>, <code>swagger-jsdoc</code>. FastAPI's "type hints = validation = docs" pipeline is significantly less boilerplate.</li>
+              <li><strong>vs Go Gin / Java Spring:</strong> Gin is ~5–10× faster raw but lacks Python's ecosystem; Spring Boot has richer enterprise tooling but 100× more config XML/annotations.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You get <strong>type safety, auto-generated interactive docs, runtime validation, and async concurrency</strong> all from a single function signature. This means <strong>fewer bugs</strong> (Pydantic catches bad input before your code runs), <strong>faster iteration</strong> (docs update live as you code), and <strong>better performance</strong> (ASGI + <code>uvicorn</code> rivals Node.js throughput). For microservices, ML model serving, and modern API backends, it's arguably the best Python choice in 2024+.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Blocking I/O in <code>async def</code>:</strong> Calling <code>requests.get()</code> or a sync DB driver inside an async route blocks the event loop — use <code>httpx.AsyncClient</code> or run blocking calls in a thread pool via <code>run_in_threadpool</code>.</li>
+              <li><strong>Pydantic v1 vs v2 migration:</strong> v2 (2023) changed <code>.dict()</code> → <code>.model_dump()</code>, <code>Config</code> class → <code>model_config</code>, validators moved to <code>@field_validator</code>. FastAPI 0.100+ supports both.</li>
+              <li><strong>Running without a production server:</strong> <code>uvicorn --reload</code> is a dev server; use <code>gunicorn -k uvicorn.workers.UvicornWorker</code> in production.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix</strong> (ML model serving via Metaflow), <strong>Uber</strong> (Ludwig model UI), <strong>Microsoft</strong> (Windows ML APIs), <strong>Explosion AI</strong> (spaCy / Prodigy), <strong>Hugging Face</strong> (Inference APIs), <strong>OpenAI</strong> (internal tooling), <strong>Cloudflare</strong>, and thousands of startups. It's the default framework for anything involving <strong>ML model deployment</strong> because data scientists already write type-hinted Python.</span></div>
+        </div>
+
         <p>FastAPI is a <strong>modern, high-performance web framework</strong> for building APIs with Python 3.7+ based on standard type hints. It's built on top of <strong>Starlette</strong> (for the web parts) and <strong>Pydantic</strong> (for data validation).</p>
 
         <h3>Why FastAPI?</h3>
@@ -230,6 +314,42 @@
     <!-- 02 -->
     <section id="setup">
         <h2><span class="sec-num">02</span> Setup & First App</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Setting up FastAPI means installing the framework and an <strong>ASGI server</strong> to run it. FastAPI is a library — it does <em>not</em> bind to a socket itself. You pair it with <code>uvicorn</code> (the de-facto ASGI server, based on <code>uvloop</code> and <code>httptools</code>) or <code>hypercorn</code>. The minimal "hello world" is literally 5 lines of Python plus one <code>uvicorn main:app</code> command.</span></div>
+          <div class="concept-row"><span class="concept-label">Installation</span><span class="concept-text">
+            <ul>
+              <li><code>pip install "fastapi[standard]"</code> — since FastAPI 0.100+ this is the recommended install; it bundles <code>uvicorn</code>, <code>httpx</code> (test client), <code>jinja2</code>, <code>python-multipart</code> (form parsing).</li>
+              <li><code>pip install fastapi uvicorn</code> — minimal install for production deploys where you know exactly what you need.</li>
+              <li><strong>Use a venv:</strong> <code>python -m venv .venv && source .venv/bin/activate</code>. Or modern tools: <code>uv</code>, <code>poetry</code>, <code>pipenv</code>, <code>pdm</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Running the app</span><span class="concept-text">
+            <ul>
+              <li><code>uvicorn main:app --reload</code> — dev mode with hot reload on file save. <code>main</code> = Python module, <code>app</code> = FastAPI instance.</li>
+              <li><code>fastapi dev main.py</code> — new in FastAPI 0.100+; wraps uvicorn with sensible dev defaults.</li>
+              <li><code>fastapi run main.py</code> — production mode (no reload, multiple workers).</li>
+              <li><strong>Default port:</strong> 8000. Override with <code>--host 0.0.0.0 --port 80</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask bundles its own dev server (<code>app.run()</code>) and uses WSGI (<code>gunicorn</code>/<code>waitress</code>). FastAPI requires explicit ASGI server selection, which is more flexible but one extra step.</li>
+              <li><strong>vs Django:</strong> Django has <code>manage.py runserver</code> and <code>django-admin startproject</code> scaffolding. FastAPI is unopinionated — no project generator, you arrange your files however you want.</li>
+              <li><strong>vs Node.js Express:</strong> Express's <code>app.listen(3000)</code> binds the socket directly; FastAPI separates app from server which maps better to containerized/K8s deploys.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Wrong app reference:</strong> <code>uvicorn main:app</code> — if your file is <code>app.py</code> with <code>application = FastAPI()</code>, use <code>uvicorn app:application</code>.</li>
+              <li><strong><code>--reload</code> in production:</strong> Kills performance because it watches the filesystem; never use it in prod.</li>
+              <li><strong>Missing <code>python-multipart</code>:</strong> File uploads and form data silently 422 without it — the <code>[standard]</code> extras prevent this.</li>
+              <li><strong>Port already in use:</strong> <code>lsof -i :8000</code> to find the old process, or just change ports.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Production setup</span><span class="concept-text">For real deployments use <code>gunicorn -k uvicorn.workers.UvicornWorker -w 4 main:app</code> — gunicorn is a battle-tested process manager that spawns N <code>uvicorn</code> workers. Rule of thumb: <code>workers = (2 × CPU cores) + 1</code>. Put nginx or a cloud load balancer in front for TLS termination. Alternative: <code>uvicorn main:app --workers 4</code> works too but gunicorn has better signal handling and graceful shutdown.</span></div>
+        </div>
+
 
 <pre><code><span class="cm"># Install</span>
 pip install fastapi uvicorn[standard]
@@ -273,6 +393,40 @@ uvicorn main:app --reload
     <!-- 03 -->
     <section id="routing">
         <h2><span class="sec-num">03</span> Routing & HTTP Methods</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Routing</strong> is the mechanism that maps incoming HTTP requests (method + URL path) to Python functions. In FastAPI, you attach a <strong>decorator</strong> like <code>@app.get("/items")</code> to a function and that function becomes the handler for that route. FastAPI supports all standard HTTP verbs via <code>@app.get</code>, <code>@app.post</code>, <code>@app.put</code>, <code>@app.patch</code>, <code>@app.delete</code>, <code>@app.options</code>, <code>@app.head</code>, <code>@app.trace</code>. Under the hood these are just thin wrappers that call <code>app.add_api_route(path, func, methods=[...])</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">HTTP methods semantics</span><span class="concept-text">
+            <ul>
+              <li><code>GET</code> — <strong>read</strong>, idempotent, cacheable, no body. <code>GET /users/123</code>.</li>
+              <li><code>POST</code> — <strong>create</strong>, not idempotent. <code>POST /users</code> with JSON body creates a new user.</li>
+              <li><code>PUT</code> — <strong>replace</strong>, idempotent. <code>PUT /users/123</code> replaces the entire resource.</li>
+              <li><code>PATCH</code> — <strong>partial update</strong>, not always idempotent. Use with <code>model.model_dump(exclude_unset=True)</code>.</li>
+              <li><code>DELETE</code> — <strong>remove</strong>, idempotent. Often returns <code>204 No Content</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Route features</span><span class="concept-text">
+            <ul>
+              <li><strong>Tags:</strong> <code>@app.get("/items", tags=["items"])</code> groups endpoints in Swagger UI.</li>
+              <li><strong>Summary & description:</strong> Shown in docs; description supports Markdown.</li>
+              <li><strong>Status code:</strong> <code>status_code=201</code> sets the default success code.</li>
+              <li><strong>Response model:</strong> <code>response_model=UserOut</code> filters the output through a Pydantic schema.</li>
+              <li><strong>Deprecation:</strong> <code>deprecated=True</code> shows a strikethrough in the docs.</li>
+              <li><strong>APIRouter:</strong> <code>router = APIRouter(prefix="/users", tags=["users"])</code> lets you split routes across files.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Route order matters</span><span class="concept-text">FastAPI matches routes <strong>in the order they were registered</strong>. So <code>/users/me</code> must be defined <strong>before</strong> <code>/users/{user_id}</code>, otherwise the latter swallows <code>/users/me</code> as <code>user_id="me"</code> and crashes on type conversion. This is a very common bug. Contrast with Flask (uses Werkzeug's routing which ranks by specificity automatically) or Django (uses explicit regex order).</span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask uses <code>@app.route("/items", methods=["GET", "POST"])</code> — one decorator with methods list. FastAPI splits them for clearer OpenAPI schemas.</li>
+              <li><strong>vs Django:</strong> Django uses <code>urlpatterns = [path("items/", view)]</code> in a separate <code>urls.py</code> — much more verbose but easier to audit all routes at once.</li>
+              <li><strong>vs Express:</strong> <code>app.get('/items', (req, res) =&gt; ...)</code> — very similar API surface, but Express has no type-based validation.</li>
+              <li><strong>vs Spring:</strong> <code>@GetMapping("/items")</code> on a method — similar decorator approach but with XML/annotation config overhead.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">Path collision with type conversion (see "Route order"), forgetting trailing slashes (<code>/items</code> vs <code>/items/</code> — FastAPI treats them as different unless you redirect), and using <code>@app.get</code> for something that mutates state (breaks caching, proxies, CDN semantics). Also: don't register the same path+method twice — the second silently overrides the first in some FastAPI versions.</span></div>
+        </div>
+
 
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
 
@@ -328,6 +482,38 @@ app.include_router(users_router)  <span class="cm"># /users/ and /users/{id}</sp
     <section id="path-params">
         <h2><span class="sec-num">04</span> Path Parameters</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Path parameters</strong> are dynamic segments in a URL path, declared with curly braces: <code>/users/{user_id}</code>. FastAPI extracts the segment, parses it using the Python type annotation on the function argument, validates it, and passes it in. If the annotation is <code>user_id: int</code> and the URL is <code>/users/abc</code>, FastAPI returns a <code>422</code> with a clear error — no manual <code>int()</code> call or <code>try/except</code> needed.</span></div>
+          <div class="concept-row"><span class="concept-label">Syntax & types</span><span class="concept-text">
+            <ul>
+              <li><code>async def read_user(user_id: int)</code> — integer path param, auto-validated and converted.</li>
+              <li><code>async def read_user(user_id: UUID)</code> — works with <code>uuid.UUID</code>, <code>datetime.date</code>, <code>Decimal</code>, etc.</li>
+              <li><code>Enum</code> path params: declare <code>class ModelName(str, Enum)</code> and use <code>model_name: ModelName</code> — gives you a dropdown in Swagger UI.</li>
+              <li><code>Path(...)</code> for metadata: <code>user_id: int = Path(..., gt=0, le=10000, description="User ID")</code> adds validation constraints and docs.</li>
+              <li><strong>Path containing slash:</strong> use the Starlette convertor <code>/files/{file_path:path}</code> to capture <code>a/b/c.txt</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Validation constraints</span><span class="concept-text">Via <code>Path()</code> you can enforce <code>gt</code> (greater than), <code>ge</code> (greater or equal), <code>lt</code>, <code>le</code>, <code>min_length</code>, <code>max_length</code>, <code>regex</code>/<code>pattern</code>. These constraints appear in the OpenAPI schema so Swagger UI shows them and client generators can enforce them. Example: <code>item_id: int = Path(..., gt=0, le=1000)</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask uses converters like <code>/users/&lt;int:user_id&gt;</code> — type comes from the URL, not the function sig. Less flexible and not tied to modern type hints.</li>
+              <li><strong>vs Django:</strong> <code>path("users/&lt;int:user_id&gt;/", view)</code> — same converter style as Flask.</li>
+              <li><strong>vs Express:</strong> <code>/users/:id</code> — everything is a string, you must manually <code>parseInt(req.params.id)</code>.</li>
+              <li><strong>vs Spring:</strong> <code>@PathVariable Long userId</code> — similar type-driven approach but with Java's verbose annotation style.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Enum with non-string base:</strong> Must inherit from <code>(str, Enum)</code> (or <code>(int, Enum)</code>) for JSON serialization to work.</li>
+              <li><strong>UUID gotcha:</strong> Passing a string UUID works, but the function receives a <code>UUID</code> object — <code>str(user_id)</code> when querying the DB.</li>
+              <li><strong>Path <code>{file_path:path}</code>:</strong> Captures slashes, but a leading slash means <code>/files//etc/passwd</code> could be dangerous — sanitize paths.</li>
+              <li><strong>Empty path param:</strong> <code>/users//</code> doesn't match <code>/users/{id}</code> — it's a 404, not a validation error.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every REST API has them: <code>GET /repos/{owner}/{repo}/issues/{number}</code> (GitHub), <code>GET /v1/customers/{id}/invoices</code> (Stripe), <code>GET /users/{username}</code> (Twitter/X). FastAPI makes these concise: one decorator, one type-annotated function, automatic docs.</span></div>
+        </div>
+
+
 <pre><code><span class="cm"># Type hint = automatic validation + conversion</span>
 <span class="dc">@app.get</span>(<span class="s">"/users/{user_id}"</span>)
 <span class="kw">def</span> <span class="fn">get_user</span>(user_id: <span class="bi">int</span>):      <span class="cm"># auto-converted to int</span>
@@ -357,6 +543,38 @@ app.include_router(users_router)  <span class="cm"># /users/ and /users/{id}</sp
     <!-- 05 -->
     <section id="query-params">
         <h2><span class="sec-num">05</span> Query Parameters</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Query parameters</strong> are the key-value pairs in the URL after <code>?</code> — for example <code>/items?skip=0&amp;limit=10&amp;q=phone</code>. In FastAPI, <strong>any function argument that is not a path parameter and not a Pydantic body is treated as a query parameter by default</strong>. Their type annotation drives automatic parsing, validation, and defaulting. <code>q: str = None</code> becomes an optional string query param; <code>limit: int = 10</code> becomes a required-with-default int.</span></div>
+          <div class="concept-row"><span class="concept-label">Syntax & types</span><span class="concept-text">
+            <ul>
+              <li><strong>Required:</strong> <code>q: str</code> (no default) — FastAPI returns 422 if missing.</li>
+              <li><strong>Optional:</strong> <code>q: str | None = None</code> or <code>Optional[str] = None</code>.</li>
+              <li><strong>With default:</strong> <code>skip: int = 0, limit: int = 10</code>.</li>
+              <li><strong>List params:</strong> <code>tags: list[str] = Query([])</code> parses <code>?tags=a&amp;tags=b&amp;tags=c</code> into <code>["a","b","c"]</code>.</li>
+              <li><strong>Booleans:</strong> <code>active: bool = False</code> — accepts <code>true/false/1/0/yes/no/on/off</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Query() metadata</span><span class="concept-text">For richer validation use <code>Query()</code>: <code>q: str = Query(None, min_length=3, max_length=50, pattern="^[a-z]+$", title="Search", description="Search term", alias="search-term", deprecated=True)</code>. The <code>alias</code> is vital when the URL param name isn't a valid Python identifier (e.g., hyphens). <code>Query()</code> supports the same constraints as <code>Path()</code>: <code>gt</code>, <code>ge</code>, <code>lt</code>, <code>le</code>, <code>min_length</code>, <code>max_length</code>, <code>pattern</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask uses <code>request.args.get('q', type=int)</code> — manual extraction, no built-in validation, no auto docs.</li>
+              <li><strong>vs Django/DRF:</strong> DRF serializers can validate query params via <code>serializer.is_valid()</code>, but it's far more code.</li>
+              <li><strong>vs Express:</strong> <code>req.query.q</code> returns a string; you validate with <code>joi</code>/<code>zod</code> manually.</li>
+              <li><strong>vs Spring:</strong> <code>@RequestParam(required=false) String q</code> — similar in spirit but heavier annotation syntax.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>List defaults:</strong> <code>tags: list[str] = []</code> fails — Python mutable default gotcha. Use <code>tags: list[str] = Query(default_factory=list)</code> or <code>Query([])</code>.</li>
+              <li><strong>Boolean coercion surprise:</strong> <code>?active=yes</code> becomes <code>True</code>, but <code>?active=random</code> fails with 422 — not silently <code>True</code>.</li>
+              <li><strong>Required with <code>Query()</code>:</strong> <code>q: str = Query(...)</code> means required; <code>Query(None)</code> means optional. Pydantic v2 prefers <code>Query()</code> no-args for required.</li>
+              <li><strong>Reserved Python keywords:</strong> Can't name param <code>class</code> or <code>from</code> — use <code>alias="class"</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world patterns</span><span class="concept-text">Pagination (<code>?page=2&amp;size=50</code>), filtering (<code>?status=active&amp;role=admin</code>), sorting (<code>?sort=-created_at</code>), search (<code>?q=laptop</code>), field selection (<code>?fields=id,name,email</code>). All major APIs — Stripe, GitHub, Twilio, Shopify — follow these patterns and FastAPI makes them declarative via type hints.</span></div>
+        </div>
+
 
 <pre><code><span class="cm"># Any parameter NOT in the path = query parameter</span>
 <span class="dc">@app.get</span>(<span class="s">"/users"</span>)
@@ -402,6 +620,44 @@ app.include_router(users_router)  <span class="cm"># /users/ and /users/{id}</sp
     <section id="request-body">
         <h2><span class="sec-num">06</span> Request Body</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">The <strong>request body</strong> is the JSON (or form/multipart) payload that clients send with <code>POST</code>, <code>PUT</code>, and <code>PATCH</code> requests. In FastAPI, bodies are declared as <strong>Pydantic model type hints</strong>: <code>async def create_item(item: Item)</code>. FastAPI automatically reads the body, parses the JSON, validates it against the Pydantic schema, and hands you a fully typed Python object. No <code>request.json()</code>, no manual dict access, no key-error exceptions.</span></div>
+          <div class="concept-row"><span class="concept-label">How FastAPI decides body vs query</span><span class="concept-text">
+            <ul>
+              <li>If the parameter is a <strong>path parameter</strong> — it's taken from the URL.</li>
+              <li>If it's a <strong>singular Python type</strong> (int, str, float, bool) — it becomes a query parameter.</li>
+              <li>If it's a <strong>Pydantic BaseModel</strong> — it becomes the request body.</li>
+              <li>Multiple Pydantic params = multiple keys inside the JSON body. Use <code>Body(embed=True)</code> to force a single model to be nested under its key name.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Body variations</span><span class="concept-text">
+            <ul>
+              <li><strong>Multiple body params:</strong> <code>def update(item: Item, user: User)</code> expects JSON <code>{"item": {...}, "user": {...}}</code>.</li>
+              <li><strong>Scalar in body:</strong> <code>importance: int = Body(...)</code> forces a scalar into the body instead of query.</li>
+              <li><strong>Form data:</strong> <code>username: str = Form(...)</code> for <code>application/x-www-form-urlencoded</code> (login forms). Requires <code>python-multipart</code>.</li>
+              <li><strong>Raw body:</strong> <code>await request.body()</code> inside the function if you need bytes.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> <code>request.get_json()</code> returns a dict; validation is manual with <code>marshmallow</code> or <code>pydantic</code> directly. Many bugs come from <code>data["field"]</code> KeyErrors.</li>
+              <li><strong>vs Django/DRF:</strong> DRF uses serializers: <code>ItemSerializer(data=request.data).is_valid(raise_exception=True)</code> — works but ~3× more code and awkward when a field has multiple representations (input vs output).</li>
+              <li><strong>vs Express:</strong> <code>app.use(express.json())</code> middleware + manual validation with <code>zod</code>/<code>joi</code>.</li>
+              <li><strong>vs Spring:</strong> <code>@RequestBody Item item</code> with Jackson — similar concept but requires Java classes with boilerplate getters/setters.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Content-Type must be <code>application/json</code></strong> — otherwise FastAPI treats it as form data and returns 422.</li>
+              <li><strong>GET with body:</strong> Technically allowed in HTTP but discouraged; FastAPI supports it via <code>Body(...)</code> but clients/proxies may strip it.</li>
+              <li><strong>Extra fields:</strong> Pydantic v2 ignores extra fields by default. To reject them set <code>model_config = ConfigDict(extra="forbid")</code>.</li>
+              <li><strong>Large bodies:</strong> Default uvicorn allows large bodies; set <code>--limit-max-requests</code> or use a reverse proxy for DoS protection.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Creating resources (<code>POST /users</code> with <code>{"name", "email"}</code>), updating resources (<code>PUT /posts/123</code>), webhooks (Stripe, GitHub, Slack send JSON bodies you must validate fast), and RPC-style APIs. The Pydantic-driven approach eliminates entire classes of bugs (missing fields, wrong types, nested object errors) that plague other frameworks.</span></div>
+        </div>
+
+
 <pre><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
 
 <span class="kw">class</span> <span class="fn">UserCreate</span>(BaseModel):
@@ -436,6 +692,48 @@ app.include_router(users_router)  <span class="cm"># /users/ and /users/{id}</sp
     <!-- 07 -->
     <section id="pydantic">
         <h2><span class="sec-num">07</span> Pydantic Models Deep Dive</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Pydantic</strong> is a data validation and settings management library that uses Python type annotations to define schemas. A <strong>Pydantic model</strong> is a class that inherits from <code>BaseModel</code> — at instantiation time, Pydantic parses the input, validates types, applies custom validators, and either returns a fully typed object or raises <code>ValidationError</code>. It's what makes FastAPI's "types = contract" design possible. Pydantic v2 (released 2023) rewrote the core in Rust and is <strong>5–50× faster</strong> than v1.</span></div>
+          <div class="concept-row"><span class="concept-label">Core features</span><span class="concept-text">
+            <ul>
+              <li><strong>Type coercion:</strong> <code>"123"</code> becomes <code>123</code> for an <code>int</code> field (or use <code>Strict[int]</code> to disable).</li>
+              <li><strong>Nested models:</strong> <code>class Order(BaseModel): items: list[Item]</code> — recursive validation.</li>
+              <li><strong>Field metadata:</strong> <code>Field(..., gt=0, le=100, description="...", examples=[42])</code>.</li>
+              <li><strong>Validators:</strong> <code>@field_validator("email")</code> (v2) or <code>@validator("email")</code> (v1) for custom logic.</li>
+              <li><strong>Model validators:</strong> <code>@model_validator(mode="after")</code> to validate across fields.</li>
+              <li><strong>Computed fields:</strong> <code>@computed_field</code> decorates a property that's serialized in output.</li>
+              <li><strong>Serialization control:</strong> <code>.model_dump()</code>, <code>.model_dump_json()</code>, <code>exclude</code>, <code>include</code>, <code>exclude_unset</code>, <code>exclude_none</code>, <code>by_alias</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Pydantic v1 vs v2</span><span class="concept-text">
+            <ul>
+              <li><code>.dict()</code> → <code>.model_dump()</code>, <code>.json()</code> → <code>.model_dump_json()</code>.</li>
+              <li><code>class Config</code> → <code>model_config = ConfigDict(...)</code>.</li>
+              <li><code>@validator</code> → <code>@field_validator</code>; <code>@root_validator</code> → <code>@model_validator</code>.</li>
+              <li><code>parse_obj</code> → <code>model_validate</code>; <code>parse_raw</code> → <code>model_validate_json</code>.</li>
+              <li>v2 has <code>Annotated[str, StringConstraints(min_length=3)]</code> for PEP 593-style constraints.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Marshmallow:</strong> Marshmallow requires defining a separate Schema class — Pydantic combines model and schema into one.</li>
+              <li><strong>vs DRF serializers:</strong> DRF needs <code>fields = ['name', 'email']</code> listing and explicit <code>create()</code>/<code>update()</code> methods. Pydantic uses the class body directly.</li>
+              <li><strong>vs Python dataclasses:</strong> <code>@dataclass</code> gives you the class structure but <strong>no validation</strong> — you must add it manually. Pydantic validates on every instantiation.</li>
+              <li><strong>vs Zod (TypeScript):</strong> Very similar feel — <code>z.object({...})</code> vs <code>class X(BaseModel)</code>. Pydantic is probably Zod's closest cousin in Python.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Optional ≠ Nullable:</strong> In v2, <code>Optional[str]</code> means "can be None", not "can be absent." Use a default value for absent: <code>name: str | None = None</code>.</li>
+              <li><strong>Mutable defaults:</strong> <code>items: list[str] = []</code> is OK in Pydantic (unlike dataclasses) because it's deep-copied — but still better style to use <code>Field(default_factory=list)</code>.</li>
+              <li><strong>Forward refs:</strong> Self-referential models need <code>Model.model_rebuild()</code> after definition.</li>
+              <li><strong>ORM integration:</strong> To build a model from an ORM object, set <code>model_config = ConfigDict(from_attributes=True)</code> and call <code>Model.model_validate(orm_obj)</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Pydantic is used by <strong>OpenAI's Python SDK</strong>, <strong>LangChain</strong>, <strong>Anthropic SDK</strong>, <strong>AWS Lambda Powertools</strong>, <strong>Prefect</strong>, <strong>Instructor</strong>, and virtually every modern Python library dealing with structured data. Pydantic Settings (<code>pydantic-settings</code>) is the standard way to load config from env vars.</span></div>
+        </div>
+
         <p>Pydantic is the backbone of FastAPI. It handles <strong>validation, serialization, and documentation</strong> all from your type hints.</p>
 
 <pre><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field, field_validator, model_validator
@@ -488,6 +786,45 @@ UserCreate.model_json_schema()     <span class="cm"># → JSON Schema (for docs)
     <section id="response">
         <h2><span class="sec-num">08</span> Response Models</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>response model</strong> is a Pydantic model declared via <code>response_model=...</code> on a route decorator. FastAPI filters, validates, and serializes the function's return value through this model <strong>before</strong> sending the HTTP response. This lets you safely return a SQLAlchemy ORM object containing <code>password_hash</code> but only expose <code>id</code>, <code>email</code>, and <code>name</code> in the API. It is FastAPI's primary mechanism for preventing accidental data leaks.</span></div>
+          <div class="concept-row"><span class="concept-label">Why separate input and output schemas</span><span class="concept-text">Best practice is <strong>two or three Pydantic models per resource</strong>:
+            <ul>
+              <li><code>UserCreate</code> — what the client sends (with <code>password</code>).</li>
+              <li><code>UserUpdate</code> — all fields optional, for <code>PATCH</code>.</li>
+              <li><code>UserOut</code> / <code>UserPublic</code> — what the server returns (no password, may add <code>created_at</code>).</li>
+            </ul>
+            This pattern is sometimes called "schema-per-concern" and maps well to domain-driven design.
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+            <ul>
+              <li><code>response_model=UserOut</code> — filter output through this schema.</li>
+              <li><code>response_model_exclude_unset=True</code> — omit fields the model didn't explicitly set (useful for <code>PATCH</code>).</li>
+              <li><code>response_model_exclude_none=True</code> — omit <code>null</code> values.</li>
+              <li><code>response_model_exclude={"password"}</code> — dynamic exclusion.</li>
+              <li><code>response_model=list[UserOut]</code> — for list endpoints.</li>
+              <li><code>Union[UserOut, AdminOut]</code> + <code>response_model_by_alias=True</code> — polymorphic responses.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask/marshmallow:</strong> You must manually <code>schema.dump(obj)</code> before returning — easy to forget. FastAPI enforces it.</li>
+              <li><strong>vs DRF:</strong> DRF also has separate read/write serializers but it's manual plumbing. FastAPI's <code>response_model</code> is one kwarg.</li>
+              <li><strong>vs Express:</strong> No built-in concept; you write <code>res.json({id, email, name})</code> and pray you don't forget a sensitive field.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Return type annotation conflicts:</strong> If you declare both <code>-&gt; User</code> return type and <code>response_model=UserOut</code>, FastAPI uses <code>response_model</code> and logs a warning.</li>
+              <li><strong>ORM objects:</strong> Need <code>model_config = ConfigDict(from_attributes=True)</code> on the response model.</li>
+              <li><strong>Performance:</strong> Every response goes through Pydantic validation — for very hot paths you can return a <code>JSONResponse</code> directly to skip it.</li>
+              <li><strong>Error responses:</strong> <code>response_model</code> only applies to <strong>success</strong> responses; errors go through <code>HTTPException</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Stripe-style APIs always return a <code>public</code> view of a resource: a <code>Customer</code> object from the DB has internal fields like <code>deleted</code>, <code>internal_notes</code>, <code>fraud_score</code> — the public response only has <code>id</code>, <code>email</code>, <code>created</code>, <code>metadata</code>. <code>response_model</code> enforces this boundary at the framework level, which is essential for compliance (GDPR, PCI) and security.</span></div>
+        </div>
+
+
 <pre><code><span class="cm"># response_model controls what the client SEES</span>
 <span class="cm"># Your function can return more data — FastAPI filters it</span>
 
@@ -520,6 +857,44 @@ UserCreate.model_json_schema()     <span class="cm"># → JSON Schema (for docs)
     <!-- 09 -->
     <section id="status-codes">
         <h2><span class="sec-num">09</span> Status Codes & Error Handling</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>HTTP status codes</strong> are 3-digit numbers in the response that tell the client what happened. FastAPI gives you fine-grained control: <code>status_code=201</code> on the decorator, <code>HTTPException(status_code=404, detail="Not found")</code> for errors, and <code>@app.exception_handler()</code> for global error mapping. The standard library module <code>fastapi.status</code> exposes named constants like <code>status.HTTP_404_NOT_FOUND</code> for readability.</span></div>
+          <div class="concept-row"><span class="concept-label">Status code families</span><span class="concept-text">
+            <ul>
+              <li><strong>2xx Success:</strong> <code>200 OK</code> (generic), <code>201 Created</code> (POST creating a resource), <code>202 Accepted</code> (async/queued), <code>204 No Content</code> (DELETE success).</li>
+              <li><strong>3xx Redirection:</strong> <code>301 Moved Permanently</code>, <code>302 Found</code>, <code>304 Not Modified</code> (caching).</li>
+              <li><strong>4xx Client errors:</strong> <code>400 Bad Request</code>, <code>401 Unauthorized</code> (not logged in), <code>403 Forbidden</code> (logged in but no permission), <code>404 Not Found</code>, <code>409 Conflict</code> (duplicate), <code>422 Unprocessable Entity</code> (FastAPI's default for validation failures), <code>429 Too Many Requests</code>.</li>
+              <li><strong>5xx Server errors:</strong> <code>500 Internal Server Error</code>, <code>502 Bad Gateway</code>, <code>503 Service Unavailable</code>, <code>504 Gateway Timeout</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Error handling mechanisms</span><span class="concept-text">
+            <ul>
+              <li><strong>HTTPException:</strong> <code>raise HTTPException(status_code=404, detail="Item not found", headers={"X-Error": "..."})</code>.</li>
+              <li><strong>Custom exception + handler:</strong> Define <code>class UnicornException(Exception)</code>, then <code>@app.exception_handler(UnicornException)</code> returns a custom <code>JSONResponse</code>.</li>
+              <li><strong>Override validation errors:</strong> <code>@app.exception_handler(RequestValidationError)</code> lets you reformat 422 responses.</li>
+              <li><strong>Global 500 handler:</strong> <code>@app.exception_handler(Exception)</code> catches unhandled exceptions.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask uses <code>abort(404)</code> or <code>@app.errorhandler(404)</code> — similar pattern but Flask returns HTML by default, FastAPI returns JSON.</li>
+              <li><strong>vs DRF:</strong> DRF has <code>APIException</code> subclasses like <code>NotFound</code>, <code>PermissionDenied</code>. FastAPI's single <code>HTTPException</code> is simpler but slightly less type-safe.</li>
+              <li><strong>vs Express:</strong> Express uses <code>res.status(404).json({...})</code> — no exception-based flow, you must return early.</li>
+              <li><strong>vs Spring:</strong> <code>@ResponseStatus(HttpStatus.NOT_FOUND)</code> on exception classes — similar declarative style.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>422 vs 400:</strong> FastAPI uses <code>422</code> for validation errors (Pydantic). Some teams prefer <code>400</code> for compatibility — override via custom exception handler.</li>
+              <li><strong>Return vs raise:</strong> <code>return HTTPException(...)</code> sends the exception object as a JSON body with status 200 — always <code>raise</code>.</li>
+              <li><strong>HTTPException detail:</strong> Leaks info in production — never include stack traces or DB errors.</li>
+              <li><strong>Swallowing <code>HTTPException</code>:</strong> A <code>try/except Exception</code> inside a handler catches HTTPException too — use <code>except HTTPException: raise</code> first.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Best practices</span><span class="concept-text">Return RFC 7807 <strong>Problem Details</strong> JSON (<code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>) for consistency. Map internal domain exceptions (e.g., <code>UserNotFoundError</code>) to HTTP via a global exception handler so your business logic stays framework-agnostic.</span></div>
+        </div>
+
 
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException, status
 
@@ -576,6 +951,50 @@ UserCreate.model_json_schema()     <span class="cm"># → JSON Schema (for docs)
     <section id="headers-cookies">
         <h2><span class="sec-num">10</span> Headers & Cookies</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Headers</strong> are key-value metadata fields in both requests and responses — things like <code>Content-Type</code>, <code>Authorization</code>, <code>User-Agent</code>, <code>X-Request-ID</code>. <strong>Cookies</strong> are a special header (<code>Cookie: name=value</code>) used for sessions and tracking. FastAPI exposes both via declarative parameter types: <code>user_agent: str = Header(None)</code> and <code>session_id: str = Cookie(None)</code>. Header names with hyphens are automatically converted to snake_case (<code>X-Request-ID</code> → <code>x_request_id</code>).</span></div>
+          <div class="concept-row"><span class="concept-label">Reading headers & cookies</span><span class="concept-text">
+            <ul>
+              <li><code>user_agent: str | None = Header(None)</code> — matches <code>User-Agent</code> header.</li>
+              <li><code>auth: str = Header(..., alias="Authorization")</code> — explicit alias when you want exact name.</li>
+              <li><code>x_token: list[str] = Header([])</code> — some headers appear multiple times.</li>
+              <li><code>session: str | None = Cookie(None)</code> — read a cookie by name.</li>
+              <li><code>convert_underscores=False</code> on <code>Header()</code> disables hyphen-to-underscore conversion.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Setting response headers & cookies</span><span class="concept-text">
+            <ul>
+              <li><strong>Inject Response:</strong> <code>def handler(response: Response)</code> — set <code>response.headers["X-Foo"] = "bar"</code> and <code>response.set_cookie("session", "abc123")</code>.</li>
+              <li><strong>Return JSONResponse:</strong> <code>return JSONResponse(content={...}, headers={"X-Foo": "bar"})</code>.</li>
+              <li><strong>Cookie flags:</strong> <code>set_cookie(httponly=True, secure=True, samesite="lax", max_age=3600, domain=".example.com")</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> <code>request.headers.get("User-Agent")</code> and <code>request.cookies.get("session")</code> — works but no type validation and not in the OpenAPI spec.</li>
+              <li><strong>vs DRF:</strong> <code>request.META.get("HTTP_USER_AGENT")</code> — Django's <code>HTTP_</code> prefix convention is clunkier.</li>
+              <li><strong>vs Express:</strong> <code>req.headers['user-agent']</code> / <code>req.cookies.session</code> (with <code>cookie-parser</code> middleware).</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Security considerations</span><span class="concept-text">
+            <ul>
+              <li><strong>HttpOnly:</strong> Cookies with <code>httponly=True</code> can't be read by JavaScript — mitigates XSS session theft.</li>
+              <li><strong>Secure:</strong> <code>secure=True</code> only sends cookies over HTTPS.</li>
+              <li><strong>SameSite:</strong> <code>"strict"</code> / <code>"lax"</code> / <code>"none"</code> — protects against CSRF.</li>
+              <li><strong>Don't trust <code>X-Forwarded-For</code></strong> unless you verify it came from your load balancer — clients can spoof it.</li>
+              <li><strong>Size limits:</strong> Cookies are max 4KB each, 50 per domain — don't stuff JWTs bigger than ~3KB.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Header case:</strong> HTTP headers are case-insensitive by spec but dict lookups are case-sensitive — use <code>request.headers.get()</code> which handles it.</li>
+              <li><strong>CORS and cookies:</strong> Need <code>allow_credentials=True</code> in CORSMiddleware AND the frontend must send <code>credentials: 'include'</code>.</li>
+              <li><strong>Cookie domain:</strong> A cookie set on <code>api.example.com</code> is NOT sent to <code>www.example.com</code> unless domain is <code>.example.com</code>.</li>
+            </ul>
+          </span></div>
+        </div>
+
+
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> Header, Cookie, Response
 
 <span class="cm"># ── Read headers ──</span>
@@ -602,6 +1021,47 @@ UserCreate.model_json_schema()     <span class="cm"># → JSON Schema (for docs)
     <!-- 11 -->
     <section id="dependency">
         <h2><span class="sec-num">11</span> Dependency Injection</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Dependency Injection (DI)</strong> is FastAPI's mechanism for declaring reusable pieces of logic that a route needs — a database session, the current user, pagination params, a Redis client — and having FastAPI <strong>compute and pass them in automatically</strong>. You declare a dependency with <code>def get_db(): yield SessionLocal()</code> and consume it with <code>db: Session = Depends(get_db)</code>. FastAPI handles resolution, caching per-request, and cleanup (via <code>yield</code>). It's arguably FastAPI's killer feature — no other Python framework has anything this clean.</span></div>
+          <div class="concept-row"><span class="concept-label">How it works</span><span class="concept-text">When a request comes in, FastAPI:
+            <ul>
+              <li>Inspects the route function's signature.</li>
+              <li>For each <code>Depends(fn)</code>, recursively resolves <code>fn</code>'s own dependencies.</li>
+              <li>Calls the dependency (async or sync), caches the result for the rest of that request.</li>
+              <li>After the route returns, runs the <code>finally</code> blocks of <code>yield</code>-based dependencies in reverse order.</li>
+            </ul>
+            Dependencies can depend on other dependencies — you get a full DAG resolved automatically.
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Patterns</span><span class="concept-text">
+            <ul>
+              <li><strong>Function dependency:</strong> <code>def pagination(skip: int = 0, limit: int = 10): return {...}</code>.</li>
+              <li><strong>Class dependency:</strong> Any class with an <code>__init__</code> can be a dependency — shorthand: <code>pager: Pager = Depends()</code>.</li>
+              <li><strong>Generator with cleanup:</strong> <code>yield</code> inside the dependency runs teardown after response.</li>
+              <li><strong>Sub-dependencies:</strong> <code>def get_current_user(token: str = Depends(oauth2_scheme))</code> — chained.</li>
+              <li><strong>Path-level dependencies:</strong> <code>@app.get("/", dependencies=[Depends(verify_token)])</code> — runs but doesn't pass value.</li>
+              <li><strong>Global dependencies:</strong> <code>app = FastAPI(dependencies=[Depends(log_request)])</code> — runs for every route.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask has no built-in DI. You use <code>flask-injector</code>, decorators, or <code>g</code> (request-scoped globals). Nothing as elegant as FastAPI's DI.</li>
+              <li><strong>vs Django:</strong> Middleware + class-based view mixins approximate DI. Much more verbose.</li>
+              <li><strong>vs Spring:</strong> Spring has full-blown DI with <code>@Autowired</code>, component scanning, profiles — more powerful but also a heavy XML/annotation config load. FastAPI's DI is request-scoped only, simpler.</li>
+              <li><strong>vs NestJS (Node.js):</strong> NestJS copies Angular's DI container (module-scoped providers). FastAPI is more functional and lightweight.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Caching within request:</strong> The same dependency called twice in one request returns the cached value — opt out with <code>Depends(fn, use_cache=False)</code>.</li>
+              <li><strong>Yield + raise:</strong> If you <code>raise HTTPException</code> <em>after</em> <code>yield</code>, FastAPI logs an error — raise before yielding.</li>
+              <li><strong>Async vs sync mixing:</strong> A sync dependency blocks the event loop if the route is async — prefer async dependencies for async routes.</li>
+              <li><strong>Overrides for testing:</strong> <code>app.dependency_overrides[get_db] = get_test_db</code> — essential but often forgotten.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every non-trivial FastAPI app uses DI for: <strong>database sessions</strong> (<code>Depends(get_db)</code>), <strong>current user</strong> (<code>Depends(get_current_user)</code>), <strong>role/permission checks</strong> (<code>Depends(require_admin)</code>), <strong>tenant resolution</strong> in multi-tenant SaaS, <strong>rate limiting</strong>, and <strong>feature flags</strong>.</span></div>
+        </div>
+
         <p>FastAPI's <strong>Depends()</strong> system lets you share logic across endpoints — database sessions, auth checks, pagination, etc.</p>
 
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> Depends
@@ -655,6 +1115,45 @@ UserCreate.model_json_schema()     <span class="cm"># → JSON Schema (for docs)
     <section id="middleware">
         <h2><span class="sec-num">12</span> Middleware & CORS</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Middleware</strong> is code that runs <strong>before and after every request</strong>, sitting between the ASGI server and your route handlers. It's the standard place for cross-cutting concerns: logging, timing, authentication, adding response headers, compression, request ID propagation, and CORS. FastAPI inherits Starlette's middleware system — you can use any ASGI middleware or write a custom one with <code>@app.middleware("http")</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Middleware types</span><span class="concept-text">
+            <ul>
+              <li><strong>Function middleware:</strong> <code>@app.middleware("http") async def add_timing(request, call_next): ... response = await call_next(request); ...; return response</code>.</li>
+              <li><strong>Class middleware (ASGI):</strong> Inherit from <code>BaseHTTPMiddleware</code> or write raw ASGI — more powerful, works with streaming.</li>
+              <li><strong>Built-ins:</strong> <code>CORSMiddleware</code>, <code>GZipMiddleware</code>, <code>HTTPSRedirectMiddleware</code>, <code>TrustedHostMiddleware</code>, <code>SessionMiddleware</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">CORS explained</span><span class="concept-text"><strong>Cross-Origin Resource Sharing (CORS)</strong> is the browser security mechanism that blocks JavaScript at <code>app.example.com</code> from calling <code>api.example.com</code> unless the API explicitly allows it via <code>Access-Control-Allow-Origin</code> headers. FastAPI's <code>CORSMiddleware</code> handles both simple requests and preflight <code>OPTIONS</code> requests:
+            <pre>app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://app.example.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)</pre>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask uses <code>@app.before_request</code> / <code>@app.after_request</code> — similar concept. CORS requires <code>flask-cors</code> extension.</li>
+              <li><strong>vs Django:</strong> Middleware is a class with <code>__call__</code>. CORS needs <code>django-cors-headers</code>.</li>
+              <li><strong>vs Express:</strong> <code>app.use((req, res, next) =&gt; ...)</code> — Express's middleware is the simplest mental model. CORS via <code>cors</code> npm package.</li>
+              <li><strong>vs Spring:</strong> <code>@CrossOrigin</code> on controllers + <code>WebMvcConfigurer</code> for global — very enterprise-y.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Order matters:</strong> Middleware runs in reverse-registration order on the way out. Add <code>CORSMiddleware</code> LAST so it wraps everything.</li>
+              <li><strong><code>allow_credentials=True</code> + <code>allow_origins=["*"]</code>:</strong> FORBIDDEN by browsers. Must list explicit origins.</li>
+              <li><strong>Body reading in middleware:</strong> If you read <code>await request.body()</code>, downstream handlers see an empty body unless you re-inject it via <code>request._body</code>.</li>
+              <li><strong>Performance:</strong> <code>BaseHTTPMiddleware</code> has overhead (uses anyio); for hot paths write pure ASGI middleware.</li>
+              <li><strong>Forgetting preflight:</strong> Non-simple requests (JSON POST, custom headers) trigger <code>OPTIONS</code> preflight — CORSMiddleware handles this automatically.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Request ID / trace ID injection</strong> for distributed tracing (<code>X-Request-ID</code> propagated to logs), <strong>Sentry</strong> error tracking via <code>SentryAsgiMiddleware</code>, <strong>Prometheus metrics</strong> via <code>starlette_exporter</code>, <strong>gzip compression</strong>, <strong>OpenTelemetry</strong> auto-instrumentation. Most production apps stack 5-10 middlewares.</span></div>
+        </div>
+
+
 <pre><code><span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
 <span class="kw">import</span> time
 
@@ -682,6 +1181,47 @@ app.add_middleware(
     <!-- 13 -->
     <section id="auth">
         <h2><span class="sec-num">13</span> Authentication (JWT)</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Authentication</strong> is proving who the user is; <strong>authorization</strong> is deciding what they can do. FastAPI ships with OAuth2 utilities in <code>fastapi.security</code> — <code>OAuth2PasswordBearer</code>, <code>OAuth2PasswordRequestForm</code>, <code>HTTPBearer</code>, <code>HTTPBasic</code>, <code>APIKeyHeader</code>, <code>APIKeyQuery</code>, <code>APIKeyCookie</code>. These integrate with DI so a route parameter <code>token: str = Depends(oauth2_scheme)</code> gives you the bearer token and adds the "Authorize" button to Swagger UI.</span></div>
+          <div class="concept-row"><span class="concept-label">What is a JWT</span><span class="concept-text">A <strong>JSON Web Token</strong> is a URL-safe, signed (not necessarily encrypted) string with three parts separated by dots: <code>header.payload.signature</code>. The header declares the signing algorithm (<code>HS256</code>, <code>RS256</code>), the payload contains claims (<code>sub</code>, <code>exp</code>, <code>iat</code>, <code>iss</code>, plus your custom data), and the signature is computed over <code>header.payload</code> with a secret or private key. Because it's signed, the server can verify authenticity without a DB lookup — making it ideal for stateless auth.</span></div>
+          <div class="concept-row"><span class="concept-label">Typical flow</span><span class="concept-text">
+            <ul>
+              <li><strong>Login:</strong> Client POSTs <code>{username, password}</code> to <code>/token</code>. Server verifies with <code>bcrypt.checkpw</code>, creates a JWT with <code>jwt.encode({"sub": user.id, "exp": now + 30min}, SECRET, "HS256")</code>, returns it.</li>
+              <li><strong>Authenticated request:</strong> Client sends <code>Authorization: Bearer &lt;token&gt;</code>. FastAPI extracts via <code>OAuth2PasswordBearer</code>.</li>
+              <li><strong>Verify:</strong> Server calls <code>jwt.decode(token, SECRET, algorithms=["HS256"])</code>, fetches user, returns to route.</li>
+              <li><strong>Refresh:</strong> Pair short-lived access token (15–30min) with long-lived refresh token (7–30 days).</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Libraries</span><span class="concept-text">
+            <ul>
+              <li><code>python-jose[cryptography]</code> — traditional JWT library (v1).</li>
+              <li><code>pyjwt</code> — alternative, heavily used.</li>
+              <li><code>passlib[bcrypt]</code> — password hashing (bcrypt, argon2).</li>
+              <li><code>authlib</code> — full OAuth2/OIDC (for SSO with Google, Microsoft).</li>
+              <li><code>fastapi-users</code> / <code>fastapi-login</code> — opinionated auth packages.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> <code>flask-login</code> for sessions, <code>flask-jwt-extended</code> for JWT — extra packages, no OpenAPI integration.</li>
+              <li><strong>vs Django:</strong> <code>django.contrib.auth</code> is session-based and tied to the ORM. DRF has <code>TokenAuthentication</code> and <code>SimpleJWT</code>.</li>
+              <li><strong>vs NextAuth/Clerk:</strong> Hosted auth services handle social login, passwordless, MFA out of the box. FastAPI's built-ins are low-level primitives.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Security gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Never put secrets in JWT:</strong> Payload is base64, not encrypted — anyone can read it.</li>
+              <li><strong><code>alg: none</code> attack:</strong> Always pass explicit <code>algorithms=["HS256"]</code> to <code>decode</code>; never trust the header.</li>
+              <li><strong>Revocation:</strong> JWTs are stateless — you can't revoke before expiry without a denylist (Redis).</li>
+              <li><strong>Store in HttpOnly cookies, not localStorage</strong> (prevents XSS token theft).</li>
+              <li><strong>Short expiry:</strong> Access tokens &lt;30min; long-lived = more blast radius.</li>
+              <li><strong>Use argon2id or bcrypt with cost ≥12</strong> for password hashing; never MD5/SHA1.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">OAuth2 Bearer tokens are the standard for API auth: <strong>Stripe, GitHub, Twilio, Twitter</strong> all use <code>Authorization: Bearer</code>. For user-facing apps, many teams now skip JWT and use session cookies with Redis for simplicity and revocability.</span></div>
+        </div>
+
 
 <pre><code><span class="cm"># pip install python-jose[cryptography] passlib[bcrypt]</span>
 <span class="kw">from</span> fastapi <span class="kw">import</span> Depends, HTTPException, status
@@ -739,6 +1279,49 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=<span class="s">"/login"</span>)
     <!-- 14 -->
     <section id="database">
         <h2><span class="sec-num">14</span> Database (SQLAlchemy)</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>SQLAlchemy</strong> is Python's most popular SQL toolkit and ORM, created by Mike Bayer. FastAPI has no built-in ORM — it's deliberately unopinionated — but SQLAlchemy is the standard pairing. It has two layers: <strong>Core</strong> (SQL expression language, closer to raw SQL) and <strong>ORM</strong> (classes mapped to tables). SQLAlchemy 2.0 (released 2023) added <strong>full async support</strong> and a unified 2.0-style API that harmonizes Core and ORM.</span></div>
+          <div class="concept-row"><span class="concept-label">Key pieces</span><span class="concept-text">
+            <ul>
+              <li><strong>Engine:</strong> <code>create_engine("postgresql+psycopg://...")</code> manages the connection pool.</li>
+              <li><strong>Session:</strong> A unit of work — tracks changes and flushes them on <code>commit()</code>.</li>
+              <li><strong>Declarative base:</strong> <code>class Base(DeclarativeBase): pass</code> — 2.0 style.</li>
+              <li><strong>Model:</strong> <code>class User(Base): __tablename__ = "users"; id: Mapped[int] = mapped_column(primary_key=True)</code>.</li>
+              <li><strong>Relationships:</strong> <code>items: Mapped[list["Item"]] = relationship(back_populates="owner")</code>.</li>
+              <li><strong>Async:</strong> <code>create_async_engine</code>, <code>AsyncSession</code>, <code>await session.execute(select(User))</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">FastAPI + SQLAlchemy pattern</span><span class="concept-text">Typical setup:
+            <ul>
+              <li>One <code>database.py</code> with engine and <code>SessionLocal</code>.</li>
+              <li><code>get_db()</code> dependency that yields a session and closes it in <code>finally</code>.</li>
+              <li>ORM models in <code>models.py</code>, Pydantic schemas in <code>schemas.py</code>.</li>
+              <li>CRUD functions in <code>crud.py</code> that take <code>db: Session</code> and Pydantic input, return ORM objects.</li>
+              <li>Routes call CRUD functions, return ORM objects, and <code>response_model</code> converts to Pydantic with <code>from_attributes=True</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Django ORM:</strong> Django's ORM is simpler for CRUD but less powerful for complex queries; tightly coupled to Django. SQLAlchemy is standalone and more flexible.</li>
+              <li><strong>vs Tortoise / SQLModel / Peewee:</strong> <code>SQLModel</code> (by the FastAPI author) merges Pydantic + SQLAlchemy into one class. Tortoise is Django-style but async-native. Peewee is lightweight.</li>
+              <li><strong>vs Prisma (Node.js):</strong> Prisma has a schema DSL and a generated client; SQLAlchemy uses Python classes.</li>
+              <li><strong>vs Hibernate (Java):</strong> Much less XML/annotation overhead; more Pythonic.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Migrations</span><span class="concept-text">SQLAlchemy has no built-in migrations — use <strong>Alembic</strong> (by the same author). Standard flow: <code>alembic init migrations</code>, <code>alembic revision --autogenerate -m "add users"</code>, <code>alembic upgrade head</code>. Autogenerate diffs your models against the current DB schema but misses things like column renames — always review generated migrations.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>N+1 queries:</strong> Accessing <code>user.items</code> lazily fires a query per user. Use <code>selectinload(User.items)</code> or <code>joinedload</code>.</li>
+              <li><strong>Session per request:</strong> Never share a session across requests; it's not thread-safe.</li>
+              <li><strong>Sync ORM in async route:</strong> Blocks the event loop — use <code>AsyncSession</code> or <code>run_in_threadpool</code>.</li>
+              <li><strong>Commit vs flush:</strong> <code>flush()</code> sends SQL but doesn't commit the transaction; <code>commit()</code> ends the transaction.</li>
+              <li><strong>Connection pool exhaustion:</strong> Set <code>pool_size</code>, <code>max_overflow</code>, <code>pool_pre_ping=True</code> for production.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">SQLAlchemy powers <strong>Reddit, Yelp, Dropbox</strong> (historically), countless Flask/FastAPI apps, and ML pipelines. For FastAPI specifically, <strong>SQLModel</strong> is increasingly popular because it eliminates the Pydantic/SQLAlchemy duplication.</span></div>
+        </div>
+
 
 <pre><code><span class="cm"># pip install sqlalchemy</span>
 
@@ -807,6 +1390,45 @@ SessionLocal = sessionmaker(bind=engine, autoflush=<span class="kw">False</span>
     <section id="async">
         <h2><span class="sec-num">15</span> Async & Background Tasks</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Async</strong> in FastAPI means writing route handlers as <code>async def</code> functions that can <code>await</code> I/O without blocking the event loop. This allows one Python process to handle <strong>thousands of concurrent connections</strong> — think WebSockets, streaming responses, long polling. <strong>Background tasks</strong> are small pieces of work that run <em>after</em> the response is sent (<code>BackgroundTasks</code>) so clients don't wait for them. Both rely on Python's <code>asyncio</code> event loop.</span></div>
+          <div class="concept-row"><span class="concept-label">Async vs sync routes</span><span class="concept-text">
+            <ul>
+              <li><code>async def</code> route → runs in the event loop directly. Must use async I/O (<code>httpx</code>, <code>asyncpg</code>, <code>aiomysql</code>).</li>
+              <li><code>def</code> route → runs in a thread pool automatically (default 40 threads in <code>anyio</code>). Safe for blocking code like <code>requests</code> or sync ORM.</li>
+              <li><strong>Don't mix:</strong> Calling <code>requests.get()</code> inside <code>async def</code> blocks the WHOLE event loop — every other request freezes.</li>
+              <li><strong>Escape hatch:</strong> <code>from starlette.concurrency import run_in_threadpool</code> to call blocking code from async.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">BackgroundTasks</span><span class="concept-text">Inject <code>background_tasks: BackgroundTasks</code> into your route, then <code>background_tasks.add_task(send_email, to=user.email, ...)</code>. The task runs AFTER the HTTP response is delivered but in the same process. Great for: <strong>sending emails</strong>, <strong>logging events</strong>, <strong>warming caches</strong>, <strong>firing webhooks</strong>. It is NOT a replacement for a real task queue.</span></div>
+          <div class="concept-row"><span class="concept-label">When to use Celery / RQ / Arq instead</span><span class="concept-text">
+            <ul>
+              <li><strong>BackgroundTasks</strong> — trivial, in-process, lost on crash, no retries, no scheduling.</li>
+              <li><strong>Celery</strong> — full task queue with Redis/RabbitMQ broker, retries, beat scheduler, distributed. Heavy but battle-tested.</li>
+              <li><strong>RQ</strong> — simpler Redis-only queue.</li>
+              <li><strong>Arq</strong> — async-native, built for asyncio apps like FastAPI.</li>
+              <li><strong>Dramatiq, Huey, Taskiq</strong> — other alternatives.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask is WSGI (synchronous). Flask 2.0+ supports <code>async def</code> but it still runs inside a thread — no true concurrency benefit.</li>
+              <li><strong>vs Django:</strong> Django has <code>async def</code> views and an async ORM in 4.1+ but much of the ecosystem is still sync-blocking.</li>
+              <li><strong>vs Node.js:</strong> Node is async by design (single event loop). FastAPI reaches similar throughput with <code>uvicorn</code>.</li>
+              <li><strong>vs Go:</strong> Go's goroutines are cheaper than Python coroutines and use multiple cores natively — Go still wins raw throughput but FastAPI is closer than Flask by 10×.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>CPU-bound in async:</strong> A tight loop in <code>async def</code> blocks the loop. Offload to threads or processes via <code>loop.run_in_executor()</code>.</li>
+              <li><strong>Missing <code>await</code>:</strong> Forgetting to <code>await</code> an async call returns a coroutine object, not the result — common bug.</li>
+              <li><strong>Session per task:</strong> If your background task hits the DB, create a new session — don't reuse the request's session.</li>
+              <li><strong>BackgroundTasks don't run in tests:</strong> They do with <code>TestClient</code> (synchronously) but verify behavior explicitly.</li>
+            </ul>
+          </span></div>
+        </div>
+
+
 <pre><code><span class="kw">import</span> httpx
 <span class="kw">from</span> fastapi <span class="kw">import</span> BackgroundTasks
 
@@ -838,6 +1460,46 @@ SessionLocal = sessionmaker(bind=engine, autoflush=<span class="kw">False</span>
     <section id="files">
         <h2><span class="sec-num">16</span> File Uploads</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">File uploads in FastAPI use the <code>File</code> and <code>UploadFile</code> primitives from the <code>fastapi</code> package. They handle <strong>multipart/form-data</strong> requests — the same format HTML file inputs send. <code>UploadFile</code> is the recommended type: it's a thin wrapper around <code>SpooledTemporaryFile</code> that keeps small files in memory and spools large ones to disk, so you can handle multi-GB uploads without OOM. Requires <code>python-multipart</code> to be installed.</span></div>
+          <div class="concept-row"><span class="concept-label">Syntax</span><span class="concept-text">
+            <ul>
+              <li><code>async def upload(file: UploadFile)</code> — single file, async-friendly.</li>
+              <li><code>async def upload(file: bytes = File(...))</code> — entire file in memory as bytes (small files only).</li>
+              <li><code>async def upload(files: list[UploadFile])</code> — multiple files.</li>
+              <li><code>file: UploadFile = File(..., description="Profile pic")</code> — with metadata.</li>
+              <li>Properties: <code>file.filename</code>, <code>file.content_type</code>, <code>file.size</code>, <code>await file.read()</code>, <code>await file.write()</code>, <code>await file.seek(0)</code>, <code>await file.close()</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Typical pipeline</span><span class="concept-text">
+            <ul>
+              <li><strong>Validate content type:</strong> Check <code>file.content_type</code> against an allow-list (<code>image/jpeg</code>, <code>image/png</code>).</li>
+              <li><strong>Validate magic bytes:</strong> Never trust the header — use <code>python-magic</code> to sniff the actual bytes.</li>
+              <li><strong>Limit size:</strong> Reject before spooling: <code>if file.size &gt; 10_000_000: raise HTTPException(413)</code>.</li>
+              <li><strong>Stream to storage:</strong> <code>boto3</code>/<code>aioboto3</code> to S3, GCS, Azure Blob — avoid saving to local disk in containers.</li>
+              <li><strong>Generate unique names:</strong> <code>f"{uuid4()}.{ext}"</code> — never use the client-supplied filename directly (path traversal).</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> <code>request.files['file']</code> returns a <code>FileStorage</code> — synchronous, no spooling.</li>
+              <li><strong>vs Django:</strong> <code>request.FILES['file']</code> returns an <code>UploadedFile</code> with similar spooling behavior.</li>
+              <li><strong>vs Express:</strong> Needs <code>multer</code> middleware; more config but flexible storage backends.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Missing <code>python-multipart</code>:</strong> You get a cryptic 422; install <code>fastapi[standard]</code> or <code>python-multipart</code>.</li>
+              <li><strong><code>bytes</code> vs <code>UploadFile</code>:</strong> <code>bytes = File(...)</code> loads the entire file into memory — fatal for large uploads.</li>
+              <li><strong>Swagger doesn't test multi-file well</strong> — use <code>curl</code> or Postman.</li>
+              <li><strong>Max body size:</strong> Check your reverse proxy too (nginx <code>client_max_body_size</code>, cloud load balancer limits).</li>
+              <li><strong>Filename sanitization:</strong> <code>../../etc/passwd</code> — always use <code>os.path.basename()</code> or UUIDs.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Image upload for profile pics, CSV import endpoints for bulk data, audio/video ingestion for ML models, document upload for e-signature apps. For large files, prefer <strong>presigned S3 URLs</strong> — let the client upload directly to S3 and just send you the final URL; your API never touches the bytes.</span></div>
+        </div>
+
+
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> File, UploadFile
 
 <span class="cm"># ── Single file ──</span>
@@ -868,6 +1530,46 @@ SessionLocal = sessionmaker(bind=engine, autoflush=<span class="kw">False</span>
     <!-- 17 -->
     <section id="websockets">
         <h2><span class="sec-num">17</span> WebSockets</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>WebSockets</strong> are a protocol (RFC 6455) that upgrades an HTTP connection to a full-duplex, long-lived TCP connection where both client and server can push messages at any time. Unlike HTTP's request/response cycle, a WebSocket stays open until either side closes it — making it ideal for chat, live dashboards, collaborative editing, multiplayer games, and stock tickers. FastAPI inherits WebSocket support from Starlette: <code>@app.websocket("/ws")</code> and an async handler with <code>websocket.accept()</code>, <code>websocket.receive_text()</code>, <code>websocket.send_text()</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Handler structure</span><span class="concept-text">
+            <ul>
+              <li><strong>Accept:</strong> <code>await websocket.accept()</code> — completes the handshake.</li>
+              <li><strong>Receive:</strong> <code>data = await websocket.receive_text()</code> (also <code>receive_json</code>, <code>receive_bytes</code>).</li>
+              <li><strong>Send:</strong> <code>await websocket.send_text(msg)</code>.</li>
+              <li><strong>Loop:</strong> Usually a <code>while True:</code> loop wrapped in <code>try / except WebSocketDisconnect</code>.</li>
+              <li><strong>Close:</strong> <code>await websocket.close(code=1000)</code> — RFC 6455 close codes (1000=normal, 1008=policy violation, 1011=server error).</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Broadcasting to multiple clients</span><span class="concept-text">FastAPI doesn't ship a pub/sub primitive. Typical patterns:
+            <ul>
+              <li><strong>In-process manager:</strong> A class holding <code>set[WebSocket]</code> and a <code>broadcast()</code> method — works for single-worker apps only.</li>
+              <li><strong>Redis pub/sub:</strong> Use <code>redis.asyncio</code> and the <code>broadcaster</code> library for multi-worker broadcast.</li>
+              <li><strong>Kafka / NATS:</strong> For high-throughput fanout across many workers/services.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Server-Sent Events (SSE):</strong> SSE is server→client only, text only, over plain HTTP — simpler and works with HTTP/2 multiplexing. Use SSE when you don't need client→server messages.</li>
+              <li><strong>vs long polling:</strong> Simulates real-time with repeated HTTP requests — wasteful, higher latency.</li>
+              <li><strong>vs Socket.IO:</strong> Socket.IO adds rooms, reconnection, fallbacks (long-polling when WS is blocked). FastAPI has <code>python-socketio</code> if you want that.</li>
+              <li><strong>vs Flask:</strong> Flask can't do real WebSockets without <code>flask-sock</code>/<code>flask-socketio</code> (worker-pinning). FastAPI/ASGI handles them natively.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Auth on WebSocket:</strong> Browsers don't let JS set <code>Authorization</code> headers on WebSocket handshakes. Pass token as a query param (<code>?token=...</code>) or a cookie.</li>
+              <li><strong>Forgetting <code>accept()</code>:</strong> Trying to send before accepting raises an error.</li>
+              <li><strong>WebSocketDisconnect not caught:</strong> Leaks to stderr; wrap the loop in try/except.</li>
+              <li><strong>Multi-worker broadcast:</strong> With <code>gunicorn -w 4</code>, each worker has its own connection set — in-process broadcasts miss clients on other workers.</li>
+              <li><strong>Reverse proxy config:</strong> nginx needs <code>Upgrade</code> and <code>Connection: upgrade</code> headers forwarded; AWS ALB needs a listener rule.</li>
+              <li><strong>Idle timeout:</strong> Many proxies kill idle connections after 60s — send application-level pings.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Figma</strong> multiplayer cursors, <strong>Slack</strong> message delivery, <strong>Discord</strong> voice/chat, <strong>Trading platforms</strong> (live price feeds), <strong>Google Docs</strong> collaborative editing, <strong>Notion</strong> sync, <strong>ChatGPT</strong> streaming (uses SSE, but same idea).</span></div>
+        </div>
+
 
 <pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> WebSocket, WebSocketDisconnect
 
@@ -905,6 +1607,45 @@ manager = ConnectionManager()</code></pre>
     <!-- 18 -->
     <section id="structure">
         <h2><span class="sec-num">18</span> Project Structure</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Project structure</strong> is how you organize files and folders as your FastAPI app grows beyond a single <code>main.py</code>. FastAPI is completely unopinionated here — you can do whatever works — but the community has converged on two dominant styles: <strong>layered</strong> (split by technical role: <code>routes/</code>, <code>models/</code>, <code>schemas/</code>, <code>services/</code>) and <strong>domain-driven</strong> (split by business feature: <code>users/</code>, <code>orders/</code>, <code>payments/</code>, each with their own models/schemas/routes). The right choice depends on team size and app complexity.</span></div>
+          <div class="concept-row"><span class="concept-label">Common structures</span><span class="concept-text">
+            <ul>
+              <li><strong>Flat (tiny apps):</strong> <code>main.py</code>, <code>models.py</code>, <code>schemas.py</code>, <code>database.py</code> — fine for &lt;10 endpoints.</li>
+              <li><strong>Layered:</strong> <code>app/routers/</code>, <code>app/models/</code>, <code>app/schemas/</code>, <code>app/crud/</code>, <code>app/core/</code> (config, security), <code>app/db/</code>. Matches the official FastAPI tutorial.</li>
+              <li><strong>Domain-driven / "package by feature":</strong> <code>app/users/{router,schemas,models,service}.py</code>, <code>app/orders/...</code>. Scales better for large teams.</li>
+              <li><strong>Clean architecture / hexagonal:</strong> <code>domain/</code>, <code>application/</code>, <code>infrastructure/</code>, <code>interface/</code> — maximum decoupling, maximum ceremony.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">APIRouter splitting</span><span class="concept-text">The key mechanism is <code>APIRouter</code>: each feature module defines its own router with a prefix and tags, and <code>main.py</code> wires them together with <code>app.include_router(users.router, prefix="/api/v1")</code>. This enables:
+            <ul>
+              <li>Separation of route files (no giant <code>main.py</code>).</li>
+              <li>Versioning: <code>/api/v1</code> vs <code>/api/v2</code>.</li>
+              <li>Per-router dependencies (e.g., all admin routes require auth).</li>
+              <li>Feature toggles (conditionally include routers).</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Config & settings</span><span class="concept-text">Use <code>pydantic-settings</code>: <code>class Settings(BaseSettings): database_url: str; model_config = SettingsConfigDict(env_file=".env")</code>. Then <code>settings = Settings()</code> at import time. Inject via DI: <code>def get_settings() -&gt; Settings</code> with <code>@lru_cache</code>. Keep secrets in env vars, never in git — use <code>.env.example</code> to document what's needed.</span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Django:</strong> Django enforces app structure (<code>apps.py</code>, <code>models.py</code>, <code>views.py</code>, <code>urls.py</code>) with <code>manage.py startapp</code>. FastAPI has no scaffolding.</li>
+              <li><strong>vs Rails:</strong> Rails has extreme convention-over-configuration (MVC folder layout). FastAPI is the opposite — you choose.</li>
+              <li><strong>vs NestJS:</strong> NestJS mandates modules, controllers, services, providers — very structured. FastAPI is lightweight in comparison.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Best practices</span><span class="concept-text">
+            <ul>
+              <li>Avoid circular imports by keeping models and schemas in separate files.</li>
+              <li>Put the FastAPI <code>app</code> instance in <code>main.py</code> or <code>app/main.py</code>; wire routers there.</li>
+              <li>Use <code>pyproject.toml</code> with <code>ruff</code>, <code>black</code>, <code>mypy</code>, <code>pytest</code> configured.</li>
+              <li>Use <code>src/</code> layout if you publish as a package.</li>
+              <li>Mirror test folder structure under <code>tests/</code>.</li>
+              <li>Pin dependencies with <code>uv</code> or <code>pip-tools</code> for reproducible builds.</li>
+            </ul>
+          </span></div>
+        </div>
+
 
         <h3>Production Architecture</h3>
         <p>In production, a FastAPI app sits behind a <strong>reverse proxy</strong> (nginx) that handles SSL, static files, and load balancing. The app runs via <strong>gunicorn</strong> (process manager) spawning multiple <strong>uvicorn workers</strong>. The database is a separate service.</p>
@@ -1617,6 +2358,55 @@ CMD [<span class="s">"gunicorn"</span>, <span class="s">"app.main:app"</span>, \
     <section id="testing">
         <h2><span class="sec-num">19</span> Testing</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Testing a FastAPI app means writing automated checks that instantiate your app, send requests, and assert responses. FastAPI ships with <code>TestClient</code> — a subclass of <code>httpx.Client</code> that talks to your ASGI app in-process, no real HTTP server needed. You pair it with <strong>pytest</strong> (the de-facto Python test runner), <strong>pytest fixtures</strong> for setup/teardown, and <strong>dependency overrides</strong> to swap real DBs for in-memory ones.</span></div>
+          <div class="concept-row"><span class="concept-label">Core tools</span><span class="concept-text">
+            <ul>
+              <li><code>TestClient(app)</code> — sync client, great for most tests.</li>
+              <li><code>AsyncClient(transport=ASGITransport(app=app))</code> — for testing async flows (<code>httpx</code> + <code>asgi-lifespan</code>).</li>
+              <li><code>app.dependency_overrides[get_db] = lambda: test_db</code> — swap dependencies without monkey-patching.</li>
+              <li><strong>pytest fixtures:</strong> <code>@pytest.fixture</code> for setup/teardown; scopes: <code>function</code>, <code>module</code>, <code>session</code>.</li>
+              <li><strong>pytest-asyncio:</strong> for <code>async def test_...</code> functions.</li>
+              <li><strong>Faker / factory-boy:</strong> for test data generation.</li>
+              <li><strong>freezegun:</strong> to freeze <code>datetime.now()</code>.</li>
+              <li><strong>respx / httpx_mock:</strong> to mock outbound HTTP calls.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Test pyramid</span><span class="concept-text">
+            <ul>
+              <li><strong>Unit tests:</strong> Pure functions, business logic, Pydantic validators — fast, many.</li>
+              <li><strong>Integration tests:</strong> Routes against a real (or dockerized) DB — medium number.</li>
+              <li><strong>End-to-end tests:</strong> Run the full app in docker-compose, hit real HTTP, use Playwright/Cypress for the frontend — slow, few.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Database strategies</span><span class="concept-text">
+            <ul>
+              <li><strong>SQLite in-memory:</strong> Fastest, but subtly different from Postgres (no JSONB, different locking).</li>
+              <li><strong>Docker Postgres:</strong> Closest to prod; use <code>testcontainers-python</code> for isolation.</li>
+              <li><strong>Transaction rollback:</strong> Wrap each test in a transaction and roll it back — very fast, no need to recreate schema.</li>
+              <li><strong>Factories:</strong> <code>factory-boy</code> or custom helpers for creating test users, orders, etc.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Flask:</strong> Flask has <code>app.test_client()</code> — conceptually identical.</li>
+              <li><strong>vs Django:</strong> Django's <code>TestCase</code> wraps each test in a transaction automatically; DRF's <code>APIClient</code> is similar to <code>TestClient</code>.</li>
+              <li><strong>vs Express:</strong> Use <code>supertest</code> + Jest/Mocha.</li>
+              <li><strong>vs Spring:</strong> <code>@SpringBootTest</code> + MockMvc — heavier setup, slower tests.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Test DB not isolated:</strong> Tests pollute each other — use transactions or recreate per test.</li>
+              <li><strong>Dependency overrides leak:</strong> Clear with <code>app.dependency_overrides.clear()</code> in teardown.</li>
+              <li><strong>Async mixing:</strong> Can't use <code>TestClient</code> (sync) on async routes that use <code>asyncio.current_task()</code> — use <code>AsyncClient</code>.</li>
+              <li><strong>Startup/shutdown events:</strong> <code>TestClient</code> runs them automatically if used as a context manager: <code>with TestClient(app) as client: ...</code>.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Coverage goals</span><span class="concept-text">Aim for ~80% line coverage on business logic (<code>pytest --cov</code>) but don't chase 100% — coverage is a floor, not a ceiling. Focus tests on: edge cases, error paths, security (authz), and data shapes. Use <strong>mutation testing</strong> (<code>mutmut</code>) for the critical paths.</span></div>
+        </div>
+
+
 <pre><code><span class="cm"># pip install pytest httpx</span>
 <span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
 <span class="kw">from</span> app.main <span class="kw">import</span> app
@@ -1675,6 +2465,57 @@ app.dependency_overrides[get_db] = override_get_db</code></pre>
     <section id="deployment">
         <h2><span class="sec-num">20</span> Deployment</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Deployment</strong> is getting your FastAPI app from your laptop to a production server where real users can hit it. In 2024 this almost always means: <strong>Docker image</strong> → <strong>container registry</strong> → <strong>orchestrator</strong> (Kubernetes, ECS, Cloud Run, Fly.io, Railway) → <strong>load balancer with TLS</strong>. FastAPI's key deployment requirement is an <strong>ASGI server</strong> like <code>uvicorn</code> or <code>gunicorn</code> with the uvicorn worker class.</span></div>
+          <div class="concept-row"><span class="concept-label">Process model</span><span class="concept-text">
+            <ul>
+              <li><strong><code>uvicorn main:app --workers 4</code></strong> — uvicorn's built-in multi-worker mode (since 0.15+).</li>
+              <li><strong><code>gunicorn -k uvicorn.workers.UvicornWorker -w 4 main:app</code></strong> — gunicorn as process manager, each worker runs uvicorn. Industry standard because of graceful shutdown and robust signal handling.</li>
+              <li><strong>Worker count:</strong> rule of thumb <code>(2 × CPU) + 1</code> for CPU-bound, fewer for async I/O-bound.</li>
+              <li><strong>One worker in K8s:</strong> Let Kubernetes horizontally scale pods instead — simpler mental model.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Dockerfile essentials</span><span class="concept-text">
+            <ul>
+              <li>Use <strong>multi-stage builds</strong> to keep the final image small.</li>
+              <li>Base on <code>python:3.12-slim</code>; avoid <code>alpine</code> (musl compatibility issues with <code>psycopg2</code>, <code>numpy</code>).</li>
+              <li>Install deps BEFORE copying code for Docker layer caching.</li>
+              <li>Run as a non-root user.</li>
+              <li>Set <code>PYTHONUNBUFFERED=1</code> so logs show up immediately.</li>
+              <li>Expose port 8000; let the orchestrator map it.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Platforms</span><span class="concept-text">
+            <ul>
+              <li><strong>Render / Railway / Fly.io:</strong> Simplest — push code, get URL.</li>
+              <li><strong>Google Cloud Run:</strong> Serverless containers, scale to zero, pay per request.</li>
+              <li><strong>AWS ECS Fargate:</strong> Managed containers on AWS, integrates with ALB.</li>
+              <li><strong>AWS Lambda:</strong> Via <code>Mangum</code> adapter — fastapi on Lambda. Cold starts ~500ms–2s.</li>
+              <li><strong>Kubernetes:</strong> Full control, most complex. Use Helm charts.</li>
+              <li><strong>VPS (DigitalOcean, Hetzner, Linode):</strong> Classic nginx + systemd + gunicorn.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Essential production concerns</span><span class="concept-text">
+            <ul>
+              <li><strong>Health checks:</strong> <code>/healthz</code> (liveness) and <code>/readyz</code> (readiness, checks DB).</li>
+              <li><strong>Structured logging:</strong> JSON logs via <code>structlog</code> or <code>python-json-logger</code>.</li>
+              <li><strong>Observability:</strong> OpenTelemetry for traces, Prometheus for metrics, Sentry for errors.</li>
+              <li><strong>Secrets management:</strong> AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault — never env files in git.</li>
+              <li><strong>Graceful shutdown:</strong> Handle SIGTERM, drain in-flight requests, close DB connections.</li>
+              <li><strong>Reverse proxy:</strong> nginx/Caddy/Traefik for TLS termination, gzip, rate limiting.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Forgetting <code>--proxy-headers</code>:</strong> Behind a load balancer, uvicorn doesn't trust <code>X-Forwarded-*</code> unless told to — <code>client_ip</code> becomes the LB IP.</li>
+              <li><strong>Single-worker deploys:</strong> 1 worker = 1 blocked request stalls everything — always run multiple workers or pods.</li>
+              <li><strong>Memory leaks from ML models:</strong> Load once at startup in <code>lifespan</code>, not per request.</li>
+              <li><strong>Database pool exhaustion:</strong> Each worker opens its own pool; N_workers × pool_size must be &lt; DB max_connections.</li>
+            </ul>
+          </span></div>
+        </div>
+
+
         <h3>Dockerfile</h3>
         <p>Package your FastAPI app into a Docker container for consistent deployment anywhere.</p>
 <pre><code>FROM python:3.12-slim
@@ -1729,6 +2570,55 @@ settings = Settings()
     <!-- ═══════════════════════════════════════════ -->
     <section id="redis">
         <h2><span class="sec-num">21</span> Redis</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Redis</strong> (REmote DIctionary Server) is an in-memory data store created by Salvatore Sanfilippo in 2009, now maintained by Redis Ltd. It speaks its own simple text protocol (<strong>RESP</strong>) over TCP and keeps all data in RAM for extreme speed — typical operations take &lt;1ms. Redis is the Swiss Army knife of modern backends: cache, session store, rate limiter, message broker, pub/sub bus, distributed lock, leaderboard, full-text index, and more. FastAPI uses <code>redis-py</code> (sync) or <code>redis.asyncio</code> (async) — both from the same <code>redis</code> pip package.</span></div>
+          <div class="concept-row"><span class="concept-label">Data structures</span><span class="concept-text">Redis isn't just a key-value store — it has rich types:
+            <ul>
+              <li><strong>Strings:</strong> <code>SET</code>, <code>GET</code>, <code>INCR</code>, <code>INCRBY</code>, <code>APPEND</code>. Binary-safe up to 512MB.</li>
+              <li><strong>Lists:</strong> <code>LPUSH</code>, <code>RPUSH</code>, <code>LPOP</code>, <code>BRPOP</code> — doubly linked lists, used as queues.</li>
+              <li><strong>Hashes:</strong> <code>HSET</code>, <code>HGET</code>, <code>HGETALL</code> — object storage.</li>
+              <li><strong>Sets:</strong> <code>SADD</code>, <code>SMEMBERS</code>, <code>SINTER</code> — uniqueness, tag sets.</li>
+              <li><strong>Sorted sets (ZSET):</strong> <code>ZADD</code>, <code>ZRANGE</code>, <code>ZRANGEBYSCORE</code> — leaderboards, priority queues, time series.</li>
+              <li><strong>Streams:</strong> <code>XADD</code>, <code>XREADGROUP</code> — Kafka-like append-only log with consumer groups.</li>
+              <li><strong>Pub/Sub:</strong> <code>SUBSCRIBE</code>/<code>PUBLISH</code> — fire-and-forget messaging.</li>
+              <li><strong>Geo:</strong> <code>GEOADD</code>, <code>GEOSEARCH</code> — geospatial indexing.</li>
+              <li><strong>HyperLogLog:</strong> <code>PFADD</code>, <code>PFCOUNT</code> — approximate cardinality.</li>
+              <li><strong>Bitmaps:</strong> <code>SETBIT</code>, <code>BITCOUNT</code> — efficient user flags.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Use cases with FastAPI</span><span class="concept-text">
+            <ul>
+              <li><strong>Caching:</strong> <code>fastapi-cache2</code> decorates routes; or manual <code>SET key value EX 60</code>.</li>
+              <li><strong>Rate limiting:</strong> <code>slowapi</code> or <code>fastapi-limiter</code> (token bucket in Redis).</li>
+              <li><strong>Session store:</strong> Instead of JWTs for mutable sessions.</li>
+              <li><strong>Task queues:</strong> RQ, Arq, Celery all use Redis as broker.</li>
+              <li><strong>Distributed locks:</strong> <code>SET key val NX PX 5000</code> — Redlock pattern.</li>
+              <li><strong>Real-time pub/sub:</strong> Broadcast WebSocket messages across workers.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs Memcached:</strong> Memcached is simpler (strings only, no persistence, LRU eviction). Redis has richer types, optional persistence, replication, clustering.</li>
+              <li><strong>vs Postgres:</strong> Postgres is disk-based ACID OLTP; Redis is in-memory, eventually consistent. Use both — Postgres for source of truth, Redis for hot reads.</li>
+              <li><strong>vs DynamoDB:</strong> DynamoDB is managed, autoscaled, strongly consistent — but slower (~5-10ms vs Redis's &lt;1ms) and pay per request.</li>
+              <li><strong>vs Kafka:</strong> Redis Streams is much smaller scale than Kafka; good for within-app messaging, not log ingestion.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Performance & persistence</span><span class="concept-text">Redis handles <strong>100k+ ops/sec</strong> on a single core. Persistence options: <strong>RDB</strong> (periodic snapshots, fast restart) and <strong>AOF</strong> (append-only log, more durable but slower). For caching use cases, disable persistence entirely. For critical data, enable AOF with <code>appendfsync everysec</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Forgotten TTL:</strong> Keys without <code>EX</code>/<code>EXPIRE</code> stay forever — memory leak.</li>
+              <li><strong><code>KEYS *</code> in prod:</strong> O(N) blocking; use <code>SCAN</code>.</li>
+              <li><strong>Cache stampede:</strong> Popular key expires, 100 requests hit DB simultaneously — use locking or <code>stale-while-revalidate</code>.</li>
+              <li><strong>Serialization:</strong> Redis only stores strings/bytes — JSON-encode objects, or use <code>msgpack</code>/<code>pickle</code> (with caution).</li>
+              <li><strong>Sync redis in async route:</strong> Blocks the loop — use <code>redis.asyncio</code>.</li>
+              <li><strong>Memory limit:</strong> Configure <code>maxmemory</code> + <code>maxmemory-policy allkeys-lru</code> or Redis OOMs.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Twitter</strong> uses Redis for timeline caching, <strong>GitHub</strong> for session storage, <strong>Stack Overflow</strong> for page cache, <strong>Instagram</strong> for counters, <strong>Airbnb</strong> for rate limiting. Every large production system eventually has Redis somewhere.</span></div>
+        </div>
+
         <p>Redis is an <strong>in-memory data store</strong> — blazing fast key-value storage used for caching, sessions, rate limiting, and real-time pub/sub. It sits between your API and your database to speed things up.</p>
 
 <pre><code><span class="cm"># Install</span>
@@ -1924,6 +2814,61 @@ router = APIRouter()
     <!-- ═══════════════════════════════════════════ -->
     <section id="kafka">
         <h2><span class="sec-num">22</span> Kafka</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Apache Kafka</strong> is a distributed, append-only, <strong>commit-log-based</strong> event streaming platform originally built at LinkedIn in 2011 and open-sourced via the Apache Software Foundation. Unlike traditional message brokers (RabbitMQ, ActiveMQ), Kafka stores messages as a durable, replayable log — consumers track their own position (<strong>offset</strong>) and can rewind or fast-forward. This makes it ideal for event sourcing, stream processing, and building "event-driven" architectures. Kafka can sustain <strong>millions of messages per second</strong> per cluster.</span></div>
+          <div class="concept-row"><span class="concept-label">Core concepts</span><span class="concept-text">
+            <ul>
+              <li><strong>Topic:</strong> A named stream of messages — like a database table.</li>
+              <li><strong>Partition:</strong> Topics are split into partitions for parallelism. Each partition is an ordered append-only log.</li>
+              <li><strong>Producer:</strong> Publishes messages to a topic.</li>
+              <li><strong>Consumer:</strong> Reads messages, tracks its offset per partition.</li>
+              <li><strong>Consumer group:</strong> Multiple consumers sharing the work — partitions are distributed among group members.</li>
+              <li><strong>Broker:</strong> A Kafka server. A cluster has many brokers; each partition has a leader and replicas.</li>
+              <li><strong>Offset:</strong> The position of a message in a partition; consumers commit offsets to track progress.</li>
+              <li><strong>Replication factor:</strong> Each partition is replicated N times (typically 3) for fault tolerance.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Python libraries for FastAPI</span><span class="concept-text">
+            <ul>
+              <li><strong><code>aiokafka</code>:</strong> Async native, perfect for FastAPI — <code>AIOKafkaProducer</code>, <code>AIOKafkaConsumer</code>.</li>
+              <li><strong><code>confluent-kafka-python</code>:</strong> Wraps librdkafka (C), fastest, sync API.</li>
+              <li><strong><code>kafka-python</code>:</strong> Pure Python, simpler but slower.</li>
+              <li><strong><code>faust</code> / <code>faust-streaming</code>:</strong> Stream processing framework inspired by Kafka Streams.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+            <ul>
+              <li><strong>vs RabbitMQ:</strong> RabbitMQ is a traditional broker — messages are consumed and removed. Kafka retains messages (default 7 days). RabbitMQ has richer routing (direct, topic, fanout, headers exchanges); Kafka has simpler model but scales further.</li>
+              <li><strong>vs Redis Streams:</strong> Redis Streams is similar in design but single-node (unless using Redis Cluster). Kafka is purpose-built for horizontal scale and multi-DC replication.</li>
+              <li><strong>vs SQS/SNS:</strong> AWS managed, simpler, but no message ordering across shards, no replay.</li>
+              <li><strong>vs NATS:</strong> NATS (JetStream) is lighter-weight, simpler to operate, but smaller ecosystem.</li>
+              <li><strong>vs Pulsar:</strong> Apache Pulsar has tiered storage and multi-tenancy — newer challenger.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Use cases</span><span class="concept-text">
+            <ul>
+              <li><strong>Event sourcing:</strong> Every state change is an event; rebuild state by replaying.</li>
+              <li><strong>Microservice communication:</strong> Decoupled async messaging between services.</li>
+              <li><strong>Log aggregation:</strong> Ship all app logs to Kafka, then to Elasticsearch.</li>
+              <li><strong>Change Data Capture (CDC):</strong> Stream database changes via Debezium.</li>
+              <li><strong>Real-time analytics:</strong> Feed into Spark/Flink/ksqlDB for aggregations.</li>
+              <li><strong>Audit trail:</strong> Immutable log of all actions.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+            <ul>
+              <li><strong>Ordering:</strong> Only guaranteed within a partition. If you need global order, use 1 partition (slow).</li>
+              <li><strong>Consumer group rebalancing:</strong> Every time a consumer joins/leaves, partitions reshuffle — brief pauses.</li>
+              <li><strong>At-least-once vs exactly-once:</strong> Default is at-least-once; exactly-once requires transactions and idempotent producers.</li>
+              <li><strong>Large messages:</strong> Default max is 1MB; for bigger payloads store in S3 and put the URL in Kafka.</li>
+              <li><strong>Schema evolution:</strong> Use Avro/Protobuf with Schema Registry to prevent breaking changes.</li>
+              <li><strong>Dev setup:</strong> Running Kafka locally is heavy; use <code>docker-compose</code> with <code>redpanda</code> (Kafka-compatible) for a lighter alternative.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>LinkedIn</strong> (created it, 7 trillion+ messages/day), <strong>Uber</strong> (trip events), <strong>Netflix</strong> (streaming analytics), <strong>Airbnb</strong> (search indexing), <strong>Spotify</strong> (event pipeline), <strong>Robinhood</strong> (order events). Any large event-driven system runs Kafka or a close equivalent.</span></div>
+        </div>
+
         <p>Apache Kafka is a <strong>distributed event streaming platform</strong> — it lets services communicate by producing and consuming messages through topics. Unlike HTTP APIs, Kafka is <strong>asynchronous and durable</strong> — messages persist even if the consumer is down.</p>
 
         <h3>When to Use Kafka vs REST</h3>
@@ -2228,6 +3173,52 @@ analytics_consumer = AIOKafkaConsumer(
     <!-- ═══════════ INTERVIEW QUESTIONS ═══════════ -->
     <section id="interview">
         <h2><span class="sec-num">23</span> Interview Questions</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">This section is a curated collection of <strong>FastAPI-specific interview questions</strong> you'll commonly see in backend engineer, platform engineer, and Python developer interviews at companies building APIs or ML services. They cover the framework's core concepts (routing, dependencies, Pydantic), the async model (ASGI vs WSGI, event loop, blocking I/O), and production concerns (deployment, security, performance). Expect both <strong>conceptual</strong> questions ("what is dependency injection and why does FastAPI have it") and <strong>practical</strong> ones ("here's a slow endpoint, diagnose it").</span></div>
+          <div class="concept-row"><span class="concept-label">Topic categories</span><span class="concept-text">
+            <ul>
+              <li><strong>Framework fundamentals:</strong> ASGI vs WSGI, Starlette vs FastAPI, Pydantic's role.</li>
+              <li><strong>Type system:</strong> How type hints drive validation, <code>Annotated</code>, <code>Field</code>, <code>Query</code>, <code>Path</code>, <code>Body</code>.</li>
+              <li><strong>Async & concurrency:</strong> Event loop, <code>async def</code> vs <code>def</code>, blocking I/O, threadpool offload.</li>
+              <li><strong>Dependency injection:</strong> Caching, sub-dependencies, <code>yield</code> teardown, overrides.</li>
+              <li><strong>Data modeling:</strong> Pydantic v1 vs v2, separate input/output models, ORMs, <code>from_attributes</code>.</li>
+              <li><strong>Security:</strong> OAuth2, JWT, CORS, CSRF, dependency-injected auth.</li>
+              <li><strong>Performance:</strong> Benchmarks, profiling, connection pools, caching.</li>
+              <li><strong>Production ops:</strong> Gunicorn workers, health checks, graceful shutdown, logging.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">How to prepare</span><span class="concept-text">
+            <ul>
+              <li><strong>Build a non-trivial app:</strong> CRUD + auth + background tasks + WebSocket + tests. Nothing beats real experience.</li>
+              <li><strong>Read the official docs cover-to-cover:</strong> They're unusually high quality — ~2-3 hours.</li>
+              <li><strong>Understand the stack:</strong> Know what happens from TCP accept → ASGI call → Pydantic validation → your handler → response serialization.</li>
+              <li><strong>Practice system design:</strong> "Design a URL shortener with FastAPI" — be ready to discuss DB choice, caching, rate limits.</li>
+              <li><strong>Read Pydantic source:</strong> Especially how validators work — it's a favorite deep-dive question.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Red flags interviewers look for</span><span class="concept-text">
+            <ul>
+              <li>Using <code>requests</code> inside <code>async def</code> routes.</li>
+              <li>Not knowing the difference between <code>Query()</code>, <code>Path()</code>, <code>Body()</code>, and <code>Depends()</code>.</li>
+              <li>Mixing Pydantic v1 and v2 syntax.</li>
+              <li>Claiming FastAPI is "just Flask with types."</li>
+              <li>Not understanding why <code>response_model</code> exists (sensitive field leakage).</li>
+              <li>Using a single global DB session instead of per-request.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Green flags</span><span class="concept-text">
+            <ul>
+              <li>Explaining <strong>why</strong> FastAPI is fast (ASGI + uvloop + Pydantic Rust core) rather than just saying "it's fast."</li>
+              <li>Knowing when to use BackgroundTasks vs a real queue like Celery/Arq.</li>
+              <li>Understanding the request lifecycle and where middleware, dependencies, and exception handlers sit.</li>
+              <li>Being comfortable with both sync and async patterns and knowing when each applies.</li>
+              <li>Mentioning observability (Sentry, OpenTelemetry, structured logging) without prompting.</li>
+            </ul>
+          </span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Companies actively hiring FastAPI engineers include <strong>Netflix, Microsoft, Uber, OpenAI, Anthropic, Stripe, Hugging Face, Explosion AI, DataRobot, Replit, and countless ML-focused startups</strong>. The combination of <strong>Python + ML + FastAPI</strong> is one of the hottest backend stacks of 2024–2026.</span></div>
+        </div>
+
 
         <div class="faq-toggle-bar">
             <span>Expand All</span>

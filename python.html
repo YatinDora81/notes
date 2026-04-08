@@ -299,6 +299,57 @@
         .callout.danger strong { color: var(--red); }
         .callout.success strong { color: var(--green); }
 
+        /* ── Concept Box ── */
+        .concept-box {
+          border-left: 3px solid #a78bfa;
+          background: rgba(167,139,250,0.05);
+          padding: 20px 24px;
+          margin: 18px 0;
+          border-radius: 8px;
+          border: 1px solid rgba(167,139,250,0.2);
+        }
+        .concept-box .concept-row {
+          margin: 14px 0;
+          display: block;
+          padding-bottom: 12px;
+          border-bottom: 1px dashed rgba(167,139,250,0.15);
+        }
+        .concept-box .concept-row:first-of-type { margin-top: 4px; }
+        .concept-box .concept-row:last-child {
+          margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+        }
+        .concept-box .concept-label {
+          display: block;
+          font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.4px;
+          color: #a78bfa; font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .concept-box .concept-text {
+          display: block; color: #a1a1aa; font-size: 0.92rem;
+          line-height: 1.7;
+        }
+        .concept-box .concept-text strong { color: #fafafa; font-weight: 600; }
+        .concept-box .concept-text code {
+          background: rgba(167,139,250,0.12);
+          padding: 1px 6px; border-radius: 3px;
+          color: #c4b5fd; font-size: 0.85em;
+        }
+        .concept-box .concept-text ul {
+          margin: 8px 0 0 0; padding-left: 22px;
+        }
+        .concept-box .concept-text ul li {
+          margin: 5px 0;
+        }
+        .concept-box .concept-text p { margin: 6px 0; }
+        .concept-box .concept-text pre {
+          background: rgba(0,0,0,0.3);
+          padding: 10px 12px;
+          border-radius: 4px;
+          font-size: 0.82em;
+          margin: 8px 0;
+          overflow-x: auto;
+        }
+
         /* ── Code ── */
         pre {
             background: var(--code-bg);
@@ -776,6 +827,32 @@
     <section id="basics">
         <h2><span class="sec-num">01</span> The Basics</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is Python</span><span class="concept-text">Python is a <strong>high-level, interpreted, dynamically typed, garbage-collected, multi-paradigm</strong> programming language created by <strong>Guido van Rossum</strong> and first released in <strong>1991</strong>. It was designed with a philosophy of <strong>code readability</strong> — enforced by significant whitespace (indentation instead of braces) and a guiding document called <strong>The Zen of Python</strong> (<code>import this</code>). Python is the reference implementation (<strong>CPython</strong>), but alternative implementations exist: <code>PyPy</code> (JIT-compiled), <code>Jython</code> (runs on JVM), <code>IronPython</code> (.NET), and <code>MicroPython</code> (embedded). Python consistently ranks #1 in the TIOBE, PYPL, and Stack Overflow surveys, making it the world's most popular programming language for 2024-2026.</span></div>
+          <div class="concept-row"><span class="concept-label">Core design philosophy</span><span class="concept-text"><ul>
+            <li><strong>Readability counts:</strong> Code is read far more often than written — Python prioritizes clean, English-like syntax.</li>
+            <li><strong>Batteries included:</strong> The standard library ships with modules for JSON, HTTP, sockets, threading, regex, SQLite, CSV, XML, crypto, and more — no extra installs needed.</li>
+            <li><strong>Duck typing:</strong> "If it walks like a duck and quacks like a duck, it's a duck." Type compatibility is determined at runtime by available methods, not declared types.</li>
+            <li><strong>Everything is an object:</strong> Functions, classes, modules, numbers, and even types themselves are first-class objects you can pass around, inspect, and modify.</li>
+            <li><strong>One obvious way:</strong> Prefer one clear idiomatic solution over many clever ones.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> Python uses indentation instead of <code>{ }</code>, has true integers with arbitrary precision (not all numbers are <code>float64</code>), and the standard library is vast. JS has event-loop concurrency by default; Python requires explicit <code>asyncio</code>.</li>
+            <li><strong>vs Java:</strong> No compile step, no static types required, no verbose boilerplate. A Python "hello world" is <code>print("hi")</code> vs Java's class+main+System.out. Python has true REPL, Java does not (traditionally).</li>
+            <li><strong>vs Go:</strong> Python is dynamically typed and interpreted; Go is statically typed and compiles to a native binary. Go starts faster and has true parallelism; Python has the GIL limiting CPU parallelism.</li>
+            <li><strong>vs C/C++:</strong> No manual memory management, no pointers, no headers, no compile step. Python is 10-100× slower on CPU-bound work but 10× faster to write.</li>
+            <li><strong>vs Ruby:</strong> Closest cousin philosophically. Python emphasizes "one way to do it," Ruby embraces "many ways." Python dominates data science; Ruby dominates web (Rails).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use Python</span><span class="concept-text">Python dominates in <strong>data science, machine learning, AI, scripting, automation, scientific computing, web backends, DevOps, and education</strong>. The ecosystem is unmatched: <code>NumPy</code>, <code>Pandas</code>, <code>PyTorch</code>, <code>TensorFlow</code>, <code>scikit-learn</code>, <code>Django</code>, <code>Flask</code>, <code>FastAPI</code>, <code>Requests</code>, <code>Jupyter</code>. Python is the <strong>glue language</strong> — perfect for rapid prototyping, ad-hoc data analysis, and bolting together C/C++ libraries via bindings. It is also the <strong>#1 teaching language</strong> in universities worldwide.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Indentation matters:</strong> Mixing tabs and spaces raises <code>IndentationError</code>. Always use 4 spaces (PEP 8).</li>
+            <li><strong>The GIL:</strong> CPython can only execute one Python bytecode at a time — real CPU parallelism requires multiprocessing or native extensions.</li>
+            <li><strong>Mutable default arguments:</strong> <code>def f(x=[])</code> shares the same list across calls — a classic footgun.</li>
+            <li><strong>Speed:</strong> Pure Python is ~50× slower than C. Hot loops need NumPy, Cython, or Numba.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world users</span><span class="concept-text"><strong>Google</strong> (early core infra, YouTube), <strong>Instagram</strong> (entire backend is Django), <strong>Spotify</strong> (data pipelines + backend services), <strong>Dropbox</strong> (desktop client + server), <strong>Netflix</strong> (ML infra), <strong>NASA</strong> (scientific computing), <strong>OpenAI</strong> (GPT training pipelines), <strong>Meta</strong> (ML research via PyTorch), <strong>Reddit</strong> (originally), <strong>Pinterest</strong>, <strong>Quora</strong>, and essentially every AI/ML company on earth.</span></div>
+        </div>
+
         <h3>What is Python?</h3>
         <p>Python is an <strong>interpreted, dynamically typed, garbage-collected</strong> language.</p>
         <ul>
@@ -892,6 +969,32 @@ data = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</s
     <!-- ═══════════════════════════════════════════ -->
     <section id="strings">
         <h2><span class="sec-num">02</span> Strings</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A Python <code>str</code> is an <strong>immutable sequence of Unicode code points</strong>. Since Python 3, all strings are Unicode by default — there is no separate "bytes string" type (use <code>bytes</code> for raw byte data). Strings support indexing, slicing, iteration, and a rich set of methods. Because they are immutable, every "modification" creates a new string object.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>f-strings:</strong> <code>f"hello {name}"</code> — introduced in Python 3.6, now the preferred formatting style. Supports inline expressions, formatting specs, and debug syntax <code>f"{x=}"</code>.</li>
+            <li><strong>Multiple quote styles:</strong> Single <code>'</code>, double <code>"</code>, triple <code>'''</code> or <code>"""</code> for multiline. Raw strings <code>r"\n"</code> ignore backslashes.</li>
+            <li><strong>Unicode-native:</strong> <code>len("café")</code> is 4, <code>len("café".encode())</code> is 5 (UTF-8).</li>
+            <li><strong>Rich methods:</strong> <code>.strip()</code>, <code>.split()</code>, <code>.join()</code>, <code>.replace()</code>, <code>.upper()</code>, <code>.startswith()</code>, <code>.format()</code>, plus 40+ more.</li>
+            <li><strong>Interning:</strong> Short strings and identifiers are automatically interned — <code>"foo" is "foo"</code> is often <code>True</code> (implementation detail).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS strings are also immutable, but Python distinguishes <code>str</code> from <code>bytes</code>. Python has triple-quoted multiline strings built in; JS uses template literals.</li>
+            <li><strong>vs Java:</strong> Java strings are also immutable UTF-16, but Python's f-strings are far more ergonomic than Java's <code>String.format()</code>. Python slicing <code>s[1:5]</code> beats <code>s.substring(1,5)</code>.</li>
+            <li><strong>vs Go:</strong> Go strings are immutable UTF-8 byte sequences — indexing gives bytes, not characters. Python indexing gives code points.</li>
+            <li><strong>vs C/C++:</strong> No null-terminator, no buffer-overflow risk, no manual allocation. Python pays with higher memory overhead (~49 bytes per empty string).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why immutability matters</span><span class="concept-text">Immutability makes strings <strong>hashable</strong> (usable as <code>dict</code> keys), <strong>thread-safe</strong> (no locking required), and enables <strong>interning</strong> optimizations. The downside: repeated concatenation in a loop is O(n²) — always use <code>"".join(list_of_strings)</code> instead of <code>s += x</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Encoding confusion:</strong> <code>str</code> ≠ <code>bytes</code>. Reading a file without <code>encoding="utf-8"</code> uses the system default — a bug factory on Windows.</li>
+            <li><strong>String + int:</strong> <code>"age: " + 25</code> raises <code>TypeError</code>. Unlike JS, Python does not auto-coerce.</li>
+            <li><strong>Concatenation in loops:</strong> O(n²) behavior — use <code>join()</code> or <code>io.StringIO</code>.</li>
+            <li><strong>Comparing with <code>is</code>:</strong> <code>s is "hello"</code> may work due to interning but is not guaranteed. Always use <code>==</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">f-strings are ubiquitous in logging (<code>log.info(f"user {uid} logged in")</code>), SQL query building (with parameterization!), and template rendering. The <code>str.format_map()</code> method powers Jinja2 templates. <code>re</code> (regex) and <code>string.Template</code> are used heavily in Django/Flask projects.</span></div>
+        </div>
+
         <p>Strings are <strong>immutable sequences of Unicode characters</strong>. Every operation creates a new string.</p>
 
 <pre><code><span class="cm"># ── Creation ──</span>
@@ -935,6 +1038,32 @@ s.strip().split(<span class="s">","</span>) <span class="o"># ['Hello', ' World!
     <!-- ═══════════════════════════════════════════ -->
     <section id="control-flow">
         <h2><span class="sec-num">03</span> Control Flow</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Control flow determines the order of execution: <strong>conditionals</strong> (<code>if</code>/<code>elif</code>/<code>else</code>), <strong>loops</strong> (<code>for</code>, <code>while</code>), <strong>loop control</strong> (<code>break</code>, <code>continue</code>, <code>else</code>-on-loop), and <strong>structural pattern matching</strong> (<code>match</code>/<code>case</code>, added in Python 3.10). Python uses <strong>indentation</strong> — typically 4 spaces — to define blocks, eliminating the need for curly braces.</span></div>
+          <div class="concept-row"><span class="concept-label">Key constructs</span><span class="concept-text"><ul>
+            <li><strong><code>if</code>/<code>elif</code>/<code>else</code>:</strong> Standard conditionals. No parentheses required. <code>elif</code> is the keyword (not <code>else if</code>).</li>
+            <li><strong><code>for item in iterable</code>:</strong> Pythonic iteration — always iterates over an iterable, never a C-style counter. Use <code>range(n)</code> or <code>enumerate()</code> for index.</li>
+            <li><strong><code>while</code>:</strong> Runs until condition is false. Common pattern: <code>while True: ... if done: break</code>.</li>
+            <li><strong><code>match</code>/<code>case</code>:</strong> Structural pattern matching — destructures tuples, dicts, and class instances. More powerful than C's <code>switch</code>.</li>
+            <li><strong>Loop <code>else</code>:</strong> The <code>else</code> clause on a loop runs if the loop completes without <code>break</code> — a unique and often confusing Python feature.</li>
+            <li><strong>Ternary:</strong> <code>x if cond else y</code> — inline conditional expression.</li>
+            <li><strong>Walrus <code>:=</code>:</strong> Assignment expression (3.8+) — <code>if (n := len(a)) > 10:</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs C/Java/Go:</strong> No braces — indentation is syntactically significant. No C-style <code>for(i=0; i&lt;n; i++)</code> — use <code>for i in range(n)</code>. No <code>switch</code> until 3.10's <code>match</code>.</li>
+            <li><strong>vs JavaScript:</strong> No implicit truthy-to-boolean coercion surprises (<code>[]</code> is falsy in Python; truthy in JS). Python's <code>for...of</code> equivalent is just <code>for</code>.</li>
+            <li><strong>vs Ruby:</strong> Similar philosophy but Ruby uses <code>end</code> keywords; Python uses dedent. Ruby has <code>unless</code>; Python does not.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Python's control flow is optimized for <strong>readability</strong>. <code>for item in collection</code> is cleaner than managing an index variable. The walrus operator eliminates duplicate work in <code>while</code> loops reading from files or sockets. Pattern matching (<code>match</code>) is ideal for parsing ASTs, protocol messages, and tagged unions.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Mutating during iteration:</strong> Modifying a list while iterating over it causes silent bugs — iterate over a copy (<code>list(lst)</code>) instead.</li>
+            <li><strong>Loop variable leaks:</strong> Unlike JavaScript <code>let</code>, the loop variable persists after the loop ends.</li>
+            <li><strong>Loop <code>else</code>:</strong> Counter-intuitive — runs only if no <code>break</code> occurred.</li>
+            <li><strong>Chained comparisons:</strong> <code>1 &lt; x &lt; 10</code> works (unlike C where it's two comparisons).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Pattern matching is used heavily in interpreter/compiler projects (e.g., parsing JSON/AST trees). Walrus is common in <code>while chunk := f.read(4096):</code> streaming loops. Loop-<code>else</code> is used in search loops where you only execute fallback logic if nothing was found.</span></div>
+        </div>
 
 <pre><code><span class="cm"># ── if / elif / else ──</span>
 score = <span class="n">85</span>
@@ -1004,6 +1133,34 @@ count = <span class="n">0</span>
     <!-- ═══════════════════════════════════════════ -->
     <section id="functions">
         <h2><span class="sec-num">04</span> Functions</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A Python function is a <strong>first-class object</strong> defined with <code>def</code> (or anonymously with <code>lambda</code>). Because functions are objects, you can assign them to variables, pass them as arguments, return them from other functions, store them in lists/dicts, and attach attributes to them. Functions have introspection data (<code>__name__</code>, <code>__doc__</code>, <code>__annotations__</code>, <code>__defaults__</code>, <code>__closure__</code>) and support a remarkably flexible argument system: positional, keyword, default, variadic <code>*args</code>, keyword-only <code>**kwargs</code>, positional-only <code>/</code>, and keyword-only <code>*</code> separators.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Default arguments:</strong> <code>def f(x=10):</code> — evaluated <em>once at definition time</em>, not per call. This is the source of the infamous "mutable default" bug.</li>
+            <li><strong>Keyword arguments:</strong> <code>f(name="Alice", age=30)</code> — improves readability, order doesn't matter.</li>
+            <li><strong>Variadic args:</strong> <code>*args</code> collects extras into a tuple; <code>**kwargs</code> into a dict.</li>
+            <li><strong>Positional-only / keyword-only:</strong> <code>def f(a, b, /, c, *, d):</code> — <code>a,b</code> must be positional, <code>d</code> must be keyword.</li>
+            <li><strong>Docstrings:</strong> First string literal in the body becomes <code>__doc__</code> — used by <code>help()</code> and doc generators like Sphinx.</li>
+            <li><strong>Type hints:</strong> <code>def add(x: int, y: int) -> int:</code> — ignored at runtime, used by <code>mypy</code>, IDEs, and runtime validators like Pydantic.</li>
+            <li><strong>Lambdas:</strong> Single-expression anonymous functions — <code>lambda x: x*2</code>. No statements allowed.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> Python has no hoisting — functions must be defined before use. JS's <code>function</code> declarations hoist; Python's <code>def</code> does not. Python has true keyword args; JS fakes them with object destructuring.</li>
+            <li><strong>vs Java:</strong> Java overloads by signature (multiple <code>add(int, int)</code> / <code>add(double, double)</code>); Python does not — last definition wins. Python uses default args and <code>@singledispatch</code> instead.</li>
+            <li><strong>vs Go:</strong> Go returns multiple values natively (<code>return x, err</code>); Python fakes this with tuples. Go has no default args or keyword args at all.</li>
+            <li><strong>vs C++:</strong> No function overloading, no templates, no <code>const</code>-ness. But Python functions can take <em>any</em> callable with <em>any</em> shape.</li>
+            <li><strong>vs Ruby:</strong> Ruby makes <code>return</code> optional (last expression is returned); Python requires explicit <code>return</code>. Ruby blocks/procs are more central than Python lambdas.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Functions are the fundamental unit of reuse and abstraction in Python. The flexible argument system means one function can serve many call styles. First-class function support enables <strong>decorators, higher-order functions, callbacks, strategy patterns, and functional composition</strong> — patterns that require verbose boilerplate in Java/C++.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Mutable default args:</strong> <code>def f(items=[]):</code> — the list is shared across all calls! Use <code>def f(items=None): items = items or []</code>.</li>
+            <li><strong>Late binding in closures:</strong> <code>[lambda: i for i in range(3)]</code> all return 2, not 0,1,2. Fix with <code>lambda i=i: i</code>.</li>
+            <li><strong>Missing <code>return</code>:</strong> Functions without <code>return</code> implicitly return <code>None</code> — easy to forget.</li>
+            <li><strong>Shadowing built-ins:</strong> <code>def list(): ...</code> silently hides the built-in <code>list</code> type.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every Python framework is built on functions: <strong>Flask/FastAPI route handlers</strong>, <strong>Django views</strong>, <strong>pytest test functions</strong>, <strong>Click/Typer CLI commands</strong>, <strong>Celery tasks</strong>, <strong>AWS Lambda handlers</strong>. The <code>functools</code> module (<code>reduce</code>, <code>partial</code>, <code>lru_cache</code>, <code>wraps</code>) is pure functional-programming gold used in nearly every real codebase.</span></div>
+        </div>
 
 <pre><code><span class="cm"># ── Defining ──</span>
 <span class="kw">def</span> <span class="fn">greet</span>(name):
@@ -1194,6 +1351,33 @@ nums = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</s
     <!-- ═══════════════════════════════════════════ -->
     <section id="data-structures">
         <h2><span class="sec-num">05</span> Data Structures</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python ships with four core <strong>built-in container types</strong> baked into the language: <code>list</code> (ordered, mutable, allows duplicates), <code>tuple</code> (ordered, <em>immutable</em>, hashable if contents are), <code>dict</code> (insertion-ordered since 3.7, mutable key-value map with O(1) average lookup), and <code>set</code> (unordered, mutable, no duplicates, hash-based). All four are implemented in C for speed and are deeply integrated with syntax (literals, comprehensions, unpacking, destructuring).</span></div>
+          <div class="concept-row"><span class="concept-label">The four core types</span><span class="concept-text"><ul>
+            <li><strong><code>list</code>:</strong> <code>[1, 2, 3]</code> — dynamic array (amortized O(1) append), supports slicing, comprehensions, and in-place mutation.</li>
+            <li><strong><code>tuple</code>:</strong> <code>(1, 2, 3)</code> — immutable, slightly smaller and faster than list, hashable (can be a dict key), used for fixed records and multi-return values.</li>
+            <li><strong><code>dict</code>:</strong> <code>{"k": 1}</code> — open-addressing hash table with key-order preservation since 3.7. Used as the backbone of Python (modules, classes, namespaces are all dicts).</li>
+            <li><strong><code>set</code>:</strong> <code>{1, 2, 3}</code> — hash set with O(1) membership test. Supports union <code>|</code>, intersection <code>&amp;</code>, difference <code>-</code>, symmetric diff <code>^</code>.</li>
+            <li><strong><code>collections</code> extras:</strong> <code>deque</code> (O(1) appends both ends), <code>defaultdict</code>, <code>Counter</code>, <code>OrderedDict</code>, <code>ChainMap</code>, <code>namedtuple</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS has only <code>Array</code> and <code>Object</code> (plus ES6 <code>Map</code>/<code>Set</code>). Python's dict is insertion-ordered natively; JS object key order is quirky. Python tuples have no JS equivalent.</li>
+            <li><strong>vs Java:</strong> Java requires <code>ArrayList&lt;Integer&gt;</code>, <code>HashMap&lt;K,V&gt;</code>, <code>HashSet&lt;T&gt;</code> with explicit generics. Python's literal syntax (<code>[]</code>, <code>{}</code>, <code>()</code>) is vastly terser.</li>
+            <li><strong>vs Go:</strong> Go has slices, maps, and no built-in set. Go maps have no ordering guarantee; Python dicts do. Go has no tuple literals (use structs).</li>
+            <li><strong>vs C++:</strong> Python dict ≈ <code>std::unordered_map</code>, list ≈ <code>std::vector</code>, set ≈ <code>std::unordered_set</code>, but with type-erased elements and GC.</li>
+            <li><strong>vs Ruby:</strong> Ruby has Array, Hash, Set (stdlib), Symbol — no immutable tuple equivalent. Ruby hash also preserves insertion order.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use each</span><span class="concept-text"><strong>list</strong> for ordered collections you'll modify; <strong>tuple</strong> for fixed records, multi-return, and dict keys; <strong>dict</strong> for key-value lookup and as a general-purpose record type; <strong>set</strong> for deduplication and membership testing. Correct choice is often O(n²) vs O(n) — e.g., use a set, not a list, for <code>if x in collection</code> in a hot loop.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Shallow copy:</strong> <code>a = b[:]</code> copies the outer list but nested lists are still shared.</li>
+            <li><strong>Mutable keys:</strong> Only hashable objects can be dict keys — lists and dicts can't.</li>
+            <li><strong>Set of lists:</strong> <code>{[1,2]}</code> raises <code>TypeError</code> — lists are unhashable.</li>
+            <li><strong>Dict iteration while mutating:</strong> Raises <code>RuntimeError: dictionary changed size during iteration</code>.</li>
+            <li><strong>Tuple of one:</strong> <code>(1)</code> is just <code>1</code>; you need <code>(1,)</code> — trailing comma!</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">JSON parsing produces nested <code>dict</code>/<code>list</code>. Database rows are often <code>tuple</code> or <code>namedtuple</code>. Config files load as <code>dict</code>. Deduplication uses <code>set(items)</code>. <strong>Django ORM QuerySets</strong>, <strong>pandas Index</strong>, <strong>Flask's <code>request.args</code></strong> — all built on these containers.</span></div>
+        </div>
 
         <!-- ── LISTS ── -->
         <h3>Lists — Ordered, Mutable</h3>
@@ -1804,6 +1988,35 @@ common = <span class="bi">list</span>(<span class="bi">set</span>(list1) & <span
     <!-- ═══════════════════════════════════════════ -->
     <section id="oop">
         <h2><span class="sec-num">06</span> OOP & Classes</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python's object-oriented system is based on <strong>classes as first-class objects</strong> created at runtime by a <em>metaclass</em> (default: <code>type</code>). Everything — integers, strings, functions, modules, even classes themselves — is an instance of some class. Python OOP supports <strong>encapsulation</strong> (by convention, not enforced), <strong>inheritance</strong> (single and multiple with C3 linearization MRO), and <strong>polymorphism</strong> (primarily via duck typing, not interfaces). The entire object model is exposed for introspection: you can list attributes, walk the MRO, and even replace methods at runtime.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Everything is an object:</strong> <code>type(42)</code> is <code>int</code>, <code>type(int)</code> is <code>type</code>, <code>type(type)</code> is <code>type</code> (self-referential).</li>
+            <li><strong>Explicit self:</strong> The first parameter of instance methods is always <code>self</code> — explicit rather than implicit like Java's <code>this</code>.</li>
+            <li><strong>No true private:</strong> <code>_name</code> is convention for "protected", <code>__name</code> triggers name-mangling (<code>_ClassName__name</code>). Nothing is actually hidden.</li>
+            <li><strong>Class/static methods:</strong> <code>@classmethod</code> receives the class, <code>@staticmethod</code> receives nothing.</li>
+            <li><strong>Properties:</strong> <code>@property</code> turns method calls into attribute access — no getters/setters boilerplate.</li>
+            <li><strong>Duck typing:</strong> No interface declarations needed; if an object has <code>.read()</code>, it's "file-like".</li>
+            <li><strong>Multiple inheritance:</strong> With C3 linearization (MRO) for method resolution.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> No <code>public</code>/<code>private</code>/<code>protected</code> keywords, no interfaces (use ABCs or Protocols), no checked exceptions, supports multiple inheritance (Java only single + interfaces).</li>
+            <li><strong>vs JavaScript:</strong> Python classes are real classes, not prototype sugar. Python supports multiple inheritance; JS only single via <code>extends</code>.</li>
+            <li><strong>vs C++:</strong> No operator overloading via <code>operator+</code> — Python uses dunder methods (<code>__add__</code>). No templates; everything is runtime.</li>
+            <li><strong>vs Go:</strong> Go has no classes at all — just structs with methods and interfaces satisfied structurally. Python has classes; Go has composition only.</li>
+            <li><strong>vs Ruby:</strong> Very similar philosophy. Ruby has true private, open classes (monkey-patching is idiomatic). Python can monkey-patch but it's frowned upon.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">OOP in Python is best used for <strong>modeling domain entities</strong> (users, orders, HTTP requests), <strong>grouping state and behavior</strong>, and <strong>building polymorphic plugin systems</strong>. For simple data containers, prefer <code>@dataclass</code> or <code>pydantic.BaseModel</code> over raw classes. Python doesn't force OOP — many real codebases use a mix of functions, dataclasses, and occasional classes.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Class vs instance attributes:</strong> Mutable class attributes (e.g., <code>items = []</code>) are shared across all instances — a famous bug.</li>
+            <li><strong>Forgetting <code>self</code>:</strong> <code>def method(x):</code> inside a class is a common error — <code>self</code> must be first.</li>
+            <li><strong>Overriding <code>__init__</code> without <code>super().__init__()</code>:</strong> Breaks parent initialization.</li>
+            <li><strong>Equality:</strong> Default <code>==</code> compares identity, not value. Override <code>__eq__</code> (and then <code>__hash__</code>).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Django models</strong> (<code>class User(Model)</code>), <strong>SQLAlchemy ORM</strong>, <strong>Pydantic BaseModel</strong>, <strong>PyTorch <code>nn.Module</code></strong>, <strong>Flask View classes</strong>, <strong>Celery Tasks</strong>, <strong>pytest fixtures via classes</strong> — OOP is the foundation of every major Python framework.</span></div>
+        </div>
+
         <p>A <strong>class</strong> = blueprint. An <strong>object</strong> = instance created from that blueprint.</p>
 
 <pre><code><span class="kw">class</span> <span class="fn">Dog</span>:
@@ -2077,6 +2290,29 @@ p = Pizza.margherita()                     <span class="cm"># classmethod — fa
     <section id="init">
         <h2><span class="sec-num">07</span> __init__ & self — Complete Explanation</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What are they</span><span class="concept-text"><code>__init__</code> is Python's <strong>initializer</strong> (not a constructor!) — it's called <em>after</em> the object is already created by <code>__new__</code>. Its job is to set up instance attributes. <code>self</code> is simply the <strong>first positional parameter</strong> of every instance method; Python automatically passes the current instance as that argument when you call <code>obj.method()</code>. The name "self" is a strong convention — you could technically name it anything, but don't.</span></div>
+          <div class="concept-row"><span class="concept-label">The two-step creation process</span><span class="concept-text"><ul>
+            <li><strong>Step 1 — <code>__new__(cls, ...)</code>:</strong> The <em>real</em> constructor. Allocates memory and returns a new instance. Almost never overridden except for singletons, immutable types, or metaclass magic.</li>
+            <li><strong>Step 2 — <code>__init__(self, ...)</code>:</strong> The initializer. Receives the freshly-created instance and populates attributes like <code>self.name = name</code>. Returns <code>None</code> (never <code>return</code> a value).</li>
+            <li><strong>Why two steps:</strong> Immutable types like <code>int</code>, <code>tuple</code>, and <code>str</code> need to lock in values in <code>__new__</code> because attributes can't be set afterward.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java/C++ constructors:</strong> Java's <code>Foo()</code> both allocates and initializes. Python splits it. Also Java constructors can be overloaded by signature; Python can't (use default args or classmethods instead).</li>
+            <li><strong>vs JavaScript:</strong> JS <code>constructor()</code> is analogous but implicit — no need to name it explicitly in every call. JS has no <code>self</code> parameter; it uses implicit <code>this</code>.</li>
+            <li><strong>vs Go:</strong> Go has no constructors at all — convention is <code>NewFoo(...)</code> functions returning structs. No <code>self</code>; Go uses an explicit receiver <code>(f *Foo)</code> in method signatures, which is spiritually identical to Python's <code>self</code>.</li>
+            <li><strong>vs Ruby:</strong> Ruby's initializer is <code>initialize</code>, invoked by <code>Foo.new</code>. Ruby uses <code>self</code> implicitly (no <code>self.</code> prefix needed most of the time).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why explicit self</span><span class="concept-text">Guido van Rossum wrote a famous blog post defending it: explicit <code>self</code> makes <strong>method definition and call-site behavior consistent</strong>, allows decorators and descriptors to work cleanly, and makes the scope of attribute lookup unambiguous (<code>self.x</code> vs <code>x</code>). Most importantly, it makes <code>cls.method(instance)</code> and <code>instance.method()</code> trivially equivalent.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Forgetting <code>self</code>:</strong> <code>def greet():</code> inside a class causes <code>TypeError: greet() takes 0 positional arguments but 1 was given</code>.</li>
+            <li><strong>Returning from <code>__init__</code>:</strong> <code>return "something"</code> raises <code>TypeError: __init__() should return None</code>.</li>
+            <li><strong>Shadowing <code>self</code>:</strong> <code>self = something_else</code> inside a method only rebinds the local name; the original object is untouched.</li>
+            <li><strong>Calling parent's init:</strong> Must use <code>super().__init__(...)</code> explicitly — it's not automatic.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Every Django model's <code>__init__</code></strong> accepts <code>**kwargs</code> to populate fields. <strong>Pydantic's <code>BaseModel</code></strong> auto-generates an <code>__init__</code> from type hints. <strong>dataclasses</strong> generate <code>__init__</code>, <code>__repr__</code>, and <code>__eq__</code> via the <code>@dataclass</code> decorator — eliminating boilerplate for 90% of cases.</span></div>
+        </div>
+
         <div class="callout">
             <strong>This is the most-asked question in Python.</strong> Let's kill it once and for all.
         </div>
@@ -2166,6 +2402,36 @@ d = Dog(<span class="s">"Rex"</span>)
     <!-- ═══════════════════════════════════════════ -->
     <section id="dunder">
         <h2><span class="sec-num">08</span> Magic / Dunder Methods</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">"Dunder" (double-underscore) methods, also called <strong>magic methods</strong> or <strong>special methods</strong>, are hooks Python calls automatically when your object is used with built-in operators, functions, or language constructs. They're the engine behind Python's <strong>operator overloading and protocol-based polymorphism</strong>. Implementing <code>__len__</code> makes <code>len(obj)</code> work; implementing <code>__iter__</code> makes your object usable in <code>for x in obj:</code>; implementing <code>__add__</code> makes <code>obj + other</code> work. They're how you make user-defined classes feel like built-in types.</span></div>
+          <div class="concept-row"><span class="concept-label">Key categories</span><span class="concept-text"><ul>
+            <li><strong>Lifecycle:</strong> <code>__new__</code>, <code>__init__</code>, <code>__del__</code>, <code>__init_subclass__</code>.</li>
+            <li><strong>Representation:</strong> <code>__str__</code> (human-readable, for <code>print</code>), <code>__repr__</code> (unambiguous, for REPL and debugging), <code>__format__</code>, <code>__bytes__</code>.</li>
+            <li><strong>Comparison:</strong> <code>__eq__</code>, <code>__lt__</code>, <code>__le__</code>, <code>__gt__</code>, <code>__ge__</code>, <code>__hash__</code>.</li>
+            <li><strong>Arithmetic:</strong> <code>__add__</code>, <code>__sub__</code>, <code>__mul__</code>, <code>__truediv__</code>, <code>__floordiv__</code>, <code>__mod__</code>, <code>__pow__</code>, plus reversed (<code>__radd__</code>) and in-place (<code>__iadd__</code>) variants.</li>
+            <li><strong>Container:</strong> <code>__len__</code>, <code>__getitem__</code>, <code>__setitem__</code>, <code>__delitem__</code>, <code>__contains__</code>, <code>__iter__</code>, <code>__next__</code>.</li>
+            <li><strong>Callable:</strong> <code>__call__</code> — makes instances callable like functions.</li>
+            <li><strong>Context manager:</strong> <code>__enter__</code>, <code>__exit__</code>.</li>
+            <li><strong>Attribute access:</strong> <code>__getattr__</code>, <code>__setattr__</code>, <code>__getattribute__</code>, <code>__delattr__</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs C++/C#:</strong> C++ has <code>operator+</code>, <code>operator==</code>, etc. as language keywords. Python's approach is more general — the protocols are just methods, so a third-party class can fully impersonate a builtin.</li>
+            <li><strong>vs Java:</strong> Java has NO operator overloading (except <code>+</code> for strings). Equivalents like <code>.equals()</code>, <code>.hashCode()</code>, <code>.compareTo()</code>, <code>.toString()</code> are interface methods with no operator sugar.</li>
+            <li><strong>vs JavaScript:</strong> JS has almost no operator overloading — no way to define <code>a + b</code> for custom objects except by coercion via <code>Symbol.toPrimitive</code>.</li>
+            <li><strong>vs Ruby:</strong> Ruby also allows defining <code>+</code>, <code>[]</code>, etc. as methods but uses cleaner names (<code>+</code>, <code>&lt;=&gt;</code>). Ruby's <code>to_s</code> ≈ Python's <code>__str__</code>.</li>
+            <li><strong>vs Go:</strong> Go has NO operator overloading at all — types support only the operators the language knows about.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Dunder methods let you build <strong>domain types that feel native</strong> — a <code>Vector</code> class you can add with <code>+</code>, a <code>Matrix</code> you can index with <code>m[i,j]</code>, a <code>Money</code> type you can compare with <code>&lt;</code>. They're also the glue for Python's <strong>protocols</strong>: the "iterator protocol", "context manager protocol", "sequence protocol" are all just "implement these dunders".</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong><code>__eq__</code> without <code>__hash__</code>:</strong> Overriding <code>__eq__</code> sets <code>__hash__</code> to <code>None</code>, making the class unhashable.</li>
+            <li><strong><code>__repr__</code> should be unambiguous:</strong> Ideally valid Python that recreates the object.</li>
+            <li><strong><code>__del__</code> is unreliable:</strong> Not guaranteed to run (circular refs, interpreter shutdown). Use context managers instead.</li>
+            <li><strong><code>__getattr__</code> vs <code>__getattribute__</code>:</strong> The former is only called when normal lookup fails; the latter is called for <em>every</em> attribute access (dangerous).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>NumPy arrays</strong> implement nearly every arithmetic dunder for element-wise ops. <strong>pathlib.Path</strong> uses <code>__truediv__</code> so you can write <code>Path("/") / "tmp" / "file"</code>. <strong>SQLAlchemy</strong> overloads <code>__eq__</code>, <code>__lt__</code> on columns to build SQL WHERE clauses. <strong>collections.OrderedDict</strong> customizes iteration dunders.</span></div>
+        </div>
+
         <p>Double-underscore methods let your objects work with Python's operators and built-in functions.</p>
 
 <pre><code><span class="kw">class</span> <span class="fn">Vector</span>:
@@ -2237,6 +2503,33 @@ x, y = v1            <span class="cm"># unpacking via __iter__</span></code></pr
     <!-- ═══════════════════════════════════════════ -->
     <section id="inheritance">
         <h2><span class="sec-num">09</span> Inheritance & MRO</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python supports <strong>multiple inheritance</strong> — a class can extend any number of parent classes. When an attribute or method is looked up on an instance, Python walks the class hierarchy in a specific order called the <strong>Method Resolution Order (MRO)</strong>, computed using the <strong>C3 linearization algorithm</strong>. C3 guarantees that (a) subclasses come before parents, (b) parent order from the class declaration is preserved, and (c) any shared ancestor appears only once. You can inspect the MRO with <code>ClassName.__mro__</code> or <code>ClassName.mro()</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Single inheritance:</strong> <code>class Dog(Animal):</code> — the common case.</li>
+            <li><strong>Multiple inheritance:</strong> <code>class SmartPhone(Phone, Camera, Computer):</code> — parents listed left-to-right.</li>
+            <li><strong><code>super()</code>:</strong> Calls the "next class in the MRO" — not necessarily the direct parent. Essential for cooperative multiple inheritance.</li>
+            <li><strong>Mixins:</strong> Small classes providing specific functionality, meant to be combined (e.g., Django's <code>LoginRequiredMixin</code>).</li>
+            <li><strong>Abstract Base Classes (ABCs):</strong> <code>from abc import ABC, abstractmethod</code> — enforces subclasses to implement certain methods.</li>
+            <li><strong><code>isinstance</code>/<code>issubclass</code>:</strong> Runtime type checks that respect the inheritance hierarchy.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java/C#:</strong> Java forbids multiple inheritance of classes — you must use interfaces (or default methods). Python allows it but with C3 MRO to avoid the "diamond problem".</li>
+            <li><strong>vs C++:</strong> C++ allows multiple inheritance but leaves diamond problem to the programmer (via <code>virtual</code> base classes). Python solves it automatically.</li>
+            <li><strong>vs JavaScript:</strong> JS only supports single prototype chain inheritance. Mixins must be simulated by copying properties.</li>
+            <li><strong>vs Go:</strong> Go has no inheritance at all — only composition via embedded structs. Polymorphism comes from interfaces.</li>
+            <li><strong>vs Ruby:</strong> Ruby has single inheritance + modules (mixins via <code>include</code>). Very similar in spirit to Python's multiple inheritance.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Inheritance is best for modeling <strong>"is-a"</strong> relationships and sharing implementation. <strong>Mixins</strong> are the idiomatic way to compose behaviors (e.g., <code>JsonSerializableMixin</code>, <code>TimestampMixin</code>). ABCs enforce contracts. But the modern Python wisdom is "<strong>composition over inheritance</strong>" — deep hierarchies become hard to reason about.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Diamond problem:</strong> If <code>D(B, C)</code> and both <code>B</code> and <code>C</code> inherit from <code>A</code>, MRO ensures <code>A</code> is visited once. But all classes must call <code>super().__init__()</code> for this to work.</li>
+            <li><strong>Forgetting <code>super()</code>:</strong> Breaks the MRO chain — later parents' <code>__init__</code> methods never run.</li>
+            <li><strong>MRO conflicts:</strong> Some multi-inheritance layouts are impossible to linearize and raise <code>TypeError</code> at class creation.</li>
+            <li><strong>Calling <code>ParentClass.method(self, ...)</code>:</strong> Bypasses MRO — almost always wrong in multi-inheritance.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Django's class-based views</strong> use heavy mixin composition (<code>LoginRequiredMixin</code>, <code>PermissionRequiredMixin</code>, <code>ListView</code>). <strong>Flask-RESTful resources</strong> subclass <code>Resource</code>. <strong>SQLAlchemy models</strong> inherit from a <code>declarative_base()</code>. <strong>PyTorch layers</strong> subclass <code>nn.Module</code> — all leveraging inheritance and MRO.</span></div>
+        </div>
 
 <pre><code><span class="kw">class</span> <span class="fn">Animal</span>:
     <span class="kw">def</span> <span class="fn">__init__</span>(self, name):
@@ -2410,6 +2703,35 @@ acc = BankAccount(<span class="n">1000</span>)
     <section id="errors">
         <h2><span class="sec-num">10</span> Error Handling</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python uses <strong>exceptions</strong> as its primary error-handling mechanism, built around the <code>try</code> / <code>except</code> / <code>else</code> / <code>finally</code> construct. Exceptions are <em>objects</em> derived from <code>BaseException</code>, with the common ancestor <code>Exception</code> for all user-catchable errors. Python embraces a philosophy known as <strong>EAFP — "Easier to Ask Forgiveness than Permission"</strong> — attempt the operation and handle failure, instead of checking preconditions first (LBYL — "Look Before You Leap"). This makes Python code often shorter and race-condition-free.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong><code>try</code>/<code>except</code>:</strong> Catch one or more exception types. Use <code>except (TypeError, ValueError) as e:</code> for multiple.</li>
+            <li><strong><code>else</code>:</strong> Runs only if no exception was raised — useful for narrowing the try block.</li>
+            <li><strong><code>finally</code>:</strong> Always runs — for cleanup (file handles, locks, connections).</li>
+            <li><strong><code>raise</code>:</strong> Throws an exception. <code>raise ValueError("msg")</code> or <code>raise</code> alone to re-raise.</li>
+            <li><strong>Exception chaining:</strong> <code>raise NewError from original_err</code> preserves the cause in tracebacks.</li>
+            <li><strong>Custom exceptions:</strong> Subclass <code>Exception</code>: <code>class AppError(Exception): pass</code>.</li>
+            <li><strong><code>except*</code>:</strong> Python 3.11+ — catches individual exceptions inside an <code>ExceptionGroup</code> (for async code).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java has <strong>checked exceptions</strong> — compiler forces you to declare or catch them. Python has no checked exceptions; any function can raise anything.</li>
+            <li><strong>vs Go:</strong> Go uses <code>error</code> return values, not exceptions — <code>if err != nil</code> is idiomatic. Python exceptions give cleaner happy-path code but hide control flow.</li>
+            <li><strong>vs Rust:</strong> Rust uses <code>Result&lt;T, E&gt;</code> and the <code>?</code> operator. Forces explicit handling at every call site.</li>
+            <li><strong>vs JavaScript:</strong> Very similar <code>try</code>/<code>catch</code>. JS has no <code>else</code> clause. Async errors need <code>try/catch</code> inside <code>async</code> functions or <code>.catch()</code> on promises.</li>
+            <li><strong>vs C++:</strong> Similar exception model but C++ discourages exceptions in performance-sensitive code. No <code>finally</code> — use RAII instead.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Exceptions separate <strong>happy-path logic</strong> from <strong>error-handling logic</strong>, making normal code cleaner. They propagate automatically up the call stack, so deeply nested callers don't need explicit error returns. Python's <strong>EAFP style</strong> also sidesteps TOCTOU (time-of-check to time-of-use) bugs that plague LBYL code.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Bare <code>except:</code>:</strong> Catches <em>everything</em> including <code>KeyboardInterrupt</code> and <code>SystemExit</code>. Use <code>except Exception:</code> instead.</li>
+            <li><strong>Catching too broadly:</strong> <code>except Exception:</code> can swallow bugs. Catch the specific type.</li>
+            <li><strong>Losing the original traceback:</strong> When re-raising, use <code>raise NewError from e</code> to preserve chain.</li>
+            <li><strong>Resource leaks:</strong> Without <code>finally</code> or <code>with</code>, exceptions can leak file/socket/lock resources.</li>
+            <li><strong><code>except</code> order:</strong> List specific exceptions before general ones — Python checks top-to-bottom.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Flask/FastAPI</strong> catch framework exceptions and return HTTP error responses. <strong>SQLAlchemy</strong> raises <code>IntegrityError</code>, <code>OperationalError</code>. <strong>requests</strong> raises <code>ConnectionError</code>, <code>Timeout</code>, <code>HTTPError</code>. Custom domain exceptions (<code>PaymentFailed</code>, <code>InvalidTokenError</code>) form the error vocabulary of any mature Python app.</span></div>
+        </div>
+
 <pre><code><span class="cm"># ── try / except / else / finally ──</span>
 <span class="kw">try</span>:
     result = <span class="n">10</span> / <span class="n">0</span>
@@ -2539,6 +2861,34 @@ acct = BankAccount(<span class="n">100</span>)
     <section id="files">
         <h2><span class="sec-num">11</span> File Handling</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python exposes file I/O through the built-in <code>open()</code> function, which returns a <strong>file object</strong> that implements the iterator protocol and the context manager protocol. The idiomatic form is always <code>with open(path) as f:</code> — the <code>with</code> statement guarantees the file is closed even if an exception occurs. The <code>io</code> module underlies everything: <code>TextIOWrapper</code>, <code>BufferedReader</code>, <code>BufferedWriter</code>, and raw <code>FileIO</code>. Modern Python also provides <code>pathlib.Path</code> for object-oriented path manipulation that's more pleasant than <code>os.path</code> string-juggling.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Modes:</strong> <code>'r'</code> (read), <code>'w'</code> (write, truncate), <code>'a'</code> (append), <code>'x'</code> (exclusive create), <code>'r+'</code> (read/write), plus <code>'b'</code> for binary and <code>'t'</code> for text (default).</li>
+            <li><strong>Text vs binary:</strong> Text mode returns <code>str</code> and handles encoding (default UTF-8 since 3.15). Binary mode returns <code>bytes</code>.</li>
+            <li><strong>Encoding:</strong> <code>open(path, encoding="utf-8")</code> — always specify explicitly for portability.</li>
+            <li><strong>Iteration:</strong> <code>for line in f:</code> streams line-by-line without loading the whole file.</li>
+            <li><strong><code>pathlib</code>:</strong> <code>Path("file.txt").read_text()</code> / <code>.write_text()</code> / <code>.read_bytes()</code> — one-liner helpers.</li>
+            <li><strong>Seeking:</strong> <code>f.seek(offset)</code> / <code>f.tell()</code> for random access.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java's old <code>FileReader</code>/<code>BufferedReader</code> is verbose. Java 7+ added try-with-resources (similar to Python's <code>with</code>). Java NIO <code>Files.readString(path)</code> is closest to Python's <code>read_text()</code>.</li>
+            <li><strong>vs Go:</strong> Go uses <code>os.Open</code>, returns <code>*os.File</code> and <code>error</code>. Requires <code>defer f.Close()</code> — no built-in context manager.</li>
+            <li><strong>vs JavaScript (Node.js):</strong> Node uses <code>fs.readFile</code> (async) or <code>fs.readFileSync</code>. No context manager; callbacks or async/await.</li>
+            <li><strong>vs C:</strong> C's <code>fopen</code>/<code>fclose</code> is manual, error-prone, and encoding-ignorant. Python abstracts it all away.</li>
+            <li><strong>vs Rust:</strong> Rust's <code>File</code> + <code>BufReader</code> is explicit about buffering and encoding. Similar RAII close behavior but via <code>Drop</code>, not context managers.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">File I/O is needed for <strong>reading configs, writing logs, processing CSVs/JSON, generating reports, parsing large datasets</strong>. The streaming iterator protocol makes Python excellent for processing files larger than RAM — just iterate line-by-line.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Forgetting <code>with</code>:</strong> Leaks file descriptors. Always use <code>with</code>.</li>
+            <li><strong>Encoding drift:</strong> On Windows, default encoding was <code>cp1252</code> pre-3.15 — caused silent corruption. Always pass <code>encoding="utf-8"</code>.</li>
+            <li><strong>Reading huge files with <code>.read()</code>:</strong> Loads entire file into memory. Use iteration for large files.</li>
+            <li><strong>Writing without newline:</strong> <code>f.write("line")</code> does NOT add <code>\n</code>. You need <code>f.write("line\n")</code> or use <code>print(..., file=f)</code>.</li>
+            <li><strong>Binary on Windows:</strong> Text mode translates <code>\r\n</code> ↔ <code>\n</code>. Use binary mode for exact bytes.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Config loaders (<code>yaml.safe_load(f)</code>), log file tailers, CSV importers (<code>csv.DictReader(f)</code>), JSON API dumps (<code>json.dump(data, f)</code>), <strong>pandas <code>read_csv</code></strong> (uses C-level file I/O underneath), <strong>Jupyter notebook .ipynb</strong> serialization — all built on Python's file API.</span></div>
+        </div>
+
 <pre><code><span class="cm"># ALWAYS use `with` — auto-closes, even on exception</span>
 <span class="kw">with</span> <span class="bi">open</span>(<span class="s">"data.txt"</span>, <span class="s">"w"</span>) <span class="kw">as</span> f:
     f.write(<span class="s">"Hello\nWorld\n"</span>)
@@ -2662,6 +3012,35 @@ users = [{<span class="s">"name"</span>: <span class="s">"Yatin"</span>, <span c
     <!-- ═══════════════════════════════════════════ -->
     <section id="modules">
         <h2><span class="sec-num">12</span> Modules, Packages & Project Structure</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>module</strong> is any <code>.py</code> file — importing it runs the file top-to-bottom and binds the resulting namespace to a name. A <strong>package</strong> is a directory containing an <code>__init__.py</code> (marker file, empty is fine) plus one or more modules or subpackages. Python also supports <strong>namespace packages</strong> (no <code>__init__.py</code>, introduced in 3.3, PEP 420) that can be split across multiple directories. Imports are resolved via <code>sys.path</code>, which Python populates from the script's directory, <code>PYTHONPATH</code> env var, and installed site-packages.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Absolute imports:</strong> <code>from myapp.utils import helper</code> — preferred style.</li>
+            <li><strong>Relative imports:</strong> <code>from .utils import helper</code> (same package), <code>from ..models import User</code> (parent package).</li>
+            <li><strong><code>__init__.py</code>:</strong> Marks a directory as a package; code runs when the package is first imported.</li>
+            <li><strong><code>__main__.py</code>:</strong> Lets you run a package with <code>python -m mypackage</code>.</li>
+            <li><strong><code>if __name__ == "__main__":</code>:</strong> The classic idiom — code runs only when the file is executed directly, not when imported.</li>
+            <li><strong><code>pyproject.toml</code>:</strong> Modern (PEP 517/518/621) way to declare dependencies, build system, and metadata. Replaces <code>setup.py</code>.</li>
+            <li><strong>Virtual environments:</strong> <code>venv</code> (stdlib), <code>virtualenv</code>, <code>poetry</code>, <code>uv</code>, <code>pipenv</code> — all provide isolated dependency trees.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS has ESM (<code>import</code>) and CommonJS (<code>require</code>), with <code>package.json</code> and <code>node_modules</code>. Python has one import system but historically fragmented tooling (pip, poetry, conda, uv).</li>
+            <li><strong>vs Java:</strong> Java packages are tied to directory structure with a strict naming convention (<code>com.company.app</code>). Python uses <code>sys.path</code> for flexibility but it can lead to confusing import errors.</li>
+            <li><strong>vs Go:</strong> Go modules (<code>go.mod</code>) enforce semver and module paths. Go's imports are stricter — no circular imports allowed at all. Python allows circular imports but they're fragile.</li>
+            <li><strong>vs Ruby:</strong> Ruby has <code>require</code> / <code>require_relative</code> and Bundler with <code>Gemfile</code>. Similar in spirit to Python's system.</li>
+            <li><strong>vs C/C++:</strong> Header files and linker. Python's import system is dramatically simpler but purely runtime.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Modules and packages enable <strong>code organization, reuse, and distribution</strong>. Publishing to PyPI via <code>pip install mypackage</code> requires proper package structure. Virtual environments isolate project dependencies so two apps can use different versions of the same library.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Circular imports:</strong> <code>a.py</code> imports <code>b.py</code> which imports <code>a.py</code> — often raises <code>ImportError</code> for names. Fix by moving imports inside functions or restructuring.</li>
+            <li><strong><code>ImportError</code> vs <code>ModuleNotFoundError</code>:</strong> The latter (3.6+) is a subclass — module wasn't found at all.</li>
+            <li><strong>Running scripts inside packages:</strong> <code>python myapp/main.py</code> often breaks relative imports. Use <code>python -m myapp.main</code> instead.</li>
+            <li><strong>Shadowing stdlib:</strong> Naming your file <code>email.py</code> or <code>json.py</code> breaks <code>import email</code>.</li>
+            <li><strong>Global state in <code>__init__.py</code>:</strong> Runs once per process — side effects can create hidden dependencies.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every Python project uses modules. <strong>Django</strong> apps are Python packages with a convention (<code>models.py</code>, <code>views.py</code>, <code>urls.py</code>). <strong>FastAPI</strong> apps structure routers as submodules. <strong>NumPy</strong>, <strong>pandas</strong>, <strong>requests</strong> are all packages. Modern tooling: <code>uv</code>, <code>poetry</code>, <code>hatch</code>, <code>pdm</code> — all build on <code>pyproject.toml</code>.</span></div>
+        </div>
 
         <h3>Modules</h3>
         <p>A module is just a <code>.py</code> file. <code>import</code> executes it and gives you access to its contents.</p>
@@ -3099,6 +3478,35 @@ models.user                              <span class="cm"># ❌ AttributeError: 
     <section id="comprehensions">
         <h2><span class="sec-num">13</span> Comprehensions</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Comprehensions are Python's <strong>declarative, expression-based way to build collections</strong> from iterables, combining mapping and filtering into a single construct. They come in four flavors: <strong>list</strong> <code>[x*2 for x in nums]</code>, <strong>set</strong> <code>{x for x in nums}</code>, <strong>dict</strong> <code>{k: v for k, v in pairs}</code>, and <strong>generator expression</strong> <code>(x*2 for x in nums)</code>. Comprehensions are not just syntactic sugar — they are implemented via a dedicated bytecode sequence that is typically <strong>30-50% faster</strong> than the equivalent <code>for</code> loop with <code>.append()</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">The four types</span><span class="concept-text"><ul>
+            <li><strong>List:</strong> <code>[x**2 for x in range(10)]</code> — eager, returns a list.</li>
+            <li><strong>Set:</strong> <code>{x.lower() for x in words}</code> — deduplicates automatically.</li>
+            <li><strong>Dict:</strong> <code>{k: v**2 for k, v in data.items()}</code> — builds a mapping.</li>
+            <li><strong>Generator expression:</strong> <code>(x**2 for x in range(10))</code> — lazy, no parentheses when passed as sole argument: <code>sum(x**2 for x in nums)</code>.</li>
+            <li><strong>Filtering:</strong> Append an <code>if</code> clause: <code>[x for x in nums if x &gt; 0]</code>.</li>
+            <li><strong>Nested loops:</strong> <code>[(x,y) for x in a for y in b]</code> — equivalent to nested <code>for</code>.</li>
+            <li><strong>Conditional expression:</strong> <code>[x if x &gt; 0 else 0 for x in nums]</code> — applies ternary to each element.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS uses <code>nums.map(x =&gt; x*2).filter(x =&gt; x &gt; 0)</code> — functional methods. Python comprehensions are more concise and faster than the equivalent chain.</li>
+            <li><strong>vs Java:</strong> Java Streams <code>nums.stream().map(x -&gt; x*2).collect(toList())</code> — far more verbose.</li>
+            <li><strong>vs C#:</strong> C# LINQ <code>from x in nums where x &gt; 0 select x*2</code> — closest analog, inspired Python's syntax in some ways.</li>
+            <li><strong>vs Go:</strong> Go has no comprehensions at all — you write explicit loops. This is by design (simplicity over convenience).</li>
+            <li><strong>vs Ruby:</strong> Ruby uses <code>nums.map { |x| x*2 }</code> — block-based. Similar expressiveness.</li>
+            <li><strong>vs Haskell:</strong> Python borrowed comprehension syntax directly from Haskell's list comprehensions (which themselves came from mathematical set-builder notation).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Comprehensions are <strong>concise, idiomatic, and fast</strong>. They signal intent ("I'm building a list by transforming this") more clearly than an imperative loop. Generator expressions let you stream through massive data without materializing a list — critical for memory efficiency. Pythonic code uses comprehensions liberally.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Overuse:</strong> Deeply nested or complex comprehensions become unreadable. Break into a loop if it takes 3+ seconds to parse.</li>
+            <li><strong>Side effects:</strong> <code>[print(x) for x in nums]</code> works but leaves garbage list. Use a real loop.</li>
+            <li><strong>Variable leaks:</strong> In Python 2, the loop variable leaked out; Python 3 fixed this for list/set/dict but not for generators used in comprehensions.</li>
+            <li><strong>Double evaluation:</strong> In <code>[f(x) for x in data if f(x) &gt; 0]</code>, <code>f(x)</code> is called twice. Use walrus: <code>[y for x in data if (y := f(x)) &gt; 0]</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Transforming API responses (<code>[user["name"] for user in resp.json()]</code>), building lookup dicts (<code>{u.id: u for u in users}</code>), filtering data (<code>[r for r in rows if r.active]</code>). <strong>pandas</strong> uses vectorized ops for speed, but for non-numeric data, comprehensions are the Pythonic default.</span></div>
+        </div>
+
 <pre><code><span class="cm"># ── List ──</span>
 squares = [x**<span class="n">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="bi">range</span>(<span class="n">10</span>)]
 evens = [x <span class="kw">for</span> x <span class="kw">in</span> <span class="bi">range</span>(<span class="n">20</span>) <span class="kw">if</span> x % <span class="n">2</span> == <span class="n">0</span>]
@@ -3127,6 +3535,35 @@ total = <span class="bi">sum</span>(x**<span class="n">2</span> <span class="kw"
     <!-- ═══════════════════════════════════════════ -->
     <section id="generators">
         <h2><span class="sec-num">14</span> Iterators & Generators</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>iterator</strong> in Python is any object implementing the <strong>iterator protocol</strong> — two dunder methods: <code>__iter__()</code> (returns self) and <code>__next__()</code> (returns the next value or raises <code>StopIteration</code>). Anything that Python's <code>for</code> loop can walk is an <strong>iterable</strong>, which is an object with <code>__iter__()</code> that returns an iterator. A <strong>generator</strong> is a special kind of iterator created with a function containing <code>yield</code> — Python automatically handles the protocol, state-saving, and resumption for you. Generators are the backbone of Python's lazy evaluation and streaming data processing.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Lazy evaluation:</strong> Values produced one at a time, on demand — perfect for infinite sequences or large datasets.</li>
+            <li><strong><code>yield</code>:</strong> Pauses execution, remembers state, resumes on next <code>__next__()</code> call.</li>
+            <li><strong><code>yield from</code>:</strong> Delegates to another iterable — <code>yield from sub_gen()</code>.</li>
+            <li><strong>Generator expressions:</strong> <code>(x*2 for x in nums)</code> — comprehension syntax for generators.</li>
+            <li><strong>Two-way communication:</strong> <code>gen.send(value)</code> passes data back into the generator — enabled coroutines before <code>async</code>/<code>await</code>.</li>
+            <li><strong><code>itertools</code> module:</strong> Extensive library of iterator combinators — <code>chain</code>, <code>zip_longest</code>, <code>groupby</code>, <code>takewhile</code>, <code>cycle</code>, <code>product</code>, <code>combinations</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> ES6 added generators with <code>function*</code> and <code>yield</code> — directly inspired by Python. JS also has iterators/iterables via <code>Symbol.iterator</code>.</li>
+            <li><strong>vs Java:</strong> Java has <code>Iterator&lt;T&gt;</code> and <code>Iterable&lt;T&gt;</code> interfaces but no <code>yield</code> — you must manually implement state machines. Java 8+ Streams offer lazy evaluation.</li>
+            <li><strong>vs C#:</strong> C# has <code>yield return</code>, nearly identical to Python. LINQ is heavily lazy.</li>
+            <li><strong>vs Go:</strong> Go traditionally uses channels + goroutines for streaming. Go 1.23 added range-over-func iterators — very recent.</li>
+            <li><strong>vs Rust:</strong> Rust's <code>Iterator</code> trait is extremely rich and zero-cost. No <code>yield</code> keyword (uses explicit state machines), though <code>gen</code> blocks are experimental.</li>
+            <li><strong>vs C++:</strong> C++20 added coroutines with <code>co_yield</code> — similar idea but more complex API.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Generators let you process <strong>infinite or gigabyte-scale streams</strong> with constant memory — e.g., reading a 100GB log file line by line. They decouple production from consumption (the producer doesn't care how much the consumer will read). They're also the foundation of Python's <code>async</code>/<code>await</code> system, which is a special form of generator.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Single-use:</strong> After iteration, a generator is exhausted. <code>gen = (...); list(gen); list(gen)</code> — second list is empty.</li>
+            <li><strong>No <code>len()</code>:</strong> Generators don't know their length ahead of time.</li>
+            <li><strong>Forgetting to iterate:</strong> Calling a generator function returns a generator object, not a value — <code>gen()</code> alone does nothing.</li>
+            <li><strong>Generator inside class:</strong> Misremembering that generator functions become iterators, not iterables.</li>
+            <li><strong>Mutating source during iteration:</strong> Often raises <code>RuntimeError</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Reading CSV files row-by-row (<code>csv.reader</code>), streaming database query results, <strong>Django's <code>QuerySet</code></strong> iteration, HTTP streaming responses, log processors, infinite random number generators, tokenizers in NLP libraries. <strong>asyncio</strong> itself is built on generators (originally; now on native coroutines).</span></div>
+        </div>
 
         <h3>The Iterator Protocol</h3>
         <p>How <code>for</code> loops actually work under the hood — using <code>__iter__()</code> and <code>__next__()</code> to walk through items one by one.</p>
@@ -3193,6 +3630,35 @@ pipeline = filter_valid(parse(read_large_file(<span class="s">"data.csv"</span>)
     <!-- ═══════════════════════════════════════════ -->
     <section id="decorators">
         <h2><span class="sec-num">15</span> Decorators</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>decorator</strong> is a callable that takes a function (or class) and returns a new callable, typically one that wraps the original with extra behavior. Python's <code>@decorator</code> syntax is purely sugar: <code>@log\ndef f():...</code> is exactly equivalent to <code>def f():...; f = log(f)</code>. Decorators leverage Python's first-class functions and closures to implement <strong>cross-cutting concerns</strong> like logging, caching, authentication, rate-limiting, timing, and retries — without modifying the decorated function's source.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Function decorators:</strong> Wrap a function to add behavior — <code>@timer</code>, <code>@cache</code>, <code>@log_calls</code>.</li>
+            <li><strong>Class decorators:</strong> Modify a class — <code>@dataclass</code>, <code>@total_ordering</code>, <code>@attr.s</code>.</li>
+            <li><strong>Decorators with arguments:</strong> <code>@retry(times=3)</code> — a "decorator factory" that returns the actual decorator.</li>
+            <li><strong><code>functools.wraps</code>:</strong> Preserves the wrapped function's name, docstring, and signature — always use this in your decorators.</li>
+            <li><strong>Built-in decorators:</strong> <code>@property</code>, <code>@classmethod</code>, <code>@staticmethod</code>, <code>@functools.lru_cache</code>, <code>@functools.cached_property</code>, <code>@dataclass</code>.</li>
+            <li><strong>Stacking:</strong> Multiple decorators apply bottom-up — <code>@a\n@b\ndef f()</code> is <code>f = a(b(f))</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java has annotations (<code>@Override</code>, <code>@Deprecated</code>) but they are metadata — behavior requires a framework like Spring AOP to act on them. Python decorators execute immediately at definition time.</li>
+            <li><strong>vs C#:</strong> C# attributes are metadata-only, like Java. Behavior injection requires reflection or PostSharp.</li>
+            <li><strong>vs JavaScript:</strong> JS decorators are a TC39 Stage 3 proposal finalized in 2023. TypeScript/Angular have used them for years. Less ergonomic than Python's.</li>
+            <li><strong>vs Go:</strong> Go has NO decorators or AOP — you must manually wrap functions. This is a deliberate simplicity choice.</li>
+            <li><strong>vs Rust:</strong> Rust has procedural macros (<code>#[derive(Debug)]</code>) which are compile-time. More powerful but vastly more complex.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Decorators keep your core function logic clean while adding <strong>cross-cutting concerns</strong> declaratively. One <code>@login_required</code> line replaces 5 lines of auth-check boilerplate repeated across 50 view functions. They're also the mechanism behind Python's major web frameworks: the <code>@app.route("/")</code> pattern for Flask/FastAPI is just a decorator that registers the function with the router.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Forgetting <code>@functools.wraps</code>:</strong> The wrapped function loses its <code>__name__</code>, <code>__doc__</code>, and signature — breaks introspection and Sphinx docs.</li>
+            <li><strong>Wrong argument order:</strong> Decorators with args need <em>three</em> levels of nesting: factory → decorator → wrapper.</li>
+            <li><strong>Mutable state in closures:</strong> A decorator that counts calls needs <code>nonlocal</code> or a mutable container.</li>
+            <li><strong>Class vs instance methods:</strong> Applying a function decorator to a method and forgetting <code>self</code> breaks things.</li>
+            <li><strong>Ordering matters:</strong> <code>@staticmethod</code> must be applied last (topmost).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Flask/FastAPI:</strong> <code>@app.get("/users/{id}")</code>. <strong>pytest:</strong> <code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code>. <strong>Click:</strong> <code>@click.command()</code>, <code>@click.option(...)</code>. <strong>Django:</strong> <code>@login_required</code>, <code>@cache_page(60)</code>. <strong>Celery:</strong> <code>@app.task</code>. <strong>functools:</strong> <code>@lru_cache(maxsize=128)</code>. Decorators are everywhere.</span></div>
+        </div>
+
         <p>A decorator takes a function, wraps it, and returns the wrapped version. <code>@</code> is just syntactic sugar.</p>
 
 <pre><code><span class="kw">import</span> time
@@ -3252,6 +3718,35 @@ slow()  <span class="o"># slow took 1.0012s</span>
     <!-- ═══════════════════════════════════════════ -->
     <section id="closures">
         <h2><span class="sec-num">16</span> Closures & Scope</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>closure</strong> is a function that captures variables from its enclosing lexical scope — these captured variables remain alive even after the enclosing function returns. Python resolves names using the <strong>LEGB rule</strong>: <strong>L</strong>ocal → <strong>E</strong>nclosing → <strong>G</strong>lobal → <strong>B</strong>uilt-in. To <em>modify</em> (not just read) a variable in an enclosing scope, you must use the <code>nonlocal</code> keyword (3.0+). To modify a module-level variable from inside a function, use <code>global</code>. Closures are the mechanism that makes decorators, factories, and many functional patterns work.</span></div>
+          <div class="concept-row"><span class="concept-label">The LEGB lookup order</span><span class="concept-text"><ul>
+            <li><strong>Local:</strong> Names defined inside the current function.</li>
+            <li><strong>Enclosing:</strong> Names in any enclosing function's scope (for nested functions).</li>
+            <li><strong>Global:</strong> Names at the module level.</li>
+            <li><strong>Built-in:</strong> Names in the built-in namespace (<code>len</code>, <code>print</code>, <code>range</code>, etc.).</li>
+            <li><strong><code>nonlocal</code>:</strong> Rebinds a name to the nearest enclosing scope.</li>
+            <li><strong><code>global</code>:</strong> Rebinds a name to the module scope.</li>
+            <li><strong><code>__closure__</code>:</strong> A tuple of cell objects holding captured variables — you can inspect what a closure captured.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS closures are very similar — variables from outer scope are captured. JS has no <code>nonlocal</code> equivalent; you can rebind directly (no implicit shadowing on assignment).</li>
+            <li><strong>vs Java:</strong> Java lambdas can only capture <strong>effectively final</strong> variables — you can't mutate them. Python's <code>nonlocal</code> bypasses this.</li>
+            <li><strong>vs C++:</strong> C++ lambdas explicitly declare what they capture with <code>[=]</code> (by value), <code>[&amp;]</code> (by reference), or named captures.</li>
+            <li><strong>vs Go:</strong> Go closures capture by reference automatically. Unlike Python, you can modify captured variables without a special keyword.</li>
+            <li><strong>vs Rust:</strong> Rust closures are strictly typed (<code>Fn</code>, <code>FnMut</code>, <code>FnOnce</code>) and use the borrow checker to ensure safety.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Closures enable <strong>function factories</strong> (functions that build customized functions), <strong>decorators</strong> (which capture the wrapped function), <strong>stateful callbacks</strong> without classes, and <strong>data hiding</strong> (the closed-over variables are inaccessible from outside). They're also the backbone of partial application and currying in functional Python.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Late binding in loops:</strong> <code>funcs = [lambda: i for i in range(3)]</code> — all lambdas return <code>2</code>! Fix with <code>lambda i=i: i</code> (default arg trick) or a generator function.</li>
+            <li><strong>Assignment creates local:</strong> <code>def f(): x = 10</code> — even if <code>x</code> exists globally, this creates a local. Use <code>global x</code> or <code>nonlocal x</code>.</li>
+            <li><strong><code>UnboundLocalError</code>:</strong> Reading <em>then</em> writing a variable in a function marks it local for the <em>whole</em> function, so the initial read fails.</li>
+            <li><strong>Forgetting <code>nonlocal</code>:</strong> Decorator counters (<code>count += 1</code>) break without it.</li>
+            <li><strong>Mutable captures:</strong> Captured lists/dicts can be modified in place without <code>nonlocal</code>, which can surprise.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every Python decorator is a closure. <strong>Flask's <code>@app.route</code></strong> captures <code>app</code> via closure. <strong><code>functools.partial</code></strong> is a closure factory. Event callbacks in Tkinter, stateful pytest fixtures, and memoization patterns all use closures. Configuration-bound loggers (<code>logger = get_logger("myapp")</code>) often capture config via closure.</span></div>
+        </div>
 
         <h3>LEGB Rule</h3>
         <p>The order Python searches for variable names — Local, Enclosing, Global, then Built-in.</p>
@@ -3314,6 +3809,36 @@ error(<span class="s">"Something broke"</span>)  <span class="o"># [ERROR] Somet
     <section id="context-managers">
         <h2><span class="sec-num">17</span> Context Managers</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>context manager</strong> is an object that implements the <code>__enter__</code> and <code>__exit__</code> dunder methods, enabling it to be used with Python's <code>with</code> statement. The <code>__enter__</code> method runs when the block starts, and <code>__exit__</code> runs when the block ends — <strong>guaranteed</strong>, even if an exception is raised inside. It's Python's answer to <strong>RAII (Resource Acquisition Is Initialization)</strong> from C++: acquire resource on entry, release on exit. The <code>contextlib</code> module provides helpers — most importantly <code>@contextmanager</code>, which lets you build context managers from generator functions.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Class-based:</strong> Implement <code>__enter__(self)</code> and <code>__exit__(self, exc_type, exc_val, tb)</code>.</li>
+            <li><strong>Generator-based:</strong> <code>@contextlib.contextmanager</code> on a generator with one <code>yield</code> — setup before yield, cleanup after.</li>
+            <li><strong>Multiple managers:</strong> <code>with open(a) as f, open(b) as g:</code> — nested but flat syntax.</li>
+            <li><strong>Suppressing exceptions:</strong> <code>__exit__</code> can return <code>True</code> to suppress the exception (rarely recommended).</li>
+            <li><strong><code>contextlib.suppress</code>:</strong> Context manager that swallows specific exceptions — replaces try/except/pass.</li>
+            <li><strong><code>contextlib.ExitStack</code>:</strong> Dynamically push and pop context managers at runtime.</li>
+            <li><strong>Async variants:</strong> <code>async with</code>, <code>__aenter__</code>, <code>__aexit__</code> for asyncio.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java 7 added try-with-resources <code>try (Resource r = ...)</code>. Very similar but Java requires implementing <code>AutoCloseable</code>.</li>
+            <li><strong>vs C#:</strong> C# has <code>using (var x = ...)</code> — same concept, implementing <code>IDisposable</code>.</li>
+            <li><strong>vs C++:</strong> C++ RAII uses stack-allocated objects whose destructors run on scope exit. More automatic than Python but tied to object lifetime.</li>
+            <li><strong>vs Go:</strong> Go uses <code>defer f.Close()</code> — runs on function return. Simpler but less lexically scoped.</li>
+            <li><strong>vs JavaScript:</strong> JS has no built-in context manager construct. You use try/finally manually, or the Explicit Resource Management proposal (<code>using</code>).</li>
+            <li><strong>vs Rust:</strong> Rust's <code>Drop</code> trait auto-runs cleanup when an object goes out of scope — no explicit <code>with</code> needed.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Context managers guarantee <strong>cleanup regardless of success or failure</strong>, preventing resource leaks (file handles, locks, database connections, network sockets). They make error-safe code look like normal code — no explicit <code>try</code>/<code>finally</code> cruft. The <code>with</code> block clearly delimits the scope of a resource.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Forgetting <code>with</code>:</strong> <code>f = open("x"); f.read()</code> leaks the file until GC.</li>
+            <li><strong>Returning from inside <code>with</code>:</strong> Cleanup still happens — <code>__exit__</code> runs before the value is returned.</li>
+            <li><strong>Exceptions in <code>__enter__</code>:</strong> <code>__exit__</code> does NOT run if <code>__enter__</code> itself raises.</li>
+            <li><strong>Generator context managers with multiple yields:</strong> Raises <code>RuntimeError</code> — only one <code>yield</code> allowed.</li>
+            <li><strong>Swallowing exceptions silently:</strong> Accidentally returning truthy from <code>__exit__</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">File I/O (<code>with open(...)</code>), database transactions (<code>with conn.transaction()</code>), thread locks (<code>with lock:</code>), tempfile management (<code>with tempfile.TemporaryDirectory()</code>), redirecting stdout (<code>with contextlib.redirect_stdout()</code>), timing blocks (custom <code>with timer():</code>), <strong>pytest's <code>pytest.raises</code></strong>, <strong>SQLAlchemy's <code>session.begin()</code></strong>.</span></div>
+        </div>
+
 <pre><code><span class="cm"># ── Class-based ──</span>
 <span class="kw">class</span> <span class="fn">Timer</span>:
     <span class="kw">def</span> <span class="fn">__enter__</span>(self):
@@ -3349,6 +3874,35 @@ error(<span class="s">"Something broke"</span>)  <span class="o"># [ERROR] Somet
     <!-- ═══════════════════════════════════════════ -->
     <section id="args-kwargs">
         <h2><span class="sec-num">18</span> *args & **kwargs</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><code>*args</code> and <code>**kwargs</code> are Python's mechanism for writing functions that accept a <strong>variable number of arguments</strong>. <code>*args</code> captures extra positional arguments as a <strong>tuple</strong>, while <code>**kwargs</code> captures extra keyword arguments as a <strong>dict</strong>. The names <code>args</code> and <code>kwargs</code> are just convention — the <code>*</code> and <code>**</code> are the syntax. The same operators also work at the <em>call site</em> for <strong>argument unpacking</strong>: <code>f(*my_list, **my_dict)</code> expands collections into positional/keyword arguments.</span></div>
+          <div class="concept-row"><span class="concept-label">Key uses</span><span class="concept-text"><ul>
+            <li><strong>Accepting arbitrary args:</strong> <code>def printer(*args): for a in args: print(a)</code></li>
+            <li><strong>Accepting arbitrary kwargs:</strong> <code>def config(**kwargs): self.__dict__.update(kwargs)</code></li>
+            <li><strong>Unpacking:</strong> <code>pairs = [(1,2),(3,4)]; list(zip(*pairs))</code> transposes to <code>[(1,3),(2,4)]</code>.</li>
+            <li><strong>Forwarding args:</strong> <code>def wrapper(*args, **kwargs): return original(*args, **kwargs)</code> — the decorator pattern.</li>
+            <li><strong>Mixed:</strong> <code>def f(a, b, *args, x=1, **kwargs):</code> — positional, then <code>*args</code>, then keyword-only, then <code>**kwargs</code>.</li>
+            <li><strong>Bare <code>*</code>:</strong> <code>def f(a, *, b):</code> — forces <code>b</code> to be keyword-only.</li>
+            <li><strong>Positional-only:</strong> <code>def f(a, /, b):</code> — forces <code>a</code> to be positional-only (3.8+).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS rest params <code>function f(...args)</code> collect extras as an array. Spread <code>f(...arr)</code> unpacks. JS has no keyword arguments — object destructuring <code>function f({a, b})</code> is the workaround.</li>
+            <li><strong>vs Java:</strong> Java varargs <code>void f(String... names)</code> accept variable positional args. No keyword args at all — must use a builder or a Map.</li>
+            <li><strong>vs C#:</strong> C# has <code>params string[] args</code> and named arguments <code>f(name: "x")</code>, closer to Python.</li>
+            <li><strong>vs Go:</strong> Go has variadic args <code>func f(nums ...int)</code> and spread <code>f(slice...)</code>. No keyword args.</li>
+            <li><strong>vs C/C++:</strong> C uses <code>stdarg.h</code> with <code>va_list</code> — very manual and type-unsafe. C++ has variadic templates, much more powerful but harder.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Essential for writing <strong>flexible APIs, decorators, wrappers, and delegators</strong>. Any decorator that doesn't know the signature of the wrapped function needs <code>*args, **kwargs</code> to forward all calls transparently. Framework code (like <code>print</code>, <code>str.format</code>, or <code>logging.info</code>) uses them to accept arbitrary inputs.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Order matters:</strong> <code>def f(*args, x, **kwargs)</code> — after <code>*args</code>, all named params become keyword-only.</li>
+            <li><strong>Key collisions in <code>**kwargs</code>:</strong> <code>f(x=1, **{"x": 2})</code> raises <code>TypeError: multiple values for keyword argument 'x'</code>.</li>
+            <li><strong>Mutable kwargs:</strong> Mutating <code>kwargs</code> inside the function doesn't affect the caller — it's a new dict.</li>
+            <li><strong>Unpacking a set:</strong> <code>f(*my_set)</code> works but order is undefined.</li>
+            <li><strong>Type-hinting varargs:</strong> <code>def f(*args: int)</code> means each arg is <code>int</code>, not that args is <code>List[int]</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every decorator in Python: <code>def wrapper(*args, **kwargs): return func(*args, **kwargs)</code>. <strong><code>print(*args, sep=', ')</code></strong>, <strong><code>dict(**kwargs)</code></strong>, <strong>Flask's <code>app.route(**options)</code></strong>, <strong>pytest fixtures' <code>request.param</code> injection</strong>. The pattern <code>super().__init__(*args, **kwargs)</code> is ubiquitous in class hierarchies.</span></div>
+        </div>
 
 <pre><code><span class="cm"># *args  → extra POSITIONAL args as a tuple</span>
 <span class="cm"># **kwargs → extra KEYWORD args as a dict</span>
@@ -3387,6 +3941,39 @@ nums = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</s
     <!-- ═══════════════════════════════════════════ -->
     <section id="type-hints">
         <h2><span class="sec-num">19</span> Type Hints</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Type hints (added in PEP 484, Python 3.5) are <strong>optional annotations</strong> on variables, parameters, and return values that describe the expected types. They are <strong>ignored at runtime</strong> by CPython — they exist for <strong>static type checkers</strong> like <code>mypy</code>, <code>pyright</code>, <code>pyre</code>, and <code>pytype</code>, as well as for IDE autocomplete, documentation, and runtime frameworks like Pydantic and FastAPI that read them via <code>typing.get_type_hints()</code>. Modern Python (3.10+) uses the <code>|</code> operator for unions and lowercase built-ins (<code>list[int]</code>, <code>dict[str, int]</code>) without importing <code>typing</code>.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Basic:</strong> <code>def add(x: int, y: int) -&gt; int:</code></li>
+            <li><strong>Collections:</strong> <code>list[int]</code>, <code>dict[str, float]</code>, <code>tuple[int, ...]</code>, <code>set[str]</code>.</li>
+            <li><strong>Unions:</strong> <code>int | str</code> (3.10+) or <code>Union[int, str]</code>.</li>
+            <li><strong>Optional:</strong> <code>str | None</code> (shortcut for <code>Optional[str]</code>).</li>
+            <li><strong>Generics:</strong> <code>def first[T](items: list[T]) -&gt; T:</code> (3.12+ native syntax) or <code>TypeVar</code>.</li>
+            <li><strong>Callable:</strong> <code>Callable[[int, int], bool]</code> for a function taking two ints, returning bool.</li>
+            <li><strong>Protocol:</strong> Structural typing — "any class with a <code>.read()</code> method".</li>
+            <li><strong>TypedDict:</strong> Typed dict-like records.</li>
+            <li><strong>Literal:</strong> <code>Literal["GET", "POST"]</code> restricts to specific values.</li>
+            <li><strong>Self type:</strong> <code>def clone(self) -&gt; Self:</code> (3.11+).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs TypeScript:</strong> Conceptually very similar — both are gradual, structural, and bolted onto a dynamic language. But TS runs its checker in the same toolchain as the compiler; Python requires a separate tool.</li>
+            <li><strong>vs Java/C#:</strong> Java/C# types are enforced by the compiler and the runtime. Python types are <em>advisory</em>: <code>f("hello")</code> when <code>f(x: int)</code> expects int will run fine at runtime, only flagged by mypy.</li>
+            <li><strong>vs Go:</strong> Go is statically typed with compile-time enforcement. Python's type hints are closer to documentation than enforcement.</li>
+            <li><strong>vs Rust:</strong> Rust types are strongly enforced with exhaustive pattern matching. Python types can be gradually adopted file-by-file.</li>
+            <li><strong>vs Ruby:</strong> Ruby has RBS and Sorbet — similar optional typing retrofits.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Type hints catch <strong>bugs before they run</strong>, dramatically improve <strong>IDE autocomplete and refactoring</strong>, and serve as inline documentation that can't drift out of date. In large codebases, <code>mypy --strict</code> provides confidence approaching Java-level safety. Frameworks like <strong>FastAPI</strong> and <strong>Pydantic</strong> leverage hints at runtime for auto-validation, serialization, and API doc generation.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Forward references:</strong> Types that don't exist yet need string literals: <code>def f(x: "SomeClass"):</code> — or use <code>from __future__ import annotations</code>.</li>
+            <li><strong>Not runtime-enforced:</strong> Passing wrong types doesn't raise — only mypy warns.</li>
+            <li><strong>Any escape hatch:</strong> <code>Any</code> disables all checking; overuse defeats the purpose.</li>
+            <li><strong>Optional vs default:</strong> <code>x: int = None</code> is <em>wrong</em> — must be <code>x: int | None = None</code>.</li>
+            <li><strong>Mutable defaults still bite:</strong> Types don't fix the <code>def f(x: list = [])</code> sharing bug.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>FastAPI</strong> reads type hints to auto-generate OpenAPI schemas and validate incoming requests. <strong>Pydantic v2</strong> (used by FastAPI) is entirely hint-driven. <strong>SQLAlchemy 2.0</strong> uses typed mapped attributes. <strong>Django 4.1+</strong> ships stubs. Every modern Python library (httpx, structlog, typer) is fully typed — type hints are now table stakes.</span></div>
+        </div>
+
         <p>Type hints don't affect runtime. They exist for docs, IDE support, and tools like <code>mypy</code>.</p>
 
 <pre><code><span class="kw">def</span> <span class="fn">greet</span>(name: <span class="bi">str</span>, times: <span class="bi">int</span> = <span class="n">1</span>) -> <span class="bi">str</span>:
@@ -3420,6 +4007,37 @@ Matrix = <span class="bi">list</span>[Vector]</code></pre>
     <!-- ═══════════════════════════════════════════ -->
     <section id="dsa">
         <h2><span class="sec-num">20</span> Data Structures from Scratch</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">This section builds <strong>classic algorithms-and-data-structures (DSA)</strong> primitives — linked lists, stacks, queues, trees, graphs, hash tables, heaps — from scratch in Python, using only the basic language features (classes, references, recursion). This is <em>not</em> how you'd build production code (use <code>collections.deque</code>, <code>heapq</code>, or a library), but it's essential for <strong>interview preparation</strong>, understanding the costs hidden behind Python's built-ins, and building a mental model of how references and objects really work. It also teaches you when to reach for a specialized structure over a list.</span></div>
+          <div class="concept-row"><span class="concept-label">Structures typically covered</span><span class="concept-text"><ul>
+            <li><strong>Linked List:</strong> Singly, doubly, circular — O(1) insertion/removal at known positions, O(n) lookup.</li>
+            <li><strong>Stack:</strong> LIFO — Python lists already do this with <code>.append()</code> / <code>.pop()</code>.</li>
+            <li><strong>Queue:</strong> FIFO — <code>collections.deque</code> is O(1) at both ends, unlike list's O(n) <code>.pop(0)</code>.</li>
+            <li><strong>Binary Tree / BST:</strong> Hierarchical structure for sorted data; average O(log n) ops, worst O(n) if unbalanced.</li>
+            <li><strong>Heap:</strong> Priority queue — Python's <code>heapq</code> provides min-heap as function calls on a list.</li>
+            <li><strong>Hash Table:</strong> The backbone of Python's own <code>dict</code> and <code>set</code>.</li>
+            <li><strong>Graph:</strong> Adjacency list (<code>dict</code> of lists) or matrix representation.</li>
+            <li><strong>Trie:</strong> Prefix tree for string lookup.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs from other languages</span><span class="concept-text"><ul>
+            <li><strong>vs C/C++:</strong> No manual memory management — <code>new Node()</code> is automatic and garbage collected. No pointer arithmetic. But ~50-100× slower than C.</li>
+            <li><strong>vs Java:</strong> No generics boilerplate — just use duck typing. Python's built-in dynamic containers make DSA code shorter.</li>
+            <li><strong>vs JavaScript:</strong> Very similar — both use class-based implementations with object references. Python's integer arithmetic is arbitrary-precision, JS's is IEEE 754.</li>
+            <li><strong>vs Go:</strong> Go has no generics until 1.18 and no inheritance — you'd use interfaces + structs. Verbose but faster.</li>
+            <li><strong>vs Rust:</strong> Linked lists in Rust are infamously hard because of the borrow checker — you need <code>Box</code>, <code>Rc&lt;RefCell&gt;</code>, or <code>unsafe</code>. Python makes them trivial.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why implement from scratch</span><span class="concept-text">Understanding DSA internals is essential for <strong>LeetCode-style interviews</strong> (FAANG+, HFT, top startups), for making <strong>time/space complexity trade-offs</strong>, and for <strong>reasoning about performance</strong>. Most Python coders reach for lists and dicts by default, but knowing when a deque, heap, or set dramatically speeds things up is a senior-level skill.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Recursion depth:</strong> Python's default recursion limit is ~1000 — recursive tree traversals can hit it on deep trees.</li>
+            <li><strong>List <code>.pop(0)</code>:</strong> O(n), not O(1) — use <code>deque</code> for FIFO.</li>
+            <li><strong>Dict / set ordering:</strong> Dict is ordered (3.7+), set is not.</li>
+            <li><strong>Hashability:</strong> Custom objects need <code>__hash__</code> and <code>__eq__</code> to go into sets or dict keys.</li>
+            <li><strong>Heap is a min-heap:</strong> For max-heap, negate values.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world relevance</span><span class="concept-text">Even though you won't hand-write a linked list in production, the concepts show up: <strong>LRU caches</strong> (doubly-linked list + dict), <strong>Dijkstra's algorithm</strong> (heap-backed priority queue in routing), <strong>Trie</strong> (autocomplete/spellcheck), <strong>BST</strong> (database indices, though B-trees dominate). Interview questions at Google, Meta, Amazon routinely test these.</span></div>
+        </div>
+
         <p>Building classic data structures in Python teaches you OOP, references, recursion, and how the language actually works under the hood.</p>
 
         <h3>Linked List</h3>
@@ -3644,6 +4262,32 @@ hm[<span class="s">"name"</span>] = <span class="s">"Yatin"</span>
     <section id="concurrency">
         <h2><span class="sec-num">21</span> Concurrency & The GIL</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python offers <strong>three distinct concurrency models</strong>: <strong>threading</strong> (<code>threading</code> module — OS threads, limited by the GIL for CPU work), <strong>multiprocessing</strong> (<code>multiprocessing</code> — separate processes with their own memory, bypasses the GIL, gives true parallelism), and <strong>asyncio</strong> (<code>asyncio</code>, <code>async</code>/<code>await</code> — single-threaded cooperative scheduling for I/O-bound code). The <strong>GIL (Global Interpreter Lock)</strong> is a CPython-specific mutex that serializes bytecode execution — it's the most famous performance limitation of Python and the reason <code>threading</code> can't speed up CPU-bound code. Python 3.13 added an experimental <strong>no-GIL / free-threading build</strong>; 3.14+ continues to mature it.</span></div>
+          <div class="concept-row"><span class="concept-label">The three models</span><span class="concept-text"><ul>
+            <li><strong><code>threading</code>:</strong> OS-level threads sharing memory. Good for I/O-bound work (network, disk). The GIL is released during blocking I/O calls. Use for: web scraping, API calls, parallel HTTP.</li>
+            <li><strong><code>multiprocessing</code>:</strong> Separate Python processes, each with their own GIL. True parallel CPU execution. Communication via pipes/queues. Use for: numerical computation, image processing, ML preprocessing.</li>
+            <li><strong><code>asyncio</code>:</strong> Single-threaded event loop. <code>async def</code> functions yield at <code>await</code> points. Ultra-cheap "coroutines" — millions possible. Use for: high-concurrency servers, streaming, WebSockets.</li>
+            <li><strong><code>concurrent.futures</code>:</strong> High-level API unifying thread and process pools via <code>ThreadPoolExecutor</code> and <code>ProcessPoolExecutor</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Go:</strong> Go has goroutines (lightweight M:N scheduled) and channels built into the language — no GIL, true parallelism by default. Python's closest equivalent is multiprocessing, which is much heavier.</li>
+            <li><strong>vs Java:</strong> Java has real threads with no GIL — <code>ExecutorService</code>, <code>ForkJoinPool</code>, and virtual threads (Project Loom, Java 21) give Python-like ergonomics with true parallelism.</li>
+            <li><strong>vs JavaScript:</strong> JS is single-threaded with an event loop — very similar to Python's asyncio. Node added Worker Threads for parallelism. JS never had Python's GIL pain because it never promised threading.</li>
+            <li><strong>vs Rust:</strong> Rust has fearless concurrency — the borrow checker prevents data races at compile time. No GIL.</li>
+            <li><strong>vs Ruby:</strong> Ruby MRI has a GVL (global VM lock), very similar to Python's GIL. Ractor (Ruby 3) offers true parallelism.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why the GIL exists</span><span class="concept-text">The GIL simplifies CPython's <strong>reference counting garbage collector</strong> and makes writing C extensions easier (no need for per-object locks). Removing it breaks most existing C extensions. Efforts to remove it date back to the 1990s; the current <strong>PEP 703 "Making the GIL Optional"</strong> is the first serious path forward, landing as an opt-in build in 3.13.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Using threads for CPU work:</strong> No speedup — the GIL serializes. Use multiprocessing.</li>
+            <li><strong>Mixing sync and async:</strong> Calling a blocking function inside an async coroutine blocks the entire event loop.</li>
+            <li><strong>Race conditions:</strong> Even with the GIL, individual operations like <code>x += 1</code> are NOT atomic.</li>
+            <li><strong>Multiprocessing pickling:</strong> Functions/objects sent to workers must be picklable — lambdas and local functions aren't.</li>
+            <li><strong>asyncio.run inside running loop:</strong> Raises <code>RuntimeError: asyncio.run() cannot be called from a running event loop</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>FastAPI</strong> uses asyncio for high-throughput APIs. <strong>aiohttp, httpx, Starlette</strong> are async HTTP. <strong>Celery</strong> uses multiprocessing/eventlet workers for background jobs. <strong>Dask</strong>, <strong>Ray</strong>, and <strong>multiprocessing.Pool</strong> parallelize data science workloads. <strong>NumPy/pandas</strong> release the GIL during C-level array operations — that's why multithreading can still help for numeric work.</span></div>
+        </div>
+
         <div class="callout warn">
             <strong>The GIL (Global Interpreter Lock)</strong> — A mutex allowing only one thread to execute Python bytecode at a time. Threads DON'T give true parallelism for CPU work. They DO help with I/O (network, files) because the GIL is released during I/O.
         </div>
@@ -3701,6 +4345,35 @@ asyncio.run(main())  <span class="cm"># ~2s, not ~4s</span></code></pre>
     <section id="memory">
         <h2><span class="sec-num">22</span> Memory Model</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python's memory model is built on <strong>two layers of garbage collection</strong>: (1) <strong>reference counting</strong> — each object tracks how many names refer to it, and it's freed immediately when that count hits zero; and (2) a <strong>cyclic garbage collector</strong> (the <code>gc</code> module) that periodically finds and frees unreachable cycles that refcounts alone can't. Every variable in Python is a <strong>name bound to an object</strong>, not a slot holding a value — this is why <code>a = b</code> never copies data, only creates a second name for the same object. The <code>id()</code> function returns a unique identity (CPython uses the memory address).</span></div>
+          <div class="concept-row"><span class="concept-label">Key concepts</span><span class="concept-text"><ul>
+            <li><strong>Everything is an object:</strong> Integers, strings, functions, classes, modules — all are heap-allocated objects with a type and refcount.</li>
+            <li><strong>Reference counting:</strong> <code>sys.getrefcount(x)</code> shows current refs. Most memory is freed the instant the count hits zero.</li>
+            <li><strong>Cyclic GC:</strong> Handles reference cycles (a list containing itself). Configurable via <code>gc.set_threshold()</code>.</li>
+            <li><strong>Small-int caching:</strong> Integers from -5 to 256 are pre-allocated singletons. <code>a = 10; b = 10; a is b</code> is <code>True</code>.</li>
+            <li><strong>String interning:</strong> Short strings and identifiers are interned — <code>"foo" is "foo"</code>.</li>
+            <li><strong>Mutable vs immutable:</strong> <code>int</code>, <code>str</code>, <code>tuple</code>, <code>frozenset</code> are immutable; <code>list</code>, <code>dict</code>, <code>set</code> are mutable.</li>
+            <li><strong>Object header:</strong> Each object has a refcount, type pointer, and size — ~28+ bytes of overhead per object (vs 4 bytes for a raw <code>int</code> in C).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java uses tracing GC (generational mark-sweep). No refcounting. Higher latency, higher throughput. Python is more predictable for simple cases.</li>
+            <li><strong>vs JavaScript:</strong> JS uses mark-sweep GC — no refcounting. Similar semantics for references.</li>
+            <li><strong>vs Go:</strong> Go uses a low-latency concurrent tri-color mark-sweep GC. No refcounting.</li>
+            <li><strong>vs C/C++:</strong> Manual memory management. Python is vastly safer but uses ~3-10× more memory per primitive.</li>
+            <li><strong>vs Rust:</strong> Rust's ownership system gives deterministic cleanup at compile time — no runtime GC at all. Lowest memory footprint, but highest learning curve.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why it matters</span><span class="concept-text">Understanding the memory model is essential for <strong>avoiding accidental aliasing bugs</strong> (two names modifying the same list), <strong>writing memory-efficient code</strong> (use <code>__slots__</code>, generators, arrays instead of lists), <strong>debugging leaks</strong> (cycles holding large objects), and <strong>understanding why <code>a = b</code> and <code>a += x</code> behave differently for lists vs ints</strong>.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Shared mutable state:</strong> <code>a = [1]; b = a; b.append(2)</code> — now <code>a == [1,2]</code>.</li>
+            <li><strong>Default argument persistence:</strong> <code>def f(x=[]):</code> — the list is shared across all calls because it's created once.</li>
+            <li><strong>Memory leaks via closures/cycles:</strong> Long-lived closures holding references prevent GC.</li>
+            <li><strong><code>is</code> vs <code>==</code>:</strong> <code>is</code> checks identity; <code>==</code> checks equality. Never use <code>is</code> for comparing values except to <code>None</code>.</li>
+            <li><strong>Object overhead:</strong> A million-element list of integers uses ~30× more RAM than a C array.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>NumPy arrays</strong> bypass Python's boxed-integer overhead by storing raw C values — 100× less memory than lists. <strong><code>__slots__</code></strong> on classes eliminates the per-instance dict, saving ~50% memory for high-volume objects (e.g., game entities, network packets). <strong>Profilers</strong> like <code>memory_profiler</code>, <code>tracemalloc</code>, and <code>objgraph</code> diagnose leaks in production.</span></div>
+        </div>
+
 <pre><code><span class="kw">import</span> sys
 
 <span class="cm"># Everything is heap-allocated</span>
@@ -3737,6 +4410,35 @@ gc.collect()
     <!-- ═══════════════════════════════════════════ -->
     <section id="metaclasses">
         <h2><span class="sec-num">23</span> Metaclasses & Descriptors</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>metaclass</strong> is the "class of a class" — the thing that creates class objects. By default, Python uses <code>type</code> as the metaclass for every class. Writing a custom metaclass lets you <strong>intercept class creation</strong> to validate, modify, or register classes as they're defined. A <strong>descriptor</strong> is an object that defines <code>__get__</code>, <code>__set__</code>, or <code>__delete__</code> — when stored as a class attribute, these methods are called instead of ordinary attribute access. Descriptors are how <code>@property</code>, <code>@classmethod</code>, <code>@staticmethod</code>, and methods themselves actually work. Together, metaclasses and descriptors are Python's <strong>ultimate metaprogramming toolkit</strong>.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Metaclass basics:</strong> <code>class Foo(metaclass=Meta):</code> — <code>Meta.__new__</code> creates <code>Foo</code>.</li>
+            <li><strong><code>type</code> dual role:</strong> <code>type(obj)</code> returns an object's type; <code>type(name, bases, dict)</code> creates a new class dynamically.</li>
+            <li><strong>Data descriptors:</strong> Define both <code>__get__</code> and <code>__set__</code> — higher priority than instance dict.</li>
+            <li><strong>Non-data descriptors:</strong> Only <code>__get__</code> — lower priority than instance dict.</li>
+            <li><strong><code>__init_subclass__</code>:</strong> A simpler alternative to metaclasses for customizing subclass creation (PEP 487).</li>
+            <li><strong><code>__set_name__</code>:</strong> Lets a descriptor know its owner attribute name at class creation time.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java/C#:</strong> Java has annotations + reflection APIs. To achieve metaclass-level power, you need annotation processors or bytecode weaving (ASM, Byte Buddy). Python's is runtime and simpler.</li>
+            <li><strong>vs Ruby:</strong> Ruby has singleton classes and <code>class_eval</code> — similar metaprogramming ability. Ruby's is arguably more ergonomic; Python's is more explicit.</li>
+            <li><strong>vs JavaScript:</strong> JS has Proxies (ES6) for intercepting property access — spiritually similar to descriptors.</li>
+            <li><strong>vs C++:</strong> C++ templates and concepts give compile-time metaprogramming — vastly more complex.</li>
+            <li><strong>vs Go/Rust:</strong> Neither has runtime class modification. Go has zero metaprogramming. Rust has macros, but they're compile-time.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use them</span><span class="concept-text">Metaclasses and descriptors are rarely needed in application code, but they're how <strong>major frameworks work their magic</strong>: Django ORM turns <code>class User(Model): name = CharField()</code> into a SQL-backed class with migrations. Pydantic turns type hints into validators. ABC turns abstract methods into enforcement. You usually don't write metaclasses — you use frameworks that do. But understanding them demystifies what "magic" is actually happening.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Metaclass conflicts:</strong> Inheriting from classes with different metaclasses raises <code>TypeError</code>.</li>
+            <li><strong>Overengineering:</strong> "Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don't." — Tim Peters.</li>
+            <li><strong>Descriptor only works as class attribute:</strong> Assigning to an instance bypasses it.</li>
+            <li><strong>Order of descriptor vs instance dict:</strong> Data descriptors win; non-data descriptors lose.</li>
+            <li><strong><code>__init_subclass__</code> is easier:</strong> Most "I need a metaclass" cases are better solved with this hook.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Django Model meta:</strong> <code>class User(Model)</code> — <code>ModelBase</code> metaclass registers fields. <strong>SQLAlchemy declarative base:</strong> similar. <strong>ABC:</strong> <code>ABCMeta</code> enforces abstract methods. <strong>Pydantic:</strong> uses <code>ModelMetaclass</code> + field descriptors. <strong>Python's own <code>@property</code></strong>: implemented as a descriptor. <strong>Enum</strong>: uses <code>EnumMeta</code>.</span></div>
+        </div>
+
         <p>A metaclass is the "class of a class." <code>type</code> is the default metaclass.</p>
 
 <pre><code><span class="bi">print</span>(<span class="bi">type</span>(<span class="n">42</span>))      <span class="o"># &lt;class 'int'&gt;</span>
@@ -3790,6 +4492,36 @@ gc.collect()
     <section id="design-patterns">
         <h2><span class="sec-num">24</span> Design Patterns</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Design patterns are <strong>reusable solutions to common object-oriented design problems</strong>, first catalogued in the 1994 "Gang of Four" book. Python's flexibility — first-class functions, duck typing, decorators, context managers, multiple inheritance — means <strong>many classic patterns become one-liners or disappear entirely</strong>. The Strategy pattern is "just pass a function". The Iterator pattern is built into <code>for</code>. Singleton becomes "just use a module". In idiomatic Python, patterns often look nothing like their Java counterparts.</span></div>
+          <div class="concept-row"><span class="concept-label">Key patterns in Python</span><span class="concept-text"><ul>
+            <li><strong>Strategy:</strong> Pass a function or lambda as a parameter. <code>sorted(xs, key=lambda x: x.name)</code>.</li>
+            <li><strong>Factory:</strong> A classmethod or plain function that returns an instance — <code>Path.home()</code>, <code>datetime.now()</code>.</li>
+            <li><strong>Singleton:</strong> A module-level instance. Python modules are already singletons.</li>
+            <li><strong>Observer:</strong> Simple callback lists or <code>blinker</code>/<code>PyDispatcher</code>. Frameworks like Django use signals.</li>
+            <li><strong>Decorator pattern:</strong> Python's <code>@decorator</code> syntax — more general than the GoF decorator.</li>
+            <li><strong>Adapter:</strong> Duck typing often makes adapters unnecessary; when needed, a simple wrapper class.</li>
+            <li><strong>Context Manager:</strong> A Python-specific pattern replacing try/finally.</li>
+            <li><strong>Dependency Injection:</strong> Pass dependencies explicitly as constructor args, or use libraries like <code>dependency-injector</code> or FastAPI's <code>Depends</code>.</li>
+            <li><strong>Command:</strong> First-class functions make this trivial.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java:</strong> Java's inflexibility (no first-class functions pre-8, strict types) forces verbose pattern implementations. Python's flexibility replaces many with 2-liners.</li>
+            <li><strong>vs C++:</strong> Similar to Java — patterns tend to be more involved and templated.</li>
+            <li><strong>vs JavaScript:</strong> JS also has first-class functions so patterns are similarly compact.</li>
+            <li><strong>vs Go:</strong> Go deliberately minimizes OOP, pushing you toward composition-based patterns (small interfaces, struct embedding).</li>
+            <li><strong>vs Ruby:</strong> Very similar to Python — dynamic typing and blocks make most patterns natural.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use them</span><span class="concept-text">Design patterns give you <strong>shared vocabulary</strong> with other developers ("this is the Strategy pattern"), <strong>proven solutions</strong> to tricky problems, and <strong>architectural blueprints</strong> for new features. But in Python the rule is: <strong>don't over-pattern</strong>. A function often replaces a class; a dict often replaces a class hierarchy.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Java-style overengineering:</strong> Porting Java-heavy patterns to Python creates unnecessary classes.</li>
+            <li><strong>Singletons in multi-process code:</strong> Each process gets its own module state.</li>
+            <li><strong>Global state:</strong> Signals and observers can create hard-to-trace coupling.</li>
+            <li><strong>Abstract Factory overkill:</strong> Often a dict of classes is enough.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Django signals</strong> (observer), <strong>Django ORM <code>objects.filter(...)</code></strong> (builder/chainable), <strong>Flask app factory</strong> (factory), <strong>pytest fixtures</strong> (dependency injection), <strong>FastAPI <code>Depends()</code></strong> (DI), <strong>SQLAlchemy session</strong> (unit of work), <strong>Python's <code>@contextmanager</code></strong> (template method).</span></div>
+        </div>
+
 <pre><code><span class="cm"># ── Strategy (first-class functions) ──</span>
 <span class="kw">def</span> <span class="fn">sort_by_name</span>(items):
     <span class="kw">return</span> <span class="bi">sorted</span>(items, key=<span class="kw">lambda</span> x: x[<span class="s">"name"</span>])
@@ -3828,6 +4560,36 @@ model = REGISTRY[<span class="s">"linear"</span>]()  <span class="cm"># create b
     <!-- ═══════════════════════════════════════════ -->
     <section id="testing">
         <h2><span class="sec-num">25</span> Testing</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python's testing ecosystem is dominated by <strong><code>pytest</code></strong> — a de-facto standard third-party framework that replaces the stdlib <code>unittest</code> (which still exists for xUnit-style tests). Pytest uses <strong>plain functions and <code>assert</code> statements</strong> with powerful introspection to produce helpful failure messages, plus a <strong>fixture system</strong> for setup/teardown and dependency injection, a <strong>parametrize decorator</strong> for data-driven tests, and a rich plugin ecosystem. Python also ships with <code>doctest</code> (tests embedded in docstrings), <code>mock</code>/<code>unittest.mock</code> for faking dependencies, and <code>hypothesis</code> for property-based testing.</span></div>
+          <div class="concept-row"><span class="concept-label">Key tools</span><span class="concept-text"><ul>
+            <li><strong>pytest:</strong> <code>def test_foo(): assert result == expected</code> — zero boilerplate.</li>
+            <li><strong>Fixtures:</strong> <code>@pytest.fixture</code> functions injected into tests by name.</li>
+            <li><strong>Parametrize:</strong> <code>@pytest.mark.parametrize("x,expected", [(1,2),(3,6)])</code> runs the same test with multiple inputs.</li>
+            <li><strong>unittest.mock:</strong> <code>@patch("module.func")</code> or <code>Mock()</code> for test doubles.</li>
+            <li><strong>Coverage.py:</strong> <code>pytest --cov=myapp</code> reports which lines aren't tested.</li>
+            <li><strong>Hypothesis:</strong> Property-based testing — generates random inputs to find edge cases.</li>
+            <li><strong>tox / nox:</strong> Run tests across multiple Python versions and environments.</li>
+            <li><strong>doctest:</strong> Embed examples in docstrings; they're tested automatically.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java JUnit:</strong> JUnit requires classes, annotations (<code>@Test</code>), and assertion methods (<code>assertEquals</code>). Pytest uses plain functions and Python's <code>assert</code> — way less ceremony.</li>
+            <li><strong>vs JavaScript Jest:</strong> Jest uses <code>describe()</code>/<code>it()</code> blocks and <code>expect(x).toBe(y)</code>. Pytest is flatter and rely on bare asserts.</li>
+            <li><strong>vs Go testing:</strong> Go's <code>testing</code> package is minimal — just <code>func TestFoo(t *testing.T)</code>. Similar philosophy to pytest but even more spartan.</li>
+            <li><strong>vs Ruby RSpec:</strong> RSpec uses a DSL (<code>describe</code>, <code>it</code>, <code>expect</code>). Pytest is simpler and less nested.</li>
+            <li><strong>vs C++ Google Test:</strong> GTest requires macros (<code>TEST_F</code>, <code>EXPECT_EQ</code>). Pytest is dramatically cleaner.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Testing catches bugs before they reach production, enables <strong>confident refactoring</strong>, and documents expected behavior. Pytest's low ceremony means developers actually <em>enjoy</em> writing tests — the biggest factor in achieving high coverage. The parametrize feature makes it trivial to test 20 variants in 5 lines.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Test interdependence:</strong> Tests sharing state through global modules fail unpredictably. Use fixtures.</li>
+            <li><strong>Mocking the wrong thing:</strong> Mock where the name is <em>looked up</em>, not where it's defined.</li>
+            <li><strong>Slow tests:</strong> Real database / network calls make test suites useless. Use fixtures and in-memory replacements.</li>
+            <li><strong>Over-mocking:</strong> Tests become change detectors — they break on refactoring without catching real bugs.</li>
+            <li><strong>Fixture scope:</strong> Forgetting <code>scope="session"</code> can re-run expensive setup for every test.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every serious Python project uses pytest. <strong>Django/Flask/FastAPI apps</strong> pair pytest with <code>pytest-django</code>, <code>pytest-flask</code>, <code>httpx.AsyncClient</code>. <strong>pandas, numpy, scikit-learn</strong> all use pytest for their massive test suites. <strong>CI platforms</strong> (GitHub Actions, GitLab CI, CircleCI) trivially run <code>pytest</code> on every commit.</span></div>
+        </div>
 
 <pre><code><span class="kw">import</span> pytest
 
@@ -3870,6 +4632,39 @@ model = REGISTRY[<span class="s">"linear"</span>]()  <span class="cm"># create b
     <!-- ═══════════════════════════════════════════ -->
     <section id="dataclasses">
         <h2><span class="sec-num">26</span> Dataclasses</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><code>dataclasses</code> (PEP 557, Python 3.7) is a stdlib decorator that <strong>auto-generates boilerplate</strong> (<code>__init__</code>, <code>__repr__</code>, <code>__eq__</code>, optionally <code>__hash__</code>, <code>__lt__</code>, etc.) based on class-level type-annotated attributes. It replaces 95% of plain Python classes used as data containers, removing the tedious <code>self.x = x; self.y = y; self.z = z</code> pattern. It's <strong>pure Python, zero dependencies</strong> — your classes remain normal classes, just with auto-generated methods. For validation, serialization, and JSON support, Pydantic or <code>attrs</code> extends the idea further.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong>Basic:</strong> <code>@dataclass class Point: x: int; y: int</code> — gets <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code>.</li>
+            <li><strong>Defaults:</strong> <code>x: int = 0</code>; for mutable defaults use <code>field(default_factory=list)</code>.</li>
+            <li><strong><code>frozen=True</code>:</strong> Makes instances immutable (attempting to set raises <code>FrozenInstanceError</code>).</li>
+            <li><strong><code>order=True</code>:</strong> Auto-generates <code>__lt__</code>, <code>__le__</code>, etc. based on field order.</li>
+            <li><strong><code>slots=True</code>:</strong> Adds <code>__slots__</code> (3.10+) — saves memory, speeds up attribute access.</li>
+            <li><strong><code>kw_only=True</code>:</strong> All fields become keyword-only (3.10+).</li>
+            <li><strong><code>__post_init__</code>:</strong> Called after <code>__init__</code> for custom logic or validation.</li>
+            <li><strong><code>asdict</code>/<code>astuple</code>:</strong> Convert to dict or tuple for serialization.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs regular classes:</strong> No more <code>def __init__(self, x, y): self.x = x; self.y = y</code>. Dataclass gives you this for free plus <code>__repr__</code> and <code>__eq__</code>.</li>
+            <li><strong>vs Java records:</strong> Java 16+ records are conceptually identical — immutable data carriers with auto-generated methods.</li>
+            <li><strong>vs C# records:</strong> C# 9 records — same idea.</li>
+            <li><strong>vs Kotlin data classes:</strong> Kotlin's <code>data class</code> is essentially the prototype for Python's dataclasses.</li>
+            <li><strong>vs TypeScript interfaces:</strong> TS interfaces are compile-time only. Dataclasses are real runtime classes.</li>
+            <li><strong>vs Go structs:</strong> Go structs are similar but lack auto-generated methods; you write constructor funcs manually.</li>
+            <li><strong>vs Pydantic:</strong> Pydantic adds runtime validation, JSON schema, and better performance (v2 is Rust-backed). Dataclasses don't validate.</li>
+            <li><strong>vs attrs:</strong> <code>attrs</code> predates dataclasses and has more features (validators, converters, slots by default).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Dataclasses eliminate <strong>tedious boilerplate</strong> while keeping your classes pure Python (no dependencies). Perfect for <strong>configuration objects, DTOs, domain entities, event payloads, tree/graph nodes</strong>. They also pair naturally with type hints for full mypy support.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Mutable defaults:</strong> <code>items: list = []</code> raises <code>ValueError</code> — must use <code>field(default_factory=list)</code>.</li>
+            <li><strong>No runtime validation:</strong> Type hints are documentation only. <code>Point(x="not an int")</code> just works.</li>
+            <li><strong>Inheritance ordering:</strong> Non-default fields can't follow default fields — including through inheritance.</li>
+            <li><strong><code>__eq__</code> and unhashable:</strong> By default, <code>@dataclass</code> sets <code>__hash__</code> to <code>None</code> (unhashable). Use <code>frozen=True</code> to make it hashable.</li>
+            <li><strong><code>InitVar</code>:</strong> Special field type for init-only args not stored on the instance.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Configuration (<code>@dataclass class Config: host: str; port: int = 8080</code>), API response schemas, message queue payloads, AST nodes, event sourcing events. <strong>Many internal tools migrate from NamedTuple to dataclasses</strong> for mutability + type hints. Projects like <strong>Pydantic models</strong>, <strong>FastAPI request bodies</strong>, and <strong>SQLModel ORM</strong> build on or parallel the same idea.</span></div>
+        </div>
 
 <pre><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field, asdict
 
@@ -3917,6 +4712,38 @@ p = Point(<span class="n">1</span>, <span class="n">2</span>)
     <section id="functional">
         <h2><span class="sec-num">27</span> Functional Programming</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python is <strong>not a pure functional language</strong> — it's multi-paradigm — but it supports many functional idioms: first-class functions, closures, higher-order functions, map/filter/reduce, immutable data (tuples, frozensets), comprehensions, generators, and the <code>functools</code> / <code>itertools</code> / <code>operator</code> standard library modules. Guido van Rossum famously wanted to remove <code>map</code>, <code>filter</code>, and <code>lambda</code> from Python 3, preferring comprehensions; they stayed but comprehensions remain the Pythonic default for transformations.</span></div>
+          <div class="concept-row"><span class="concept-label">Key tools</span><span class="concept-text"><ul>
+            <li><strong><code>map(fn, iterable)</code>:</strong> Lazy application of <code>fn</code> to each item. Pythonic alternative: comprehension.</li>
+            <li><strong><code>filter(pred, iterable)</code>:</strong> Lazy filtering by predicate.</li>
+            <li><strong><code>functools.reduce</code>:</strong> Left-fold. <code>reduce(operator.add, [1,2,3])</code> == 6.</li>
+            <li><strong><code>functools.partial</code>:</strong> Partial application — freeze some arguments to create a new function.</li>
+            <li><strong><code>functools.lru_cache</code>:</strong> Memoization decorator.</li>
+            <li><strong><code>functools.reduce</code>, <code>cache</code>, <code>singledispatch</code>:</strong> Other functional helpers.</li>
+            <li><strong><code>itertools</code>:</strong> Lazy combinators — <code>chain</code>, <code>accumulate</code>, <code>groupby</code>, <code>dropwhile</code>, <code>takewhile</code>, <code>starmap</code>.</li>
+            <li><strong><code>operator</code>:</strong> Functions mirroring operators — <code>operator.add</code>, <code>operator.itemgetter("name")</code>.</li>
+            <li><strong>Immutable types:</strong> <code>tuple</code>, <code>frozenset</code>, <code>@dataclass(frozen=True)</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Haskell:</strong> Haskell is pure — no side effects, lazy by default, rich type system. Python is impure but borrows ideas (comprehensions, pattern matching).</li>
+            <li><strong>vs JavaScript:</strong> JS has <code>Array.map/filter/reduce</code> as methods. Python's are free functions (or comprehensions).</li>
+            <li><strong>vs Java:</strong> Java 8+ Streams give map/filter/reduce. Verbose but type-safe.</li>
+            <li><strong>vs Scala:</strong> Scala is a true functional-OOP hybrid with pattern matching, case classes, and immutability. More expressive than Python.</li>
+            <li><strong>vs Clojure:</strong> Clojure is immutable-by-default with persistent data structures. Very different mindset from Python.</li>
+            <li><strong>vs Elixir/Erlang:</strong> Purely functional, actor-based. Python's async is spiritually similar to processes.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Functional idioms encourage <strong>data pipelines</strong>, <strong>immutability</strong>, and <strong>pure functions</strong> — all of which improve testability, reasoning, and parallelism. In Python, the "sweet spot" is hybrid: use comprehensions/generators for transformations, immutable dataclasses for domain objects, and keep side effects at the edges.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong><code>lambda</code> limitations:</strong> Only expressions, no statements. Multi-line logic needs a real <code>def</code>.</li>
+            <li><strong><code>reduce</code> readability:</strong> Complex reduces are hard to read — often a loop is clearer.</li>
+            <li><strong>Closure capture:</strong> Lambdas in loops capture variables by reference, not by value.</li>
+            <li><strong>No tail-call optimization:</strong> Deeply recursive functional code blows the stack.</li>
+            <li><strong>Performance:</strong> <code>map</code>/<code>filter</code> + <code>lambda</code> is often slower than a comprehension due to per-call function overhead.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>pandas' <code>.apply(lambda row: ...)</code></strong>, <strong>toolz</strong> library (functional utilities), <strong>PySpark</strong> RDD <code>.map().filter().reduce()</code>, <strong>dask</strong> graph computation, <strong>immutables</strong> library for persistent dicts. Event sourcing architectures use immutable events + pure reducers.</span></div>
+        </div>
+
 <pre><code><span class="kw">from</span> functools <span class="kw">import</span> reduce, partial
 <span class="kw">from</span> itertools <span class="kw">import</span> chain, islice, groupby, product
 
@@ -3942,6 +4769,38 @@ square = partial(power, exp=<span class="n">2</span>)
     <!-- ═══════════════════════════════════════════ -->
     <section id="numpy">
         <h2><span class="sec-num">28</span> NumPy Foundation</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>NumPy</strong> (Numerical Python) is the foundation of Python's scientific and machine-learning ecosystem. Its core object is the <code>ndarray</code> — a fixed-type, multi-dimensional, densely-packed array stored in contiguous memory, manipulated by <strong>C and Fortran code under the hood</strong> (via BLAS, LAPACK, and SIMD). It's typically <strong>50-100× faster than pure Python lists</strong> for numeric work, uses far less memory (4 bytes per int32 vs ~28 bytes per boxed Python int), and enables <strong>vectorization</strong> — expressing computations as whole-array operations instead of element-by-element loops.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong><code>ndarray</code>:</strong> N-dimensional homogeneous array with a single <code>dtype</code> (<code>int32</code>, <code>float64</code>, <code>complex128</code>, etc.).</li>
+            <li><strong>Vectorization:</strong> <code>a + b</code> adds entire arrays element-wise without Python-level loops.</li>
+            <li><strong>Broadcasting:</strong> Rules for combining arrays of different shapes — <code>a.shape=(3,1) + b.shape=(1,4)</code> produces <code>(3,4)</code>.</li>
+            <li><strong>Slicing and views:</strong> <code>a[::2]</code> returns a view (no copy), so modifying it affects the original.</li>
+            <li><strong>Fancy indexing:</strong> Boolean and integer array indexing — <code>a[a &gt; 0]</code>, <code>a[[1,3,5]]</code>.</li>
+            <li><strong>Reductions:</strong> <code>.sum()</code>, <code>.mean()</code>, <code>.std()</code>, <code>.max()</code> along any axis.</li>
+            <li><strong>Linear algebra:</strong> <code>np.dot</code>, <code>np.linalg.inv</code>, <code>np.linalg.eig</code>, SVD, QR, etc.</li>
+            <li><strong>FFT, random, polynomial:</strong> Entire mathematical libraries built in.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Python lists:</strong> Lists are arrays of boxed heterogeneous objects with pointer indirection. NumPy arrays are packed C primitives — 10-100× faster, dramatically less memory.</li>
+            <li><strong>vs MATLAB:</strong> NumPy was designed as a Python alternative to MATLAB. Syntax is similar but Python is free, general-purpose, and has a richer ecosystem.</li>
+            <li><strong>vs R:</strong> R's vectors and matrices are similar in spirit; NumPy is more general and integrates better with non-stats code.</li>
+            <li><strong>vs Julia:</strong> Julia is designed from scratch for scientific computing and can match or beat NumPy. But Python's ecosystem (sklearn, pytorch, TF) is deeper.</li>
+            <li><strong>vs C++ Eigen/Armadillo:</strong> Those are pure C++ template libraries — faster compile-time, more cumbersome API.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">NumPy is the <strong>de-facto numeric standard in Python</strong>. Every major library — <strong>pandas, scikit-learn, PyTorch, TensorFlow, SciPy, Matplotlib, OpenCV</strong> — either uses NumPy arrays internally or interoperates with them via the <code>__array__</code> protocol. Mastering NumPy's vectorization is the single biggest performance win for Python data code.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Views vs copies:</strong> Slicing creates a view; modifying it mutates the original. Use <code>.copy()</code> to be safe.</li>
+            <li><strong>Integer overflow:</strong> <code>int32</code> wraps silently at 2³¹ — NumPy does NOT upcast automatically.</li>
+            <li><strong>dtype upcasting:</strong> <code>int32 + float32</code> becomes <code>float64</code>.</li>
+            <li><strong>Broadcasting surprises:</strong> Shapes that don't align raise <code>ValueError</code>.</li>
+            <li><strong>Loops over arrays:</strong> <code>for x in arr</code> defeats vectorization — use whole-array ops.</li>
+            <li><strong>NaN propagation:</strong> <code>np.nan != np.nan</code>; use <code>np.isnan</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Machine learning:</strong> Every gradient descent, matrix multiplication, and activation in neural nets runs on NumPy-like arrays. <strong>Image processing:</strong> OpenCV stores images as NumPy arrays. <strong>Scientific computing:</strong> Physics simulations, signal processing, finance quant models. <strong>PyTorch tensors</strong> and <strong>TensorFlow tensors</strong> both conceptually mirror NumPy arrays (with GPU support added).</span></div>
+        </div>
+
         <p>NumPy is the foundation of ALL Python ML/data science. Every ML library uses NumPy arrays internally.</p>
 
 <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
@@ -3999,6 +4858,39 @@ m = np.array([[<span class="n">1</span>,<span class="n">2</span>,<span class="n"
     <section id="pandas">
         <h2><span class="sec-num">29</span> Pandas Foundation</h2>
 
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Pandas</strong> is Python's premier library for <strong>tabular data manipulation and analysis</strong>. Built on top of NumPy, it provides two core data structures: the <strong><code>Series</code></strong> (a labeled 1-D array) and the <strong><code>DataFrame</code></strong> (a 2-D table with labeled rows and columns, like a SQL table or Excel sheet). Pandas gives you <strong>vectorized operations</strong>, <strong>SQL-like group-by / join / filter</strong>, and connectors to read/write CSV, JSON, Parquet, SQL, Excel, HDF5. Created by Wes McKinney at AQR Capital in 2008, it's now the <em>lingua franca</em> of data science and analytics in Python.</span></div>
+          <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text"><ul>
+            <li><strong><code>Series</code>:</strong> 1-D labeled array — think of it as a NumPy array with a name and an index.</li>
+            <li><strong><code>DataFrame</code>:</strong> 2-D table — dict of Series sharing an index.</li>
+            <li><strong>I/O:</strong> <code>pd.read_csv</code>, <code>read_parquet</code>, <code>read_sql</code>, <code>read_excel</code>, <code>read_json</code>, etc.</li>
+            <li><strong>Filtering:</strong> Boolean indexing — <code>df[df.age &gt; 30]</code>.</li>
+            <li><strong>Group-by:</strong> <code>df.groupby("city").agg({"sales":"sum"})</code>.</li>
+            <li><strong>Join/Merge:</strong> <code>pd.merge(left, right, on="id", how="inner")</code> — SQL-like joins.</li>
+            <li><strong>Reshape:</strong> <code>pivot</code>, <code>pivot_table</code>, <code>melt</code>, <code>stack</code>, <code>unstack</code>.</li>
+            <li><strong>Time-series:</strong> Rich datetime indexing, resampling, rolling windows.</li>
+            <li><strong>Missing data:</strong> <code>NaN</code> support with <code>.fillna</code>, <code>.dropna</code>, <code>.isna</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs R data.frame:</strong> Direct inspiration. Pandas is more Python-integrated; R's <code>dplyr</code> is arguably cleaner.</li>
+            <li><strong>vs SQL:</strong> Pandas does in-memory what SQL does on disk. SQL is better for huge tables; pandas for iterative analysis.</li>
+            <li><strong>vs Excel:</strong> Pandas scales to millions of rows, is version-controllable, and reproducible. Excel is better for ad-hoc exploration and charts.</li>
+            <li><strong>vs Polars:</strong> Polars is a newer Rust-based DataFrame library — much faster, lazy evaluation, type-safer API. The pandas-killer, arguably.</li>
+            <li><strong>vs Dask/PySpark:</strong> Dask and PySpark handle out-of-memory and distributed data. Pandas is single-machine.</li>
+            <li><strong>vs JS (Data-Forge / Danfo.js):</strong> JS tabular libraries exist but are vastly less mature.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Pandas is the <strong>default Python tool for any data manipulation task</strong>. Loading a CSV, cleaning it, joining with another table, aggregating, and exporting — pandas does it all in 5-10 lines. Every Python data scientist, ML engineer, quant analyst, and data analyst uses pandas daily.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>SettingWithCopyWarning:</strong> Modifying a slice may or may not affect the original — always use <code>.loc</code>.</li>
+            <li><strong>Chained indexing:</strong> <code>df[df.x &gt; 0]["y"] = 5</code> may silently fail. Use <code>df.loc[df.x &gt; 0, "y"] = 5</code>.</li>
+            <li><strong>Memory hungry:</strong> Loads entire dataset into RAM — not great for 50+ GB files.</li>
+            <li><strong>Integer vs object dtypes:</strong> A column with NaNs gets promoted to float.</li>
+            <li><strong>Iterating rows:</strong> <code>for row in df.iterrows()</code> is slow — vectorize instead.</li>
+            <li><strong>Inconsistent API:</strong> Some methods return views, others copies; some mutate in place, others don't.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every <strong>Jupyter notebook</strong> in data science uses pandas. <strong>ETL pipelines</strong> load → clean → transform → export with pandas. <strong>Feature engineering</strong> for ML is almost always in pandas. <strong>Financial analysis</strong>, <strong>A/B test evaluation</strong>, <strong>log analysis</strong>, <strong>reporting dashboards</strong>. Libraries like <strong>scikit-learn</strong>, <strong>plotly</strong>, <strong>statsmodels</strong>, <strong>seaborn</strong> all accept DataFrames natively.</span></div>
+        </div>
+
 <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
 
 df = pd.DataFrame({
@@ -4052,6 +4944,43 @@ merged = pd.merge(orders, users, on=<span class="s">"uid"</span>)
     <!-- ═══════════════════════════════════════════ -->
     <section id="ml-bridge">
         <h2><span class="sec-num">30</span> The ML Bridge — Everything Together</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">This section is the <strong>capstone that fuses everything</strong> — OOP, NumPy vectorization, iterators, closures, type hints, dataclasses, decorators — into a small end-to-end machine learning example (linear regression from scratch). It's meant to show how Python's language features come together in real ML code, and how Python became the undisputed king of ML because it blends <strong>fast C-backed numerics</strong> (NumPy, BLAS) with <strong>ergonomic high-level syntax</strong> for rapid iteration.</span></div>
+          <div class="concept-row"><span class="concept-label">The Python ML stack</span><span class="concept-text"><ul>
+            <li><strong>NumPy:</strong> Raw tensor/array math, the base layer.</li>
+            <li><strong>pandas:</strong> Data loading, cleaning, feature engineering.</li>
+            <li><strong>Matplotlib / Seaborn / Plotly:</strong> Visualization.</li>
+            <li><strong>scikit-learn:</strong> Classical ML — linear models, trees, SVMs, clustering, preprocessing.</li>
+            <li><strong>PyTorch / TensorFlow / JAX:</strong> Deep learning with GPU/TPU acceleration and autograd.</li>
+            <li><strong>Hugging Face Transformers:</strong> Pre-trained LLMs, vision models, audio models.</li>
+            <li><strong>MLflow / Weights &amp; Biases:</strong> Experiment tracking and model registry.</li>
+            <li><strong>FastAPI / BentoML:</strong> Model serving.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why Python dominates ML</span><span class="concept-text"><ul>
+            <li><strong>NumPy + BLAS:</strong> Fast C-level math with an easy Python interface.</li>
+            <li><strong>Jupyter notebooks:</strong> Interactive, visual, and reproducible exploration.</li>
+            <li><strong>Ecosystem:</strong> Decade-plus head start over all competitors.</li>
+            <li><strong>Researcher-friendly syntax:</strong> Code reads like pseudocode.</li>
+            <li><strong>Glue language:</strong> Easy to wrap C/C++/CUDA kernels (pybind11, Cython).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs R:</strong> R excels at statistics and visualization but loses on production deployment and deep learning.</li>
+            <li><strong>vs Julia:</strong> Julia is designed for scientific computing, faster than Python, but its ecosystem is 1/10 the size.</li>
+            <li><strong>vs C++ (Caffe, LibTorch):</strong> C++ is used for inference and embedded ML, but training code is almost always Python.</li>
+            <li><strong>vs JavaScript (TensorFlow.js):</strong> For in-browser inference only; not for training.</li>
+            <li><strong>vs Swift for TensorFlow:</strong> Google's experiment; now discontinued.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Mixing NumPy + PyTorch tensors:</strong> Each has its own conventions; use <code>.numpy()</code> / <code>torch.from_numpy</code> to bridge.</li>
+            <li><strong>Random seeds:</strong> Reproducibility requires seeding NumPy, Python's <code>random</code>, and PyTorch/TensorFlow separately.</li>
+            <li><strong>Data leakage:</strong> Fitting preprocessing (e.g., <code>StandardScaler</code>) on the full dataset instead of just the train fold.</li>
+            <li><strong>GPU memory:</strong> Keeping tensors on GPU and forgetting to detach gradients leads to out-of-memory.</li>
+            <li><strong>Python speed vs GPU:</strong> The Python loop overhead doesn't matter once the GPU kernel is running.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every major AI system you use — <strong>ChatGPT, Claude, Midjourney, Stable Diffusion, AlphaFold, DALL-E</strong> — was trained with Python. <strong>Netflix recommendations</strong>, <strong>Uber ETAs</strong>, <strong>Tesla autopilot training</strong>, <strong>Google Search ranking</strong> all use Python ML pipelines. Python is the language of modern AI.</span></div>
+        </div>
+
         <p>This example uses almost every Python concept from this guide to build Linear Regression from scratch.</p>
 
 <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
@@ -4156,6 +5085,43 @@ merged = pd.merge(orders, users, on=<span class="s">"uid"</span>)
     <!-- ═══════════════════════════════════════════ -->
     <section id="project-structure">
         <h2><span class="sec-num">31</span> Real-World Project Structure</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Python has no single mandated project layout — the community has converged on a handful of conventions based on project type: <strong>single-script</strong> (one <code>.py</code> file), <strong>flat layout</strong> (modules at project root), <strong>src layout</strong> (code under <code>src/</code> — now recommended), and framework-specific layouts (Django's <code>manage.py</code> + apps, Flask blueprints, FastAPI routers). Modern Python uses <strong><code>pyproject.toml</code></strong> for metadata, build config, and tooling settings — replacing the older <code>setup.py</code>, <code>setup.cfg</code>, <code>requirements.txt</code> sprawl.</span></div>
+          <div class="concept-row"><span class="concept-label">Typical layout (src style)</span><span class="concept-text"><ul>
+            <li><strong><code>pyproject.toml</code></strong> — project metadata, deps, tool configs (ruff, black, mypy, pytest).</li>
+            <li><strong><code>README.md</code></strong>, <strong><code>LICENSE</code></strong>, <strong><code>.gitignore</code></strong>.</li>
+            <li><strong><code>src/myapp/</code></strong> — the installable package (modules, subpackages).</li>
+            <li><strong><code>src/myapp/__init__.py</code></strong> — package marker and exports.</li>
+            <li><strong><code>tests/</code></strong> — pytest tests mirroring package structure.</li>
+            <li><strong><code>docs/</code></strong> — Sphinx or MkDocs documentation.</li>
+            <li><strong><code>.github/workflows/</code></strong> — CI pipelines.</li>
+            <li><strong><code>.venv/</code></strong> — virtual environment (gitignored).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Modern tooling</span><span class="concept-text"><ul>
+            <li><strong><code>uv</code> / <code>poetry</code> / <code>hatch</code> / <code>pdm</code>:</strong> Modern dependency/environment managers.</li>
+            <li><strong><code>ruff</code>:</strong> Ultra-fast linter + formatter (replaces flake8, isort, black for many projects).</li>
+            <li><strong><code>mypy</code> / <code>pyright</code>:</strong> Static type checking.</li>
+            <li><strong><code>pytest</code>:</strong> Test runner.</li>
+            <li><strong><code>pre-commit</code>:</strong> Git hooks to run linters before commit.</li>
+            <li><strong><code>tox</code> / <code>nox</code>:</strong> Test against multiple Python versions.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Node.js:</strong> <code>package.json</code> + <code>node_modules</code> is much more standardized than Python historically was. Python is catching up with <code>uv</code> and <code>pyproject.toml</code>.</li>
+            <li><strong>vs Java:</strong> Maven/Gradle enforce strict layouts (<code>src/main/java</code>). Python is more flexible but less predictable.</li>
+            <li><strong>vs Go:</strong> Go has <code>go.mod</code> and a strict layout — much less to decide.</li>
+            <li><strong>vs Rust:</strong> Cargo is the gold standard — unified tooling, predictable layouts. Python's <code>uv</code> is Rust-inspired.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why it matters</span><span class="concept-text">A clean layout makes <strong>onboarding new contributors</strong>, <strong>running tests in CI</strong>, <strong>building and publishing to PyPI</strong>, and <strong>managing dependencies</strong> straightforward. The <code>src/</code> layout in particular prevents "it works on my machine" bugs where tests import the local directory instead of the installed package.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Importing from <code>tests/</code>:</strong> Forgetting to install the package in editable mode (<code>pip install -e .</code>).</li>
+            <li><strong>Not pinning versions:</strong> <code>requirements.txt</code> without hashes leads to irreproducible builds.</li>
+            <li><strong>Committing <code>.venv</code>:</strong> Large, platform-specific, pointless.</li>
+            <li><strong>Overusing <code>__init__.py</code>:</strong> Side effects in init files create hidden imports.</li>
+            <li><strong>Mixing flat and src layouts:</strong> Confuses tooling.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>FastAPI</strong>, <strong>Pydantic</strong>, <strong>httpx</strong>, <strong>Pandas</strong>, <strong>Polars</strong>, <strong>Poetry itself</strong> — all use a modern <code>src/</code> layout with <code>pyproject.toml</code>. Django projects follow their own layout (<code>manage.py</code>, apps). Data science projects often use <strong>Cookiecutter Data Science</strong> template with <code>data/</code>, <code>notebooks/</code>, <code>models/</code> dirs.</span></div>
+        </div>
 
         <h3>Basic Script Project</h3>
         <p>The simplest layout — just a script, dependencies, and a gitignore.</p>
@@ -4274,6 +5240,45 @@ deactivate</code></pre>
     <!-- ═══════════════════════════════════════════ -->
     <section id="vscode">
         <h2><span class="sec-num">32</span> VS Code Setup</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">VS Code (with Microsoft's official <strong>Python extension</strong> and <strong>Pylance</strong> language server) is now the <strong>most popular Python IDE</strong>, overtaking PyCharm in community surveys. It's free, open-source, lightweight, and its extension ecosystem covers everything: IntelliSense, type checking (Pylance uses Pyright internally), debugging, Jupyter notebooks, refactoring, Git, remote development, and Docker. Proper setup includes selecting the right interpreter, enabling format-on-save, integrating a linter, and configuring launch.json for debugging.</span></div>
+          <div class="concept-row"><span class="concept-label">Essential extensions</span><span class="concept-text"><ul>
+            <li><strong>Python (Microsoft):</strong> Core interpreter management, debugging, test runner.</li>
+            <li><strong>Pylance:</strong> Fast type checking and IntelliSense (uses Pyright).</li>
+            <li><strong>Ruff:</strong> Linting and formatting with the blazing-fast Rust-based linter.</li>
+            <li><strong>Jupyter:</strong> Native notebook support inside VS Code.</li>
+            <li><strong>Python Debugger:</strong> Enhanced debugging via <code>debugpy</code>.</li>
+            <li><strong>Python Test Explorer:</strong> GUI for pytest/unittest.</li>
+            <li><strong>autoDocstring:</strong> Auto-generates docstring templates.</li>
+            <li><strong>Error Lens:</strong> Shows errors inline.</li>
+            <li><strong>GitLens:</strong> Enhanced git integration.</li>
+            <li><strong>Dev Containers / Remote SSH:</strong> Develop inside Docker or on remote machines.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Key settings</span><span class="concept-text"><ul>
+            <li><strong>Interpreter:</strong> <code>Cmd/Ctrl+Shift+P → Python: Select Interpreter</code> — pick your venv.</li>
+            <li><strong>Format on save:</strong> <code>"editor.formatOnSave": true</code> with Ruff or Black.</li>
+            <li><strong>Type-check mode:</strong> <code>"python.analysis.typeCheckingMode": "strict"</code>.</li>
+            <li><strong><code>launch.json</code>:</strong> Debug configurations for scripts, Django, FastAPI, pytest.</li>
+            <li><strong><code>tasks.json</code>:</strong> Run linters, tests, build commands with one keystroke.</li>
+            <li><strong>Notebook support:</strong> Directly run <code>.ipynb</code> cells without opening Jupyter.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs PyCharm:</strong> PyCharm is a heavier, paid (Pro) IDE with deeper refactoring, built-in database tools, and scientific mode. VS Code is free, lighter, and better for polyglot projects.</li>
+            <li><strong>vs Vim/Neovim:</strong> Much steeper learning curve but extreme customizability. Tools like <code>jedi</code>, <code>coc.nvim</code>, and LSP mode give similar features.</li>
+            <li><strong>vs Jupyter Lab:</strong> Jupyter is notebook-native; VS Code handles both scripts and notebooks in one app.</li>
+            <li><strong>vs Spyder:</strong> Spyder is science-focused (like MATLAB). VS Code is more general-purpose.</li>
+            <li><strong>vs Cursor / Windsurf:</strong> AI-first forks of VS Code optimized for Copilot-style coding.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">VS Code gives you <strong>almost PyCharm-level Python power for free</strong>, with a much smaller memory footprint and faster startup. The remote development features (SSH, containers, WSL, Codespaces) make it the best tool for ML/data work where you need to edit locally but run on a GPU box.</span></div>
+          <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text"><ul>
+            <li><strong>Wrong interpreter:</strong> Linting errors because VS Code is using system Python, not your venv.</li>
+            <li><strong>Pylance false positives:</strong> Dynamic code confuses the type checker. Use <code># type: ignore</code> sparingly.</li>
+            <li><strong>Slow on huge monorepos:</strong> Disable unnecessary extensions per-workspace.</li>
+            <li><strong>Conflicting formatters:</strong> Only enable one (Ruff or Black, not both).</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Nearly every Python developer — from FAANG engineers to ML researchers at OpenAI — uses VS Code. It's the default for <strong>GitHub Codespaces</strong>, <strong>Microsoft's Azure ML</strong>, <strong>AWS Cloud9 successor</strong>, and <strong>Gitpod</strong>. The <strong>Remote - Containers</strong> extension is the basis of the "dev containers" workflow used in production projects.</span></div>
+        </div>
 
         <h3>Must-Have Extensions</h3>
         <p>The core extensions every Python developer needs — install these first.</p>
@@ -4423,6 +5428,32 @@ deactivate</code></pre>
     <!-- ═══════════════════════════════════════════ -->
     <section id="common-methods">
         <h2><span class="sec-num">33</span> Common Methods Cheatsheet</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>consolidated reference</strong> of the most-used built-in methods, functions, and stdlib helpers you'll reach for daily — grouped by type (strings, lists, dicts, sets, tuples, numbers, files, itertools, functools). Python's standard library is so vast that even experienced devs don't remember every method; this is your quick-lookup for "how do I reverse a list" or "how do I sort a dict by value". Keeping a mental index of these saves countless Google trips.</span></div>
+          <div class="concept-row"><span class="concept-label">Why keep a cheatsheet</span><span class="concept-text"><ul>
+            <li><strong>Muscle memory:</strong> The top 20% of methods cover 80% of real work — mastering them is a force multiplier.</li>
+            <li><strong>Pythonic idioms:</strong> Knowing <code>any()</code>, <code>all()</code>, <code>zip()</code>, <code>enumerate()</code>, <code>sorted(key=...)</code> makes code 3× shorter.</li>
+            <li><strong>Interview prep:</strong> Whiteboard questions expect you to know these cold.</li>
+            <li><strong>Code review:</strong> Recognizing that a 5-line loop can be replaced with <code>sum(x for x in nums if x &gt; 0)</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Common must-know methods</span><span class="concept-text"><ul>
+            <li><strong>String:</strong> <code>.strip()</code>, <code>.split()</code>, <code>.join()</code>, <code>.replace()</code>, <code>.startswith()</code>, <code>.format()</code>, f-strings.</li>
+            <li><strong>List:</strong> <code>.append()</code>, <code>.extend()</code>, <code>.pop()</code>, <code>.sort()</code>, <code>sorted()</code>, slicing, comprehensions.</li>
+            <li><strong>Dict:</strong> <code>.get()</code>, <code>.items()</code>, <code>.keys()</code>, <code>.values()</code>, <code>.update()</code>, <code>.setdefault()</code>.</li>
+            <li><strong>Set:</strong> <code>.add()</code>, <code>.remove()</code>, <code>|</code>, <code>&amp;</code>, <code>-</code>, <code>^</code>.</li>
+            <li><strong>Built-ins:</strong> <code>len()</code>, <code>range()</code>, <code>enumerate()</code>, <code>zip()</code>, <code>map()</code>, <code>filter()</code>, <code>sorted()</code>, <code>reversed()</code>, <code>sum()</code>, <code>min()</code>, <code>max()</code>, <code>any()</code>, <code>all()</code>.</li>
+            <li><strong>functools:</strong> <code>reduce</code>, <code>partial</code>, <code>lru_cache</code>, <code>wraps</code>.</li>
+            <li><strong>itertools:</strong> <code>chain</code>, <code>zip_longest</code>, <code>groupby</code>, <code>product</code>, <code>combinations</code>, <code>permutations</code>.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs JavaScript:</strong> JS has similar methods on Array/Object but they're methods, not free functions. Python mixes both styles.</li>
+            <li><strong>vs Ruby:</strong> Ruby everything-is-a-method; Python prefers free functions for some (e.g., <code>len(obj)</code> not <code>obj.length</code>).</li>
+            <li><strong>vs Java:</strong> Java's Collections/Stream APIs are vastly more verbose.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Every Python script, notebook, and production app uses this core set of methods constantly. Mastering them is the difference between a 10-line script and a 40-line one.</span></div>
+        </div>
+
         <p>Every method you'll reach for daily. Grouped by type so you can scan fast.</p>
 
         <div class="method-section">
@@ -4912,6 +5943,41 @@ parsed = json.loads(json_str)              <span class="cm"># dict</span>
     <!-- ═══════════════════════════════════════════ -->
     <section id="interview">
         <h2><span class="sec-num">34</span> Interview Questions</h2>
+
+        <div class="concept-box">
+          <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A curated set of the <strong>most-asked Python interview questions</strong> — from FAANG-style technical screens to startup pairing sessions. These questions test both <strong>language-level knowledge</strong> (GIL, MRO, decorators, generators, memory model) and <strong>practical problem-solving</strong> (implement a data structure, fix a bug, explain output). Expect questions ranging from "what's the difference between a list and tuple" to "explain how <code>async</code>/<code>await</code> works under the hood".</span></div>
+          <div class="concept-row"><span class="concept-label">Topics you'll be asked</span><span class="concept-text"><ul>
+            <li><strong>Language internals:</strong> GIL, reference counting, MRO, how <code>is</code> differs from <code>==</code>, mutable vs immutable.</li>
+            <li><strong>Data structures:</strong> When to use dict vs list, how sets work, hashability, <code>deque</code>.</li>
+            <li><strong>OOP:</strong> <code>__init__</code> vs <code>__new__</code>, classmethod vs staticmethod, properties, multiple inheritance.</li>
+            <li><strong>Functions:</strong> Mutable default args, closures, decorators, <code>*args</code>/<code>**kwargs</code>.</li>
+            <li><strong>Iteration:</strong> Generators vs iterators, <code>yield from</code>, lazy evaluation.</li>
+            <li><strong>Concurrency:</strong> GIL, threading vs multiprocessing vs asyncio, when to use each.</li>
+            <li><strong>Error handling:</strong> EAFP vs LBYL, exception chaining, custom exceptions.</li>
+            <li><strong>Coding challenges:</strong> Reverse a linked list, balance parentheses, LRU cache, two-sum, binary search, tree traversal.</li>
+            <li><strong>Debug output:</strong> "What does this code print?" gotcha questions on closures and mutable state.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text"><ul>
+            <li><strong>vs Java interviews:</strong> Java interviews emphasize JVM internals (GC, classloaders) and Spring. Python interviews focus on GIL, metaclasses, and duck typing.</li>
+            <li><strong>vs JavaScript interviews:</strong> JS interviews dive into closures, <code>this</code>, event loop. Python overlaps on closures but adds GIL and comprehensions.</li>
+            <li><strong>vs Go interviews:</strong> Go interviews emphasize goroutines, channels, and simplicity. Python focuses on flexibility and protocols.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">How to prepare</span><span class="concept-text"><ul>
+            <li><strong>Practice LeetCode</strong> in Python — focus on arrays, strings, trees, DP, graphs.</li>
+            <li><strong>Build a small project</strong> with pytest, typing, and a web framework.</li>
+            <li><strong>Read CPython docs</strong> for language internals.</li>
+            <li><strong>Prepare "tell me about a bug you fixed"</strong> stories.</li>
+            <li><strong>Know your stdlib:</strong> itertools, collections, functools, contextlib are frequent sources of "did you know this exists" questions.</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Common gotcha questions</span><span class="concept-text"><ul>
+            <li><strong>Mutable default args:</strong> "What does this function print after being called twice?"</li>
+            <li><strong>Late binding in closures:</strong> "Why do all these lambdas return the same value?"</li>
+            <li><strong><code>is</code> vs <code>==</code>:</strong> "Why does <code>a is b</code> return True for small ints but False for large ones?"</li>
+            <li><strong>Dict ordering:</strong> "Does Python dict preserve insertion order?"</li>
+            <li><strong><code>+=</code> on mutable in tuple:</strong> "<code>t = ([1,2],); t[0] += [3]</code> — does it raise? What's the state of <code>t[0]</code> after?"</li>
+          </ul></span></div>
+          <div class="concept-row"><span class="concept-label">Real-world relevance</span><span class="concept-text">These questions appear routinely in <strong>backend</strong>, <strong>data engineering</strong>, <strong>ML engineer</strong>, and <strong>SRE</strong> interviews at companies like Google, Meta, Netflix, Dropbox, Stripe, Airbnb, and countless startups. Mastering them signals both <strong>language fluency</strong> and <strong>production experience</strong>.</span></div>
+        </div>
 
         <div class="faq-toggle-bar">
             <span>Expand All</span>

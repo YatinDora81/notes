@@ -357,6 +357,57 @@
     pre { padding: 12px 10px; font-size: 0.74rem; }
     pre code { font-size: 0.74rem; }
   }
+
+  /* ========== CONCEPT BOX ========== */
+  .concept-box {
+    border-left: 3px solid #a78bfa;
+    background: rgba(167,139,250,0.05);
+    padding: 20px 24px;
+    margin: 18px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+  .concept-box .concept-row {
+    margin: 14px 0;
+    display: block;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed rgba(167,139,250,0.15);
+  }
+  .concept-box .concept-row:first-of-type { margin-top: 4px; }
+  .concept-box .concept-row:last-child {
+    margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+  }
+  .concept-box .concept-label {
+    display: block;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.4px;
+    color: #a78bfa; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .concept-box .concept-text {
+    display: block; color: #a1a1aa; font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .concept-box .concept-text strong { color: #fafafa; font-weight: 600; }
+  .concept-box .concept-text code {
+    background: rgba(167,139,250,0.12);
+    padding: 1px 6px; border-radius: 3px;
+    color: #c4b5fd; font-size: 0.85em;
+  }
+  .concept-box .concept-text ul {
+    margin: 8px 0 0 0; padding-left: 22px;
+  }
+  .concept-box .concept-text ul li {
+    margin: 5px 0;
+  }
+  .concept-box .concept-text p { margin: 6px 0; }
+  .concept-box .concept-text pre {
+    background: rgba(0,0,0,0.3);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 0.82em;
+    margin: 8px 0;
+    overflow-x: auto;
+  }
 </style>
 </head>
 <body>
@@ -442,6 +493,40 @@
 <!-- ===================== SECTION 01: HTTP CLIENT ===================== -->
 <h2 id="http-client"><span class="section-num">01</span> HTTP Client</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>HTTP client</strong> in Go is an instance of <code>*http.Client</code> from the <code>net/http</code> standard library package. It lets your program send HTTP/1.1 and HTTP/2 requests to other servers and read the responses — the exact job that <code>axios</code>, <code>fetch</code>, <code>requests</code>, <code>OkHttp</code>, and <code>HttpClient</code> do in other ecosystems. A Go client is a thin, concurrency-safe wrapper around an <code>http.RoundTripper</code> (usually <code>*http.Transport</code>) that owns a <strong>connection pool</strong>, manages <strong>keep-alive</strong>, <strong>TLS</strong>, <strong>proxies</strong>, <strong>redirects</strong>, and <strong>cookie jars</strong>. The same <code>http.Client</code> value is safe to share across hundreds of goroutines.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Zero dependencies:</strong> <code>net/http</code> is in the standard library — no <code>npm install axios</code>, no <code>pip install requests</code>.</li>
+      <li><strong>Connection pooling:</strong> the default <code>http.Transport</code> reuses TCP connections, giving you HTTP keep-alive for free.</li>
+      <li><strong>Full HTTP/2 support:</strong> enabled automatically on TLS connections.</li>
+      <li><strong>Context cancellation:</strong> every request accepts a <code>context.Context</code> so upstream cancellations propagate down.</li>
+      <li><strong>Configurable timeouts:</strong> <code>Client.Timeout</code>, plus fine-grained <code>Transport</code> timeouts (<code>DialContext</code>, <code>TLSHandshakeTimeout</code>, <code>ResponseHeaderTimeout</code>).</li>
+      <li><strong>Pluggable RoundTripper:</strong> wrap transport to add logging, retries, auth headers, tracing, circuit-breaking, or metrics.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Python <code>requests</code>:</strong> Go's client is synchronous by default but cheap to parallelize via goroutines — no <code>async/await</code> ceremony, no GIL. You build a <code>*http.Request</code> explicitly instead of passing keyword arguments.</li>
+      <li><strong>vs Node.js <code>fetch</code>/<code>axios</code>:</strong> Go returns <code>(resp, err)</code> tuples rather than rejecting Promises. Errors are values; you always check them. Response bodies are <code>io.ReadCloser</code> streams, not buffered strings.</li>
+      <li><strong>vs Java <code>HttpClient</code>:</strong> Go has no builder pattern — you mutate struct fields directly. No fluent DSL, no <code>CompletableFuture</code>, just explicit method calls.</li>
+      <li><strong>vs C# <code>HttpClient</code>:</strong> same "reuse one client" principle, but Go avoids the infamous <code>HttpClient</code> socket-exhaustion trap because the Transport manages pooling correctly by default.</li>
+      <li><strong>vs Go third-party (<code>go-resty</code>, <code>hashicorp/go-retryablehttp</code>):</strong> those add fluent APIs, retries, and JSON helpers on top of <code>*http.Client</code>, but the standard library is enough for 90% of production code.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You use <code>http.Client</code> whenever your Go program needs to talk to another HTTP service — a REST API, a webhook, an OAuth token endpoint, a cloud provider SDK, Prometheus, ElasticSearch, a microservice in your own cluster. It is the foundation for every SDK in the Go ecosystem: the AWS SDK, GitHub's <code>go-github</code>, Stripe's <code>stripe-go</code>, Kubernetes' <code>client-go</code> — all wrap <code>*http.Client</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Forgetting <code>defer resp.Body.Close()</code></strong> — leaks sockets and file descriptors until the process dies.</li>
+      <li><strong>Using <code>http.DefaultClient</code> in production</strong> — it has <strong>no timeout</strong>, so a hung server can block your goroutine forever. Always create your own client with <code>Timeout: 30 * time.Second</code>.</li>
+      <li><strong>Not draining the body</strong> — if you read part of the body then close it, the TCP connection can't be reused. Use <code>io.Copy(io.Discard, resp.Body)</code> before closing to recycle the socket.</li>
+      <li><strong>Creating a new client per request</strong> — defeats the connection pool. Create <strong>one</strong> <code>*http.Client</code> package-level variable and reuse it.</li>
+      <li><strong>Ignoring status codes</strong> — <code>err == nil</code> only means the round trip succeeded; a <code>500</code> is still a valid response. You must check <code>resp.StatusCode</code> yourself.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' <code>client-go</code></strong> uses <code>*http.Client</code> with a custom transport for mTLS against the API server. <strong>Terraform providers</strong> use it to talk to AWS/GCP/Azure APIs. <strong>Prometheus</strong> scrapes metrics with a shared client across thousands of targets. <strong>Grafana Loki</strong> ships logs via a pooled client. <strong>Hugo</strong> uses it to fetch remote content for static sites. The <strong>Cloudflare Go</strong> libraries wrap it with retry logic for their edge API.</span></div>
+</div>
+
 <p>Go's <code>net/http</code> package provides a production-grade HTTP client out of the box. Unlike most languages where you need a third-party library (axios, requests, etc.), Go's standard library is all you need. The <code>http.Client</code> struct gives you full control over timeouts, redirects, cookies, and transport-level settings.</p>
 
 <p>The pattern is straightforward: create a client, make the request, check the error, and <strong>always</strong> close the response body with <code>defer</code>. Forgetting to close the body is a classic Go bug that causes resource leaks.</p>
@@ -508,6 +593,40 @@ resp, err := client.<span class="fn">Do</span>(req)
 <!-- ===================== SECTION 02: HTTP SERVER BASICS ===================== -->
 <h2 id="http-server"><span class="section-num">02</span> HTTP Server Basics</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">An <strong>HTTP server</strong> in Go is any process that listens on a TCP port and serves the <code>http.Handler</code> interface. The standard library ships a production-quality server (<code>*http.Server</code>) and two ways to register routes: the top-level <code>http.HandleFunc</code> helpers (which use <code>http.DefaultServeMux</code>) and your own <code>*http.ServeMux</code>. A handler is anything with a <code>ServeHTTP(w http.ResponseWriter, r *http.Request)</code> method — a pattern so simple that middleware, routers, and entire frameworks all compose through it. Go servers are natively concurrent: every incoming request runs on its own goroutine, so a single process can comfortably handle tens of thousands of simultaneous connections.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Goroutine-per-request:</strong> no thread pools to tune, no event loop to starve.</li>
+      <li><strong>HTTP/1.1 &amp; HTTP/2 out of the box:</strong> HTTP/2 is automatic on TLS listeners.</li>
+      <li><strong>Graceful shutdown:</strong> <code>server.Shutdown(ctx)</code> drains in-flight requests before exiting.</li>
+      <li><strong>Interface-driven design:</strong> <code>http.Handler</code> is a single-method interface — everything else composes from it.</li>
+      <li><strong>Built-in timeouts:</strong> <code>ReadTimeout</code>, <code>WriteTimeout</code>, <code>IdleTimeout</code>, <code>ReadHeaderTimeout</code> protect against slow-loris attacks.</li>
+      <li><strong>Zero-allocation routing:</strong> <code>http.ServeMux</code> is a simple trie — no regex compilation on every request.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node.js Express:</strong> Express runs on a single-threaded event loop; one CPU-heavy request blocks everything. Go spawns a goroutine per request, so CPU work scales across all cores automatically.</li>
+      <li><strong>vs Python Flask/Django:</strong> Flask needs <code>gunicorn</code>+<code>gevent</code> or <code>uWSGI</code> to handle concurrency; Go's server is the production server. No WSGI, no ASGI, no separate reverse proxy required (though Nginx in front is still common).</li>
+      <li><strong>vs Java Spring Boot:</strong> Spring Boot embeds Tomcat/Jetty/Undertow behind heavy annotations. Go has no annotations, no DI container — handlers are just functions.</li>
+      <li><strong>vs Rust <code>hyper</code>/<code>actix</code>:</strong> Rust gives you more raw performance and zero-cost futures but forces you to reason about lifetimes and async runtimes. Go trades a little speed for dramatic simplicity.</li>
+      <li><strong>vs Go frameworks (Gin, Echo, Fiber, Chi):</strong> those add ergonomic routers, middleware stacks, and param parsing on top of <code>net/http</code>, but the raw standard library is completely usable for production APIs.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You use <code>net/http</code> when you want a <strong>production HTTP server with zero dependencies</strong>. It scales vertically without configuration tuning, deploys as a single binary, and exposes every knob you need for TLS, timeouts, graceful shutdown, and observability. For microservices, REST APIs, webhooks, health-check endpoints, and metrics exporters, it is the default choice.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Never use <code>http.ListenAndServe</code> in production without a custom <code>*http.Server</code></strong> — the default has no timeouts, leaving you vulnerable to slow-loris DoS.</li>
+      <li><strong>Panics crash only the current goroutine</strong> — but they still return a broken response to the client, so you need a recovery middleware.</li>
+      <li><strong>Writing to <code>http.ResponseWriter</code> after calling <code>WriteHeader</code>:</strong> headers must be set first; Go logs a warning but silently discards them.</li>
+      <li><strong>Global <code>http.DefaultServeMux</code> is shared</strong> — any imported package can register handlers on it. Prefer your own <code>*http.ServeMux</code>.</li>
+      <li><strong>Forgetting graceful shutdown</strong> — <code>server.Close()</code> kills connections mid-response; use <code>server.Shutdown(ctx)</code> instead.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Caddy</strong> (web server), <strong>Traefik</strong> (reverse proxy), and <strong>Kubernetes' API server</strong> are all built directly on <code>net/http</code>. <strong>Prometheus</strong>, <strong>Grafana</strong>, <strong>Consul</strong>, and <strong>Vault</strong> expose their HTTP APIs through it. <strong>Cloudflare</strong> uses it for edge workers. <strong>Dropbox</strong> migrated large parts of their Python backend to Go <code>net/http</code> and reduced server count by an order of magnitude.</span></div>
+</div>
+
 <p>Go's standard library includes a full-featured HTTP server. No framework needed. This is one of Go's biggest strengths: you can build production-ready servers with zero external dependencies. The <code>net/http</code> package handles connection pooling, keep-alive, HTTP/1.1, and graceful shutdown out of the box.</p>
 
 <p>The simplest server uses <code>http.HandleFunc</code> to register handler functions and <code>http.ListenAndServe</code> to start listening. Each incoming request runs in its own goroutine automatically, so your server is concurrent by default.</p>
@@ -558,6 +677,41 @@ http.<span class="fn">Handle</span>(<span class="str">"/home"</span>, &amp;<span
 
 <!-- ===================== SECTION 03: MODERN ROUTING ===================== -->
 <h2 id="modern-routing"><span class="section-num">03</span> Modern Routing (Go 1.22+)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Modern routing</strong> refers to the Go 1.22 enhancement of <code>http.ServeMux</code> that finally added <strong>HTTP method matching</strong> and <strong>path wildcards</strong> to the standard library. Before 1.22 you had to use <code>gorilla/mux</code>, <code>chi</code>, or <code>gin</code> for any non-trivial API because the built-in mux could only match literal prefixes. Now you can write <code>mux.HandleFunc("GET /users/{id}", handler)</code>, extract parameters with <code>r.PathValue("id")</code>, and even match a trailing wildcard <code>{path...}</code> for catch-all routes — all without any third-party dependency.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Method-scoped patterns:</strong> <code>"GET /posts"</code>, <code>"POST /posts"</code>, <code>"DELETE /posts/{id}"</code> all coexist on the same path.</li>
+      <li><strong>Named path parameters:</strong> <code>{id}</code>, <code>{slug}</code> — accessed via <code>r.PathValue("id")</code>.</li>
+      <li><strong>Wildcard suffix:</strong> <code>{path...}</code> captures everything remaining, useful for static file servers or proxies.</li>
+      <li><strong>Host-based routing:</strong> <code>"api.example.com/v1/users"</code> matches only that host.</li>
+      <li><strong>Precedence rules:</strong> more-specific patterns beat less-specific ones automatically — no ordering hacks.</li>
+      <li><strong>405 Method Not Allowed:</strong> automatically returned when a path exists but the method doesn't match.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Go pre-1.22 stdlib:</strong> the old <code>http.ServeMux</code> had no method matching, no params — you had to parse URLs yourself or pull in a router library.</li>
+      <li><strong>vs <code>gorilla/mux</code>:</strong> gorilla supports regex constraints and has been archived; stdlib routing is now a drop-in replacement for 90% of its use cases without the dependency.</li>
+      <li><strong>vs <code>chi</code>:</strong> chi still offers better middleware chaining and sub-router mounting, but stdlib now covers basic method+param routing.</li>
+      <li><strong>vs Gin/Echo/Fiber:</strong> those frameworks bundle routing, middleware, validation, and JSON helpers. Stdlib routing is leaner and doesn't lock you into a framework ecosystem.</li>
+      <li><strong>vs Express.js:</strong> Express uses middleware chains and <code>req.params.id</code>; Go 1.22 uses <code>r.PathValue("id")</code> and a flat registration style.</li>
+      <li><strong>vs Rails routes.rb:</strong> no DSL, no convention-over-configuration — you register each route explicitly.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Use modern routing whenever you want a real REST API without pulling in a framework. It's perfect for <strong>internal microservices</strong>, <strong>CLI webhook servers</strong>, <strong>admin dashboards</strong>, and <strong>minimal-dependency tools</strong> where you want the smallest possible attack surface and supply chain. If your project already uses Gin or Chi, stick with it — but for new services, Go 1.22's mux is often enough.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Your <code>go.mod</code> must declare <code>go 1.22</code> or later</strong> — otherwise patterns silently fall back to the old behavior.</li>
+      <li><strong>No regex constraints:</strong> you can't limit <code>{id}</code> to digits; you must validate inside the handler.</li>
+      <li><strong>No middleware stack</strong> — you wrap handlers manually (<code>Logger(Recovery(mux))</code>), which gets verbose.</li>
+      <li><strong>No sub-router mounting like <code>chi.Mount</code></strong> — you have to use <code>http.StripPrefix</code> or register prefixed routes yourself.</li>
+      <li><strong>PathValue returns empty string if not found</strong> — not an error — so typos silently produce <code>""</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Many new microservices written after Go 1.22 ship with pure stdlib routing: internal tools at <strong>Google</strong>, <strong>Tailscale</strong>'s lightweight services, various <strong>Cloudflare Workers Go runtimes</strong>, and a large number of OSS CLI tools that expose a local HTTP UI. The <code>net/http</code> router is also the backbone of Go's own <code>godoc</code> and <code>pkg.go.dev</code> site.</span></div>
+</div>
 
 <p>Before Go 1.22, the standard library router was limited: no method-based routing, no path parameters. You had to use third-party routers like <code>gorilla/mux</code> or <code>chi</code>. Go 1.22 changed everything by adding <strong>method-based routing</strong>, <strong>path parameters</strong>, and <strong>wildcards</strong> directly into the standard library.</p>
 
@@ -615,6 +769,38 @@ limit := r.URL.Query().<span class="fn">Get</span>(<span class="str">"limit"</sp
 <!-- ===================== SECTION 04: SUB-ROUTING ===================== -->
 <h2 id="sub-routing"><span class="section-num">04</span> Sub-Routing &amp; Route Groups</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Sub-routing</strong> (also called route groups or mounting) is the practice of composing multiple routers under a common URL prefix and/or a common middleware stack. For example, every route under <code>/api/v1</code> shares a JSON-response middleware, and every route under <code>/api/v1/admin</code> additionally requires an auth middleware. Go has no native <code>router.Group()</code> API in <code>net/http</code>, so you build sub-routing by combining <strong>multiple <code>*http.ServeMux</code> instances</strong>, the <code>http.StripPrefix</code> helper, and handler wrapping — or you use a framework like Chi or Gin that has this built in.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Prefix mounting:</strong> <code>mainMux.Handle("/api/v1/", http.StripPrefix("/api/v1", apiMux))</code> delegates everything under <code>/api/v1</code> to a separate mux.</li>
+      <li><strong>Shared middleware per group:</strong> wrap the sub-mux once (<code>authMiddleware(adminMux)</code>) instead of every handler.</li>
+      <li><strong>Version isolation:</strong> run <code>v1</code> and <code>v2</code> routers side-by-side during API migrations.</li>
+      <li><strong>Independent testing:</strong> each sub-mux can be tested in isolation with <code>httptest.NewRecorder</code>.</li>
+      <li><strong>Composable ownership:</strong> different teams can maintain different sub-routers in different files/packages.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express.js <code>Router</code>:</strong> Express gives you <code>app.use('/api', router)</code>, a direct equivalent. Go requires the extra <code>StripPrefix</code> step because paths are matched verbatim.</li>
+      <li><strong>vs Rails <code>namespace</code>:</strong> Rails nests routes declaratively; Go does it imperatively by wiring muxes together.</li>
+      <li><strong>vs Spring Boot <code>@RequestMapping</code>:</strong> Spring uses class-level annotations for prefixes; Go uses explicit handler registration.</li>
+      <li><strong>vs Chi's <code>r.Route("/api", ...)</code>:</strong> Chi has first-class sub-routers with inherited middleware; stdlib doesn't, so the wiring is more verbose but completely transparent.</li>
+      <li><strong>vs Gin's <code>router.Group("/api")</code>:</strong> Gin groups inherit middleware automatically; with stdlib you manually re-wrap.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Sub-routing is essential for <strong>modular large applications</strong>. It keeps your <code>main.go</code> clean, enables per-group middleware (auth only on <code>/admin</code>, CORS only on <code>/public</code>), and supports <strong>API versioning</strong> (<code>/v1</code>, <code>/v2</code>) without duplication. Without it, adding auth means repeating the wrapper on every handler — a recipe for security bugs when someone forgets one.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Forgetting <code>http.StripPrefix</code></strong> — the sub-mux sees the full path <code>/api/v1/users</code> instead of <code>/users</code> and nothing matches.</li>
+      <li><strong>Trailing slash mismatch:</strong> <code>"/api/v1"</code> and <code>"/api/v1/"</code> are different patterns in <code>http.ServeMux</code>.</li>
+      <li><strong>Middleware order confusion:</strong> wrapping a sub-mux <em>after</em> mounting has no effect; wrap before.</li>
+      <li><strong>Method matching inside a group:</strong> remember Go 1.22 patterns in the sub-mux still need the <code>"GET /"</code> prefix.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes API server</strong> uses nested routers for <code>/api/v1</code>, <code>/apis/apps/v1</code>, <code>/healthz</code> etc. <strong>Gitea</strong> (Go-based Git hosting) mounts its API router under <code>/api/v1</code> and admin under <code>/-/admin</code>. <strong>Grafana</strong> composes dozens of sub-routers for its datasource, alerting, and user-management subsystems. <strong>Caddy</strong>'s admin API uses prefix-based route groups.</span></div>
+</div>
+
 <p>As your application grows, you'll want to organize routes into logical groups. Go's <code>http.ServeMux</code> supports this through <strong>sub-routing</strong> using <code>http.StripPrefix</code>. This pattern lets you build modular routers and mount them under prefixes, similar to Express.js <code>app.use("/api", router)</code>.</p>
 
 <p>The key insight is that <code>http.StripPrefix</code> removes the prefix before passing the request to the inner handler, so your sub-router's patterns don't need to include the prefix.</p>
@@ -655,6 +841,40 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 05: TLS HTTPS ===================== -->
 <h2 id="tls-https"><span class="section-num">05</span> TLS, HTTPS &amp; HTTP/2</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>TLS (Transport Layer Security)</strong> is the protocol that encrypts HTTP into HTTPS. In Go, TLS is provided by the <code>crypto/tls</code> package and plugs directly into <code>net/http</code>: you call <code>server.ListenAndServeTLS(certFile, keyFile)</code> and Go takes care of the handshake, certificate presentation, ALPN negotiation, and session resumption. Whenever TLS is enabled, Go <strong>automatically upgrades the connection to HTTP/2</strong> via ALPN — no configuration required. For zero-touch certificates, the <code>golang.org/x/crypto/acme/autocert</code> package integrates with Let's Encrypt to provision and renew certs on demand.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Automatic HTTP/2:</strong> TLS + ALPN = HTTP/2 with no code changes.</li>
+      <li><strong>Modern cipher suites:</strong> TLS 1.3 is the default on Go 1.12+; weak ciphers are disabled.</li>
+      <li><strong>Mutual TLS (mTLS):</strong> set <code>tls.Config.ClientAuth = RequireAndVerifyClientCert</code> and you have client-certificate auth.</li>
+      <li><strong>SNI support:</strong> a single listener can serve multiple hostnames with different certificates via <code>GetCertificate</code>.</li>
+      <li><strong>autocert:</strong> one-line Let's Encrypt integration with on-disk caching.</li>
+      <li><strong>HTTP/3 (experimental):</strong> via <code>quic-go</code>, though not in the stdlib yet.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Nginx/Apache:</strong> you don't need a reverse proxy for TLS termination — Go serves HTTPS directly at line rate. Caddy, a pure-Go server, actually <em>is</em> your reverse proxy.</li>
+      <li><strong>vs Node.js <code>https</code> module:</strong> same idea, but Go's HTTP/2 is transparent; Node needs the separate <code>http2</code> module and manual ALPN setup.</li>
+      <li><strong>vs Python with <code>ssl</code>:</strong> Python's SSL context is more verbose and HTTP/2 requires <code>hypercorn</code> or similar.</li>
+      <li><strong>vs Java <code>SSLContext</code>:</strong> Java's JKS/PKCS12 keystores are painful; Go just reads PEM files.</li>
+      <li><strong>vs Rust <code>rustls</code>:</strong> comparable in safety and speed; Go wins on ergonomics (no lifetimes to manage), Rust wins on compile-time guarantees.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Every production HTTP service should use TLS — browsers mark HTTP as "Not Secure", search engines penalize it, and compliance frameworks (PCI, HIPAA, SOC2) require it. Go's built-in TLS lets you terminate HTTPS at the application process itself, which is ideal for <strong>internal microservices</strong>, <strong>mTLS service meshes</strong>, and <strong>edge deployments</strong> where there's no Nginx layer.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Self-signed certs in dev leak into production</strong> — use real certs (or Let's Encrypt) from day one.</li>
+      <li><strong>Certificate key file permissions:</strong> must be <code>0600</code> or <code>tls.LoadX509KeyPair</code> may still load but security scanners flag it.</li>
+      <li><strong>Forgetting to redirect HTTP to HTTPS:</strong> run a second listener on port 80 that 301s to <code>https://</code>.</li>
+      <li><strong>autocert requires port 80 or DNS-01:</strong> behind a load balancer you need <code>HostPolicy</code> configured correctly.</li>
+      <li><strong>HTTP/2 "PRI method" panic:</strong> caused by clients trying HTTP/2 cleartext (h2c) without configuration — use <code>h2c.NewHandler</code> if you need it.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Caddy</strong> (Go web server) pioneered automatic HTTPS — its entire architecture is built on Go's <code>crypto/tls</code> + <code>autocert</code>. <strong>Kubernetes</strong> uses mTLS for internal API server communication. <strong>Consul</strong> and <strong>Vault</strong> use mTLS for all service-to-service traffic. <strong>Cloudflare</strong>'s Go services terminate millions of TLS handshakes per second. <strong>Let's Encrypt's Boulder</strong> CA backend is itself written in Go.</span></div>
+</div>
 
 <p>Production servers must use TLS (Transport Layer Security) to encrypt traffic. Go makes this straightforward with <code>ListenAndServeTLS</code>. You can also configure the minimum TLS version, cipher suites, and enable HTTP/2 for better performance.</p>
 
@@ -712,6 +932,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 06: PROJECT STRUCTURE ===================== -->
 <h2 id="project-structure"><span class="section-num">06</span> REST API Project Structure</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Project structure</strong> is the convention for laying out directories and packages in a Go REST API. The community has converged on a layout that separates <strong>entry points</strong> (<code>cmd/</code>), <strong>private application code</strong> (<code>internal/</code>), <strong>reusable libraries</strong> (<code>pkg/</code>), and configuration. Inside <code>internal/</code> you typically split by responsibility: <code>handlers/</code> (HTTP layer), <code>services/</code> (business logic), <code>repository/</code> or <code>store/</code> (database), <code>models/</code> (domain types), and <code>middleware/</code>. Go's <strong>package-per-directory</strong> rule and its strict import cycle enforcement naturally push you toward clean layering.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong><code>cmd/&lt;binary&gt;/main.go</code>:</strong> a thin main function per binary; each subdirectory becomes an executable.</li>
+      <li><strong><code>internal/</code>:</strong> Go enforces that packages here can only be imported by code in the parent module — a compile-time privacy check.</li>
+      <li><strong><code>pkg/</code> (optional):</strong> truly reusable libraries that you're willing to let other modules import.</li>
+      <li><strong><code>api/</code>:</strong> OpenAPI specs, Protobuf files, JSON schemas.</li>
+      <li><strong><code>migrations/</code>:</strong> SQL migration files managed by <code>goose</code>, <code>golang-migrate</code>, or <code>atlas</code>.</li>
+      <li><strong><code>configs/</code>:</strong> YAML/TOML config templates (not secrets).</li>
+      <li><strong><code>Dockerfile</code>, <code>Makefile</code>, <code>go.mod</code>, <code>go.sum</code>:</strong> at the repo root.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node.js:</strong> Node has no enforced privacy beyond <code>package.json</code> exports. Go's <code>internal/</code> is a compile error if violated — far stronger.</li>
+      <li><strong>vs Python:</strong> Python uses <code>__init__.py</code> and relative imports; Go uses directory names as import paths, avoiding circular-import headaches.</li>
+      <li><strong>vs Java/Maven:</strong> Maven's <code>src/main/java/com/company/...</code> is deeply nested; Go layouts are usually 2–3 levels deep.</li>
+      <li><strong>vs Rails:</strong> Rails imposes convention (<code>app/controllers</code>, <code>app/models</code>); Go lets you choose, but <code>handlers/services/repository</code> is the de facto standard.</li>
+      <li><strong>vs Clean Architecture / Hexagonal:</strong> Go's layout maps naturally — <code>handlers</code> = delivery, <code>services</code> = use-cases, <code>repository</code> = gateways, <code>models</code> = entities.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">A consistent layout means <strong>any Go developer can navigate your codebase in 30 seconds</strong>. <code>internal/</code> prevents accidental API leakage. Splitting by responsibility makes testing trivial — you can mock the repository in service tests and mock the service in handler tests. It also enables <strong>multi-binary repos</strong>: one module with <code>cmd/api</code>, <code>cmd/worker</code>, and <code>cmd/migrate</code> sharing the same internal code.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Over-nesting:</strong> <code>internal/app/services/user/v1/handler/</code> is too deep — Go favors flat.</li>
+      <li><strong>Putting everything in <code>pkg/</code>:</strong> if no external consumer needs it, it belongs in <code>internal/</code>.</li>
+      <li><strong>Cyclic imports:</strong> Go refuses to compile, so you have to refactor — often a sign that two packages should merge or a third interface package is needed.</li>
+      <li><strong>Global state in <code>main.go</code>:</strong> instead, build a <code>*App</code> struct with dependencies injected in <code>main</code>.</li>
+      <li><strong>Mixing <code>cmd/</code> and library code:</strong> <code>cmd/</code> should be thin — parse flags, wire dependencies, call into <code>internal/</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes</strong> uses <code>cmd/kube-apiserver</code>, <code>cmd/kubelet</code>, <code>cmd/kubectl</code> — dozens of binaries sharing <code>pkg/</code> and <code>staging/</code>. <strong>Hashicorp</strong> tools (Vault, Consul, Nomad) follow the same pattern. <strong>Grafana</strong>, <strong>Loki</strong>, and <strong>Cortex</strong> use <code>cmd/</code> + <code>pkg/</code>. The unofficial but widely referenced <strong><code>golang-standards/project-layout</code></strong> GitHub repo codifies these conventions.</span></div>
+</div>
+
 <p>Go projects follow a conventional layout using <code>cmd/</code>, <code>internal/</code>, and <code>pkg/</code> directories. This structure comes from the Go community standard and is used by most production Go applications. The key idea: <code>internal/</code> packages cannot be imported by external projects (enforced by the Go compiler), while <code>pkg/</code> packages are shareable.</p>
 
 <div class="file-tree">
@@ -747,6 +1002,40 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 07: MODELS ===================== -->
 <h2 id="models"><span class="section-num">07</span> Models</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>model</strong> in a Go REST API is a struct that represents a domain entity — <code>User</code>, <code>Order</code>, <code>Product</code> — usually mirroring a database row or a JSON payload. Models live in their own package (<code>internal/models</code>) and use <strong>struct tags</strong> to describe how fields serialize to JSON (<code>json:"email"</code>), map to SQL columns (<code>db:"email_address"</code>), or participate in validation (<code>validate:"required,email"</code>). Go has no ORM-style annotations or metaclasses; everything is just struct fields and tags that libraries read via the <code>reflect</code> package.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Struct tags drive everything:</strong> <code>json</code>, <code>db</code>, <code>bson</code>, <code>validate</code>, <code>form</code>, <code>xml</code> — one struct can serve many layers.</li>
+      <li><strong>Zero-value friendly:</strong> an uninitialized <code>User{}</code> is a valid, usable value with all fields at their type's zero value.</li>
+      <li><strong>Embedded structs:</strong> <code>type User struct { Base; Name string }</code> promotes <code>Base</code>'s fields for free (composition instead of inheritance).</li>
+      <li><strong>Unexported fields:</strong> lowercase fields are private to the package and invisible to JSON, useful for internal state.</li>
+      <li><strong>Pointer vs value:</strong> use <code>*string</code> for nullable fields, plain <code>string</code> when empty means empty.</li>
+      <li><strong>Custom marshaling:</strong> implement <code>MarshalJSON</code>/<code>UnmarshalJSON</code> to control serialization of complex types (dates, money, enums).</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Java JPA/Hibernate entities:</strong> no <code>@Entity</code>, no proxy classes, no lazy loading surprises — Go models are plain data.</li>
+      <li><strong>vs Python <code>dataclass</code>/Pydantic:</strong> Go structs pre-date dataclasses and are a core language feature. Pydantic-like validation comes from <code>go-playground/validator</code>.</li>
+      <li><strong>vs TypeScript interfaces:</strong> TS interfaces exist only at compile time; Go structs are real types at runtime with reflection access.</li>
+      <li><strong>vs Rails ActiveRecord:</strong> Rails models carry their own DB connection; Go models are dumb data and separate repositories handle persistence.</li>
+      <li><strong>vs Rust structs:</strong> similar philosophy but Go tags are string-based; Rust uses <code>#[derive]</code> macros for stronger type safety.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Models give you <strong>one source of truth</strong> for each entity: the same struct serializes to the HTTP response, deserializes from the request body, validates user input, and maps to database rows. This drastically reduces boilerplate compared to layering DTOs, entities, and request/response objects. For APIs with strict contracts, you may split into separate <code>request</code>, <code>response</code>, and <code>domain</code> types — Go lets you scale either way.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Forgetting <code>json:"-"</code> on sensitive fields</strong> — password hashes leak into API responses.</li>
+      <li><strong>Zero values vs missing fields:</strong> <code>json.Unmarshal</code> can't distinguish <code>{"age": 0}</code> from <code>{}</code> unless you use <code>*int</code>.</li>
+      <li><strong>Time zones:</strong> <code>time.Time</code> marshals to RFC3339 but DB drivers may return UTC vs local inconsistently.</li>
+      <li><strong>Using the same struct for request and response</strong> — leaks server-side fields like <code>CreatedAt</code> or <code>InternalNotes</code>.</li>
+      <li><strong>Embedding and name collisions:</strong> two embedded structs with a <code>Name</code> field cause an ambiguous selector error.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes API types</strong> (<code>k8s.io/api/core/v1</code>) are generated Go structs with JSON tags — <code>Pod</code>, <code>Deployment</code>, <code>Service</code> are all just structs. <strong>Terraform providers</strong> define resource schemas as Go structs with <code>hcl</code> tags. <strong>Stripe's <code>stripe-go</code></strong>, <strong>GitHub's <code>go-github</code></strong>, and <strong>AWS SDK v2</strong> all model their APIs as tagged Go structs.</span></div>
+</div>
 
 <p>Models define the shape of your data. In Go, we use struct tags to control how data is serialized to JSON and mapped to database columns. The <code>json</code> tag controls JSON field names, and the <code>db</code> tag (used by libraries like <code>sqlx</code>) maps to database columns.</p>
 
@@ -796,6 +1085,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 08: DB CONNECTION ===================== -->
 <h2 id="db-connection"><span class="section-num">08</span> Database Connection (MySQL)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">Go accesses databases through the standard <strong><code>database/sql</code></strong> package, which defines a driver-agnostic API: you open a connection with <code>sql.Open(driverName, dsn)</code> and receive a <code>*sql.DB</code> — a long-lived, goroutine-safe <strong>connection pool</strong>, not a single connection. For MySQL you import a driver like <code>github.com/go-sql-driver/mysql</code> for its side effects (it registers itself with <code>database/sql</code> via <code>init()</code>). You then run queries with <code>db.Query</code>, <code>db.QueryRow</code>, <code>db.Exec</code>, or use <code>db.Begin</code> for transactions. The pool handles connection reuse, idle timeouts, and concurrent access automatically.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Driver-independent API:</strong> swap MySQL for Postgres by changing the import and the DSN.</li>
+      <li><strong>Connection pooling built in:</strong> tune with <code>SetMaxOpenConns</code>, <code>SetMaxIdleConns</code>, <code>SetConnMaxLifetime</code>, <code>SetConnMaxIdleTime</code>.</li>
+      <li><strong>Context-aware:</strong> <code>QueryContext</code>, <code>ExecContext</code>, <code>BeginTx</code> accept a <code>context.Context</code> for timeouts and cancellation.</li>
+      <li><strong>Prepared statements:</strong> <code>db.Prepare</code> or driver-level auto-prepare prevents SQL injection.</li>
+      <li><strong>Lazy connection:</strong> <code>sql.Open</code> doesn't actually connect until you call <code>db.Ping()</code>.</li>
+      <li><strong>Transactions:</strong> <code>tx.Commit()</code>/<code>tx.Rollback()</code> with defer-based rollback patterns.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node <code>mysql2</code>/<code>pg</code>:</strong> Node drivers expose promises; Go uses synchronous calls and lets you parallelize with goroutines.</li>
+      <li><strong>vs Python <code>psycopg2</code>/SQLAlchemy:</strong> SQLAlchemy is a full ORM; <code>database/sql</code> is lower-level. Go ORMs (GORM, Ent, Bun) sit on top.</li>
+      <li><strong>vs Java JDBC:</strong> very similar model (driver + pool + prepared statements) but Go's error handling is more explicit.</li>
+      <li><strong>vs Rust <code>sqlx</code>:</strong> sqlx verifies SQL at compile time against your schema; <code>database/sql</code> is runtime-only (though <code>sqlc</code> in Go compiles SQL to typed Go functions at build time).</li>
+      <li><strong>vs ActiveRecord/Hibernate:</strong> no lazy loading, no change tracking, no magic — you write SQL and scan rows.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You use <code>database/sql</code> + MySQL driver for any service that needs a relational store: user accounts, orders, inventory, audit logs. The stdlib API gives you <strong>predictable performance</strong>, <strong>explicit SQL</strong> (no N+1 surprises), and <strong>full transaction control</strong>. For teams that prefer writing SQL over learning ORM DSLs, it's the standard choice. For heavy query needs, <code>sqlx</code> (thin helper) or <code>sqlc</code> (SQL-to-Go codegen) are common upgrades.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Opening a new <code>*sql.DB</code> per request</strong> — kills performance. It's a pool; open once and reuse.</li>
+      <li><strong>Forgetting <code>rows.Close()</code></strong> — leaks connections back to the pool slowly until the pool exhausts.</li>
+      <li><strong>Not checking <code>rows.Err()</code></strong> after iteration — silent data corruption.</li>
+      <li><strong>Parsing time values:</strong> MySQL driver requires <code>?parseTime=true</code> in the DSN or <code>time.Time</code> scanning panics.</li>
+      <li><strong>Unlimited connections:</strong> default <code>SetMaxOpenConns(0)</code> = unlimited; MySQL runs out of file descriptors under load.</li>
+      <li><strong>Transactions and connection leaks:</strong> a <code>tx</code> holds a connection until Commit/Rollback — forgetting either deadlocks the pool.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Uber</strong> runs massive Go services against MySQL (their Schemaless sharding layer is in Go). <strong>GitHub's Vitess</strong> (the horizontally sharded MySQL system powering YouTube and GitHub) is written entirely in Go. <strong>PlanetScale</strong>'s control plane uses <code>database/sql</code>. <strong>Gitea</strong> supports MySQL, Postgres, SQLite, and MSSQL via the same driver interface.</span></div>
+</div>
 
 <p>Go's <code>database/sql</code> package provides a generic interface for SQL databases. The actual driver (MySQL, PostgreSQL, SQLite) is imported as a side effect using the blank identifier <code>_</code>. The connection pool is managed automatically — <code>sql.Open</code> doesn't actually connect; it prepares the pool. The first real query triggers the connection.</p>
 
@@ -851,6 +1175,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 09: CRUD ===================== -->
 <h2 id="crud"><span class="section-num">09</span> CRUD Operations</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>CRUD</strong> stands for <strong>Create, Read, Update, Delete</strong> — the four fundamental persistence operations that virtually every REST API exposes. In Go, CRUD handlers typically live in the <code>handlers/</code> package and delegate to a repository or service layer. Each HTTP verb maps to a database operation: <code>POST /users</code> → <code>INSERT</code>, <code>GET /users/:id</code> → <code>SELECT</code>, <code>PUT/PATCH /users/:id</code> → <code>UPDATE</code>, <code>DELETE /users/:id</code> → <code>DELETE</code>. Go's explicit error handling and lack of ORM magic means CRUD code is verbose but transparent: every query is visible, every error is handled.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>HTTP verb semantics:</strong> safe GET, idempotent PUT/DELETE, non-idempotent POST.</li>
+      <li><strong>Prepared statements with <code>?</code> placeholders:</strong> prevent SQL injection by default.</li>
+      <li><strong>Row scanning:</strong> <code>rows.Scan(&amp;user.ID, &amp;user.Name)</code> — explicit, type-safe, no reflection overhead.</li>
+      <li><strong>LastInsertId &amp; RowsAffected:</strong> returned from <code>sql.Result</code> after <code>Exec</code>.</li>
+      <li><strong>Status code discipline:</strong> 201 Created, 200 OK, 204 No Content, 404 Not Found, 409 Conflict.</li>
+      <li><strong>JSON in / JSON out:</strong> <code>json.NewDecoder(r.Body).Decode</code> and <code>json.NewEncoder(w).Encode</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Rails scaffold:</strong> Rails generates CRUD with one command via ActiveRecord; Go expects you to write each handler explicitly. More code, fewer surprises.</li>
+      <li><strong>vs Django REST Framework:</strong> DRF has <code>ModelViewSet</code> that auto-generates CRUD; Go has no equivalent in stdlib (though code generators like <code>ent</code> and <code>sqlc</code> come close).</li>
+      <li><strong>vs Express + Sequelize:</strong> Sequelize hides SQL; Go favors writing SQL explicitly so query plans are visible.</li>
+      <li><strong>vs Spring Data JPA:</strong> JPA derives queries from method names; Go requires you to write them, which avoids "magic query" debugging nightmares.</li>
+      <li><strong>vs Go frameworks (Gin, Echo):</strong> those simplify binding and response writing but the underlying CRUD logic is identical.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">CRUD is the backbone of every data-driven API. Mastering the stdlib pattern means you can ship a REST service without framework lock-in. Explicit SQL gives you exact control over indexes, joins, and transactions — essential when performance matters. For read-heavy services, you can add caching layers (Redis) in front of the Read path without touching the ORM abstraction.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Concatenating user input into SQL strings</strong> — classic injection vulnerability. Always use <code>?</code> placeholders.</li>
+      <li><strong>Returning DB errors directly to clients</strong> — leaks table names and schema. Wrap errors with domain-level messages.</li>
+      <li><strong>Not handling <code>sql.ErrNoRows</code></strong> — it's not really an error for "not found" — map it to a 404.</li>
+      <li><strong>PATCH vs PUT:</strong> PATCH expects partial updates; you need to handle missing fields without overwriting with zero values (use pointers or a map).</li>
+      <li><strong>Soft delete vs hard delete:</strong> production apps usually flag rows with <code>deleted_at</code> instead of issuing <code>DELETE</code>.</li>
+      <li><strong>Missing pagination:</strong> <code>SELECT * FROM users</code> on a million-row table will OOM your process.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Gitea</strong>, <strong>Mattermost</strong>, and <strong>Nextcloud's Go components</strong> expose massive CRUD APIs. <strong>Drone CI</strong> (Go-based CI server) uses a stdlib CRUD pattern for its build, repo, and user entities. <strong>Grafana</strong>'s datasource and dashboard APIs are CRUD. <strong>Ent</strong> (Facebook's Go ORM used in Meta and others) generates typed CRUD methods from schema files.</span></div>
+</div>
 
 <p>CRUD (Create, Read, Update, Delete) operations form the backbone of any REST API. Each operation maps to an HTTP method: POST (Create), GET (Read), PUT/PATCH (Update), DELETE (Delete). Let's build real handlers that talk to a MySQL database.</p>
 
@@ -1037,6 +1396,40 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 10: ROUTER SETUP ===================== -->
 <h2 id="router-setup"><span class="section-num">10</span> Routing &amp; Router Setup</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Router setup</strong> is the wiring layer that registers every URL pattern to its handler and composes the middleware stack. In a Go REST API it usually lives in a single file like <code>internal/routes/routes.go</code> and exposes a function such as <code>func NewRouter(app *App) http.Handler</code> that returns the fully configured <code>*http.ServeMux</code> (or <code>chi.Router</code>, <code>gin.Engine</code>, etc.). Centralizing routing makes it trivial to see every endpoint at a glance, keeps <code>main.go</code> clean, and makes the router itself testable in isolation.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Single registration point:</strong> all routes visible in one file.</li>
+      <li><strong>Dependency injection:</strong> the router function receives the <code>*App</code> (or individual services) and closes over them in handlers.</li>
+      <li><strong>Middleware composition:</strong> wrap the final <code>http.Handler</code> with logging, recovery, CORS, auth in a clear outer-to-inner order.</li>
+      <li><strong>Version prefixing:</strong> register <code>/api/v1</code> routes on one sub-mux, <code>/api/v2</code> on another.</li>
+      <li><strong>Static file serving:</strong> <code>mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))</code>.</li>
+      <li><strong>Health and metrics endpoints:</strong> <code>/healthz</code>, <code>/readyz</code>, <code>/metrics</code> registered alongside business routes.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>app.use</code>:</strong> Express interleaves middleware and routes freely; Go keeps them separate for clarity.</li>
+      <li><strong>vs Flask blueprints:</strong> Flask splits by blueprint module; Go often keeps one router file per binary but delegates handler logic into packages.</li>
+      <li><strong>vs Rails <code>routes.rb</code>:</strong> Rails has a DSL; Go uses plain function calls — no meta-programming.</li>
+      <li><strong>vs Spring <code>@RestController</code>:</strong> Spring scatters routes across annotated classes; Go's explicit router file avoids the "where is this route defined?" problem.</li>
+      <li><strong>vs Chi/Gin:</strong> Chi offers <code>r.Route</code>, <code>r.Group</code>, and per-route middleware; stdlib is more verbose but dependency-free.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">A well-organized router lets new developers find any endpoint in seconds, makes it easy to add middleware globally (rate limiting, tracing), and supports <strong>testing the routing layer independently</strong> with <code>httptest</code>. It also decouples the HTTP layer from <code>main</code>, so you can reuse the same router for production, integration tests, and dev-time mock servers.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Middleware applied in the wrong order:</strong> recovery must be outermost or a panic inside logging crashes everything.</li>
+      <li><strong>Closure capture bugs:</strong> registering handlers in a loop with a shared variable — classic pre-Go-1.22 gotcha.</li>
+      <li><strong>Global muxes:</strong> <code>http.HandleFunc</code> modifies <code>DefaultServeMux</code>, which is shared — prefer a local <code>*http.ServeMux</code>.</li>
+      <li><strong>Forgetting trailing slash conventions:</strong> <code>"/users"</code> and <code>"/users/"</code> behave differently.</li>
+      <li><strong>Route conflicts:</strong> <code>"GET /users/{id}"</code> and <code>"GET /users/new"</code> — Go 1.22 picks the more specific one, but older routers may behave unpredictably.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' kube-apiserver</strong> registers hundreds of routes through a layered setup. <strong>Traefik</strong>'s dynamic router config is generated at runtime from Docker/K8s state. <strong>Caddy</strong>'s admin API defines its routes in a single file. <strong>Prometheus</strong>'s web package wires <code>/api/v1/query</code>, <code>/api/v1/series</code>, <code>/-/healthy</code> etc. in one router-setup function.</span></div>
+</div>
+
 <p>In a real project, you don't define all routes in <code>main()</code>. Instead, you create router functions for each domain (students, teachers, execs) and compose them together. This keeps each file focused and makes it easy to add new route groups without touching existing code.</p>
 
 <pre><code><span class="kw">package</span> router
@@ -1085,6 +1478,40 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 11: MIDDLEWARE PATTERN ===================== -->
 <h2 id="middleware-pattern"><span class="section-num">11</span> Middleware Pattern</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Middleware</strong> is a function that takes an <code>http.Handler</code> and returns a new <code>http.Handler</code>, wrapping it with cross-cutting behavior: logging, authentication, compression, rate limiting, request-ID tagging, panic recovery, and more. The canonical Go signature is <code>func(next http.Handler) http.Handler</code>. Because <code>http.Handler</code> is a single-method interface, middleware <strong>composes naturally</strong>: <code>Logger(Recovery(Auth(handler)))</code>. The result is a clean chain where each layer can inspect or mutate the request, call (or skip) <code>next.ServeHTTP</code>, and post-process the response.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Functional composition:</strong> middleware are just higher-order functions — no framework lock-in.</li>
+      <li><strong>Before/after hooks:</strong> do work before calling <code>next</code>, after, or both (e.g., timing a request).</li>
+      <li><strong>Short-circuiting:</strong> return early without calling <code>next</code> to reject auth-failed requests.</li>
+      <li><strong>Context propagation:</strong> attach values (user ID, request ID, tenant) via <code>r.WithContext(ctx)</code> and read them in downstream handlers.</li>
+      <li><strong>ResponseWriter wrapping:</strong> wrap <code>http.ResponseWriter</code> to capture status code, body size, or buffer the response.</li>
+      <li><strong>Global or per-route:</strong> apply to the whole router or to individual sub-routes.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express middleware:</strong> Express uses <code>(req, res, next) =&gt; next()</code>, a callback-style chain. Go wraps handlers instead, which is stack-based and easier to reason about.</li>
+      <li><strong>vs Python Django middleware:</strong> Django middleware is class-based with <code>process_request</code>/<code>process_response</code> methods. Go is simpler — one function.</li>
+      <li><strong>vs Java Servlet Filters:</strong> filters are registered in XML or via annotations; Go composes middleware programmatically.</li>
+      <li><strong>vs Rails <code>around_action</code>:</strong> Rails uses method decorators inside controllers; Go middleware lives outside handlers entirely.</li>
+      <li><strong>vs Gin <code>Use</code>:</strong> Gin middleware has a similar shape but uses <code>*gin.Context</code> and <code>c.Next()</code>, which is more framework-coupled.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Middleware is how you implement <strong>cross-cutting concerns without polluting handlers</strong>. Authentication, logging, tracing, CORS, rate limiting, and panic recovery all live in one place and apply uniformly. Without middleware, every handler would need to copy-paste the same boilerplate — a source of security bugs and inconsistency. Middleware also makes it trivial to add observability: a single tracing middleware instruments every endpoint at once.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Wrong ordering:</strong> recovery must be outermost; auth before handler; logging outermost or innermost depending on whether you want to log panics.</li>
+      <li><strong>Writing headers after calling <code>next</code>:</strong> the response may already be sent; you can't change headers post hoc.</li>
+      <li><strong>Reading <code>r.Body</code> in middleware</strong> consumes the stream — handlers downstream see an empty body unless you restore it.</li>
+      <li><strong>Panicking in middleware itself</strong> — the recovery middleware must be outside it to catch anything.</li>
+      <li><strong>Goroutines started in middleware</strong> outlive the request — don't pass <code>r.Context()</code> to them without care.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' kube-apiserver</strong> uses dozens of middleware layers (authentication, authorization, admission control, audit). <strong>Chi router</strong> ships a popular middleware library (<code>chi/middleware</code>) used by thousands of services. <strong>OpenTelemetry's Go instrumentation</strong> provides a middleware that wraps any <code>http.Handler</code> to emit spans automatically. <strong>Goa</strong> and <strong>go-kit</strong> both encourage middleware-based service design.</span></div>
+</div>
+
 <p>Middleware is the backbone of any production Go server. A middleware is simply a function that wraps an <code>http.Handler</code>, does something before/after the request, and calls the next handler in the chain. This pattern is composable: you stack middlewares like layers, and each request passes through all of them in order.</p>
 
 <p>The signature is always the same: take a handler, return a handler. This makes every middleware interchangeable and stackable.</p>
@@ -1131,6 +1558,39 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 12: SECURITY HEADERS ===================== -->
 <h2 id="security-headers"><span class="section-num">12</span> Security Headers Middleware</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Security headers</strong> are HTTP response headers that instruct browsers to enforce defensive behavior: which origins can frame your page, which scripts can run, whether MIME sniffing is allowed, whether HTTPS is mandatory, and more. A security-headers middleware is a Go <code>http.Handler</code> wrapper that sets these headers on every response before delegating to the next handler. Key headers include <code>Content-Security-Policy</code>, <code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>, <code>Strict-Transport-Security</code>, <code>Referrer-Policy</code>, and <code>Permissions-Policy</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>CSP (Content-Security-Policy):</strong> controls which scripts, styles, images, and iframes can load — the single most effective XSS mitigation.</li>
+      <li><strong>HSTS (Strict-Transport-Security):</strong> forces browsers to use HTTPS for a given duration, preventing downgrade attacks.</li>
+      <li><strong>X-Frame-Options: DENY:</strong> blocks clickjacking by disallowing iframing.</li>
+      <li><strong>X-Content-Type-Options: nosniff:</strong> stops browsers from guessing MIME types and running mislabeled JS.</li>
+      <li><strong>Referrer-Policy:</strong> controls how much of the referring URL is sent to third parties.</li>
+      <li><strong>Permissions-Policy:</strong> disables browser features (camera, mic, geolocation) your app doesn't need.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node <code>helmet</code>:</strong> Helmet is a collection of small middlewares that set these headers — Go equivalents include <code>unrolled/secure</code> or a handwritten 20-line middleware.</li>
+      <li><strong>vs Django <code>SecurityMiddleware</code>:</strong> Django sets a subset by default; Go stdlib sets nothing — you must opt in.</li>
+      <li><strong>vs Rails <code>default_headers</code>:</strong> Rails configures a default set in <code>config/application.rb</code>; Go is explicit about every header.</li>
+      <li><strong>vs Nginx <code>add_header</code>:</strong> Nginx can set headers at the proxy layer, but doing it in-app means headers survive all proxies and are version-controlled with the code.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Security headers are the <strong>cheapest defense in depth</strong>: a 20-line middleware blocks entire classes of attacks (XSS, clickjacking, MIME confusion, protocol downgrade). Compliance frameworks (PCI-DSS, OWASP ASVS, SOC2) require them, and they directly improve your scores on tools like Mozilla Observatory and <code>securityheaders.com</code>. They cost nothing and ship in every production Go web service that does browser-facing work.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Overly strict CSP breaks your own app</strong> — inline styles, third-party scripts, or Google Analytics all need explicit allowances.</li>
+      <li><strong>HSTS on localhost</strong> — if you browse <code>http://localhost</code> and receive HSTS, your browser remembers and you can't use HTTP dev servers.</li>
+      <li><strong>Setting headers after <code>WriteHeader</code></strong> — they're silently dropped.</li>
+      <li><strong>Forgetting API-only services:</strong> CSP is irrelevant for JSON APIs but other headers (HSTS, nosniff) are still valuable.</li>
+      <li><strong>Preload list:</strong> HSTS preload requires the <code>includeSubDomains</code> and <code>preload</code> directives — easy to misconfigure.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Caddy</strong> ships secure defaults out of the box. <strong>GitHub</strong>, <strong>Google</strong>, and <strong>Cloudflare</strong>'s Go services all apply these headers uniformly. <strong>Mozilla's security-headers policy</strong> is followed by many Go projects, and <strong>unrolled/secure</strong> is a popular library wrapping it all up. <strong>Grafana</strong> sets CSP and HSTS via its own security middleware.</span></div>
+</div>
 
 <p>Security headers tell the browser how to behave when handling your site's content. Without these headers, your application is vulnerable to clickjacking, XSS, MIME sniffing, and other attacks. This middleware sets all recommended headers on every response.</p>
 
@@ -1198,6 +1658,38 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 13: CORS ===================== -->
 <h2 id="cors"><span class="section-num">13</span> CORS Middleware</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>CORS (Cross-Origin Resource Sharing)</strong> is a browser security mechanism that blocks JavaScript running on one origin (<code>app.example.com</code>) from calling an API on another origin (<code>api.example.com</code>) unless the API explicitly opts in via response headers. A Go CORS middleware inspects the <code>Origin</code> request header, validates it against an allow-list, and adds headers like <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code>, and <code>Access-Control-Allow-Credentials</code>. It also handles browser <strong>preflight <code>OPTIONS</code></strong> requests by short-circuiting the chain with a 204 response.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Origin allow-listing:</strong> exact-match or regex/wildcard support for subdomains.</li>
+      <li><strong>Preflight handling:</strong> respond to <code>OPTIONS</code> requests with the allowed methods and headers.</li>
+      <li><strong>Credentials flag:</strong> enable cookies/Authorization header with <code>Access-Control-Allow-Credentials: true</code> (cannot be combined with <code>Allow-Origin: *</code>).</li>
+      <li><strong>Max-Age caching:</strong> tell browsers how long to cache preflight results (reduces OPTIONS traffic).</li>
+      <li><strong>Exposed headers:</strong> allow frontend code to read custom response headers like <code>X-Total-Count</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>cors</code>:</strong> Express has a single <code>cors()</code> middleware. Go equivalents: <code>rs/cors</code>, <code>gorilla/handlers</code>, or a 30-line handwritten middleware.</li>
+      <li><strong>vs Django <code>django-cors-headers</code>:</strong> Django's package uses settings.py config; Go uses struct-based config.</li>
+      <li><strong>vs Spring <code>@CrossOrigin</code>:</strong> Spring allows per-controller annotations; Go applies CORS globally or per-route via handler wrapping.</li>
+      <li><strong>vs Nginx CORS config:</strong> doing it in-app means your CORS policy is version-controlled with the code instead of hidden in config files.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Any API that serves a <strong>browser-based SPA on a different origin</strong> needs CORS. Single-page apps, mobile web apps, and third-party integrations all depend on it. Without CORS, fetch calls from the frontend fail with opaque "CORS error" messages. Properly configured CORS also <strong>hardens your API</strong> by refusing unauthorized origins explicitly instead of trusting anyone.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong><code>Access-Control-Allow-Origin: *</code> + credentials = blocked</strong> — the spec forbids it; you must echo the specific origin.</li>
+      <li><strong>Forgetting preflight for PUT/DELETE/custom headers</strong> — the browser sends <code>OPTIONS</code> first, and if you don't respond 2xx it aborts.</li>
+      <li><strong>Wildcard subdomains:</strong> <code>*.example.com</code> is not valid; you must parse the <code>Origin</code> header and echo it if it matches a regex.</li>
+      <li><strong>Caching CORS responses behind a proxy</strong> without a <code>Vary: Origin</code> header returns wrong headers to other origins.</li>
+      <li><strong>Setting CORS headers on 4xx/5xx responses:</strong> if your error handler runs before CORS middleware, errors won't get CORS headers and the browser hides the real response.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>GitHub's API</strong>, <strong>Stripe's API</strong>, and <strong>Twilio's API</strong> all serve browser clients and implement CORS carefully. <strong>Grafana</strong>, <strong>Gitea</strong>, and <strong>Mattermost</strong> ship built-in CORS middleware. The <strong><code>rs/cors</code></strong> package is used by thousands of Go services including many at <strong>Uber</strong> and <strong>Dropbox</strong>.</span></div>
+</div>
+
 <p>CORS (Cross-Origin Resource Sharing) is a browser security mechanism. When your frontend at <code>localhost:3000</code> calls your API at <code>localhost:8080</code>, the browser blocks the request unless your API explicitly allows it via CORS headers. Without proper CORS, your SPA cannot talk to your API.</p>
 
 <p>The browser sends a <strong>preflight request</strong> (OPTIONS) before the actual request to check if the origin is allowed. Your middleware must handle this preflight and respond with the appropriate headers.</p>
@@ -1245,6 +1737,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 14: JWT AUTH ===================== -->
 <h2 id="jwt-auth"><span class="section-num">14</span> JWT Authentication Middleware</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>JWT (JSON Web Token)</strong> is a compact, URL-safe, <strong>signed</strong> token format defined in RFC 7519 that encodes a JSON payload (claims) along with a cryptographic signature. A JWT middleware in Go extracts the token from the <code>Authorization: Bearer ...</code> header, verifies its signature (usually HMAC-SHA256 or RSA/ECDSA), validates standard claims (<code>exp</code>, <code>iat</code>, <code>iss</code>, <code>aud</code>), and if everything passes, attaches the user identity to <code>r.Context()</code> so downstream handlers can read it. The most popular Go library is <code>github.com/golang-jwt/jwt/v5</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Stateless auth:</strong> the server doesn't need a session store — the token carries identity.</li>
+      <li><strong>Signature verification:</strong> HS256 (shared secret) or RS256/ES256 (public/private key pairs).</li>
+      <li><strong>Standard claims:</strong> <code>exp</code> (expiry), <code>iat</code> (issued-at), <code>nbf</code> (not-before), <code>iss</code>, <code>aud</code>, <code>sub</code>.</li>
+      <li><strong>Custom claims:</strong> role, tenant ID, scopes — anything you serialize into the payload.</li>
+      <li><strong>Context propagation:</strong> inject user ID into <code>context.Context</code> for logs and DB queries.</li>
+      <li><strong>Refresh token pattern:</strong> short-lived access token + long-lived refresh token stored server-side.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs session cookies:</strong> sessions require a server-side store (Redis, DB); JWTs are stateless but harder to revoke.</li>
+      <li><strong>vs OAuth access tokens:</strong> OAuth access tokens are often opaque strings backed by a server database; JWTs are self-contained and verifiable without a lookup.</li>
+      <li><strong>vs Node <code>jsonwebtoken</code>:</strong> very similar API; Go's version uses strongly typed claim structs via generics.</li>
+      <li><strong>vs Java <code>jjwt</code>:</strong> same standards, different ergonomics — Go is more concise.</li>
+      <li><strong>vs PASETO:</strong> PASETO is a safer alternative designed to avoid JWT's algorithm-confusion pitfalls; <code>o1egl/paseto</code> is the Go implementation.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">JWTs are ideal for <strong>stateless microservices</strong>, <strong>mobile backends</strong>, and <strong>SPAs</strong> where you want to verify identity without a shared session store. They scale horizontally because any instance can verify any token. They're also the currency of modern auth providers (Auth0, Okta, Cognito, Firebase, Clerk) — your Go service just needs to verify their signature against a public JWKS endpoint.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Algorithm confusion attack:</strong> accepting <code>alg: none</code> or switching HS256 to RS256 with the public key as the secret — always pin the algorithm.</li>
+      <li><strong>Storing JWTs in localStorage</strong> exposes them to XSS. Use httpOnly cookies for browser clients.</li>
+      <li><strong>No easy revocation:</strong> once issued, a JWT is valid until <code>exp</code>. Short lifetimes + refresh tokens are the workaround.</li>
+      <li><strong>Clock skew:</strong> distributed servers with slight clock drift reject valid tokens — allow a small leeway.</li>
+      <li><strong>Putting sensitive data in claims:</strong> JWT payloads are base64-encoded, not encrypted — anyone can decode them.</li>
+      <li><strong>Leaking the HS256 secret</strong> means anyone can forge tokens; prefer RS256 if the secret has to be shared.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Auth0</strong>, <strong>Okta</strong>, <strong>AWS Cognito</strong>, and <strong>Firebase Auth</strong> all issue JWTs that Go services verify via JWKS. <strong>Kubernetes service accounts</strong> issue JWT tokens mounted into pods. <strong>GitHub Actions' OIDC tokens</strong> are JWTs verified by cloud providers for keyless authentication. <strong>Hashicorp Vault</strong> supports JWT auth methods. <strong>Hasura</strong> and <strong>Supabase</strong> use JWTs as their primary auth mechanism.</span></div>
+</div>
 
 <p>JWT (JSON Web Token) is the standard for stateless authentication in REST APIs. The token is signed by the server and contains claims (user ID, role, expiration). The middleware reads the token from an httpOnly cookie (more secure than localStorage), validates the signature, checks expiration, and passes the claims to downstream handlers via context.</p>
 
@@ -1313,6 +1840,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 15: PASSWORD HASHING ===================== -->
 <h2 id="password-hashing"><span class="section-num">15</span> Password Hashing (Argon2)</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Argon2</strong> is a modern password-hashing function — the winner of the 2015 Password Hashing Competition — designed to be <strong>memory-hard</strong> and resistant to GPU, FPGA, and ASIC attacks. Go provides it in the <code>golang.org/x/crypto/argon2</code> package. You hash a password with a random salt, tunable memory cost (typically 64 MB), iterations (3), and parallelism (2–4 threads), then store the salt + parameters + digest together in a single encoded string. At login, you re-hash the candidate password with the same parameters and compare results in constant time.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Argon2id variant:</strong> hybrid of Argon2i (side-channel resistant) and Argon2d (GPU resistant) — the recommended default.</li>
+      <li><strong>Memory-hard:</strong> attackers need huge RAM per guess, defeating GPU parallelism.</li>
+      <li><strong>Tunable cost:</strong> memory, time, and parallelism parameters adjustable as hardware improves.</li>
+      <li><strong>Random per-user salt:</strong> prevents rainbow-table attacks; you generate 16 bytes from <code>crypto/rand</code>.</li>
+      <li><strong>Constant-time compare:</strong> use <code>crypto/subtle.ConstantTimeCompare</code> to prevent timing attacks.</li>
+      <li><strong>Encoded format:</strong> stores algorithm, version, parameters, salt, and hash in one string for forward compatibility.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs bcrypt (<code>golang.org/x/crypto/bcrypt</code>):</strong> bcrypt is older, still acceptable, but not memory-hard — GPU attacks are faster against it.</li>
+      <li><strong>vs scrypt:</strong> scrypt was the previous state-of-the-art; Argon2 improves on it in both security and tunability.</li>
+      <li><strong>vs PBKDF2:</strong> PBKDF2 is FIPS-compliant but lacks memory hardness — still used where FIPS matters.</li>
+      <li><strong>vs MD5/SHA-1/SHA-256 for passwords:</strong> catastrophically insecure — these are cryptographic digests, not password hashers. Billions of guesses per second on modern GPUs.</li>
+      <li><strong>vs Node <code>argon2</code> package:</strong> same algorithm, different API. Go's is closer to the specification; Node wraps a native binding.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You use Argon2 to store user passwords safely so that even if your database is stolen, <strong>attackers can't recover the plaintext</strong>. It's the OWASP-recommended default for new applications in 2024+. Any system with user accounts — SaaS apps, e-commerce, forums, internal tools — needs a password hasher, and Argon2id is the right choice unless you have FIPS constraints (then PBKDF2-SHA256).</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Using the same salt for everyone</strong> — defeats the entire purpose. Generate a fresh 16-byte salt per password.</li>
+      <li><strong>Insufficient memory cost:</strong> 4 MB is too low; 64 MB is the current OWASP baseline.</li>
+      <li><strong>Using <code>bytes.Equal</code> instead of <code>subtle.ConstantTimeCompare</code></strong> — opens timing side-channels.</li>
+      <li><strong>Hard-coding parameters:</strong> you'll need to rotate cost parameters as hardware improves — store them in the encoded hash.</li>
+      <li><strong>Memory exhaustion attacks:</strong> 64 MB × concurrent login attempts can OOM your server under a login flood — rate-limit logins.</li>
+      <li><strong>Not migrating from bcrypt:</strong> you can re-hash with Argon2 on next successful login for a seamless upgrade.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Matrix Synapse</strong> (Python but the design informed many Go rewrites like <code>conduit</code>) uses bcrypt/Argon2. <strong>Gitea</strong> supports Argon2id for user passwords. <strong>Bitwarden's Go services</strong> and <strong>Authelia</strong> (Go auth gateway) both use Argon2id. <strong>Hashicorp Vault's userpass auth backend</strong> hashes credentials with bcrypt but Argon2 is recommended for new deployments.</span></div>
+</div>
 
 <p>Never store passwords in plain text. Argon2 is the winner of the 2015 Password Hashing Competition and is the recommended algorithm for password hashing. It's resistant to GPU/ASIC attacks because it requires significant memory, unlike bcrypt which is compute-bound only.</p>
 
@@ -1383,6 +1945,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 16: RATE LIMITING ===================== -->
 <h2 id="rate-limiting"><span class="section-num">16</span> Rate Limiting Middleware</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Rate limiting</strong> caps how many requests a given client (IP, API key, user ID) can make in a time window. A Go rate-limiting middleware checks a client identifier against a shared limiter state and returns <code>429 Too Many Requests</code> if the quota is exceeded. The standard library-adjacent <code>golang.org/x/time/rate</code> package provides a battle-tested <strong>token bucket</strong> implementation via <code>rate.Limiter</code> and <code>rate.NewLimiter(r rate.Limit, b int)</code>. For distributed rate limiting across many app instances, a Redis-backed limiter (e.g., <code>go-redis/redis_rate</code>) is used.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Token bucket algorithm:</strong> smooths bursts — tokens refill at a fixed rate, requests consume tokens.</li>
+      <li><strong>Per-client keying:</strong> IP, user ID, API key, tenant, or combinations.</li>
+      <li><strong>Per-route limits:</strong> stricter limits on <code>/login</code> and <code>/signup</code> than on <code>/products</code>.</li>
+      <li><strong>Headers:</strong> return <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>Retry-After</code> so clients can back off.</li>
+      <li><strong>Distributed enforcement:</strong> Redis or memcache shared state across app replicas.</li>
+      <li><strong>Sliding window:</strong> alternative to token bucket using sorted sets in Redis.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>express-rate-limit</code>:</strong> Node's limiter is in-memory by default; Go's <code>golang.org/x/time/rate</code> is also in-memory but nicely typed.</li>
+      <li><strong>vs Nginx <code>limit_req</code>:</strong> Nginx rate limiting is at the proxy edge and applies globally; app-level limiting can be per-user or per-API-key.</li>
+      <li><strong>vs API Gateway (Kong, Tyk, Envoy):</strong> gateways offer advanced policies (quotas, plans) but you may want app-level limits on top for fine-grained control.</li>
+      <li><strong>vs Redis <code>INCR</code>-based limiting:</strong> the token bucket is smoother; a naive <code>INCR + EXPIRE</code> is a fixed window that suffers from boundary bursts.</li>
+      <li><strong>vs Java Bucket4j:</strong> Bucket4j supports distributed buckets via Hazelcast; Go libraries like <code>ulule/limiter</code> cover the same ground.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Rate limiting protects against <strong>DoS attacks, credential stuffing, scraping, runaway scripts, and accidental abuse</strong>. Without it, a single buggy client can exhaust your database connections or CPU. It's also the foundation of API plans: free tier gets 100 req/min, paid tier gets 10k req/min. Every public-facing API — including internal microservices — benefits from sensible limits.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Keying by <code>r.RemoteAddr</code> behind a proxy</strong> rate-limits the proxy itself; read <code>X-Forwarded-For</code> instead (carefully, to avoid spoofing).</li>
+      <li><strong>In-memory limiter with multiple replicas</strong> means clients get N× the allowed rate — use Redis for shared state.</li>
+      <li><strong>Limiting by IP</strong> punishes users behind NAT/CGNAT; key by user ID or API key when possible.</li>
+      <li><strong>Missing <code>Retry-After</code> header</strong> — clients don't know when to retry, leading to thundering-herd loops.</li>
+      <li><strong>Limiter map grows unbounded:</strong> evict stale entries or use an LRU cache.</li>
+      <li><strong>Applying globally to <code>/healthz</code></strong> causes Kubernetes probes to fail under load.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>GitHub's API</strong> uses per-token rate limits and exposes headers so clients can self-regulate. <strong>Cloudflare</strong> and <strong>Fastly</strong> provide edge rate limiting to all their Go customers. <strong>Hashicorp Vault</strong> has a built-in rate limiter. <strong>Envoy Proxy</strong> (C++) is often used in front of Go services and exposes a <code>ratelimit-service</code> gRPC API that a Go backend (<code>envoyproxy/ratelimit</code>) implements.</span></div>
+</div>
 
 <p>Rate limiting prevents abuse by restricting how many requests a client can make in a given time window. This implementation tracks requests per IP address using a map protected by a mutex. A background goroutine periodically resets the counters.</p>
 
@@ -1466,6 +2063,40 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 17: COMPRESSION ===================== -->
 <h2 id="compression"><span class="section-num">17</span> Compression Middleware</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Compression middleware</strong> transparently compresses HTTP response bodies using gzip, deflate, brotli, or zstd — cutting payload size by 60–90% for JSON, HTML, CSS, and JS. A Go compression middleware inspects the client's <code>Accept-Encoding</code> header, wraps the <code>http.ResponseWriter</code> with a compressing writer (e.g., <code>gzip.NewWriter</code>), and sets <code>Content-Encoding: gzip</code> on the response. Go's standard library provides <code>compress/gzip</code>, <code>compress/flate</code>, and <code>compress/zlib</code>. Third-party packages like <code>klauspost/compress</code> deliver faster implementations and brotli/zstd support.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Content negotiation:</strong> pick the best encoding the client supports.</li>
+      <li><strong>Level tuning:</strong> 1 (fastest) to 9 (smallest); 5–6 is the usual sweet spot.</li>
+      <li><strong>Min-size threshold:</strong> skip tiny responses where compression overhead isn't worth it.</li>
+      <li><strong>Content-type filtering:</strong> don't compress already-compressed formats (JPEG, PNG, gzip, video).</li>
+      <li><strong>Pooled writers:</strong> use <code>sync.Pool</code> to reuse <code>gzip.Writer</code> instances and avoid allocations.</li>
+      <li><strong>Vary: Accept-Encoding:</strong> crucial for caches/CDNs so they don't serve gzipped responses to non-gzip clients.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>compression</code>:</strong> same idea, similar defaults; Go gives more explicit control over pooling.</li>
+      <li><strong>vs Nginx <code>gzip on</code>:</strong> doing it at the edge offloads CPU from your Go process; doing it in-app means it works even without a proxy.</li>
+      <li><strong>vs HTTP/2 header compression (HPACK):</strong> HPACK compresses headers only; body compression is still your job.</li>
+      <li><strong>vs brotli/zstd:</strong> brotli is ~15% smaller than gzip for text; zstd is faster and decent ratio — both are supported via <code>andybalholm/brotli</code> and <code>klauspost/compress/zstd</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Compression dramatically reduces bandwidth costs and improves latency — especially for mobile users on slow networks. A 500 KB JSON response becomes ~50 KB gzipped, cutting transfer time by 10×. It's a one-line change that improves Lighthouse scores, reduces egress bills on cloud providers, and makes APIs feel snappier. Essentially every production web service compresses responses.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Compressing already-compressed content</strong> (images, videos) wastes CPU for no benefit.</li>
+      <li><strong>Forgetting <code>Vary: Accept-Encoding</code></strong> — CDN caches poison themselves and return gzipped bodies to clients that asked for identity.</li>
+      <li><strong>Not closing the <code>gzip.Writer</code></strong> before flushing the response — produces truncated output.</li>
+      <li><strong>BREACH attack:</strong> compressing responses that include user secrets can leak them if an attacker controls part of the body — mitigate by masking CSRF tokens.</li>
+      <li><strong>Streaming responses and compression:</strong> flushing too often destroys the compression ratio.</li>
+      <li><strong>Allocation pressure:</strong> a new <code>gzip.Writer</code> per request is expensive — pool them.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Caddy</strong> and <strong>Traefik</strong> gzip by default. <strong>Kubernetes' API server</strong> compresses large list responses. <strong>Prometheus</strong> compresses its <code>/metrics</code> endpoint, which is essential when scraping thousands of time series. <strong>Grafana Loki</strong> uses zstd for log chunks. <strong>Chi's middleware package</strong> ships a <code>Compress</code> middleware used across the ecosystem.</span></div>
+</div>
+
 <p>Gzip compression can reduce response sizes by 70-90% for text-based content (JSON, HTML, CSS). The middleware checks if the client supports gzip (via <code>Accept-Encoding</code> header), wraps the response writer with a gzip writer, and sets the appropriate headers.</p>
 
 <p>The key challenge is that you need a custom <code>ResponseWriter</code> that writes to the gzip stream instead of the raw connection.</p>
@@ -1513,6 +2144,41 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 
 <!-- ===================== SECTION 18: XSS ===================== -->
 <h2 id="xss-protection"><span class="section-num">18</span> XSS Protection Middleware</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>XSS (Cross-Site Scripting)</strong> is a vulnerability where attacker-controlled HTML/JavaScript ends up rendered on your site, stealing cookies, tokens, or session data. An XSS protection middleware in Go does two complementary jobs: (1) sets defensive response headers (<code>Content-Security-Policy</code>, <code>X-XSS-Protection</code>, <code>X-Content-Type-Options</code>) that instruct the browser to block or contain malicious scripts, and (2) optionally sanitizes incoming JSON/form data to strip dangerous HTML. The Go stdlib's <code>html/template</code> package auto-escapes by default, but for rich user input you use <code>microcosm-cc/bluemonday</code> — the canonical Go HTML sanitizer.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Context-aware escaping:</strong> <code>html/template</code> knows whether a variable is in an attribute, a script, or a URL and escapes accordingly.</li>
+      <li><strong>HTML sanitization:</strong> <code>bluemonday.UGCPolicy()</code> allows safe tags (<code>p</code>, <code>b</code>, <code>a</code>) while stripping <code>script</code>, <code>iframe</code>, event handlers.</li>
+      <li><strong>Strict CSP:</strong> disallow inline scripts (<code>script-src 'self'</code>) — the single most effective XSS mitigation.</li>
+      <li><strong>X-Content-Type-Options: nosniff:</strong> prevents browsers from executing a <code>.txt</code> file as JavaScript.</li>
+      <li><strong>Input validation:</strong> reject unexpected characters in user-supplied IDs, emails, URLs.</li>
+      <li><strong>Output encoding:</strong> always encode at the point of output, never store pre-escaped data.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node <code>xss</code>/<code>DOMPurify</code>:</strong> DOMPurify runs in the browser; bluemonday runs on the server. Both use allow-lists.</li>
+      <li><strong>vs Python <code>bleach</code>:</strong> bleach is bluemonday's conceptual sibling — allow-list HTML sanitizer.</li>
+      <li><strong>vs Rails' default escaping:</strong> ERB auto-escapes; Go's <code>html/template</code> does the same. Both packages are safer than raw string interpolation.</li>
+      <li><strong>vs PHP <code>htmlspecialchars</code>:</strong> PHP's function is basic text escaping; bluemonday is context-aware HTML parsing.</li>
+      <li><strong>vs WAF rules (Cloudflare, ModSecurity):</strong> WAFs block known attack patterns at the edge; in-app sanitization catches what the WAF misses.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Any app that <strong>renders user-supplied content in HTML</strong> — comments, forum posts, markdown previews, profile bios — needs XSS protection. Even JSON APIs benefit from CSP and nosniff headers because a misconfigured error page could otherwise execute an injected script. XSS is #3 on the OWASP Top 10 and a single missed escape can compromise every logged-in user.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Using <code>text/template</code> for HTML</strong> — it doesn't escape; use <code>html/template</code>.</li>
+      <li><strong>Trusting client-side sanitization only</strong> — attackers bypass JS; always sanitize server-side.</li>
+      <li><strong>Allowing <code>javascript:</code> URLs in link attributes</strong> — bluemonday's default URL schemes block these.</li>
+      <li><strong>Loose CSP with <code>'unsafe-inline'</code></strong> — defeats most of CSP's value; use nonces or hashes.</li>
+      <li><strong>Double-escaping:</strong> sanitizing then escaping produces <code>&amp;amp;lt;</code> mess.</li>
+      <li><strong>Stored XSS in JSON APIs:</strong> when the frontend injects a value into the DOM without escaping, it's still your server's responsibility to validate input.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Gitea</strong> uses bluemonday to sanitize Markdown before rendering. <strong>Mattermost</strong> sanitizes user posts. <strong>Hugo</strong> (Go static site generator) relies on <code>html/template</code>'s context-aware escaping. <strong>Grafana</strong> applies strict CSP on its dashboard HTML. <strong>Caddy</strong> ships security headers by default on any site it serves.</span></div>
+</div>
 
 <p>XSS (Cross-Site Scripting) attacks inject malicious scripts into your application. This middleware sanitizes all JSON request bodies by recursively walking the parsed JSON structure and stripping dangerous HTML/JavaScript using the <code>bluemonday</code> library.</p>
 
@@ -1576,6 +2242,38 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 19: HPP ===================== -->
 <h2 id="hpp"><span class="section-num">19</span> HPP Protection</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>HPP (HTTP Parameter Pollution)</strong> is an attack where a client sends the same query or form parameter multiple times (<code>?role=user&amp;role=admin</code>) hoping the server behaves inconsistently — for example, a WAF sees the first value while the application trusts the last. Different frameworks and languages pick different winners: PHP takes the last, Express takes an array, ASP.NET concatenates with commas. An HPP-protection middleware normalizes this behavior by collapsing duplicates to the last (or first) value, or by rejecting the request entirely when duplicates are unexpected.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Query parameter deduplication:</strong> ensure <code>r.URL.Query().Get("key")</code> returns a consistent value.</li>
+      <li><strong>Form data normalization:</strong> collapse repeated form fields in <code>POST</code> bodies.</li>
+      <li><strong>Allow-list for genuinely repeated params:</strong> <code>?tags=go&amp;tags=backend</code> is legitimate; other params should be singular.</li>
+      <li><strong>Explicit rejection:</strong> return 400 Bad Request when duplicates appear on forbidden keys.</li>
+      <li><strong>Consistent behavior across middleware chain:</strong> eliminates discrepancies between WAFs and app logic.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Node <code>hpp</code> package:</strong> Express's <code>hpp</code> middleware is the direct inspiration; Go equivalents are smaller since Go's <code>url.Values</code> is already a <code>map[string][]string</code>.</li>
+      <li><strong>vs Spring Boot:</strong> Java servlets return the first value by default, which itself is inconsistent with PHP/ASP.NET — mixed stacks are vulnerable.</li>
+      <li><strong>vs raw <code>net/http</code>:</strong> Go's <code>r.URL.Query().Get(key)</code> returns the <strong>first</strong> value, but <code>r.FormValue(key)</code> may return a different one — calling both without care creates inconsistency.</li>
+      <li><strong>vs WAF rules:</strong> WAFs can detect HPP patterns but differ in interpretation — app-level normalization is the source of truth.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">HPP protection eliminates a whole class of <strong>filter bypass and authorization bypass bugs</strong>. If your app uses a WAF or upstream validator that checks only the first value but your handler trusts the last, attackers can smuggle malicious payloads past the filter. Normalizing at the middleware layer makes all downstream code see consistent input and closes this gap.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Breaking legitimate multi-value params</strong> (checkboxes, tag lists) by blindly deduplicating — use an allow-list.</li>
+      <li><strong>Calling <code>r.FormValue</code> and <code>r.URL.Query().Get</code> for the same key</strong> — they may return different values after body parsing.</li>
+      <li><strong>Middleware runs after body parsing</strong> — ensure you run HPP normalization before handlers read params.</li>
+      <li><strong>JSON body pollution:</strong> HPP traditionally applies to query/form; JSON has its own "duplicate key" issue that <code>encoding/json</code> handles by taking the last value.</li>
+      <li><strong>Overwriting <code>r.URL</code></strong> can confuse logging and metrics — create a copy if needed.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">HPP protection is less famous than CORS or CSRF but still ships in production hardening guides for <strong>banking APIs</strong>, <strong>payment gateways</strong>, and any service behind <strong>ModSecurity</strong> or <strong>AWS WAF</strong>. Most Go services that use Express-style templates port the Node <code>hpp</code> logic directly. The <strong>OWASP Testing Guide</strong> documents HPP and recommends app-layer mitigation.</span></div>
+</div>
+
 <p>HTTP Parameter Pollution (HPP) is an attack where the attacker sends duplicate query parameters to confuse your application. For example: <code>/search?category=books&amp;category=admin</code>. Depending on how the server handles duplicates, this can bypass security filters or alter query logic.</p>
 
 <p>This middleware keeps only the <strong>last</strong> value for each query parameter, preventing pollution. You can also configure a whitelist of parameters that are allowed to have multiple values (like <code>tags</code> or <code>ids</code>).</p>
@@ -1621,6 +2319,39 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 20: RESPONSE TIME ===================== -->
 <h2 id="response-time"><span class="section-num">20</span> Response Time Middleware</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Response time middleware</strong> measures how long each request takes, from the moment the handler chain begins to when the response is fully written. It records the duration with <code>time.Since(start)</code>, sets an <code>X-Response-Time</code> header on the response, emits metrics to Prometheus or statsd, and logs slow requests. Because middleware wraps <code>http.Handler</code>, it's trivial to insert a stopwatch around the next call — <strong>Go's elegance shines here</strong>: <code>start := time.Now(); next.ServeHTTP(w, r); log(time.Since(start))</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Per-request timing:</strong> <code>time.Now()</code> is monotonic and nanosecond-precision.</li>
+      <li><strong>Status-code capture:</strong> wrap <code>http.ResponseWriter</code> to record the written status for labels.</li>
+      <li><strong>Prometheus histograms:</strong> <code>http_request_duration_seconds</code> with labels for method, path, status.</li>
+      <li><strong>Slow-query logging:</strong> log a warning when duration exceeds a threshold.</li>
+      <li><strong>X-Response-Time header:</strong> useful for client-side debugging and synthetic monitoring.</li>
+      <li><strong>Distributed tracing:</strong> integrate with OpenTelemetry to correlate traces with HTTP latency.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express morgan / response-time:</strong> Node's response-time middleware does the same job; Go's version is usually handwritten in 15 lines.</li>
+      <li><strong>vs Spring Boot Actuator:</strong> Actuator auto-emits HTTP metrics via Micrometer; Go requires opt-in middleware but the data model is the same.</li>
+      <li><strong>vs Python <code>prometheus_flask_exporter</code>:</strong> drop-in for Flask; Go equivalents include <code>promhttp</code> + a handwritten middleware or <code>chi-prometheus</code>.</li>
+      <li><strong>vs APM agents (Datadog, New Relic):</strong> those auto-instrument via bytecode/runtime hooks; in Go you install their SDK which wraps your router.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You cannot optimize what you don't measure. Response time middleware gives you <strong>P50/P95/P99 latency per endpoint</strong>, which is the primary SLI for most APIs. It surfaces regressions immediately after deploys, identifies slow DB queries hiding behind endpoints, and powers alerting (<code>P99 &gt; 500ms for 5 minutes</code>). Every production Go service should have it from day one.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>High-cardinality path labels:</strong> <code>/users/42</code> as a label creates a time series per user ID — use the <em>route pattern</em> (<code>/users/{id}</code>) instead.</li>
+      <li><strong>Timer not including response flush:</strong> if you measure before <code>WriteHeader</code> you miss the body-write latency — measure around the full <code>next.ServeHTTP</code>.</li>
+      <li><strong>ResponseWriter wrapping breaks Hijacker/Flusher:</strong> if your wrapper doesn't also implement those interfaces, WebSockets and SSE break.</li>
+      <li><strong>Using <code>log.Printf</code> with a giant fmt string</strong> adds measurable overhead on hot paths — use structured logging.</li>
+      <li><strong>Measuring with <code>time.Now().Sub(time.Now())</code>:</strong> always use <code>time.Since</code> which is monotonic.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Prometheus</strong>'s own client libraries ship <code>promhttp.InstrumentHandlerDuration</code>. <strong>Kubernetes components</strong> emit duration histograms for every API call. <strong>Grafana Mimir</strong> and <strong>Loki</strong> expose detailed latency histograms. <strong>OpenTelemetry</strong>'s <code>otelhttp</code> package instruments any <code>http.Handler</code> with both traces and metrics.</span></div>
+</div>
+
 <p>Tracking response time is essential for monitoring and debugging. This middleware records when the request started, lets the handler run, then calculates the elapsed time and adds it as a response header. You can also log slow requests for alerting.</p>
 
 <pre><code><span class="kw">package</span> middlewares
@@ -1663,6 +2394,39 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
 <!-- ===================== SECTION 21: MW EXCLUSION ===================== -->
 <h2 id="mw-exclusion"><span class="section-num">21</span> Middleware Route Exclusion</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Middleware route exclusion</strong> is the pattern of skipping a middleware for specific paths. For example, your <code>auth</code> middleware should run on every <code>/api</code> route except <code>/api/login</code> and <code>/api/register</code>, and your <code>ratelimit</code> middleware should skip <code>/healthz</code>. Because Go's standard router doesn't support per-route middleware natively, you either (1) wrap a sub-mux with the middleware and register only the protected routes on it, or (2) write a small helper that checks the request path against an exclusion list before calling <code>next</code>.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Path allow/deny lists:</strong> exact matches or prefix matches.</li>
+      <li><strong>Sub-mux composition:</strong> public and private routes on separate muxes merged at the top.</li>
+      <li><strong>Per-route wrappers:</strong> wrap individual handlers with <code>authMiddleware(handlerFunc)</code>.</li>
+      <li><strong>Method-aware exclusion:</strong> skip <code>GET /users</code> but enforce on <code>POST /users</code>.</li>
+      <li><strong>Fallthrough on match:</strong> call <code>next.ServeHTTP</code> directly without running middleware logic.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>app.use('/api', middleware)</code>:</strong> Express supports prefix-scoped middleware natively; Go requires sub-mux or wrapper patterns.</li>
+      <li><strong>vs Chi <code>r.Group</code>:</strong> Chi has per-group middleware that naturally excludes other groups — a cleaner approach than path-based exclusion.</li>
+      <li><strong>vs Gin <code>router.Use</code>:</strong> Gin supports middleware per route group; stdlib doesn't.</li>
+      <li><strong>vs Java Servlet Filter url-pattern:</strong> servlets declare path patterns in <code>web.xml</code> or annotations; Go does it imperatively.</li>
+      <li><strong>vs Spring Security's <code>requestMatchers</code>:</strong> Spring has a fluent DSL for which URLs require auth; Go just uses functions.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You need exclusion whenever middleware can't apply universally — most obviously <strong>auth (login/register can't require auth)</strong>, <strong>rate limiting (health checks should be unlimited)</strong>, and <strong>CSRF protection (webhooks from third parties can't send CSRF tokens)</strong>. Without explicit exclusion you either break those endpoints or have to disable the middleware entirely, losing its benefit everywhere else.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Accidentally excluding too broadly:</strong> skipping auth on <code>/api</code> instead of <code>/api/login</code> opens the whole API.</li>
+      <li><strong>Prefix matches that are too permissive:</strong> <code>/admin</code> matches <code>/administrative-tools</code> unless you check a trailing slash.</li>
+      <li><strong>Exclusion lists in global variables</strong> are hard to test — inject them into the middleware instead.</li>
+      <li><strong>Mixing sub-mux exclusion with wrapper exclusion</strong> creates two sources of truth for "is this route protected?".</li>
+      <li><strong>Skipping logging/metrics middleware</strong> to "save CPU" on health checks also hides outages — keep those instrumented.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes API server</strong> applies different auth plugins depending on the URL prefix (<code>/api</code>, <code>/apis</code>, <code>/healthz</code>). <strong>Traefik</strong> uses middleware chains scoped by router rules — its config lets you attach middleware to specific routes only. <strong>Caddy</strong>'s matcher system lets middleware target specific paths. <strong>Chi's router</strong> ships <code>Middlewares()</code> and <code>Group()</code> for exactly this use case.</span></div>
+</div>
+
 <p>Not every route needs every middleware. For example, your login and register endpoints shouldn't require JWT authentication, and your health check endpoint probably doesn't need rate limiting. This helper wraps a middleware and skips it for specified paths.</p>
 
 <pre><code><span class="kw">package</span> utils
@@ -1702,6 +2466,40 @@ jwtMiddleware := utils.<span class="fn">MiddlewaresExcludePaths</span>(
 
 <!-- ===================== SECTION 22: UTILS ===================== -->
 <h2 id="utils"><span class="section-num">22</span> Utility Functions</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Utility functions</strong> are small, reusable helpers that live in an <code>internal/utils</code> (or <code>internal/httputil</code>) package and encapsulate common boilerplate: writing JSON responses, decoding JSON request bodies, sending standardized error replies, reading path parameters, generating IDs, parsing pagination. Good utilities turn ten-line handlers into two-line handlers while keeping error handling explicit. The canonical pair in Go REST code is <code>WriteJSON(w, status, data)</code> and <code>DecodeJSON(r, &amp;target)</code>, plus an <code>Error(w, status, message)</code> helper for consistent error shapes.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>JSON response writer:</strong> sets content-type, status, and encodes in one call.</li>
+      <li><strong>JSON body decoder:</strong> with <code>DisallowUnknownFields()</code> to reject typos.</li>
+      <li><strong>Error envelope:</strong> <code>{"error": {"code": "invalid_input", "message": "..."}}</code>.</li>
+      <li><strong>Pagination parser:</strong> extract <code>limit</code> and <code>offset</code> from query params with defaults and caps.</li>
+      <li><strong>Request ID extractor:</strong> pull the request-ID from context for logging.</li>
+      <li><strong>Input validators:</strong> email, UUID, non-empty string helpers.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Express <code>res.json()</code>:</strong> Express bundles JSON helpers into the response object; Go uses standalone functions.</li>
+      <li><strong>vs Django REST Framework Response:</strong> DRF has a rich <code>Response</code> class with content negotiation; Go is more minimal.</li>
+      <li><strong>vs Gin <code>c.JSON(status, obj)</code>:</strong> Gin provides the same shape inside its context; stdlib users handwrite it once.</li>
+      <li><strong>vs Spring <code>ResponseEntity</code>:</strong> Spring has a builder pattern; Go is simpler but less discoverable.</li>
+      <li><strong>vs Rails render:</strong> Rails auto-serializes; Go is explicit.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Without utilities, every handler repeats 5–10 lines of boilerplate: set header, set status, encode body, handle error, log. Over 50 handlers that's 500 lines of copy-paste with subtle inconsistencies. A tiny <code>httputil</code> package unifies the <strong>error shape across the whole API</strong>, enforces <strong>JSON content types</strong>, and makes it easy to add cross-cutting changes (like switching to <code>application/problem+json</code>) in one place.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Utility functions that panic instead of returning errors</strong> — make the caller's error handling awkward.</li>
+      <li><strong>Writing the status after the body</strong> — must call <code>WriteHeader</code> before <code>Write</code>.</li>
+      <li><strong>Encoding directly into the <code>ResponseWriter</code></strong> means you can't change your mind if encoding fails partway through — buffer first if that matters.</li>
+      <li><strong>Global logger in utilities</strong> — inject the logger so tests can assert on output.</li>
+      <li><strong>Inconsistent error codes:</strong> <code>"invalid_input"</code> vs <code>"INVALID_INPUT"</code> vs <code>"invalidInput"</code> across handlers — pick one style and enforce it.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text">Almost every production Go service has an <code>httputil</code> or <code>transport</code> package with these helpers. <strong>Kubernetes' <code>apimachinery</code></strong> has extensive utility packages for writing status responses and encoding. <strong>go-kit</strong> provides <code>transport/http</code> with helpers for the same purpose. <strong>Chi's <code>render</code> package</strong> (<code>go-chi/render</code>) is a popular external library filling exactly this role.</span></div>
+</div>
 
 <p>These are the helper functions that keep your handlers clean. Instead of repeating SQL generation, error handling, and reflection logic in every handler, extract them into reusable utilities.</p>
 
@@ -1815,6 +2613,41 @@ jwtMiddleware := utils.<span class="fn">MiddlewaresExcludePaths</span>(
 <!-- ===================== SECTION 23: PROTOBUF ===================== -->
 <h2 id="protobuf"><span class="section-num">23</span> Protocol Buffers</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Protocol Buffers (protobuf)</strong> is a language-neutral, platform-neutral, extensible mechanism for serializing structured data — Google's flagship alternative to JSON and XML. You describe your messages and RPC services in a <code>.proto</code> file, then run <code>protoc</code> with the Go plugin to generate strongly typed Go structs, marshal/unmarshal methods, and (with <code>protoc-gen-go-grpc</code>) gRPC client and server stubs. Protobuf wire format is <strong>binary, compact, and forward/backward compatible</strong>: adding a new field with a new tag number doesn't break old clients.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Schema-first:</strong> one <code>.proto</code> file is the source of truth for all languages.</li>
+      <li><strong>Binary wire format:</strong> 3–10× smaller than JSON and much faster to parse.</li>
+      <li><strong>Strong typing:</strong> generated Go types are exact — no reflection, no schema validation at runtime.</li>
+      <li><strong>Field numbers for compatibility:</strong> adding/removing fields is safe if tag numbers never reuse.</li>
+      <li><strong>Well-known types:</strong> <code>Timestamp</code>, <code>Duration</code>, <code>Any</code>, <code>Struct</code>, <code>FieldMask</code>.</li>
+      <li><strong>Language interop:</strong> Go service can talk to Java/Python/C++/Rust clients with zero manual translation.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs JSON:</strong> protobuf is ~5× smaller and ~10× faster to parse, but not human-readable and requires a schema.</li>
+      <li><strong>vs MessagePack/BSON:</strong> those are schemaless binary formats; protobuf requires a schema but gives you strong typing and codegen.</li>
+      <li><strong>vs Avro:</strong> Avro embeds the schema in the data; protobuf separates them. Avro is more popular in Hadoop/Kafka; protobuf in microservices.</li>
+      <li><strong>vs FlatBuffers / Cap'n Proto:</strong> those allow zero-copy access; protobuf always parses into heap structs but has far broader ecosystem support.</li>
+      <li><strong>vs gRPC over JSON (grpc-gateway):</strong> you can serve the same protobuf service as both gRPC (binary) and REST (JSON) — best of both worlds.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Use protobuf when you have <strong>polyglot microservices</strong>, <strong>high-volume internal APIs</strong>, or <strong>mobile clients on constrained bandwidth</strong>. It's the foundation of gRPC, which is the default RPC protocol at Google, Uber, Netflix, and most large tech orgs. The schema-first workflow forces API design discipline — you can't ship a message until the schema is agreed upon, which is exactly what large teams need.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Reusing field numbers:</strong> catastrophic compatibility break — once a number is deprecated, never reuse it; add a new one.</li>
+      <li><strong>Proto2 vs proto3:</strong> proto3 dropped required fields and default values, changing the null semantics dramatically.</li>
+      <li><strong>Code generation setup:</strong> <code>protoc</code> is not a Go tool — install the binary and the Go plugins separately.</li>
+      <li><strong>Generated code in version control:</strong> either commit the generated files or make codegen part of every build; pick one and stick to it.</li>
+      <li><strong>Large messages:</strong> protobuf wire format handles them but gRPC has a default 4 MB message limit you'll hit fast.</li>
+      <li><strong>Enum zero values:</strong> proto3 enums start at zero, which must be <code>UNSPECIFIED</code> by convention to distinguish unset from first real value.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Google</strong> uses protobuf for billions of RPC calls per second. <strong>Kubernetes</strong> uses it on the wire for etcd and for the API server's internal storage format. <strong>gRPC services at Uber, Netflix, Square, Dropbox</strong> all rely on protobuf. <strong>Envoy Proxy</strong> defines its entire xDS config API in proto. <strong>Tensorflow</strong> and <strong>PyTorch's distributed training</strong> use protobuf for gradient exchange.</span></div>
+</div>
+
 <p>Protocol Buffers (protobuf) is Google's language-neutral, platform-neutral mechanism for serializing structured data. Think of it as JSON, but binary, smaller, faster, and with a strict schema. You define your data structures in <code>.proto</code> files, then the <code>protoc</code> compiler generates Go code (structs and methods) automatically.</p>
 
 <p>Protobuf is the foundation of gRPC. While REST APIs use JSON over HTTP, gRPC uses protobuf over HTTP/2 for much better performance.</p>
@@ -1873,6 +2706,42 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
 
 <!-- ===================== SECTION 24: GRPC SERVER ===================== -->
 <h2 id="grpc-server"><span class="section-num">24</span> gRPC Server</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>gRPC</strong> is a high-performance, open-source RPC framework developed at Google, built on <strong>HTTP/2</strong> and <strong>Protocol Buffers</strong>. A gRPC server in Go is created with <code>grpc.NewServer()</code> from <code>google.golang.org/grpc</code>; you register an implementation of the auto-generated service interface (e.g., <code>pb.RegisterUserServiceServer</code>) and call <code>server.Serve(listener)</code>. The framework handles connection multiplexing, message framing, context propagation, metadata (gRPC's equivalent of HTTP headers), status codes, and streaming out of the box.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>HTTP/2 multiplexing:</strong> many concurrent streams over one TCP connection.</li>
+      <li><strong>Four RPC modes:</strong> unary, server-streaming, client-streaming, bidirectional-streaming.</li>
+      <li><strong>Interceptors:</strong> gRPC's equivalent of HTTP middleware — wrap calls with logging, auth, tracing.</li>
+      <li><strong>Rich status codes:</strong> <code>codes.NotFound</code>, <code>codes.PermissionDenied</code>, <code>codes.ResourceExhausted</code> — richer than HTTP's.</li>
+      <li><strong>Deadline propagation:</strong> a <code>context.Context</code> with a deadline flows through every call.</li>
+      <li><strong>Bidirectional TLS:</strong> first-class mTLS for service-to-service auth.</li>
+      <li><strong>Reflection:</strong> clients can discover the service schema at runtime via the reflection API.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs REST/JSON:</strong> gRPC is binary, strongly typed, streaming-capable, and faster, but not browser-native (needs grpc-web or grpc-gateway).</li>
+      <li><strong>vs GraphQL:</strong> GraphQL is query-oriented and schemaless on the wire; gRPC is RPC-oriented and schema-first. GraphQL shines for front-end aggregation; gRPC shines for service-to-service.</li>
+      <li><strong>vs Thrift (Facebook):</strong> similar concept, older IDL-based RPC framework — still used at Meta but gRPC has overtaken it elsewhere.</li>
+      <li><strong>vs Finagle (Twitter, Scala):</strong> Finagle is an asynchronous RPC framework predating gRPC; gRPC has the open-source momentum.</li>
+      <li><strong>vs JSON-RPC:</strong> JSON-RPC is a simple text protocol; gRPC is dramatically more powerful and faster.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">gRPC is the default choice for <strong>internal microservice communication</strong> in modern cloud-native architectures. It gives you type safety across language boundaries, high throughput, low latency, streaming primitives, and built-in deadline propagation. For a Go microservice talking to a Java service, gRPC lets you share a single <code>.proto</code> file and get matched client/server code automatically.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Not propagating deadlines:</strong> every call should inherit the incoming context so upstream cancellation cascades.</li>
+      <li><strong>Unbounded message size:</strong> default limits are 4 MB; large payloads need <code>grpc.MaxRecvMsgSize</code>.</li>
+      <li><strong>Blocking in streaming handlers:</strong> a slow client blocks the stream; always <code>select</code> on <code>ctx.Done()</code>.</li>
+      <li><strong>Using HTTP status codes</strong> — gRPC uses its own codes from the <code>codes</code> package.</li>
+      <li><strong>Forgetting to close the listener on shutdown</strong> — causes orphaned goroutines on reload.</li>
+      <li><strong>Mixing protobuf versions:</strong> proto2 and proto3 generated code can conflict on the same types.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' <code>kubelet</code></strong> talks to the container runtime via CRI (gRPC). <strong>etcd</strong>'s client protocol is gRPC. <strong>Envoy's xDS control plane</strong> is gRPC. <strong>CockroachDB</strong> and <strong>TiDB</strong> use gRPC for inter-node communication. <strong>Dapr</strong>, <strong>Dgraph</strong>, <strong>Pilosa</strong>, and <strong>Temporal</strong> all expose gRPC APIs. <strong>Google Cloud SDK</strong>'s preferred protocol is gRPC.</span></div>
+</div>
 
 <p>gRPC is a high-performance RPC framework that uses HTTP/2 for transport and Protocol Buffers for serialization. Unlike REST where you manually serialize/deserialize JSON and define URL patterns, gRPC generates the entire client-server boilerplate from your <code>.proto</code> file. You just implement the business logic.</p>
 
@@ -1935,6 +2804,41 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
 <!-- ===================== SECTION 25: GRPC CLIENT ===================== -->
 <h2 id="grpc-client"><span class="section-num">25</span> gRPC Client</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">A <strong>gRPC client</strong> in Go is a generated <strong>stub</strong> that wraps an underlying <code>*grpc.ClientConn</code>. You dial the server with <code>grpc.NewClient(target)</code> (or the older <code>grpc.Dial</code>), create a typed client with <code>pb.NewUserServiceClient(conn)</code>, and then call methods like any Go function: <code>client.GetUser(ctx, &amp;pb.GetUserRequest{Id: 42})</code>. The stub handles serialization, HTTP/2 framing, metadata, deadlines, retries, and load balancing. One <code>ClientConn</code> is safe to share across thousands of goroutines.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Typed stubs:</strong> generated from the <code>.proto</code> file — compile-time guarantees that request and response types match.</li>
+      <li><strong>Connection multiplexing:</strong> one HTTP/2 connection handles many concurrent streams.</li>
+      <li><strong>Name resolution:</strong> built-in support for DNS, xDS, and custom resolvers for service discovery.</li>
+      <li><strong>Load balancing:</strong> pick_first, round_robin, xDS-driven — configured via service config or dial options.</li>
+      <li><strong>Retry policy:</strong> declarative retry config via service config JSON.</li>
+      <li><strong>Interceptors:</strong> client-side middleware for logging, tracing, auth, metrics.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs an HTTP client wrapper:</strong> a gRPC stub is strongly typed; an HTTP client wrapper requires manual request/response encoding.</li>
+      <li><strong>vs Apollo Client (GraphQL):</strong> Apollo is browser-oriented with caching; gRPC is for backend-to-backend with no automatic caching.</li>
+      <li><strong>vs OpenAPI-generated clients:</strong> OpenAPI generates REST clients in many languages; gRPC stubs are binary and typically faster.</li>
+      <li><strong>vs Java gRPC stubs:</strong> same semantics, different ergonomics — Go stubs return <code>(resp, err)</code>; Java stubs can be blocking, async, or future-based.</li>
+      <li><strong>vs Connect-Go:</strong> Connect is a newer gRPC-compatible framework that also speaks plain HTTP — easier to integrate with browsers.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">A gRPC client is the counterpart of a gRPC server — every service consuming a gRPC API uses one. The generated stub eliminates boilerplate (no manual serialization, no URL construction, no status-code parsing), making service-to-service calls feel like local function calls while still running over the network. For polyglot systems, the same <code>.proto</code> yields consistent clients in every language.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Creating a new <code>ClientConn</code> per call</strong> — defeats connection reuse and HTTP/2 multiplexing. Create one per target and share.</li>
+      <li><strong>Not deferring <code>conn.Close()</code></strong> in long-lived programs leaks TCP connections on shutdown.</li>
+      <li><strong>Missing context deadlines:</strong> a hung server blocks the goroutine forever unless you set a timeout on the context.</li>
+      <li><strong>Insecure credentials in production:</strong> <code>grpc.WithInsecure()</code> (or <code>insecure.NewCredentials()</code>) is fine for dev but must be replaced with TLS in prod.</li>
+      <li><strong>Dial errors are silent</strong> by default — <code>grpc.Dial</code> returns immediately and errors surface only on the first call unless you use <code>grpc.WithBlock</code>.</li>
+      <li><strong>Load balancer confusion:</strong> <code>dns:///myservice</code> with <code>round_robin</code> is necessary to load-balance across pods in Kubernetes.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' <code>kubectl</code></strong> is largely a REST client but talks to CRI via gRPC. <strong>Dapr sidecars</strong> provide gRPC clients for service invocation. <strong>Envoy's xDS API</strong> is consumed by gRPC clients in control planes. <strong>Temporal workers</strong> connect to Temporal's server via gRPC. <strong>Vitess query serving</strong> and <strong>TiDB's PD client</strong> are gRPC-based.</span></div>
+</div>
+
 <p>The gRPC client is auto-generated from the same <code>.proto</code> file. You create a connection, get a typed client stub, and call methods as if they were local function calls. The serialization, HTTP/2 framing, and error handling are all handled by the framework.</p>
 
 <pre><code><span class="kw">package</span> main
@@ -1990,6 +2894,40 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
 
 <!-- ===================== SECTION 26: GRPC STREAMING ===================== -->
 <h2 id="grpc-streaming"><span class="section-num">26</span> gRPC Streaming</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>gRPC streaming</strong> is a native feature of gRPC enabled by HTTP/2, letting a single RPC send or receive multiple messages over one call. There are three flavors beyond plain unary calls: <strong>server streaming</strong> (one request, many responses — e.g. live stock quotes), <strong>client streaming</strong> (many requests, one response — e.g. log upload), and <strong>bidirectional streaming</strong> (many of each, interleaved — e.g. chat, game state). In Go, each stream is exposed as a generated interface with <code>Send</code>, <code>Recv</code>, and <code>CloseSend</code> methods that you call in goroutines or loops.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>HTTP/2 frames:</strong> messages are chunked into frames on a single TCP stream — no head-of-line blocking between calls.</li>
+      <li><strong>Flow control:</strong> HTTP/2 provides automatic back-pressure; fast senders don't swamp slow receivers.</li>
+      <li><strong>Deadline + cancellation:</strong> the same <code>context.Context</code> cancels in-flight streams.</li>
+      <li><strong>Metadata on open:</strong> headers and trailers let you attach authentication and status to the stream.</li>
+      <li><strong>Natural mapping to Go:</strong> loops with <code>stream.Recv()</code> returning <code>io.EOF</code> feel exactly like reading from an <code>io.Reader</code>.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs WebSockets:</strong> WebSockets are great for browsers but lack strong typing, deadline propagation, and richer status codes. gRPC streaming is superior for backend-to-backend.</li>
+      <li><strong>vs Server-Sent Events (SSE):</strong> SSE is one-way and text-based; gRPC streaming is binary and bidirectional.</li>
+      <li><strong>vs Kafka / NATS / RabbitMQ:</strong> message brokers decouple producers and consumers; gRPC streaming is point-to-point with no persistence.</li>
+      <li><strong>vs long-polling:</strong> long-polling fakes streaming over short-lived HTTP calls; gRPC uses persistent HTTP/2 streams.</li>
+      <li><strong>vs GraphQL subscriptions:</strong> GraphQL subscriptions run over WebSockets in browsers; gRPC is the backend equivalent.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">Use streaming whenever your RPC is not request-response shaped: <strong>live dashboards</strong>, <strong>log tailing</strong>, <strong>telemetry ingestion</strong>, <strong>real-time chat</strong>, <strong>continuous queries</strong>, <strong>long-running jobs that report progress</strong>, <strong>config watchers</strong>. Streaming avoids the overhead of opening a new RPC per message and lets the server push updates without the client polling.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Forgetting to call <code>CloseSend</code></strong> in client-streaming — the server waits forever.</li>
+      <li><strong>Blocking on <code>Recv</code> without checking <code>ctx.Done()</code></strong> — cancelled streams leak goroutines.</li>
+      <li><strong>Handling <code>io.EOF</code> as an error</strong> — it's the normal end-of-stream marker.</li>
+      <li><strong>Flow control misunderstanding:</strong> streams have per-stream windows; a slow reader blocks the sender until the window refills.</li>
+      <li><strong>Running Send and Recv in the same goroutine</strong> in bidi streaming can deadlock — split into two goroutines.</li>
+      <li><strong>Intermediate proxies that buffer:</strong> some load balancers don't support HTTP/2 streaming properly — use a gRPC-aware LB (Envoy, Linkerd).</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Kubernetes' <code>kubectl logs -f</code></strong> uses server streaming via the API server. <strong>Envoy's xDS</strong> uses bidirectional streaming to push config updates. <strong>etcd's watch API</strong> streams change events. <strong>Temporal workflows</strong> use bidirectional streams for task polling. <strong>Google Cloud's Pub/Sub pull subscribers</strong> use streaming for low-latency message delivery. <strong>Cockroach's changefeed</strong> streams row changes to consumers.</span></div>
+</div>
 
 <p>gRPC supports four communication patterns. Unary (request-response) is the simplest. But gRPC's real power comes from its three streaming modes: server-side, client-side, and bidirectional. Streaming is ideal for real-time data, large file transfers, and chat applications.</p>
 
@@ -2126,6 +3064,40 @@ stream.<span class="fn">CloseSend</span>()</code></pre>
 <!-- ===================== SECTION 27: GRPC GATEWAY ===================== -->
 <h2 id="grpc-gateway"><span class="section-num">27</span> gRPC Gateway</h2>
 
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>grpc-gateway</strong> is a Go code generator (<code>protoc-gen-grpc-gateway</code>) that reads your <code>.proto</code> file along with HTTP annotations from <code>google.api.http</code> and produces a reverse-proxy server that translates RESTful JSON requests into gRPC calls. It lets you write your service once in protobuf and serve both <strong>gRPC (binary, internal)</strong> and <strong>REST+JSON (public, browser-friendly)</strong> from the same code. The gateway runs as a separate HTTP handler (or on the same process) that forwards calls to the gRPC backend.</span></div>
+  <div class="concept-row"><span class="concept-label">Key features</span><span class="concept-text">
+    <ul>
+      <li><strong>Single source of truth:</strong> one proto defines REST paths, methods, bodies, and query params via <code>option (google.api.http)</code>.</li>
+      <li><strong>Automatic JSON &lt;-&gt; protobuf translation:</strong> camelCase/snake_case, enums as strings, timestamps as RFC3339.</li>
+      <li><strong>OpenAPI generation:</strong> <code>protoc-gen-openapiv2</code> produces Swagger specs from the same proto.</li>
+      <li><strong>Streaming support:</strong> server-streaming maps to SSE or chunked JSON responses.</li>
+      <li><strong>Custom marshalers:</strong> per-content-type (e.g., protobuf over HTTP for Envoy ext_authz).</li>
+      <li><strong>Header/metadata mapping:</strong> propagate HTTP headers to gRPC metadata and vice versa.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">How it differs</span><span class="concept-text">
+    <ul>
+      <li><strong>vs Connect-Go (<code>connectrpc.com/connect</code>):</strong> Connect is a newer approach — one server speaks gRPC, gRPC-Web, and Connect protocol over plain HTTP; grpc-gateway is a translation layer.</li>
+      <li><strong>vs Twirp (Twitch):</strong> Twirp is a protobuf-based RPC framework that uses plain HTTP+JSON or HTTP+protobuf; simpler than gRPC but lacks streaming.</li>
+      <li><strong>vs writing REST handlers manually:</strong> manual handlers drift from the proto schema over time; the gateway stays in sync automatically.</li>
+      <li><strong>vs Envoy gRPC-JSON transcoder:</strong> Envoy does the same translation at the proxy layer instead of in a Go process — good for polyglot backends.</li>
+      <li><strong>vs gRPC-Web:</strong> gRPC-Web lets browsers speak gRPC directly (binary); grpc-gateway exposes idiomatic REST+JSON for broader interop.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Why use it</span><span class="concept-text">You use grpc-gateway when you want <strong>one backend, two public APIs</strong>: gRPC for efficient service-to-service traffic and REST for browsers, mobile apps, webhook receivers, and tools like <code>curl</code>. It saves you from maintaining parallel implementations and guarantees the two APIs never drift. It's especially popular for public product APIs that need to support both gRPC clients and JavaScript/Python clients that don't want to install gRPC runtimes.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Setup complexity:</strong> requires <code>protoc</code>, the Go plugin, the grpc-gateway plugin, and the openapiv2 plugin — a <code>buf.gen.yaml</code> config is strongly recommended.</li>
+      <li><strong>Error mapping:</strong> gRPC status codes must map to HTTP status codes — the defaults are usually right but edge cases need custom mappers.</li>
+      <li><strong>Large binary fields:</strong> <code>bytes</code> types in proto become base64 strings in JSON, which is bulky.</li>
+      <li><strong>Streaming over REST is awkward:</strong> server-streaming becomes chunked JSON; client-streaming is not really supported.</li>
+      <li><strong>Two ports to open</strong> if you serve gRPC and gateway separately — or use <code>cmux</code> to multiplex on one port.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>etcd</strong> exposes its gRPC API as REST via grpc-gateway. <strong>Vitess</strong>, <strong>Dgraph</strong>, <strong>Jaeger</strong>, and <strong>Tendermint</strong> all ship grpc-gateway. <strong>Google Cloud's Cloud Run, Cloud Functions, and AI Platform</strong> use the same google.api.http annotations internally. <strong>Bufbuild's Connect</strong> is the spiritual successor widely adopted in 2023+.</span></div>
+</div>
+
 <p>Sometimes you need both gRPC and REST on the same server. The <strong>grpc-gateway</strong> project generates a reverse proxy that translates RESTful JSON API calls into gRPC calls. This lets you serve gRPC clients (internal microservices) and REST clients (web browsers, mobile apps) from the same backend.</p>
 
 <h3>How It Works</h3>
@@ -2195,6 +3167,34 @@ stream.<span class="fn">CloseSend</span>()</code></pre>
 
 <!-- ===================== SECTION 28: GO VS NODE ===================== -->
 <h2 id="go-vs-node"><span class="section-num">28</span> Go vs Node.js</h2>
+
+<div class="concept-box">
+  <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text"><strong>Go vs Node.js</strong> is the classic backend-language comparison for web services. <strong>Go</strong> is a statically typed, compiled, garbage-collected language with native concurrency via goroutines. <strong>Node.js</strong> is a JavaScript runtime built on V8 with a single-threaded event loop, non-blocking I/O, and libuv. Both are extremely popular for building REST APIs, microservices, and CLI tools — but they make very different trade-offs in performance, type safety, concurrency model, deployment, and ecosystem maturity. Understanding those trade-offs helps you pick the right tool and explains why large companies often run both.</span></div>
+  <div class="concept-row"><span class="concept-label">Key differences</span><span class="concept-text">
+    <ul>
+      <li><strong>Concurrency model:</strong> Go uses <strong>goroutines</strong> (M:N scheduled, pre-emptive) so CPU-heavy work scales across all cores automatically. Node uses a <strong>single-threaded event loop</strong> — CPU-bound tasks block everything. Node <code>worker_threads</code> and clustering help but are not transparent.</li>
+      <li><strong>Type system:</strong> Go is statically typed with generics (1.18+). JavaScript is dynamically typed; TypeScript adds compile-time types but still compiles to untyped JS at runtime.</li>
+      <li><strong>Performance:</strong> Go is typically 2–5× faster than Node on CPU-bound work and uses ~3–10× less memory under comparable load.</li>
+      <li><strong>Startup time:</strong> Go: &lt;10 ms. Node: 100–500 ms (plus JIT warm-up). Matters for serverless and CLI tools.</li>
+      <li><strong>Deployment:</strong> Go compiles to a single static binary. Node needs <code>node_modules</code> (often 500 MB+) plus the Node runtime.</li>
+      <li><strong>Ecosystem:</strong> npm is the largest package registry in the world. Go's ecosystem is smaller but more curated, with fewer transitive dependencies.</li>
+      <li><strong>Error handling:</strong> Go returns <code>(value, error)</code> pairs explicitly. Node uses <code>try/catch</code>, Promise rejections, and callback errors — easier to miss.</li>
+      <li><strong>Tooling:</strong> Go ships <code>go fmt</code>, <code>go test</code>, <code>go vet</code>, <code>go build</code>, <code>pprof</code>. Node uses a patchwork: eslint, prettier, jest, webpack, ts-node, nodemon, etc.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">When Go wins</span><span class="concept-text">Go is the better choice for: <strong>high-throughput APIs</strong> with thousands of concurrent connections, <strong>CPU-intensive services</strong> (image processing, ML inference, cryptography), <strong>infrastructure and DevOps tools</strong> (Docker, Kubernetes, Terraform), <strong>CLI binaries</strong> distributed to end users, and <strong>performance-critical microservices</strong> where every millisecond of latency matters. Its goroutine model makes it trivial to write concurrent code that would be painful in Node.</span></div>
+  <div class="concept-row"><span class="concept-label">When Node wins</span><span class="concept-text">Node is the better choice for: <strong>rapid prototyping</strong> with a huge library ecosystem, <strong>full-stack JavaScript teams</strong> sharing code between frontend and backend, <strong>real-time apps</strong> with WebSockets + Socket.IO (though Go's <code>gorilla/websocket</code> is also excellent), <strong>SSR frameworks</strong> (Next.js, Remix), <strong>GraphQL services</strong> with Apollo's mature tooling, and <strong>I/O-bound services</strong> where the event loop is a natural fit.</span></div>
+  <div class="concept-row"><span class="concept-label">Common gotchas</span><span class="concept-text">
+    <ul>
+      <li><strong>Treating "Node is fast" as universal:</strong> Node is fast for non-blocking I/O; it stalls hard on CPU-bound work.</li>
+      <li><strong>Assuming Go has "no packages":</strong> its standard library is so rich you rarely need third-party code for stdlib-level tasks.</li>
+      <li><strong>Mixing async and sync in Node:</strong> one forgotten <code>await</code> and behavior changes silently. Go's explicit error returns catch mistakes at compile time.</li>
+      <li><strong>Hiring pool:</strong> JavaScript devs are easier to hire than Go devs — an organizational factor, not technical.</li>
+      <li><strong>Memory footprint:</strong> a Go service at 30 MB resident is routine; the equivalent Node service often sits at 150+ MB.</li>
+    </ul>
+  </span></div>
+  <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Netflix, PayPal, and LinkedIn</strong> all started backends on Node and migrated performance-critical services to Go (or Java). <strong>Uber</strong> runs thousands of Go services alongside Node APIs. <strong>Dropbox</strong> famously rewrote performance-critical parts from Python to Go. <strong>GitHub, Vercel, and Shopify</strong> have Node frontends and Go backends. <strong>Discord</strong> uses Node for the API gateway and Rust/Elixir for realtime — a pragmatic polyglot stack echoed across the industry.</span></div>
+</div>
 
 <p>Both Go and Node.js are popular for building web servers, but they take fundamentally different approaches. Go compiles to a single binary with built-in concurrency. Node.js runs on V8 with an event loop and requires external packages for most functionality. Let's compare them head-to-head.</p>
 
