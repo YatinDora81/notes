@@ -675,6 +675,245 @@ http.<span class="fn">HandleFunc</span>(<span class="str">"/health"</span>, <spa
 http.<span class="fn">Handle</span>(<span class="str">"/home"</span>, &amp;<span class="ty">HomeHandler</span>{})</code></pre>
 
 
+<h3>Different Ways to Create an HTTP Server</h3>
+<p>Go gives you several ways to spin up an HTTP server, each adding more control. Understanding when to use which is critical for writing production code.</p>
+
+<h4>1. http.ListenAndServe — The Simplest Way</h4>
+<p>This is a convenience wrapper that creates a default <code>http.Server</code> internally. It's great for prototyping but <strong>never use it in production</strong> because you get no control over timeouts, TLS, or graceful shutdown.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    http.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Hello!"</span>)
+    })
+
+    <span class="cm">// nil handler = use http.DefaultServeMux (the global mux)</span>
+    <span class="cm">// This is essentially:</span>
+    <span class="cm">//   server := &amp;http.Server{Addr: ":8080", Handler: nil}</span>
+    <span class="cm">//   server.ListenAndServe()</span>
+    log.<span class="fn">Fatal</span>(http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>))
+}</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Why not in production?</div>
+  <p><code>http.ListenAndServe</code> creates a server with <strong>zero timeouts</strong>. A slow client can hold a connection open forever (slow-loris attack). It also uses the global <code>DefaultServeMux</code>, which any imported package can register handlers on — a security risk. And you can't call <code>Shutdown()</code> on it for graceful termination.</p>
+</div>
+
+<h4>2. Custom http.Server — The Production Way</h4>
+<p>Creating your own <code>*http.Server</code> gives you full control over timeouts, TLS configuration, error logging, connection limits, and graceful shutdown. This is what every production Go service should use.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"os"</span>
+    <span class="str">"os/signal"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Hello from production server!"</span>)
+    })
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:              <span class="str">":8080"</span>,            <span class="cm">// Listen address</span>
+        Handler:           mux,                <span class="cm">// Your own mux, NOT nil/DefaultServeMux</span>
+        ReadTimeout:       <span class="num">5</span> * time.Second,    <span class="cm">// Max time to read entire request (headers + body)</span>
+        ReadHeaderTimeout: <span class="num">2</span> * time.Second,    <span class="cm">// Max time to read just the headers</span>
+        WriteTimeout:      <span class="num">10</span> * time.Second,   <span class="cm">// Max time to write the response</span>
+        IdleTimeout:       <span class="num">120</span> * time.Second,  <span class="cm">// Max time for keep-alive connections to idle</span>
+        MaxHeaderBytes:    <span class="num">1</span> &lt;&lt; <span class="num">20</span>,            <span class="cm">// 1 MB max header size</span>
+    }
+
+    <span class="cm">// Start server in a goroutine so we can handle shutdown</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        log.<span class="fn">Printf</span>(<span class="str">"Server starting on %s"</span>, server.Addr)
+        <span class="kw">if</span> err := server.<span class="fn">ListenAndServe</span>(); err != <span class="kw">nil</span> &amp;&amp; err != http.ErrServerClosed {
+            log.<span class="fn">Fatalf</span>(<span class="str">"Server failed: %v"</span>, err)
+        }
+    }()
+
+    <span class="cm">// Wait for interrupt signal (Ctrl+C)</span>
+    quit := <span class="fn">make</span>(<span class="kw">chan</span> os.Signal, <span class="num">1</span>)
+    signal.<span class="fn">Notify</span>(quit, os.Interrupt)
+    &lt;-quit
+    log.<span class="fn">Println</span>(<span class="str">"Shutting down server..."</span>)
+
+    <span class="cm">// Give in-flight requests 30 seconds to finish</span>
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">30</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+
+    <span class="cm">// Shutdown stops accepting new connections, waits for existing ones to finish</span>
+    <span class="kw">if</span> err := server.<span class="fn">Shutdown</span>(ctx); err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatalf</span>(<span class="str">"Forced shutdown: %v"</span>, err)
+    }
+    log.<span class="fn">Println</span>(<span class="str">"Server stopped gracefully"</span>)
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">Timeout Diagram</div>
+  <pre><code>Client connects
+  ├── ReadHeaderTimeout ──→ headers must arrive within this window
+  ├── ReadTimeout ─────────→ entire request (headers + body) must arrive
+  ├── Handler executes...
+  ├── WriteTimeout ────────→ response must be fully written
+  └── IdleTimeout ─────────→ if keep-alive, how long to wait for next request</code></pre>
+  <p>Without these timeouts, a malicious client can open thousands of connections and never close them, exhausting your server's file descriptors.</p>
+</div>
+
+<h4>3. DefaultServeMux vs Custom ServeMux</h4>
+<p>Understanding the difference between these two is important for both security and code organization.</p>
+
+<pre><code><span class="cm">// ❌ DefaultServeMux — global, shared, risky</span>
+<span class="cm">// When you call http.HandleFunc() or http.Handle(), you're registering</span>
+<span class="cm">// on the GLOBAL http.DefaultServeMux. Any imported package can also</span>
+<span class="cm">// register on it. If you pass nil to ListenAndServe, it uses this.</span>
+http.<span class="fn">HandleFunc</span>(<span class="str">"/secret"</span>, secretHandler)  <span class="cm">// Goes to DefaultServeMux</span>
+http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>)          <span class="cm">// nil = DefaultServeMux</span>
+
+<span class="cm">// Imagine an imported package does this in its init():</span>
+<span class="cm">// func init() {</span>
+<span class="cm">//     http.HandleFunc("/debug/pprof/", pprof.Index)  // Now exposed!</span>
+<span class="cm">// }</span>
+<span class="cm">// You just accidentally exposed profiling data to the internet.</span>
+
+<span class="cm">// ✅ Custom ServeMux — isolated, explicit, safe</span>
+<span class="cm">// You control exactly what's registered. Nothing else can touch it.</span>
+mux := http.<span class="fn">NewServeMux</span>()
+mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /users"</span>, usersHandler)   <span class="cm">// Only what YOU register</span>
+mux.<span class="fn">HandleFunc</span>(<span class="str">"POST /users"</span>, createUser)    <span class="cm">// Method-based routing (Go 1.22+)</span>
+
+server := &amp;<span class="ty">http.Server</span>{
+    Addr:    <span class="str">":8080"</span>,
+    Handler: mux,  <span class="cm">// Explicit — no surprises</span>
+}
+server.<span class="fn">ListenAndServe</span>()</code></pre>
+
+<table>
+  <tr><th>Feature</th><th>DefaultServeMux</th><th>Custom ServeMux</th></tr>
+  <tr><td>Scope</td><td>Global singleton — shared across entire process</td><td>Local variable — scoped to your code</td></tr>
+  <tr><td>Registration</td><td><code>http.HandleFunc()</code></td><td><code>mux.HandleFunc()</code></td></tr>
+  <tr><td>Safety</td><td>Any package can register routes via <code>init()</code></td><td>Only code with access to the variable can register</td></tr>
+  <tr><td>Testing</td><td>Harder — global state leaks between tests</td><td>Easy — create a new mux per test</td></tr>
+  <tr><td>Multiple servers</td><td>One mux for everything</td><td>Different mux per server (e.g., public vs admin)</td></tr>
+  <tr><td>Use case</td><td>Quick scripts, prototyping</td><td>Production services, anything non-trivial</td></tr>
+</table>
+
+<h4>4. Running Multiple Servers (Public + Admin)</h4>
+<p>A common pattern is running two servers in the same process: one public-facing and one for internal admin/metrics. Each gets its own mux and can run on different ports.</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Public API server</span>
+    publicMux := http.<span class="fn">NewServeMux</span>()
+    publicMux.<span class="fn">HandleFunc</span>(<span class="str">"GET /api/products"</span>, listProducts)
+    publicMux.<span class="fn">HandleFunc</span>(<span class="str">"GET /api/products/{id}"</span>, getProduct)
+
+    publicServer := &amp;<span class="ty">http.Server</span>{
+        Addr:         <span class="str">":8080"</span>,
+        Handler:      publicMux,
+        ReadTimeout:  <span class="num">5</span> * time.Second,
+        WriteTimeout: <span class="num">10</span> * time.Second,
+    }
+
+    <span class="cm">// Internal admin/metrics server (not exposed to internet)</span>
+    adminMux := http.<span class="fn">NewServeMux</span>()
+    adminMux.<span class="fn">HandleFunc</span>(<span class="str">"GET /healthz"</span>, healthCheck)
+    adminMux.<span class="fn">HandleFunc</span>(<span class="str">"GET /metrics"</span>, metricsHandler)
+    adminMux.<span class="fn">HandleFunc</span>(<span class="str">"GET /debug/pprof/"</span>, pprofHandler)
+
+    adminServer := &amp;<span class="ty">http.Server</span>{
+        Addr:    <span class="str">":9090"</span>,           <span class="cm">// Different port, firewalled from public</span>
+        Handler: adminMux,
+    }
+
+    <span class="cm">// Run both servers concurrently</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        log.<span class="fn">Println</span>(<span class="str">"Public server on :8080"</span>)
+        log.<span class="fn">Fatal</span>(publicServer.<span class="fn">ListenAndServe</span>())
+    }()
+
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        log.<span class="fn">Println</span>(<span class="str">"Admin server on :9090"</span>)
+        log.<span class="fn">Fatal</span>(adminServer.<span class="fn">ListenAndServe</span>())
+    }()
+
+    <span class="cm">// Block forever (or use signal handling for graceful shutdown)</span>
+    <span class="fn">select</span> {}
+}</code></pre>
+
+<h4>5. Custom net.Listener — Maximum Control</h4>
+<p>For advanced use cases, you can create your own TCP listener and pass it to <code>server.Serve()</code>. This gives you control over the listener itself — useful for Unix sockets, custom connection limits, or dynamic port assignment.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"net"</span>
+    <span class="str">"net/http"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, homeHandler)
+
+    <span class="cm">// Create a TCP listener manually</span>
+    ln, err := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":0"</span>)  <span class="cm">// :0 = OS picks a free port</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)
+    }
+    log.<span class="fn">Printf</span>(<span class="str">"Listening on %s"</span>, ln.<span class="fn">Addr</span>())  <span class="cm">// Print the actual port</span>
+
+    server := &amp;<span class="ty">http.Server</span>{Handler: mux}
+    server.<span class="fn">Serve</span>(ln)  <span class="cm">// Use Serve() instead of ListenAndServe()</span>
+
+    <span class="cm">// Unix socket example:</span>
+    <span class="cm">// ln, _ := net.Listen("unix", "/var/run/myapp.sock")</span>
+    <span class="cm">// server.Serve(ln)</span>
+}</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">Server Creation Methods — Quick Comparison</div>
+  <table>
+    <tr><th>Method</th><th>What it does</th><th>When to use</th></tr>
+    <tr><td><code>http.ListenAndServe(addr, handler)</code></td><td>Creates server + listener internally, blocks</td><td>Prototyping, scripts, learning</td></tr>
+    <tr><td><code>server.ListenAndServe()</code></td><td>Creates listener from <code>server.Addr</code>, blocks</td><td>Production HTTP servers</td></tr>
+    <tr><td><code>server.ListenAndServeTLS(cert, key)</code></td><td>Same but with TLS from cert/key files</td><td>Production HTTPS servers</td></tr>
+    <tr><td><code>server.Serve(listener)</code></td><td>Uses YOUR listener, blocks</td><td>Custom listeners, Unix sockets, dynamic ports</td></tr>
+    <tr><td><code>server.ServeTLS(listener, cert, key)</code></td><td>Uses YOUR listener + TLS</td><td>Custom TLS listeners, mTLS setups</td></tr>
+  </table>
+</div>
+
+<h4>6. http.ListenAndServe vs http.Server Summary</h4>
+<pre><code><span class="cm">// These two are EQUIVALENT:</span>
+
+<span class="cm">// Version 1: The shortcut (what http.ListenAndServe does internally)</span>
+http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, mux)
+
+<span class="cm">// Version 2: What it actually expands to</span>
+server := &amp;<span class="ty">http.Server</span>{
+    Addr:    <span class="str">":8080"</span>,
+    Handler: mux,
+    <span class="cm">// ReadTimeout:  0  ← DANGER: no timeouts!</span>
+    <span class="cm">// WriteTimeout: 0  ← DANGER!</span>
+    <span class="cm">// IdleTimeout:  0  ← DANGER!</span>
+}
+server.<span class="fn">ListenAndServe</span>()
+
+<span class="cm">// The ONLY difference: with http.Server{} you can set</span>
+<span class="cm">// timeouts, TLS config, error logger, max header bytes,</span>
+<span class="cm">// base context, and call Shutdown() for graceful termination.</span>
+<span class="cm">// http.ListenAndServe gives you NONE of that.</span></code></pre>
+
+
 <!-- ===================== SECTION 03: MODERN ROUTING ===================== -->
 <h2 id="modern-routing"><span class="section-num">03</span> Modern Routing (Go 1.22+)</h2>
 
@@ -876,56 +1115,458 @@ api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<sp
   <div class="concept-row"><span class="concept-label">Real-world examples</span><span class="concept-text"><strong>Caddy</strong> (Go web server) pioneered automatic HTTPS — its entire architecture is built on Go's <code>crypto/tls</code> + <code>autocert</code>. <strong>Kubernetes</strong> uses mTLS for internal API server communication. <strong>Consul</strong> and <strong>Vault</strong> use mTLS for all service-to-service traffic. <strong>Cloudflare</strong>'s Go services terminate millions of TLS handshakes per second. <strong>Let's Encrypt's Boulder</strong> CA backend is itself written in Go.</span></div>
 </div>
 
-<p>Production servers must use TLS (Transport Layer Security) to encrypt traffic. Go makes this straightforward with <code>ListenAndServeTLS</code>. You can also configure the minimum TLS version, cipher suites, and enable HTTP/2 for better performance.</p>
+<p>Production servers must use TLS (Transport Layer Security) to encrypt traffic. Go makes this straightforward with <code>ListenAndServeTLS</code>. Here's a complete breakdown of how TLS, certificates, HTTPS, and HTTP/2 work in Go.</p>
 
-<h3>TLS Configuration</h3>
+<h3>How TLS/HTTPS Works (The Big Picture)</h3>
+<div class="info-box">
+  <div class="box-title">TLS Handshake — What happens when a browser connects to your Go server</div>
+  <pre><code>Browser                                 Go Server (:443)
+   │                                         │
+   │──── 1. ClientHello ────────────────────→│  "I support TLS 1.3, these ciphers"
+   │                                         │
+   │←─── 2. ServerHello + Certificate ──────│  "Let's use TLS 1.3. Here's my cert"
+   │                                         │
+   │──── 3. Verify cert against CA ─────────│  Browser checks cert chain
+   │                                         │
+   │──── 4. Key Exchange ───────────────────→│  Establish shared secret
+   │                                         │
+   │←──→ 5. Encrypted HTTP traffic ────────→│  All data encrypted from here
+   │                                         │
+   │     (ALPN negotiation happens at step 2:
+   │      both sides agree on h2 = HTTP/2)</code></pre>
+</div>
+
+<h3>Generating Certificates</h3>
+<p>Before you can serve HTTPS, you need a certificate (public) and a private key. There are three ways to get them:</p>
+
+<h4>1. Self-Signed Certificate (Development Only)</h4>
+<pre><code><span class="cm"># Generate a self-signed cert valid for 365 days</span>
+<span class="cm"># -x509: output a self-signed cert instead of a CSR</span>
+<span class="cm"># -nodes: don't encrypt the private key with a passphrase</span>
+<span class="cm"># -newkey rsa:4096: generate a new 4096-bit RSA key</span>
+openssl req -x509 -newkey rsa:4096 \
+    -keyout key.pem \
+    -out cert.pem \
+    -days 365 \
+    -nodes \
+    -subj "/CN=localhost"
+
+<span class="cm"># For testing with multiple domains (Subject Alternative Names):</span>
+openssl req -x509 -newkey rsa:4096 \
+    -keyout key.pem -out cert.pem -days 365 -nodes \
+    -subj "/CN=localhost" \
+    -addext "subjectAltName=DNS:localhost,DNS:*.localhost,IP:127.0.0.1"</code></pre>
+
+<div class="warn-box">
+  <div class="box-title">Self-signed certs trigger browser warnings</div>
+  <p>Browsers show "Your connection is not private" because no trusted CA signed the cert. This is fine for local dev but <strong>never</strong> use self-signed certs in production. Clients using <code>http.Client</code> will also reject them unless you set <code>InsecureSkipVerify: true</code> (which defeats the purpose of TLS).</p>
+</div>
+
+<h4>2. Generate Certs Programmatically in Go (Tests &amp; Dev)</h4>
+<p>Go can generate certificates at runtime — useful for test servers and development tools that need TLS without external files.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"crypto/ecdsa"</span>
+    <span class="str">"crypto/elliptic"</span>
+    <span class="str">"crypto/rand"</span>
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"crypto/x509"</span>
+    <span class="str">"crypto/x509/pkix"</span>
+    <span class="str">"encoding/pem"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"math/big"</span>
+    <span class="str">"net"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">func</span> <span class="fn">generateSelfSignedCert</span>() (<span class="ty">tls.Certificate</span>, <span class="ty">error</span>) {
+    <span class="cm">// Generate ECDSA private key (faster than RSA, smaller keys)</span>
+    privateKey, err := ecdsa.<span class="fn">GenerateKey</span>(elliptic.<span class="fn">P256</span>(), rand.Reader)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">return</span> tls.Certificate{}, err
+    }
+
+    <span class="cm">// Create certificate template</span>
+    template := &amp;<span class="ty">x509.Certificate</span>{
+        SerialNumber: big.<span class="fn">NewInt</span>(<span class="num">1</span>),
+        Subject:      pkix.Name{Organization: []<span class="ty">string</span>{<span class="str">"Dev"</span>}},
+        NotBefore:    time.<span class="fn">Now</span>(),
+        NotAfter:     time.<span class="fn">Now</span>().<span class="fn">Add</span>(<span class="num">24</span> * time.Hour),  <span class="cm">// 1 day validity</span>
+        KeyUsage:     x509.KeyUsageDigitalSignature,
+        ExtKeyUsage:  []<span class="ty">x509.ExtKeyUsage</span>{x509.ExtKeyUsageServerAuth},
+        IPAddresses:  []<span class="ty">net.IP</span>{net.<span class="fn">ParseIP</span>(<span class="str">"127.0.0.1"</span>)},
+        DNSNames:     []<span class="ty">string</span>{<span class="str">"localhost"</span>},
+    }
+
+    <span class="cm">// Self-sign: certificate signs itself (template == parent)</span>
+    certDER, err := x509.<span class="fn">CreateCertificate</span>(rand.Reader, template, template,
+        &amp;privateKey.PublicKey, privateKey)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">return</span> tls.Certificate{}, err
+    }
+
+    <span class="cm">// Encode to PEM format in memory (no files needed)</span>
+    certPEM := pem.<span class="fn">EncodeToMemory</span>(&amp;<span class="ty">pem.Block</span>{Type: <span class="str">"CERTIFICATE"</span>, Bytes: certDER})
+    keyDER, _ := x509.<span class="fn">MarshalECPrivateKey</span>(privateKey)
+    keyPEM := pem.<span class="fn">EncodeToMemory</span>(&amp;<span class="ty">pem.Block</span>{Type: <span class="str">"EC PRIVATE KEY"</span>, Bytes: keyDER})
+
+    <span class="kw">return</span> tls.<span class="fn">X509KeyPair</span>(certPEM, keyPEM)
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    cert, err := <span class="fn">generateSelfSignedCert</span>()
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)
+    }
+
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintf</span>(w, <span class="str">"TLS: %s, Protocol: %s"</span>, r.TLS.Version, r.Proto)
+    })
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:    <span class="str">":8443"</span>,
+        Handler: mux,
+        TLSConfig: &amp;<span class="ty">tls.Config</span>{
+            Certificates: []<span class="ty">tls.Certificate</span>{cert},  <span class="cm">// Use the in-memory cert</span>
+            MinVersion:   tls.VersionTLS12,
+        },
+    }
+
+    log.<span class="fn">Println</span>(<span class="str">"HTTPS server on :8443"</span>)
+    <span class="cm">// Pass empty strings — certs are already in TLSConfig</span>
+    log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">""</span>, <span class="str">""</span>))
+}</code></pre>
+
+<h4>3. Let's Encrypt with autocert (Production)</h4>
+<p>The <code>autocert</code> package automatically provisions and renews TLS certificates from Let's Encrypt. Zero manual cert management.</p>
+
 <pre><code><span class="kw">import</span> (
     <span class="str">"crypto/tls"</span>
     <span class="str">"net/http"</span>
-    <span class="str">"golang.org/x/net/http2"</span>
+    <span class="str">"golang.org/x/crypto/acme/autocert"</span>
 )
 
 <span class="kw">func</span> <span class="fn">main</span>() {
     mux := http.<span class="fn">NewServeMux</span>()
-    mux.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
-        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Secure Hello!"</span>)
-    })
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, homeHandler)
 
-    <span class="cm">// Configure TLS — set minimum version to TLS 1.2</span>
-    tlsConfig := &amp;<span class="ty">tls.Config</span>{
-        MinVersion: tls.VersionTLS12,
+    <span class="cm">// autocert manager handles everything:</span>
+    <span class="cm">// - Requests certs from Let's Encrypt on first connection</span>
+    <span class="cm">// - Caches them in /var/www/.cache</span>
+    <span class="cm">// - Auto-renews before expiry (certs last 90 days)</span>
+    certManager := autocert.Manager{
+        Prompt:     autocert.AcceptTOS,                            <span class="cm">// Accept Let's Encrypt TOS</span>
+        HostPolicy: autocert.<span class="fn">HostWhitelist</span>(<span class="str">"example.com"</span>, <span class="str">"www.example.com"</span>),  <span class="cm">// Only these domains</span>
+        Cache:      autocert.<span class="fn">DirCache</span>(<span class="str">"/var/www/.cache"</span>),           <span class="cm">// Where to store certs</span>
     }
 
     server := &amp;<span class="ty">http.Server</span>{
-        Addr:      <span class="str">":3000"</span>,
+        Addr:    <span class="str">":443"</span>,
+        Handler: mux,
+        TLSConfig: &amp;<span class="ty">tls.Config</span>{
+            GetCertificate: certManager.GetCertificate,  <span class="cm">// Dynamic cert lookup</span>
+            MinVersion:     tls.VersionTLS12,
+        },
+    }
+
+    <span class="cm">// IMPORTANT: Also run HTTP on port 80 for two reasons:</span>
+    <span class="cm">// 1. Let's Encrypt needs port 80 for HTTP-01 challenge verification</span>
+    <span class="cm">// 2. Redirect all HTTP traffic to HTTPS</span>
+    <span class="kw">go</span> http.<span class="fn">ListenAndServe</span>(<span class="str">":80"</span>, certManager.<span class="fn">HTTPHandler</span>(<span class="kw">nil</span>))
+
+    log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">""</span>, <span class="str">""</span>))  <span class="cm">// Certs come from certManager</span>
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">How Let's Encrypt verification works</div>
+  <p><strong>HTTP-01 challenge:</strong> Let's Encrypt asks your server to prove it owns the domain by serving a token on <code>http://yourdomain.com/.well-known/acme-challenge/TOKEN</code>. That's why <code>certManager.HTTPHandler(nil)</code> must run on port 80. If port 80 is blocked, you can use DNS-01 challenge instead (requires DNS API integration).</p>
+</div>
+
+<h3>Basic HTTPS Server with TLS Config</h3>
+<p>The most common production setup: load cert files, configure TLS, serve HTTPS.</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Protocol: %s, TLS: %v\n"</span>, r.Proto, r.TLS != <span class="kw">nil</span>)
+    })
+
+    tlsConfig := &amp;<span class="ty">tls.Config</span>{
+        MinVersion:               tls.VersionTLS12,  <span class="cm">// Minimum TLS 1.2</span>
+        MaxVersion:               tls.VersionTLS13,  <span class="cm">// Allow TLS 1.3 (default anyway)</span>
+        PreferServerCipherSuites: <span class="kw">true</span>,              <span class="cm">// Server chooses the cipher</span>
+        CurvePreferences: []<span class="ty">tls.CurveID</span>{
+            tls.X25519,     <span class="cm">// Fastest, most secure</span>
+            tls.CurveP256,  <span class="cm">// Widely supported fallback</span>
+        },
+        CipherSuites: []<span class="ty">uint16</span>{
+            <span class="cm">// TLS 1.3 ciphers (always used for TLS 1.3, this list is for TLS 1.2)</span>
+            tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+            tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+            tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+            tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+            tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+            tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+        },
+    }
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:              <span class="str">":443"</span>,
+        Handler:           mux,
+        TLSConfig:         tlsConfig,
+        ReadTimeout:       <span class="num">5</span> * time.Second,
+        WriteTimeout:      <span class="num">10</span> * time.Second,
+        IdleTimeout:       <span class="num">120</span> * time.Second,
+        ReadHeaderTimeout: <span class="num">2</span> * time.Second,
+    }
+
+    log.<span class="fn">Println</span>(<span class="str">"HTTPS server starting on :443"</span>)
+    <span class="cm">// cert.pem = your certificate (public), key.pem = your private key</span>
+    log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>))
+}</code></pre>
+
+<h3>HTTP to HTTPS Redirect</h3>
+<p>In production, you should always redirect HTTP traffic to HTTPS. Run a small server on port 80 that 301-redirects everything.</p>
+
+<pre><code><span class="cm">// Run this alongside your HTTPS server</span>
+<span class="kw">go</span> <span class="kw">func</span>() {
+    redirectServer := &amp;<span class="ty">http.Server</span>{
+        Addr: <span class="str">":80"</span>,
+        Handler: http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+            <span class="cm">// Build HTTPS URL from the original request</span>
+            target := <span class="str">"https://"</span> + r.Host + r.RequestURI
+            http.<span class="fn">Redirect</span>(w, r, target, http.StatusMovedPermanently)  <span class="cm">// 301</span>
+        }),
+        ReadTimeout:  <span class="num">5</span> * time.Second,
+        WriteTimeout: <span class="num">5</span> * time.Second,
+    }
+    log.<span class="fn">Fatal</span>(redirectServer.<span class="fn">ListenAndServe</span>())
+}()</code></pre>
+
+<h3>HTTP/2 — Automatic with TLS</h3>
+<p>Go enables HTTP/2 automatically when you serve over TLS. No configuration needed — the ALPN (Application-Layer Protocol Negotiation) during the TLS handshake handles it. Both client and server agree on "h2" (HTTP/2) during step 2 of the TLS handshake.</p>
+
+<pre><code><span class="cm">// HTTP/2 is AUTOMATIC with TLS. Just use ListenAndServeTLS and you get:</span>
+<span class="cm">// - Multiplexed streams (many requests on one connection)</span>
+<span class="cm">// - Header compression (HPACK)</span>
+<span class="cm">// - Stream prioritization</span>
+<span class="cm">// - Binary framing (faster parsing than HTTP/1.1 text)</span>
+
+<span class="cm">// You can verify the protocol in your handler:</span>
+mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /protocol"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Protocol: %s\n"</span>, r.Proto)
+    <span class="cm">// With TLS:    "Protocol: HTTP/2.0"</span>
+    <span class="cm">// Without TLS: "Protocol: HTTP/1.1"</span>
+})</code></pre>
+
+<h4>Explicit HTTP/2 Configuration</h4>
+<p>For advanced control (max concurrent streams, upload limits), use <code>golang.org/x/net/http2</code>:</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"golang.org/x/net/http2"</span>
+
+server := &amp;<span class="ty">http.Server</span>{
+    Addr:      <span class="str">":443"</span>,
+    Handler:   mux,
+    TLSConfig: tlsConfig,
+}
+
+<span class="cm">// Configure HTTP/2 settings</span>
+http2.<span class="fn">ConfigureServer</span>(server, &amp;<span class="ty">http2.Server</span>{
+    MaxConcurrentStreams:         <span class="num">250</span>,                 <span class="cm">// Max simultaneous streams per connection</span>
+    MaxUploadBufferPerConnection: <span class="num">1</span> &lt;&lt; <span class="num">20</span>,             <span class="cm">// 1 MB flow control window</span>
+    MaxUploadBufferPerStream:     <span class="num">1</span> &lt;&lt; <span class="num">20</span>,             <span class="cm">// 1 MB per stream</span>
+})
+
+log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>))</code></pre>
+
+<h4>HTTP/2 Cleartext (h2c) — Without TLS</h4>
+<p>Sometimes you need HTTP/2 without TLS — typically behind a reverse proxy (Nginx, Envoy) that handles TLS termination. Go supports this via <code>h2c</code>:</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"net/http"</span>
+    <span class="str">"golang.org/x/net/http2"</span>
+    <span class="str">"golang.org/x/net/http2/h2c"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Protocol: %s (no TLS!)\n"</span>, r.Proto)
+    })
+
+    <span class="cm">// h2c.NewHandler wraps your mux to handle HTTP/2 cleartext upgrades</span>
+    h2s := &amp;<span class="ty">http2.Server</span>{}
+    handler := h2c.<span class="fn">NewHandler</span>(mux, h2s)
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:    <span class="str">":8080"</span>,
+        Handler: handler,  <span class="cm">// Supports both HTTP/1.1 and HTTP/2 without TLS</span>
+    }
+
+    <span class="cm">// No TLS, but HTTP/2 works via cleartext upgrade</span>
+    log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServe</span>())
+
+    <span class="cm">// Test with: curl --http2-prior-knowledge http://localhost:8080/</span>
+}</code></pre>
+
+<h3>Mutual TLS (mTLS) — Both Sides Verify</h3>
+<p>In mTLS, both the server AND the client present certificates. The server verifies the client's cert before allowing the connection. This is used in service-to-service communication (Kubernetes, service meshes, internal APIs).</p>
+
+<pre><code><span class="kw">import</span> (
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"crypto/x509"</span>
+    <span class="str">"log"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"os"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Load the CA certificate that signed client certificates</span>
+    caCert, err := os.<span class="fn">ReadFile</span>(<span class="str">"ca-cert.pem"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)
+    }
+
+    <span class="cm">// Create a cert pool with the CA cert</span>
+    caCertPool := x509.<span class="fn">NewCertPool</span>()
+    caCertPool.<span class="fn">AppendCertsFromPEM</span>(caCert)
+
+    tlsConfig := &amp;<span class="ty">tls.Config</span>{
+        <span class="cm">// RequireAndVerifyClientCert = client MUST present a valid cert</span>
+        <span class="cm">// Other options:</span>
+        <span class="cm">//   NoClientCert              — don't ask for client cert (default)</span>
+        <span class="cm">//   RequestClientCert         — ask but don't verify</span>
+        <span class="cm">//   RequireAnyClientCert      — require but don't verify against CA</span>
+        <span class="cm">//   VerifyClientCertIfGiven   — verify only if client sends one</span>
+        ClientAuth: tls.RequireAndVerifyClientCert,
+        ClientCAs:  caCertPool,  <span class="cm">// Only accept client certs signed by this CA</span>
+        MinVersion: tls.VersionTLS12,
+    }
+
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// Access client certificate info</span>
+        <span class="kw">if</span> <span class="fn">len</span>(r.TLS.PeerCertificates) > <span class="num">0</span> {
+            clientCert := r.TLS.PeerCertificates[<span class="num">0</span>]
+            fmt.<span class="fn">Fprintf</span>(w, <span class="str">"Hello %s (verified client)\n"</span>, clientCert.Subject.CommonName)
+        }
+    })
+
+    server := &amp;<span class="ty">http.Server</span>{
+        Addr:      <span class="str">":8443"</span>,
         Handler:   mux,
         TLSConfig: tlsConfig,
     }
 
-    <span class="cm">// Enable HTTP/2 support</span>
-    http2.<span class="fn">ConfigureServer</span>(server, &amp;<span class="ty">http2.Server</span>{})
+    <span class="cm">// Server's own cert and key</span>
+    log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"server-cert.pem"</span>, <span class="str">"server-key.pem"</span>))
+}
 
-    <span class="cm">// Start HTTPS server with certificate and key files</span>
-    err := server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>)
-    <span class="kw">if</span> err != <span class="kw">nil</span> {
-        log.<span class="fn">Fatal</span>(<span class="str">"TLS Server failed:"</span>, err)
-    }
+<span class="cm">// mTLS Client — must present its own certificate:</span>
+<span class="cm">// cert, _ := tls.LoadX509KeyPair("client-cert.pem", "client-key.pem")</span>
+<span class="cm">// client := &amp;http.Client{</span>
+<span class="cm">//     Transport: &amp;http.Transport{</span>
+<span class="cm">//         TLSClientConfig: &amp;tls.Config{</span>
+<span class="cm">//             Certificates: []tls.Certificate{cert},</span>
+<span class="cm">//             RootCAs:      caCertPool,  // Trust the server's CA</span>
+<span class="cm">//         },</span>
+<span class="cm">//     },</span>
+<span class="cm">// }</span>
+<span class="cm">// resp, err := client.Get("https://localhost:8443/")</span></code></pre>
+
+<h3>SNI — Multiple Domains on One Server</h3>
+<p>Server Name Indication (SNI) lets one server serve different certificates for different hostnames. Go supports this via the <code>GetCertificate</code> callback.</p>
+
+<pre><code><span class="cm">// Load certificates for different domains</span>
+certExample, _ := tls.<span class="fn">LoadX509KeyPair</span>(<span class="str">"example.com.pem"</span>, <span class="str">"example.com-key.pem"</span>)
+certAPI, _ := tls.<span class="fn">LoadX509KeyPair</span>(<span class="str">"api.example.com.pem"</span>, <span class="str">"api.example.com-key.pem"</span>)
+
+certs := <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">tls.Certificate</span>{
+    <span class="str">"example.com"</span>:     certExample,
+    <span class="str">"api.example.com"</span>: certAPI,
+}
+
+tlsConfig := &amp;<span class="ty">tls.Config</span>{
+    GetCertificate: <span class="kw">func</span>(hello *<span class="ty">tls.ClientHelloInfo</span>) (*<span class="ty">tls.Certificate</span>, <span class="ty">error</span>) {
+        <span class="cm">// hello.ServerName contains the hostname the client requested</span>
+        <span class="kw">if</span> cert, ok := certs[hello.ServerName]; ok {
+            <span class="kw">return</span> &amp;cert, <span class="kw">nil</span>
+        }
+        <span class="kw">return</span> &amp;certExample, <span class="kw">nil</span>  <span class="cm">// Default fallback</span>
+    },
+    MinVersion: tls.VersionTLS12,
 }</code></pre>
 
-<h3>HTTP/1.1 vs HTTP/2</h3>
+<h3>HTTP/1.1 vs HTTP/2 vs HTTP/3</h3>
 <table>
-  <tr><th>Feature</th><th>HTTP/1.1</th><th>HTTP/2</th></tr>
-  <tr><td>Connections</td><td>One request per connection (or pipelining)</td><td>Multiplexed: many requests on one connection</td></tr>
-  <tr><td>Headers</td><td>Plain text, sent every time</td><td>HPACK compressed, binary format</td></tr>
-  <tr><td>Server Push</td><td>Not supported</td><td>Server can push resources before client asks</td></tr>
-  <tr><td>Protocol</td><td>Text-based</td><td>Binary framing layer</td></tr>
-  <tr><td>Performance</td><td>Head-of-line blocking per connection</td><td>Parallel streams eliminate HOL blocking</td></tr>
+  <tr><th>Feature</th><th>HTTP/1.1</th><th>HTTP/2</th><th>HTTP/3</th></tr>
+  <tr><td>Transport</td><td>TCP</td><td>TCP</td><td>QUIC (over UDP)</td></tr>
+  <tr><td>Connections</td><td>One request per connection (or pipelining)</td><td>Multiplexed: many requests on one connection</td><td>Multiplexed, no head-of-line blocking</td></tr>
+  <tr><td>Headers</td><td>Plain text, sent every time</td><td>HPACK compressed, binary</td><td>QPACK compressed, binary</td></tr>
+  <tr><td>Server Push</td><td>Not supported</td><td>Server can push resources</td><td>Supported (rarely used)</td></tr>
+  <tr><td>Protocol</td><td>Text-based</td><td>Binary framing layer</td><td>Binary over QUIC</td></tr>
+  <tr><td>Head-of-line</td><td>Blocking per connection</td><td>Solved at HTTP level, not TCP</td><td>Fully solved (streams independent)</td></tr>
+  <tr><td>Connection setup</td><td>TCP handshake + TLS handshake</td><td>TCP + TLS handshake</td><td>0-RTT or 1-RTT (TLS built into QUIC)</td></tr>
+  <tr><td>Go support</td><td>Built-in</td><td>Built-in (auto with TLS)</td><td><code>quic-go</code> library (not in stdlib)</td></tr>
+  <tr><td>TLS required</td><td>No (but should be)</td><td>Technically no, practically yes</td><td>Always (built into QUIC)</td></tr>
 </table>
 
-<div class="info-box">
-  <div class="box-title">Generating Self-Signed Certificates for Development</div>
-  <pre><code>openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes</code></pre>
-  <p>For production, use <strong>Let's Encrypt</strong> with Go's <code>autocert</code> package for automatic certificate management.</p>
+<div class="tip-box">
+  <div class="box-title">Complete Production HTTPS Setup — Putting It All Together</div>
+  <pre><code><span class="kw">func</span> <span class="fn">main</span>() {
+    mux := http.<span class="fn">NewServeMux</span>()
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /api/health"</span>, healthHandler)
+    mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /api/users/{id}"</span>, getUserHandler)
+
+    tlsConfig := &amp;<span class="ty">tls.Config</span>{
+        MinVersion: tls.VersionTLS12,
+        CurvePreferences: []<span class="ty">tls.CurveID</span>{tls.X25519, tls.CurveP256},
+    }
+
+    httpsServer := &amp;<span class="ty">http.Server</span>{
+        Addr:              <span class="str">":443"</span>,
+        Handler:           mux,
+        TLSConfig:         tlsConfig,
+        ReadTimeout:       <span class="num">5</span> * time.Second,
+        WriteTimeout:      <span class="num">10</span> * time.Second,
+        IdleTimeout:       <span class="num">120</span> * time.Second,
+        ReadHeaderTimeout: <span class="num">2</span> * time.Second,
+    }
+
+    <span class="cm">// HTTP/2 is automatic with TLS — this line is optional for tuning</span>
+    http2.<span class="fn">ConfigureServer</span>(httpsServer, &amp;<span class="ty">http2.Server</span>{})
+
+    <span class="cm">// HTTP → HTTPS redirect on port 80</span>
+    <span class="kw">go</span> http.<span class="fn">ListenAndServe</span>(<span class="str">":80"</span>, http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        http.<span class="fn">Redirect</span>(w, r, <span class="str">"https://"</span>+r.Host+r.RequestURI, http.StatusMovedPermanently)
+    }))
+
+    <span class="cm">// Graceful shutdown</span>
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        quit := <span class="fn">make</span>(<span class="kw">chan</span> os.Signal, <span class="num">1</span>)
+        signal.<span class="fn">Notify</span>(quit, os.Interrupt)
+        &lt;-quit
+        ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">30</span>*time.Second)
+        <span class="kw">defer</span> <span class="fn">cancel</span>()
+        httpsServer.<span class="fn">Shutdown</span>(ctx)
+    }()
+
+    log.<span class="fn">Println</span>(<span class="str">"HTTPS on :443, HTTP redirect on :80"</span>)
+    log.<span class="fn">Fatal</span>(httpsServer.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>))
+}</code></pre>
 </div>
 
 
