@@ -1531,6 +1531,12 @@
                     <span class="sidebar-link-label">Interview Q&A</span>
                     <svg class="sidebar-link-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </a>
+                <a href="#crud-mongoose-prisma" class="sidebar-link" data-section="crud-mongoose-prisma" data-num="18" data-label="CRUD: Mongoose & Prisma">
+                    <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    <span class="sidebar-link-num">18</span>
+                    <span class="sidebar-link-label">CRUD: Mongoose & Prisma</span>
+                    <svg class="sidebar-link-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </a>
             </div>
         </div>
     </nav>
@@ -1540,7 +1546,7 @@
         <div class="sidebar-stats">
             <div class="sidebar-stat">
                 <svg class="sidebar-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span id="readCount">0</span>/<span class="sidebar-stat-value">17</span> read
+                <span id="readCount">0</span>/<span class="sidebar-stat-value">18</span> read
             </div>
             <div class="sidebar-stat">
                 <svg class="sidebar-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -5493,6 +5499,1365 @@ npm install @apollo/client graphql</code></pre>
     </div>
 </section>
 
+<!-- ============================================== -->
+<!-- SECTION 18: CRUD WITH MONGOOSE & PRISMA         -->
+<!-- ============================================== -->
+<section class="section" id="crud-mongoose-prisma">
+    <div class="section-header">
+        <div class="section-number">Section 18</div>
+        <h2 class="section-title">CRUD: <span class="gradient-text">Mongoose & Prisma</span></h2>
+        <p class="section-subtitle">Complete Create, Read, Update, Delete with both ORMs — every line explained.</p>
+    </div>
+
+    <div class="concept-box">
+      <div class="concept-row"><span class="concept-label">What is it</span><span class="concept-text">CRUD (Create, Read, Update, Delete) is the backbone of any API. In GraphQL, <strong>Queries</strong> handle the R (Read) and <strong>Mutations</strong> handle C, U, D. The resolvers inside these operations call your database layer — either <strong>Mongoose</strong> (MongoDB ODM) or <strong>Prisma</strong> (type-safe ORM for SQL/MongoDB). This section gives you a full, production-style implementation with both, line by line.</span></div>
+      <div class="concept-row"><span class="concept-label">Mongoose vs Prisma</span><span class="concept-text">
+        <ul>
+          <li><strong>Mongoose:</strong> ODM for MongoDB. Schema-based, flexible documents, no migrations needed, great for unstructured/semi-structured data. You define schemas in JS/TS code.</li>
+          <li><strong>Prisma:</strong> Type-safe ORM for PostgreSQL, MySQL, SQLite, MongoDB. Uses a <code>.prisma</code> schema file, generates a client with full autocompletion. Handles migrations automatically.</li>
+          <li><strong>Key difference:</strong> Mongoose = NoSQL-first, schema-in-code, manual population. Prisma = SQL-first, schema-in-file, auto-generated client with relations.</li>
+        </ul>
+      </span></div>
+      <div class="concept-row"><span class="concept-label">When to use which</span><span class="concept-text">
+        <ul>
+          <li><strong>Mongoose:</strong> When using MongoDB, need flexible schemas, rapid prototyping, document-style data (logs, IoT, CMS content).</li>
+          <li><strong>Prisma:</strong> When you want type safety, relational data, auto-migrations, or need to support multiple databases. Production apps with strict data integrity.</li>
+        </ul>
+      </span></div>
+      <div class="concept-row"><span class="concept-label">CRUD in GraphQL</span><span class="concept-text"><strong>Create</strong> = Mutation (e.g., <code>createUser</code>), <strong>Read</strong> = Query (e.g., <code>users</code>, <code>user(id)</code>), <strong>Update</strong> = Mutation (e.g., <code>updateUser</code>), <strong>Delete</strong> = Mutation (e.g., <code>deleteUser</code>). Each one maps to a resolver that calls the database.</span></div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- PART 1: MONGOOSE CRUD   -->
+    <!-- ======================= -->
+    <h3 class="mb-3 mt-4" style="color: var(--accent-green); font-size: 1.8rem;">Part 1: GraphQL CRUD with Mongoose (MongoDB)</h3>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 1: Project Setup</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash</span><span class="code-filename">Terminal</span></div>
+<pre><code><span class="comment"># Create project folder and initialize</span>
+mkdir graphql-mongoose-crud && cd graphql-mongoose-crud
+npm init -y
+
+<span class="comment"># Install core dependencies</span>
+npm install @apollo/server graphql express cors
+<span class="comment"># @apollo/server  → GraphQL server engine</span>
+<span class="comment"># graphql         → GraphQL JS reference implementation</span>
+<span class="comment"># express         → HTTP server framework</span>
+<span class="comment"># cors            → Cross-Origin Resource Sharing middleware</span>
+
+<span class="comment"># Install Mongoose (MongoDB ODM)</span>
+npm install mongoose
+<span class="comment"># mongoose → Object Document Mapper for MongoDB</span>
+
+<span class="comment"># Dev dependencies</span>
+npm install -D nodemon
+<span class="comment"># nodemon → Auto-restarts server on file changes</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 2: Mongoose Model</h3>
+        <p class="text-secondary mb-3">This defines how your data is stored in MongoDB. Think of it as your database table blueprint.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">models/User.js</span></div>
+<pre><code><span class="keyword">const</span> mongoose = <span class="function">require</span>(<span class="string">'mongoose'</span>);
+<span class="comment">// ↑ Import mongoose — the library that lets us talk to MongoDB</span>
+<span class="comment">//   using JavaScript objects instead of raw MongoDB commands</span>
+
+<span class="keyword">const</span> userSchema = <span class="keyword">new</span> mongoose.<span class="function">Schema</span>({
+<span class="comment">// ↑ Create a new Schema — this defines the STRUCTURE of every</span>
+<span class="comment">//   document in the "users" collection. Like a blueprint.</span>
+
+  name: {
+    type: String,        <span class="comment">// Data type is String</span>
+    required: <span class="keyword">true</span>,      <span class="comment">// This field MUST be provided (validation)</span>
+    trim: <span class="keyword">true</span>,          <span class="comment">// Removes whitespace from both ends before saving</span>
+  },
+  <span class="comment">// ↑ name field: required string, auto-trimmed</span>
+
+  email: {
+    type: String,
+    required: <span class="keyword">true</span>,
+    unique: <span class="keyword">true</span>,        <span class="comment">// Creates a unique INDEX in MongoDB — no duplicates allowed</span>
+    lowercase: <span class="keyword">true</span>,     <span class="comment">// Converts to lowercase before saving (Bob@Mail.com → bob@mail.com)</span>
+  },
+  <span class="comment">// ↑ email field: required, must be unique across all users, stored lowercase</span>
+
+  age: {
+    type: Number,
+    min: <span class="number">0</span>,              <span class="comment">// Validation: age cannot be negative</span>
+    max: <span class="number">150</span>,            <span class="comment">// Validation: age cannot exceed 150</span>
+  },
+  <span class="comment">// ↑ age field: optional number with min/max validation</span>
+
+  role: {
+    type: String,
+    enum: [<span class="string">'USER'</span>, <span class="string">'ADMIN'</span>, <span class="string">'MODERATOR'</span>],  <span class="comment">// Only these values are allowed</span>
+    default: <span class="string">'USER'</span>,                          <span class="comment">// If not provided, defaults to 'USER'</span>
+  },
+  <span class="comment">// ↑ role field: restricted to specific values using enum</span>
+
+  posts: [{
+    type: mongoose.Schema.Types.ObjectId,  <span class="comment">// Stores MongoDB ObjectId references</span>
+    ref: <span class="string">'Post'</span>,                           <span class="comment">// References the 'Post' model (for .populate())</span>
+  }],
+  <span class="comment">// ↑ posts: array of references to Post documents</span>
+  <span class="comment">//   This creates a ONE-TO-MANY relationship (one user → many posts)</span>
+  <span class="comment">//   We use .populate('posts') later to load the actual post data</span>
+
+}, {
+  timestamps: <span class="keyword">true</span>,
+  <span class="comment">// ↑ Automatically adds createdAt and updatedAt fields</span>
+  <span class="comment">//   createdAt = when document was first created</span>
+  <span class="comment">//   updatedAt = when document was last modified</span>
+  <span class="comment">//   Both are managed by Mongoose automatically</span>
+});
+
+module.exports = mongoose.<span class="function">model</span>(<span class="string">'User'</span>, userSchema);
+<span class="comment">// ↑ Create and export the Model</span>
+<span class="comment">//   'User' → name of the model (MongoDB creates a 'users' collection)</span>
+<span class="comment">//   userSchema → the schema we just defined</span>
+<span class="comment">//   The model gives us methods like .find(), .findById(), .create(), etc.</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 3: Post Model</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">models/Post.js</span></div>
+<pre><code><span class="keyword">const</span> mongoose = <span class="function">require</span>(<span class="string">'mongoose'</span>);
+
+<span class="keyword">const</span> postSchema = <span class="keyword">new</span> mongoose.<span class="function">Schema</span>({
+  title: {
+    type: String,
+    required: <span class="keyword">true</span>,
+    trim: <span class="keyword">true</span>,
+  },
+  <span class="comment">// ↑ title: required string, whitespace trimmed</span>
+
+  body: {
+    type: String,
+    required: <span class="keyword">true</span>,
+  },
+  <span class="comment">// ↑ body: the main content of the post</span>
+
+  published: {
+    type: Boolean,
+    default: <span class="keyword">false</span>,
+  },
+  <span class="comment">// ↑ published: defaults to false (draft state)</span>
+  <span class="comment">//   Only published posts should be shown to other users</span>
+
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: <span class="string">'User'</span>,
+    required: <span class="keyword">true</span>,
+  },
+  <span class="comment">// ↑ author: reference to the User who created this post</span>
+  <span class="comment">//   This is the "belongs to" side of the relationship</span>
+  <span class="comment">//   required: true means every post MUST have an author</span>
+
+}, { timestamps: <span class="keyword">true</span> });
+
+module.exports = mongoose.<span class="function">model</span>(<span class="string">'Post'</span>, postSchema);
+<span class="comment">// ↑ Creates 'posts' collection in MongoDB</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 4: GraphQL Type Definitions (Schema)</h3>
+        <p class="text-secondary mb-3">This is the contract between frontend and backend — what data can be queried and what mutations are available.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">schema/typeDefs.js</span></div>
+<pre><code><span class="keyword">const</span> typeDefs = <span class="string">`#graphql</span>
+
+  <span class="comment"># ============ TYPES (what the API RETURNS) ============</span>
+
+  type User {
+    id: ID!              # Unique identifier (mapped from MongoDB's _id)
+    name: String!        # ! means non-nullable — server guarantees a value
+    email: String!       # User's email — always present
+    age: Int             # No ! → nullable — age might not be provided
+    role: String!        # USER, ADMIN, or MODERATOR
+    posts: [Post!]!      # Array of posts — the array itself and each post are non-null
+    createdAt: String!   # ISO date string from Mongoose timestamps
+    updatedAt: String!   # Last modification date
+  }
+  # ↑ User type: defines the SHAPE of user data returned by queries
+  #   This is NOT the database schema — it's the API contract
+  #   Some DB fields (like password) are intentionally excluded
+
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!        # The author field returns a full User object (not just an ID)
+    createdAt: String!
+    updatedAt: String!
+  }
+  # ↑ Post type: notice author returns User! (resolved via .populate())
+
+  <span class="comment"># ============ INPUT TYPES (what the client SENDS) ============</span>
+
+  input CreateUserInput {
+    name: String!        # Required for creation
+    email: String!       # Required for creation
+    age: Int             # Optional
+    role: String         # Optional — defaults to USER in the model
+  }
+  # ↑ input types are for ARGUMENTS — separate from output types
+  #   This separation lets read shape differ from write shape
+  #   e.g., User output has 'id', 'posts', 'createdAt' but input doesn't
+
+  input UpdateUserInput {
+    name: String         # All fields optional for updates (partial update)
+    email: String        # Only send the fields you want to change
+    age: Int
+    role: String
+  }
+  # ↑ Update input: no ! on any field — all optional
+  #   This enables PATCH-style updates (only change what you send)
+
+  input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean
+    authorId: ID!        # ID of the user creating the post
+  }
+
+  input UpdatePostInput {
+    title: String
+    body: String
+    published: Boolean
+  }
+
+  <span class="comment"># ============ QUERIES (READ operations) ============</span>
+
+  type Query {
+    users: [User!]!
+    # ↑ Returns all users — no arguments needed
+    #   [User!]! → non-null array of non-null users
+    #   Even if empty, returns [] not null
+
+    user(id: ID!): User
+    # ↑ Returns a single user by ID
+    #   Returns User (nullable) — returns null if not found
+    #   id: ID! → the ID argument is required
+
+    posts: [Post!]!
+    # ↑ Returns all posts
+
+    post(id: ID!): Post
+    # ↑ Returns a single post by ID
+  }
+
+  <span class="comment"># ============ MUTATIONS (CREATE, UPDATE, DELETE) ============</span>
+
+  type Mutation {
+    createUser(input: CreateUserInput!): User!
+    # ↑ Creates a new user
+    #   Takes CreateUserInput (required) → returns the created User
+    #   The ! after User means it always returns a user (or throws error)
+
+    updateUser(id: ID!, input: UpdateUserInput!): User
+    # ↑ Updates an existing user
+    #   Takes id (which user) + input (what to change)
+    #   Returns User (nullable) — null if user not found
+
+    deleteUser(id: ID!): User
+    # ↑ Deletes a user by ID
+    #   Returns the deleted user data (so frontend can update cache)
+    #   Nullable — null if user didn't exist
+
+    createPost(input: CreatePostInput!): Post!
+    updatePost(id: ID!, input: UpdatePostInput!): Post
+    deletePost(id: ID!): Post
+  }
+<span class="string">`</span>;
+
+module.exports = typeDefs;
+<span class="comment">// ↑ Export so our Apollo Server can use this schema</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 5: Resolvers (The Business Logic)</h3>
+        <p class="text-secondary mb-3">Resolvers are functions that actually fetch/modify data. Each field in the schema can have a resolver.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">schema/resolvers.js</span></div>
+<pre><code><span class="keyword">const</span> User = <span class="function">require</span>(<span class="string">'../models/User'</span>);
+<span class="keyword">const</span> Post = <span class="function">require</span>(<span class="string">'../models/Post'</span>);
+<span class="comment">// ↑ Import our Mongoose models — these give us database methods</span>
+<span class="comment">//   User.find(), User.findById(), User.create(), etc.</span>
+
+<span class="keyword">const</span> resolvers = {
+
+  <span class="comment">// ============================================</span>
+  <span class="comment">// QUERY RESOLVERS (READ operations)</span>
+  <span class="comment">// ============================================</span>
+  Query: {
+
+    <span class="comment">// -------- GET ALL USERS --------</span>
+    users: <span class="keyword">async</span> () => {
+    <span class="comment">// ↑ async because database calls return Promises</span>
+    <span class="comment">//   No arguments needed — returns all users</span>
+
+      <span class="keyword">return</span> <span class="keyword">await</span> User.<span class="function">find</span>().<span class="function">populate</span>(<span class="string">'posts'</span>);
+      <span class="comment">// ↑ User.find() → MongoDB equivalent of SELECT * FROM users</span>
+      <span class="comment">//   Returns ALL documents in the users collection</span>
+      <span class="comment">//</span>
+      <span class="comment">//   .populate('posts') → Mongoose "join"</span>
+      <span class="comment">//   The 'posts' field in User schema stores ObjectId references</span>
+      <span class="comment">//   .populate() replaces those IDs with actual Post documents</span>
+      <span class="comment">//   Without populate: posts: ["507f1f77bcf86cd799439011"]</span>
+      <span class="comment">//   With populate:    posts: [{ title: "Hello", body: "..." }]</span>
+    },
+
+    <span class="comment">// -------- GET SINGLE USER BY ID --------</span>
+    user: <span class="keyword">async</span> (_, { id }) => {
+    <span class="comment">// ↑ Resolver arguments: (parent, args, context, info)</span>
+    <span class="comment">//   _ → parent (unused here since this is a root Query)</span>
+    <span class="comment">//   { id } → destructure 'id' from the args object</span>
+    <span class="comment">//   When client sends: query { user(id: "123") { name } }</span>
+    <span class="comment">//   args = { id: "123" }</span>
+
+      <span class="keyword">return</span> <span class="keyword">await</span> User.<span class="function">findById</span>(id).<span class="function">populate</span>(<span class="string">'posts'</span>);
+      <span class="comment">// ↑ User.findById(id) → finds one document by its _id field</span>
+      <span class="comment">//   MongoDB equivalent: db.users.findOne({ _id: ObjectId(id) })</span>
+      <span class="comment">//   Returns null if no user found (which is fine — our schema says User is nullable)</span>
+    },
+
+    <span class="comment">// -------- GET ALL POSTS --------</span>
+    posts: <span class="keyword">async</span> () => {
+      <span class="keyword">return</span> <span class="keyword">await</span> Post.<span class="function">find</span>().<span class="function">populate</span>(<span class="string">'author'</span>);
+      <span class="comment">// ↑ Post.find() → get all posts</span>
+      <span class="comment">//   .populate('author') → replace the authorId ObjectId</span>
+      <span class="comment">//   with the full User document</span>
+    },
+
+    <span class="comment">// -------- GET SINGLE POST BY ID --------</span>
+    post: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">return</span> <span class="keyword">await</span> Post.<span class="function">findById</span>(id).<span class="function">populate</span>(<span class="string">'author'</span>);
+    },
+  },
+
+  <span class="comment">// ============================================</span>
+  <span class="comment">// MUTATION RESOLVERS (CREATE, UPDATE, DELETE)</span>
+  <span class="comment">// ============================================</span>
+  Mutation: {
+
+    <span class="comment">// -------- CREATE USER --------</span>
+    createUser: <span class="keyword">async</span> (_, { input }) => {
+    <span class="comment">// ↑ { input } → destructured from args</span>
+    <span class="comment">//   input = { name: "John", email: "john@mail.com", age: 25 }</span>
+    <span class="comment">//   (comes from CreateUserInput in our schema)</span>
+
+      <span class="keyword">const</span> user = <span class="keyword">new</span> <span class="function">User</span>(input);
+      <span class="comment">// ↑ Create a new Mongoose document instance</span>
+      <span class="comment">//   This does NOT save to the database yet</span>
+      <span class="comment">//   It applies schema defaults (role: 'USER')</span>
+      <span class="comment">//   and validations (required fields, enum values)</span>
+
+      <span class="keyword">await</span> user.<span class="function">save</span>();
+      <span class="comment">// ↑ Actually persist to MongoDB</span>
+      <span class="comment">//   This is where validation runs</span>
+      <span class="comment">//   If validation fails, it throws an error</span>
+      <span class="comment">//   If email is duplicate, MongoDB throws a duplicate key error</span>
+      <span class="comment">//   Mongoose also sets createdAt and updatedAt here</span>
+
+      <span class="keyword">return</span> user;
+      <span class="comment">// ↑ Return the saved user document</span>
+      <span class="comment">//   It now has an _id, createdAt, updatedAt</span>
+      <span class="comment">//   Apollo Server automatically maps _id → id for the ID! field</span>
+    },
+
+    <span class="comment">// -------- UPDATE USER --------</span>
+    updateUser: <span class="keyword">async</span> (_, { id, input }) => {
+    <span class="comment">// ↑ id = which user to update</span>
+    <span class="comment">//   input = fields to change { name: "New Name" }</span>
+
+      <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(
+        id,           <span class="comment">// Find user with this _id</span>
+        input,        <span class="comment">// Apply these changes (only provided fields)</span>
+        { new: <span class="keyword">true</span>, runValidators: <span class="keyword">true</span> }
+        <span class="comment">// ↑ Options:</span>
+        <span class="comment">//   new: true → return the UPDATED document (default returns the OLD one)</span>
+        <span class="comment">//   runValidators: true → still run schema validations on update</span>
+        <span class="comment">//   Without runValidators, you could set age: -5 on update!</span>
+      ).<span class="function">populate</span>(<span class="string">'posts'</span>);
+      <span class="comment">// ↑ Also populate the posts for the returned user</span>
+
+      <span class="keyword">return</span> user;
+      <span class="comment">// ↑ Returns updated user, or null if ID not found</span>
+    },
+
+    <span class="comment">// -------- DELETE USER --------</span>
+    deleteUser: <span class="keyword">async</span> (_, { id }) => {
+
+      <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">findByIdAndDelete</span>(id);
+      <span class="comment">// ↑ Find the user by ID and remove from database</span>
+      <span class="comment">//   Returns the deleted document (so frontend can update cache)</span>
+      <span class="comment">//   Returns null if user not found</span>
+
+      <span class="keyword">if</span> (user) {
+        <span class="keyword">await</span> Post.<span class="function">deleteMany</span>({ author: id });
+        <span class="comment">// ↑ CASCADE DELETE: also delete all posts by this user</span>
+        <span class="comment">//   Without this, we'd have orphaned posts in the database</span>
+        <span class="comment">//   MongoDB doesn't have foreign key constraints like SQL</span>
+        <span class="comment">//   So we handle cascading manually</span>
+      }
+
+      <span class="keyword">return</span> user;
+    },
+
+    <span class="comment">// -------- CREATE POST --------</span>
+    createPost: <span class="keyword">async</span> (_, { input }) => {
+    <span class="comment">// ↑ input = { title, body, published, authorId }</span>
+
+      <span class="keyword">const</span> { authorId, ...postData } = input;
+      <span class="comment">// ↑ Destructure: pull out authorId, keep the rest as postData</span>
+      <span class="comment">//   postData = { title, body, published }</span>
+      <span class="comment">//   authorId = "507f1f77bcf86cd799439011"</span>
+
+      <span class="keyword">const</span> post = <span class="keyword">new</span> <span class="function">Post</span>({ ...postData, author: authorId });
+      <span class="comment">// ↑ Create Post document, set author to the user's ObjectId</span>
+
+      <span class="keyword">await</span> post.<span class="function">save</span>();
+      <span class="comment">// ↑ Save to MongoDB</span>
+
+      <span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(authorId, {
+        $push: { posts: post._id }
+      });
+      <span class="comment">// ↑ MAINTAIN THE RELATIONSHIP</span>
+      <span class="comment">//   $push adds post._id to the user's posts array</span>
+      <span class="comment">//   This is manual — MongoDB doesn't auto-sync relations</span>
+      <span class="comment">//   Now user.posts = [...existing, newPostId]</span>
+
+      <span class="keyword">return</span> <span class="keyword">await</span> post.<span class="function">populate</span>(<span class="string">'author'</span>);
+      <span class="comment">// ↑ Populate the author field before returning</span>
+      <span class="comment">//   So the response includes full author data, not just an ID</span>
+    },
+
+    <span class="comment">// -------- UPDATE POST --------</span>
+    updatePost: <span class="keyword">async</span> (_, { id, input }) => {
+      <span class="keyword">return</span> <span class="keyword">await</span> Post.<span class="function">findByIdAndUpdate</span>(
+        id,
+        input,
+        { new: <span class="keyword">true</span>, runValidators: <span class="keyword">true</span> }
+      ).<span class="function">populate</span>(<span class="string">'author'</span>);
+    },
+
+    <span class="comment">// -------- DELETE POST --------</span>
+    deletePost: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">const</span> post = <span class="keyword">await</span> Post.<span class="function">findByIdAndDelete</span>(id);
+      <span class="comment">// ↑ Remove the post from database</span>
+
+      <span class="keyword">if</span> (post) {
+        <span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(post.author, {
+          $pull: { posts: post._id }
+        });
+        <span class="comment">// ↑ $pull removes the post ID from the user's posts array</span>
+        <span class="comment">//   This keeps the relationship consistent</span>
+        <span class="comment">//   Without this, user.posts would contain a dead reference</span>
+      }
+
+      <span class="keyword">return</span> post;
+    },
+  },
+
+  <span class="comment">// ============================================</span>
+  <span class="comment">// FIELD-LEVEL RESOLVERS (resolve relationships)</span>
+  <span class="comment">// ============================================</span>
+  User: {
+    id: (parent) => parent._id.toString(),
+    <span class="comment">// ↑ MongoDB uses _id (with underscore)</span>
+    <span class="comment">//   GraphQL schema uses id (without underscore)</span>
+    <span class="comment">//   This resolver maps _id → id</span>
+    <span class="comment">//   .toString() converts ObjectId to a string</span>
+  },
+
+  Post: {
+    id: (parent) => parent._id.toString(),
+    <span class="comment">// ↑ Same mapping for Post documents</span>
+  },
+};
+
+module.exports = resolvers;</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 6: Server Setup (Putting It All Together)</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">index.js</span></div>
+<pre><code><span class="keyword">const</span> { ApolloServer } = <span class="function">require</span>(<span class="string">'@apollo/server'</span>);
+<span class="comment">// ↑ Import Apollo Server — the GraphQL engine that parses queries,</span>
+<span class="comment">//   validates them against our schema, and calls the right resolvers</span>
+
+<span class="keyword">const</span> { expressMiddleware } = <span class="function">require</span>(<span class="string">'@apollo/server/express4'</span>);
+<span class="comment">// ↑ Middleware adapter to plug Apollo Server into Express</span>
+<span class="comment">//   Apollo v4 doesn't run standalone with Express — it uses middleware</span>
+
+<span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> cors = <span class="function">require</span>(<span class="string">'cors'</span>);
+<span class="keyword">const</span> mongoose = <span class="function">require</span>(<span class="string">'mongoose'</span>);
+
+<span class="keyword">const</span> typeDefs = <span class="function">require</span>(<span class="string">'./schema/typeDefs'</span>);
+<span class="keyword">const</span> resolvers = <span class="function">require</span>(<span class="string">'./schema/resolvers'</span>);
+<span class="comment">// ↑ Our GraphQL schema and resolver functions</span>
+
+<span class="keyword">async function</span> <span class="function">startServer</span>() {
+<span class="comment">// ↑ Wrap in async function because Apollo Server startup is async</span>
+
+  <span class="keyword">const</span> app = <span class="function">express</span>();
+  <span class="comment">// ↑ Create Express application instance</span>
+
+  <span class="keyword">const</span> server = <span class="keyword">new</span> <span class="function">ApolloServer</span>({
+    typeDefs,      <span class="comment">// Our GraphQL schema (type definitions)</span>
+    resolvers,     <span class="comment">// Our resolver functions</span>
+  });
+  <span class="comment">// ↑ Create Apollo Server with our schema + resolvers</span>
+  <span class="comment">//   It validates that every type/field in typeDefs</span>
+  <span class="comment">//   has a corresponding resolver (or uses default resolver)</span>
+
+  <span class="keyword">await</span> server.<span class="function">start</span>();
+  <span class="comment">// ↑ MUST call start() before applying middleware</span>
+  <span class="comment">//   This initializes the schema, plugins, and internal caches</span>
+
+  app.<span class="function">use</span>(
+    <span class="string">'/graphql'</span>,              <span class="comment">// Route: all GraphQL requests go to POST /graphql</span>
+    <span class="function">cors</span>(),                  <span class="comment">// Allow cross-origin requests (needed for frontends on different ports)</span>
+    express.<span class="function">json</span>(),          <span class="comment">// Parse JSON request bodies (GraphQL sends JSON)</span>
+    <span class="function">expressMiddleware</span>(server)  <span class="comment">// Mount Apollo as Express middleware</span>
+  );
+  <span class="comment">// ↑ Chain of middleware:</span>
+  <span class="comment">//   1. CORS headers added</span>
+  <span class="comment">//   2. JSON body parsed</span>
+  <span class="comment">//   3. Apollo processes the GraphQL query</span>
+
+  <span class="keyword">await</span> mongoose.<span class="function">connect</span>(<span class="string">'mongodb://localhost:27017/graphql-crud'</span>);
+  <span class="comment">// ↑ Connect to MongoDB</span>
+  <span class="comment">//   'graphql-crud' is the database name (created automatically)</span>
+  <span class="comment">//   In production, use an environment variable for the connection string</span>
+
+  console.<span class="function">log</span>(<span class="string">'Connected to MongoDB'</span>);
+
+  app.<span class="function">listen</span>(<span class="number">4000</span>, () => {
+    console.<span class="function">log</span>(<span class="string">'Server running at http://localhost:4000/graphql'</span>);
+  });
+  <span class="comment">// ↑ Start HTTP server on port 4000</span>
+  <span class="comment">//   Open http://localhost:4000/graphql in browser for Apollo Sandbox</span>
+}
+
+<span class="function">startServer</span>();
+<span class="comment">// ↑ Call the async startup function</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 7: Testing Mongoose CRUD (Apollo Sandbox Queries)</h3>
+        <p class="text-secondary mb-3">Open <code>http://localhost:4000/graphql</code> in your browser. Apollo Sandbox loads automatically. Paste these queries/mutations.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">CREATE — Add a user</span></div>
+<pre><code><span class="keyword">mutation</span> {
+  createUser(input: {
+    name: <span class="string">"Yatin Dora"</span>       <span class="comment"># Required field</span>
+    email: <span class="string">"yatin@dev.com"</span>   <span class="comment"># Required, must be unique</span>
+    age: 25                   <span class="comment"># Optional</span>
+    role: <span class="string">"ADMIN"</span>             <span class="comment"># Optional, defaults to USER</span>
+  }) {
+    <span class="comment"># ↓ Choose which fields you want back in the response</span>
+    id          <span class="comment"># The generated MongoDB _id</span>
+    name        <span class="comment"># Confirm the name was saved</span>
+    email       <span class="comment"># Confirm email was lowercased</span>
+    age
+    role
+    createdAt   <span class="comment"># Timestamp when created</span>
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">CREATE — Add a post for that user</span></div>
+<pre><code><span class="keyword">mutation</span> {
+  createPost(input: {
+    title: <span class="string">"GraphQL is Amazing"</span>
+    body: <span class="string">"Here's why GraphQL changes everything..."</span>
+    published: true
+    authorId: <span class="string">"PASTE_USER_ID_HERE"</span>  <span class="comment"># Use the id from createUser response</span>
+  }) {
+    id
+    title
+    published
+    author {        <span class="comment"># ← This returns the full User object (thanks to .populate)</span>
+      name
+      email
+    }
+    createdAt
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">READ — Get all users with their posts</span></div>
+<pre><code><span class="keyword">query</span> {
+  users {
+    id
+    name
+    email
+    age
+    role
+    posts {         <span class="comment"># ← Nested: each user's posts are resolved</span>
+      id
+      title
+      published
+    }
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">READ — Get single user</span></div>
+<pre><code><span class="keyword">query</span> {
+  user(id: <span class="string">"PASTE_USER_ID_HERE"</span>) {
+    name
+    email
+    posts {
+      title
+    }
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">UPDATE — Change user's name and age</span></div>
+<pre><code><span class="keyword">mutation</span> {
+  updateUser(
+    id: <span class="string">"PASTE_USER_ID_HERE"</span>
+    input: {
+      name: <span class="string">"Yatin Updated"</span>   <span class="comment"># Only fields you send get changed</span>
+      age: 26                    <span class="comment"># Email and role stay the same</span>
+    }
+  ) {
+    id
+    name          <span class="comment"># Should show "Yatin Updated"</span>
+    age           <span class="comment"># Should show 26</span>
+    email         <span class="comment"># Unchanged</span>
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">DELETE — Remove a post</span></div>
+<pre><code><span class="keyword">mutation</span> {
+  deletePost(id: <span class="string">"PASTE_POST_ID_HERE"</span>) {
+    id
+    title         <span class="comment"># Returns the deleted post's data</span>
+  }
+}</code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">DELETE — Remove a user (cascades: deletes their posts too)</span></div>
+<pre><code><span class="keyword">mutation</span> {
+  deleteUser(id: <span class="string">"PASTE_USER_ID_HERE"</span>) {
+    id
+    name
+    email
+  }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- PART 2: PRISMA CRUD     -->
+    <!-- ======================= -->
+    <h3 class="mb-3 mt-4" style="color: var(--accent-purple); font-size: 1.8rem;">Part 2: GraphQL CRUD with Prisma (PostgreSQL)</h3>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 1: Project Setup</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash</span><span class="code-filename">Terminal</span></div>
+<pre><code><span class="comment"># Create project folder and initialize</span>
+mkdir graphql-prisma-crud && cd graphql-prisma-crud
+npm init -y
+
+<span class="comment"># Install core dependencies</span>
+npm install @apollo/server graphql express cors
+<span class="comment"># Same as Mongoose setup — Apollo is the GraphQL engine</span>
+
+<span class="comment"># Install Prisma</span>
+npm install prisma @prisma/client
+<span class="comment"># prisma        → CLI tool for migrations, schema management</span>
+<span class="comment"># @prisma/client → auto-generated type-safe database client</span>
+
+<span class="comment"># Initialize Prisma (creates prisma/ folder with schema.prisma)</span>
+npx prisma init
+<span class="comment"># This creates:</span>
+<span class="comment">#   prisma/schema.prisma → your database schema file</span>
+<span class="comment">#   .env                 → DATABASE_URL goes here</span>
+
+<span class="comment"># Dev dependencies</span>
+npm install -D nodemon</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 2: Prisma Schema</h3>
+        <p class="text-secondary mb-3">Unlike Mongoose (schema in JS code), Prisma uses its own schema file. This is your single source of truth for the database structure.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">Prisma</span><span class="code-filename">prisma/schema.prisma</span></div>
+<pre><code><span class="comment">// prisma/schema.prisma</span>
+<span class="comment">// This file defines your DATABASE structure.</span>
+<span class="comment">// Prisma reads this and generates:</span>
+<span class="comment">//   1. SQL migrations (CREATE TABLE statements)</span>
+<span class="comment">//   2. A type-safe JavaScript/TypeScript client</span>
+
+<span class="keyword">generator</span> client {
+  provider = <span class="string">"prisma-client-js"</span>
+}
+<span class="comment">// ↑ Tells Prisma to generate a JavaScript client</span>
+<span class="comment">//   After running `npx prisma generate`, you get</span>
+<span class="comment">//   a client with full autocompletion in your IDE</span>
+
+<span class="keyword">datasource</span> db {
+  provider = <span class="string">"postgresql"</span>
+  url      = <span class="function">env</span>(<span class="string">"DATABASE_URL"</span>)
+}
+<span class="comment">// ↑ Database connection settings</span>
+<span class="comment">//   provider: which database (postgresql, mysql, sqlite, mongodb)</span>
+<span class="comment">//   url: connection string from .env file</span>
+<span class="comment">//   Example: DATABASE_URL="postgresql://user:pass@localhost:5432/mydb"</span>
+
+<span class="keyword">model</span> <span class="type">User</span> {
+  id        <span class="type">String</span>   <span class="directive">@id</span> <span class="directive">@default</span>(<span class="function">cuid</span>())
+  <span class="comment">// ↑ id: primary key, auto-generated CUID string</span>
+  <span class="comment">//   @id → marks this as the primary key (like PRIMARY KEY in SQL)</span>
+  <span class="comment">//   @default(cuid()) → auto-generates a unique ID</span>
+  <span class="comment">//   CUID is like UUID but shorter and URL-safe</span>
+  <span class="comment">//   You could also use @default(uuid()) or @default(autoincrement())</span>
+
+  name      <span class="type">String</span>
+  <span class="comment">// ↑ name: required string column (NOT NULL by default in Prisma)</span>
+  <span class="comment">//   In Prisma, fields are required unless you add ? (e.g., String?)</span>
+  <span class="comment">//   Opposite of GraphQL where fields are nullable by default</span>
+
+  email     <span class="type">String</span>   <span class="directive">@unique</span>
+  <span class="comment">// ↑ email: required + unique constraint</span>
+  <span class="comment">//   @unique → creates a UNIQUE INDEX in the database</span>
+  <span class="comment">//   INSERT with duplicate email will throw an error</span>
+
+  age       <span class="type">Int?</span>
+  <span class="comment">// ↑ age: OPTIONAL integer (? makes it nullable)</span>
+  <span class="comment">//   SQL: age INTEGER (no NOT NULL constraint)</span>
+
+  role      <span class="type">Role</span>     <span class="directive">@default</span>(USER)
+  <span class="comment">// ↑ role: uses the Role enum defined below</span>
+  <span class="comment">//   @default(USER) → defaults to USER if not provided</span>
+
+  posts     <span class="type">Post</span>[]
+  <span class="comment">// ↑ posts: ONE-TO-MANY relationship — one user has many posts</span>
+  <span class="comment">//   This is a VIRTUAL field — no column is created in the users table</span>
+  <span class="comment">//   Prisma uses the Post.authorId foreign key to resolve this</span>
+  <span class="comment">//   Accessed as: user.posts (returns array of Post objects)</span>
+
+  createdAt <span class="type">DateTime</span> <span class="directive">@default</span>(<span class="function">now</span>())
+  <span class="comment">// ↑ createdAt: auto-set to current timestamp when row is created</span>
+  <span class="comment">//   SQL: created_at TIMESTAMP DEFAULT NOW()</span>
+
+  updatedAt <span class="type">DateTime</span> <span class="directive">@updatedAt</span>
+  <span class="comment">// ↑ updatedAt: automatically updated whenever the row is modified</span>
+  <span class="comment">//   Prisma handles this — no trigger needed</span>
+}
+
+<span class="keyword">model</span> <span class="type">Post</span> {
+  id        <span class="type">String</span>   <span class="directive">@id</span> <span class="directive">@default</span>(<span class="function">cuid</span>())
+  title     <span class="type">String</span>
+  body      <span class="type">String</span>
+  published <span class="type">Boolean</span>  <span class="directive">@default</span>(<span class="keyword">false</span>)
+  <span class="comment">// ↑ published: defaults to false (draft state)</span>
+
+  author    <span class="type">User</span>     <span class="directive">@relation</span>(fields: [authorId], references: [id], onDelete: Cascade)
+  <span class="comment">// ↑ author: MANY-TO-ONE relationship — each post belongs to one user</span>
+  <span class="comment">//   @relation → tells Prisma HOW to join the tables:</span>
+  <span class="comment">//     fields: [authorId] → "use the authorId column in THIS table"</span>
+  <span class="comment">//     references: [id]   → "to match against the id column in User table"</span>
+  <span class="comment">//     onDelete: Cascade  → if the user is deleted, delete their posts too</span>
+  <span class="comment">//   SQL: FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE</span>
+
+  authorId  <span class="type">String</span>
+  <span class="comment">// ↑ The actual foreign key column stored in the posts table</span>
+  <span class="comment">//   This IS a real column (unlike the 'author' field above)</span>
+
+  createdAt <span class="type">DateTime</span> <span class="directive">@default</span>(<span class="function">now</span>())
+  updatedAt <span class="type">DateTime</span> <span class="directive">@updatedAt</span>
+
+  <span class="directive">@@index</span>([authorId])
+  <span class="comment">// ↑ Create a database INDEX on authorId for faster lookups</span>
+  <span class="comment">//   When querying "all posts by user X", this index makes it fast</span>
+  <span class="comment">//   SQL: CREATE INDEX ON posts(author_id)</span>
+}
+
+<span class="keyword">enum</span> <span class="type">Role</span> {
+  USER
+  ADMIN
+  MODERATOR
+}
+<span class="comment">// ↑ Enum type — only these three values are allowed for the role field</span>
+<span class="comment">//   Prisma creates a real PostgreSQL ENUM type</span>
+<span class="comment">//   SQL: CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN', 'MODERATOR')</span></code></pre>
+        </div>
+
+        <div class="code-block mt-3">
+            <div class="code-header"><span class="code-lang">Bash</span><span class="code-filename">Run migrations after defining schema</span></div>
+<pre><code><span class="comment"># Create the database tables from your schema</span>
+npx prisma migrate dev --name init
+<span class="comment"># ↑ This does THREE things:</span>
+<span class="comment">#   1. Generates SQL migration files (in prisma/migrations/)</span>
+<span class="comment">#   2. Runs those migrations against your database</span>
+<span class="comment">#   3. Regenerates the Prisma Client</span>
+<span class="comment"># --name init → names this migration "init" (for readability)</span>
+
+<span class="comment"># If you only want to regenerate the client (no migration):</span>
+npx prisma generate
+<span class="comment"># ↑ Regenerates node_modules/@prisma/client with latest schema types</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 3: Prisma Client Setup</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">prisma/client.js</span></div>
+<pre><code><span class="keyword">const</span> { PrismaClient } = <span class="function">require</span>(<span class="string">'@prisma/client'</span>);
+<span class="comment">// ↑ Import the auto-generated Prisma Client</span>
+<span class="comment">//   This client was generated by `npx prisma generate`</span>
+<span class="comment">//   It has full TypeScript types matching your schema</span>
+
+<span class="keyword">const</span> prisma = <span class="keyword">new</span> <span class="function">PrismaClient</span>();
+<span class="comment">// ↑ Create a single Prisma Client instance</span>
+<span class="comment">//   IMPORTANT: only create ONE instance for the entire app</span>
+<span class="comment">//   Each instance holds a connection pool (default: 5 connections)</span>
+<span class="comment">//   Creating multiple instances wastes database connections</span>
+
+module.exports = prisma;
+<span class="comment">// ↑ Export the singleton — import this everywhere you need DB access</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 4: GraphQL Type Definitions</h3>
+        <p class="text-secondary mb-3">Very similar to Mongoose version — the GraphQL schema is independent of which ORM you use.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">schema/typeDefs.js</span></div>
+<pre><code><span class="keyword">const</span> typeDefs = <span class="string">`#graphql</span>
+
+  <span class="comment"># Same output types as before — GraphQL schema doesn't change</span>
+  <span class="comment"># whether you use Mongoose or Prisma underneath</span>
+
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int
+    role: String!
+    posts: [Post!]!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  <span class="comment"># Input types stay the same too</span>
+  input CreateUserInput {
+    name: String!
+    email: String!
+    age: Int
+    role: String
+  }
+
+  input UpdateUserInput {
+    name: String
+    email: String
+    age: Int
+    role: String
+  }
+
+  input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean
+    authorId: ID!
+  }
+
+  input UpdatePostInput {
+    title: String
+    body: String
+    published: Boolean
+  }
+
+  type Query {
+    users: [User!]!
+    user(id: ID!): User
+    posts: [Post!]!
+    post(id: ID!): Post
+  }
+
+  type Mutation {
+    createUser(input: CreateUserInput!): User!
+    updateUser(id: ID!, input: UpdateUserInput!): User
+    deleteUser(id: ID!): User
+    createPost(input: CreatePostInput!): Post!
+    updatePost(id: ID!, input: UpdatePostInput!): Post
+    deletePost(id: ID!): Post
+  }
+<span class="string">`</span>;
+
+module.exports = typeDefs;
+<span class="comment">// ↑ Identical schema to Mongoose version</span>
+<span class="comment">//   The ONLY thing that changes is the resolvers (database calls)</span>
+<span class="comment">//   This is one of GraphQL's strengths: the API contract is ORM-agnostic</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 5: Prisma Resolvers (The Key Difference)</h3>
+        <p class="text-secondary mb-3">This is where Prisma shines — notice how much cleaner the database calls are compared to Mongoose. No <code>.populate()</code>, no <code>$push/$pull</code>, no manual cascade deletes.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">schema/resolvers.js</span></div>
+<pre><code><span class="keyword">const</span> prisma = <span class="function">require</span>(<span class="string">'../prisma/client'</span>);
+<span class="comment">// ↑ Import our singleton Prisma Client</span>
+<span class="comment">//   prisma.user → access the User table</span>
+<span class="comment">//   prisma.post → access the Post table</span>
+<span class="comment">//   Every method returns a Promise (so we use async/await)</span>
+
+<span class="keyword">const</span> resolvers = {
+
+  <span class="comment">// ============================================</span>
+  <span class="comment">// QUERY RESOLVERS (READ operations)</span>
+  <span class="comment">// ============================================</span>
+  Query: {
+
+    <span class="comment">// -------- GET ALL USERS --------</span>
+    users: <span class="keyword">async</span> () => {
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.user.<span class="function">findMany</span>({
+      <span class="comment">// ↑ prisma.user.findMany() → SELECT * FROM users</span>
+      <span class="comment">//   Returns an array of all users</span>
+      <span class="comment">//   Like Mongoose's User.find() but with a type-safe API</span>
+
+        include: { posts: <span class="keyword">true</span> },
+        <span class="comment">// ↑ include → Prisma's version of Mongoose's .populate()</span>
+        <span class="comment">//   { posts: true } → also load related Post records</span>
+        <span class="comment">//   Prisma generates a JOIN query (not N+1 separate queries)</span>
+        <span class="comment">//   SQL: SELECT * FROM users LEFT JOIN posts ON posts.author_id = users.id</span>
+        <span class="comment">//</span>
+        <span class="comment">//   You can also do nested includes:</span>
+        <span class="comment">//   include: { posts: { include: { comments: true } } }</span>
+      });
+    },
+
+    <span class="comment">// -------- GET SINGLE USER BY ID --------</span>
+    user: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.user.<span class="function">findUnique</span>({
+      <span class="comment">// ↑ findUnique → find ONE record by a unique field</span>
+      <span class="comment">//   SQL: SELECT * FROM users WHERE id = $1 LIMIT 1</span>
+      <span class="comment">//   Returns null if not found (perfect for our nullable return type)</span>
+      <span class="comment">//</span>
+      <span class="comment">//   findUnique vs findFirst:</span>
+      <span class="comment">//   findUnique → only works on @unique or @id fields</span>
+      <span class="comment">//   findFirst → works on any field (but slower, no index guarantee)</span>
+
+        where: { id },
+        <span class="comment">// ↑ where clause: { id: id } (shorthand: { id })</span>
+        <span class="comment">//   Prisma generates: WHERE id = 'clx123...'</span>
+
+        include: { posts: <span class="keyword">true</span> },
+        <span class="comment">// ↑ Include related posts in the result</span>
+      });
+    },
+
+    <span class="comment">// -------- GET ALL POSTS --------</span>
+    posts: <span class="keyword">async</span> () => {
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.post.<span class="function">findMany</span>({
+        include: { author: <span class="keyword">true</span> },
+        <span class="comment">// ↑ Include the author (User) for each post</span>
+        <span class="comment">//   Prisma knows how to join because of the @relation in schema</span>
+      });
+    },
+
+    <span class="comment">// -------- GET SINGLE POST BY ID --------</span>
+    post: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.post.<span class="function">findUnique</span>({
+        where: { id },
+        include: { author: <span class="keyword">true</span> },
+      });
+    },
+  },
+
+  <span class="comment">// ============================================</span>
+  <span class="comment">// MUTATION RESOLVERS (CREATE, UPDATE, DELETE)</span>
+  <span class="comment">// ============================================</span>
+  Mutation: {
+
+    <span class="comment">// -------- CREATE USER --------</span>
+    createUser: <span class="keyword">async</span> (_, { input }) => {
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.user.<span class="function">create</span>({
+      <span class="comment">// ↑ prisma.user.create() → INSERT INTO users (...) VALUES (...)</span>
+      <span class="comment">//   Prisma validates against the schema automatically</span>
+      <span class="comment">//   If email is duplicate, throws: Unique constraint failed on `email`</span>
+
+        data: input,
+        <span class="comment">// ↑ data: the values to insert</span>
+        <span class="comment">//   input = { name: "John", email: "john@dev.com", age: 25 }</span>
+        <span class="comment">//   Prisma auto-handles:</span>
+        <span class="comment">//     id → generated by @default(cuid())</span>
+        <span class="comment">//     role → defaults to USER via @default(USER)</span>
+        <span class="comment">//     createdAt → set by @default(now())</span>
+        <span class="comment">//     updatedAt → set by @updatedAt</span>
+
+        include: { posts: <span class="keyword">true</span> },
+        <span class="comment">// ↑ Include posts in the response (will be empty [] for new user)</span>
+      });
+    },
+
+    <span class="comment">// -------- UPDATE USER --------</span>
+    updateUser: <span class="keyword">async</span> (_, { id, input }) => {
+      <span class="keyword">try</span> {
+      <span class="comment">// ↑ Wrap in try-catch because Prisma throws if record not found</span>
+      <span class="comment">//   (unlike Mongoose which returns null)</span>
+
+        <span class="keyword">return</span> <span class="keyword">await</span> prisma.user.<span class="function">update</span>({
+        <span class="comment">// ↑ prisma.user.update() → UPDATE users SET ... WHERE id = $1</span>
+        <span class="comment">//   IMPORTANT: Prisma THROWS an error if the record doesn't exist</span>
+        <span class="comment">//   This is different from Mongoose's findByIdAndUpdate (returns null)</span>
+
+          where: { id },
+          <span class="comment">// ↑ Which record to update</span>
+
+          data: input,
+          <span class="comment">// ↑ What to change — only provided fields are updated</span>
+          <span class="comment">//   If input = { name: "New Name" }, only name changes</span>
+          <span class="comment">//   Prisma automatically updates the updatedAt timestamp</span>
+
+          include: { posts: <span class="keyword">true</span> },
+          <span class="comment">// ↑ Return the updated user with their posts</span>
+        });
+      } <span class="keyword">catch</span> (error) {
+        <span class="keyword">if</span> (error.code === <span class="string">'P2025'</span>) <span class="keyword">return</span> <span class="keyword">null</span>;
+        <span class="comment">// ↑ P2025 = "Record to update not found"</span>
+        <span class="comment">//   Return null instead of throwing (matches our nullable schema)</span>
+        <span class="comment">//   Prisma error codes: P2025 (not found), P2002 (unique violation), etc.</span>
+
+        <span class="keyword">throw</span> error;
+        <span class="comment">// ↑ Re-throw any other errors (real database errors)</span>
+      }
+    },
+
+    <span class="comment">// -------- DELETE USER --------</span>
+    deleteUser: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">try</span> {
+        <span class="keyword">return</span> <span class="keyword">await</span> prisma.user.<span class="function">delete</span>({
+        <span class="comment">// ↑ prisma.user.delete() → DELETE FROM users WHERE id = $1</span>
+        <span class="comment">//   Returns the deleted record data</span>
+        <span class="comment">//   Throws P2025 if record doesn't exist</span>
+        <span class="comment">//</span>
+        <span class="comment">//   CASCADE: Because we set onDelete: Cascade in the schema,</span>
+        <span class="comment">//   Prisma/PostgreSQL automatically deletes all related posts!</span>
+        <span class="comment">//   No manual cascade needed (unlike Mongoose)</span>
+
+          where: { id },
+        });
+      } <span class="keyword">catch</span> (error) {
+        <span class="keyword">if</span> (error.code === <span class="string">'P2025'</span>) <span class="keyword">return</span> <span class="keyword">null</span>;
+        <span class="keyword">throw</span> error;
+      }
+    },
+
+    <span class="comment">// -------- CREATE POST --------</span>
+    createPost: <span class="keyword">async</span> (_, { input }) => {
+      <span class="keyword">const</span> { authorId, ...postData } = input;
+      <span class="comment">// ↑ Same destructuring as Mongoose version</span>
+
+      <span class="keyword">return</span> <span class="keyword">await</span> prisma.post.<span class="function">create</span>({
+        data: {
+          ...postData,
+          <span class="comment">// ↑ Spread: title, body, published</span>
+
+          author: {
+            connect: { id: authorId },
+          },
+          <span class="comment">// ↑ connect → Prisma's way of setting a relationship</span>
+          <span class="comment">//   Instead of: author: authorId (like Mongoose)</span>
+          <span class="comment">//   Prisma uses: author: { connect: { id: authorId } }</span>
+          <span class="comment">//   This sets the authorId foreign key in the posts table</span>
+          <span class="comment">//   SQL: INSERT INTO posts (title, body, author_id) VALUES ($1, $2, $3)</span>
+          <span class="comment">//</span>
+          <span class="comment">//   No need to manually update the User's posts array!</span>
+          <span class="comment">//   Prisma handles the relationship automatically</span>
+          <span class="comment">//   (Unlike Mongoose where we had to $push to user.posts)</span>
+        },
+        include: { author: <span class="keyword">true</span> },
+        <span class="comment">// ↑ Return the post with full author data</span>
+      });
+    },
+
+    <span class="comment">// -------- UPDATE POST --------</span>
+    updatePost: <span class="keyword">async</span> (_, { id, input }) => {
+      <span class="keyword">try</span> {
+        <span class="keyword">return</span> <span class="keyword">await</span> prisma.post.<span class="function">update</span>({
+          where: { id },
+          data: input,
+          include: { author: <span class="keyword">true</span> },
+        });
+      } <span class="keyword">catch</span> (error) {
+        <span class="keyword">if</span> (error.code === <span class="string">'P2025'</span>) <span class="keyword">return</span> <span class="keyword">null</span>;
+        <span class="keyword">throw</span> error;
+      }
+    },
+
+    <span class="comment">// -------- DELETE POST --------</span>
+    deletePost: <span class="keyword">async</span> (_, { id }) => {
+      <span class="keyword">try</span> {
+        <span class="keyword">return</span> <span class="keyword">await</span> prisma.post.<span class="function">delete</span>({
+          where: { id },
+          include: { author: <span class="keyword">true</span> },
+          <span class="comment">// ↑ Include author in the returned deleted post</span>
+          <span class="comment">//   No need to manually $pull from user.posts!</span>
+          <span class="comment">//   Prisma manages the relationship automatically</span>
+        });
+      } <span class="keyword">catch</span> (error) {
+        <span class="keyword">if</span> (error.code === <span class="string">'P2025'</span>) <span class="keyword">return</span> <span class="keyword">null</span>;
+        <span class="keyword">throw</span> error;
+      }
+    },
+  },
+};
+
+module.exports = resolvers;</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 6: Server Setup (Prisma Version)</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><span class="code-filename">index.js</span></div>
+<pre><code><span class="keyword">const</span> { ApolloServer } = <span class="function">require</span>(<span class="string">'@apollo/server'</span>);
+<span class="keyword">const</span> { expressMiddleware } = <span class="function">require</span>(<span class="string">'@apollo/server/express4'</span>);
+<span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> cors = <span class="function">require</span>(<span class="string">'cors'</span>);
+
+<span class="keyword">const</span> typeDefs = <span class="function">require</span>(<span class="string">'./schema/typeDefs'</span>);
+<span class="keyword">const</span> resolvers = <span class="function">require</span>(<span class="string">'./schema/resolvers'</span>);
+
+<span class="keyword">async function</span> <span class="function">startServer</span>() {
+  <span class="keyword">const</span> app = <span class="function">express</span>();
+
+  <span class="keyword">const</span> server = <span class="keyword">new</span> <span class="function">ApolloServer</span>({ typeDefs, resolvers });
+  <span class="keyword">await</span> server.<span class="function">start</span>();
+
+  app.<span class="function">use</span>(
+    <span class="string">'/graphql'</span>,
+    <span class="function">cors</span>(),
+    express.<span class="function">json</span>(),
+    <span class="function">expressMiddleware</span>(server)
+  );
+
+  <span class="comment">// ↑ Notice: NO database connection code here!</span>
+  <span class="comment">//   Prisma connects lazily — the first query triggers a connection</span>
+  <span class="comment">//   Mongoose required explicit mongoose.connect() before starting</span>
+  <span class="comment">//   Prisma reads DATABASE_URL from .env automatically</span>
+
+  app.<span class="function">listen</span>(<span class="number">4000</span>, () => {
+    console.<span class="function">log</span>(<span class="string">'Server running at http://localhost:4000/graphql'</span>);
+  });
+}
+
+<span class="function">startServer</span>();</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Step 7: Testing Prisma CRUD (Same Queries Work!)</h3>
+        <p class="text-secondary mb-3">The GraphQL queries are <strong>identical</strong> to the Mongoose version — that's the beauty of GraphQL. The ORM is an implementation detail hidden behind the resolvers.</p>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">GraphQL</span><span class="code-filename">All CRUD operations — same as Mongoose</span></div>
+<pre><code><span class="comment"># CREATE USER — exactly the same query</span>
+<span class="keyword">mutation</span> {
+  createUser(input: {
+    name: <span class="string">"Yatin Dora"</span>
+    email: <span class="string">"yatin@dev.com"</span>
+    age: 25
+    role: <span class="string">"ADMIN"</span>
+  }) {
+    id
+    name
+    email
+    role
+  }
+}
+
+<span class="comment"># READ ALL USERS — exactly the same query</span>
+<span class="keyword">query</span> {
+  users {
+    id
+    name
+    posts {
+      title
+    }
+  }
+}
+
+<span class="comment"># UPDATE — exactly the same query</span>
+<span class="keyword">mutation</span> {
+  updateUser(
+    id: <span class="string">"PASTE_ID"</span>
+    input: { name: <span class="string">"Updated Name"</span> }
+  ) {
+    name
+  }
+}
+
+<span class="comment"># DELETE — exactly the same query</span>
+<span class="keyword">mutation</span> {
+  deleteUser(id: <span class="string">"PASTE_ID"</span>) {
+    name
+  }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- COMPARISON TABLE         -->
+    <!-- ======================= -->
+    <h3 class="mb-3 mt-4" style="color: var(--accent-cyan); font-size: 1.8rem;">Mongoose vs Prisma — Side by Side</h3>
+
+    <div class="card">
+        <h3 class="card-title mb-3">Operation Comparison</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">Comparison</span><span class="code-filename">Every CRUD operation side by side</span></div>
+<pre><code><span class="comment">// ==========================================</span>
+<span class="comment">// FIND ALL</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose:</span>
+<span class="keyword">await</span> User.<span class="function">find</span>().<span class="function">populate</span>(<span class="string">'posts'</span>);
+<span class="comment">// → Separate queries: 1 for users + 1 for posts (2 queries)</span>
+<span class="comment">// → .populate() does a second query behind the scenes</span>
+
+<span class="comment">// Prisma:</span>
+<span class="keyword">await</span> prisma.user.<span class="function">findMany</span>({ include: { posts: <span class="keyword">true</span> } });
+<span class="comment">// → Single JOIN query (1 query, more efficient)</span>
+<span class="comment">// → include replaces populate with better SQL generation</span>
+
+<span class="comment">// ==========================================</span>
+<span class="comment">// FIND BY ID</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose:</span>
+<span class="keyword">await</span> User.<span class="function">findById</span>(id).<span class="function">populate</span>(<span class="string">'posts'</span>);
+<span class="comment">// → Works with MongoDB ObjectId strings</span>
+
+<span class="comment">// Prisma:</span>
+<span class="keyword">await</span> prisma.user.<span class="function">findUnique</span>({ where: { id } });
+<span class="comment">// → findUnique only works on @id or @unique fields (optimized)</span>
+
+<span class="comment">// ==========================================</span>
+<span class="comment">// CREATE</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose:</span>
+<span class="keyword">const</span> user = <span class="keyword">new</span> <span class="function">User</span>(data);    <span class="comment">// Create instance</span>
+<span class="keyword">await</span> user.<span class="function">save</span>();              <span class="comment">// Save to DB (2 steps)</span>
+<span class="comment">// OR: await User.create(data);  // 1 step shorthand</span>
+
+<span class="comment">// Prisma:</span>
+<span class="keyword">await</span> prisma.user.<span class="function">create</span>({ data });
+<span class="comment">// → Always 1 step, returns the created record</span>
+
+<span class="comment">// ==========================================</span>
+<span class="comment">// UPDATE</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose:</span>
+<span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(id, data, { new: <span class="keyword">true</span>, runValidators: <span class="keyword">true</span> });
+<span class="comment">// → Need { new: true } to get updated doc (quirky default)</span>
+<span class="comment">// → Need { runValidators: true } to validate on update</span>
+
+<span class="comment">// Prisma:</span>
+<span class="keyword">await</span> prisma.user.<span class="function">update</span>({ where: { id }, data });
+<span class="comment">// → Always returns updated record</span>
+<span class="comment">// → Always validates (schema is enforced by the database)</span>
+<span class="comment">// → THROWS if record not found (must catch P2025)</span>
+
+<span class="comment">// ==========================================</span>
+<span class="comment">// DELETE</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose:</span>
+<span class="keyword">await</span> User.<span class="function">findByIdAndDelete</span>(id);
+<span class="keyword">await</span> Post.<span class="function">deleteMany</span>({ author: id });  <span class="comment">// Manual cascade!</span>
+
+<span class="comment">// Prisma:</span>
+<span class="keyword">await</span> prisma.user.<span class="function">delete</span>({ where: { id } });
+<span class="comment">// → Cascade is automatic (onDelete: Cascade in schema)</span>
+<span class="comment">// → No manual cleanup needed</span>
+
+<span class="comment">// ==========================================</span>
+<span class="comment">// RELATIONSHIPS</span>
+<span class="comment">// ==========================================</span>
+
+<span class="comment">// Mongoose — Creating a post requires 2 operations:</span>
+<span class="keyword">const</span> post = <span class="keyword">await</span> Post.<span class="function">create</span>({ ...data, author: userId });
+<span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(userId, { $push: { posts: post._id } });
+<span class="comment">// → Must manually sync BOTH sides of the relationship</span>
+
+<span class="comment">// Prisma — Creating a post is 1 operation:</span>
+<span class="keyword">await</span> prisma.post.<span class="function">create</span>({
+  data: { ...data, author: { connect: { id: userId } } }
+});
+<span class="comment">// → Prisma handles the foreign key — no manual syncing</span></code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3">When to Choose Which</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">Decision Guide</span></div>
+<pre><code><span class="comment">// CHOOSE MONGOOSE WHEN:</span>
+<span class="comment">// ✓ Using MongoDB (document database)</span>
+<span class="comment">// ✓ Data is unstructured or changes shape often</span>
+<span class="comment">// ✓ Rapid prototyping — no migrations needed</span>
+<span class="comment">// ✓ Storing nested documents (arrays of objects inside a document)</span>
+<span class="comment">// ✓ Team already knows MongoDB</span>
+<span class="comment">// ✓ Building CMS, IoT, logging, or analytics systems</span>
+
+<span class="comment">// CHOOSE PRISMA WHEN:</span>
+<span class="comment">// ✓ Using PostgreSQL, MySQL, or SQLite</span>
+<span class="comment">// ✓ Need strong data integrity (foreign keys, constraints)</span>
+<span class="comment">// ✓ Want type-safe queries with autocompletion</span>
+<span class="comment">// ✓ Need database migrations (version-controlled schema changes)</span>
+<span class="comment">// ✓ Complex relationships (many-to-many, self-referential)</span>
+<span class="comment">// ✓ Building production apps with strict data requirements</span>
+<span class="comment">// ✓ Want the cleaner API (include vs populate, connect vs $push)</span>
+
+<span class="comment">// BOTH WORK GREAT WITH GRAPHQL</span>
+<span class="comment">// The GraphQL schema + queries stay IDENTICAL</span>
+<span class="comment">// Only the resolvers (database layer) change</span></code></pre>
+        </div>
+    </div>
+
+</section>
+
 </main>
 
 <!-- ============================================== -->
@@ -5505,7 +6870,7 @@ npm install @apollo/client graphql</code></pre>
         </span>
     </p>
     <p>From fundamentals to production architecture</p>
-    <p class="mt-2 text-muted">Topics covered: Schema Design, Resolvers, Node.js + Apollo Server, React + Apollo Client, Authentication, Caching, DataLoader, Federation, Security, Testing, and 40+ Interview Questions</p>
+    <p class="mt-2 text-muted">Topics covered: Schema Design, Resolvers, Node.js + Apollo Server, React + Apollo Client, Authentication, Caching, DataLoader, Federation, Security, Testing, CRUD with Mongoose & Prisma, and 40+ Interview Questions</p>
 </footer>
 
 </div><!-- /.page-wrapper -->
