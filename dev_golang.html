@@ -656,6 +656,210 @@ resp, err := client.<span class="fn">Do</span>(req)
   <p>When you pass <code>nil</code> as the handler, Go uses <code>http.DefaultServeMux</code>, a global request multiplexer. Each call to <code>http.HandleFunc</code> registers a pattern on this default mux. When a request arrives, the mux finds the most specific matching pattern and calls its handler.</p>
 </div>
 
+<h3>Understanding Every Line — What Each Function Does</h3>
+<p>Before learning multiple server methods, let's break down every piece of the basic server so nothing feels like magic.</p>
+
+<pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>       <span class="cm">// Formatted I/O — Fprintln writes to any io.Writer (like http.ResponseWriter)</span>
+    <span class="str">"log"</span>       <span class="cm">// Logging with timestamps — log.Fatal = log.Print + os.Exit(1)</span>
+    <span class="str">"net/http"</span>  <span class="cm">// Full HTTP client + server, production-quality, zero dependencies</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// http.HandleFunc registers a function on the GLOBAL DefaultServeMux.</span>
+    <span class="cm">// Pattern "/" matches ALL paths (it's a catch-all in Go's mux).</span>
+    <span class="cm">// The function signature must be: func(http.ResponseWriter, *http.Request)</span>
+    http.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, <span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+        <span class="cm">// w (ResponseWriter) — write your response here. It implements io.Writer.</span>
+        <span class="cm">// r (*Request) — contains everything about the incoming request:</span>
+        <span class="cm">//   r.Method, r.URL, r.Header, r.Body, r.Context()</span>
+        fmt.<span class="fn">Fprintln</span>(w, <span class="str">"Hello Server!"</span>)
+    })
+
+    fmt.<span class="fn">Println</span>(<span class="str">"Server on :8080"</span>)
+
+    <span class="cm">// log.Fatal does TWO things:</span>
+    <span class="cm">//   1. Logs the error with a timestamp (like log.Println)</span>
+    <span class="cm">//   2. Calls os.Exit(1) — terminates the program immediately</span>
+    <span class="cm">//</span>
+    <span class="cm">// http.ListenAndServe BLOCKS forever (it runs an infinite accept loop).</span>
+    <span class="cm">// It only returns if something goes wrong (port already in use, permission denied).</span>
+    <span class="cm">// So if it returns at all, it's an error — and log.Fatal prints it and exits.</span>
+    log.<span class="fn">Fatal</span>(http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>))
+}</code></pre>
+
+<div class="info-box">
+  <div class="box-title">log.Fatal vs log.Println vs fmt.Println — When to use which</div>
+  <table>
+    <tr><th>Function</th><th>What it does</th><th>When to use</th></tr>
+    <tr><td><code>fmt.Println("msg")</code></td><td>Prints to stdout, no timestamp</td><td>User-facing output, debug prints</td></tr>
+    <tr><td><code>log.Println("msg")</code></td><td>Prints to stderr with timestamp, program continues</td><td>Non-fatal warnings, info logs</td></tr>
+    <tr><td><code>log.Fatal("msg")</code></td><td><code>log.Println</code> + <code>os.Exit(1)</code> — program dies</td><td>Startup failures where the program can't recover (port busy, missing config, cert not found)</td></tr>
+    <tr><td><code>log.Fatalf("err: %v", err)</code></td><td>Same as Fatal but with format string</td><td>Same, but when you want to include the error value</td></tr>
+    <tr><td><code>log.Panic("msg")</code></td><td><code>log.Println</code> + <code>panic()</code> — triggers defer chains</td><td>Rarely used — when you want defers to run before crashing</td></tr>
+  </table>
+</div>
+
+<div class="warn-box">
+  <div class="box-title">Why log.Fatal and not just if err != nil?</div>
+  <p><code>http.ListenAndServe</code> is meant to run forever. If it returns, something is fatally wrong — the port is taken, permissions are denied, or the listener broke. There's nothing to "handle" — the server can't start. <code>log.Fatal</code> is the idiomatic Go pattern for "log it and crash" at startup. You'll see this in virtually every Go server example. Inside handlers, never use <code>log.Fatal</code> — use <code>http.Error(w, msg, code)</code> instead, because you don't want one bad request to kill the entire server.</p>
+</div>
+
+<h3>All Server Creation Methods — Complete Reference</h3>
+<p>Go gives you 5 ways to start an HTTP server, from simplest to most control. Each TLS method is the secure equivalent of a plain HTTP method. Here's every one of them with when and why you'd pick it.</p>
+
+<h4>Method 1: http.ListenAndServe — Quick Start</h4>
+<p>A package-level convenience function. Creates an <code>http.Server</code> internally, binds to the address, and blocks forever. You get zero configuration — no timeouts, no TLS, no graceful shutdown.</p>
+<pre><code><span class="cm">// Signature: func ListenAndServe(addr string, handler http.Handler) error</span>
+
+http.<span class="fn">HandleFunc</span>(<span class="str">"/"</span>, homeHandler)
+log.<span class="fn">Fatal</span>(http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="kw">nil</span>))
+<span class="cm">//                              │         │</span>
+<span class="cm">//                              │         └─ nil = use DefaultServeMux</span>
+<span class="cm">//                              └─ ":8080" = listen on all interfaces, port 8080</span>
+<span class="cm">//                                 "localhost:8080" = only local connections</span>
+<span class="cm">//                                 ":0" = OS picks a random free port</span></code></pre>
+
+<h4>Method 2: http.ListenAndServeTLS — Quick Start with HTTPS</h4>
+<p>Same as above but wraps the connection in TLS. You pass cert and key file paths. Still no timeouts or shutdown control.</p>
+<pre><code><span class="cm">// Signature: func ListenAndServeTLS(addr, certFile, keyFile string, handler http.Handler) error</span>
+
+log.<span class="fn">Fatal</span>(http.<span class="fn">ListenAndServeTLS</span>(
+    <span class="str">":443"</span>,        <span class="cm">// HTTPS standard port</span>
+    <span class="str">"cert.pem"</span>,    <span class="cm">// Public certificate file — sent to clients</span>
+    <span class="str">"key.pem"</span>,     <span class="cm">// Private key file — NEVER share this, chmod 0600</span>
+    <span class="kw">nil</span>,           <span class="cm">// Handler (nil = DefaultServeMux)</span>
+))
+<span class="cm">// Internally: creates *http.Server, loads cert+key via tls.LoadX509KeyPair,</span>
+<span class="cm">// wraps the TCP listener in a TLS listener, then calls server.Serve()</span></code></pre>
+
+<h4>Method 3: server.ListenAndServe — Production HTTP</h4>
+<p>Create your own <code>*http.Server</code> struct with full control over timeouts, handler, header limits, and graceful shutdown.</p>
+<pre><code>mux := http.<span class="fn">NewServeMux</span>()  <span class="cm">// Your own mux — isolated from global state</span>
+mux.<span class="fn">HandleFunc</span>(<span class="str">"GET /"</span>, homeHandler)
+
+server := &amp;<span class="ty">http.Server</span>{
+    Addr:              <span class="str">":8080"</span>,             <span class="cm">// Listen address</span>
+    Handler:           mux,                 <span class="cm">// Your mux (NOT nil — avoid DefaultServeMux)</span>
+    ReadTimeout:       <span class="num">5</span> * time.Second,     <span class="cm">// Max time to read full request</span>
+    ReadHeaderTimeout: <span class="num">2</span> * time.Second,     <span class="cm">// Max time to read just headers</span>
+    WriteTimeout:      <span class="num">10</span> * time.Second,    <span class="cm">// Max time to write the response</span>
+    IdleTimeout:       <span class="num">120</span> * time.Second,   <span class="cm">// How long keep-alive connections idle</span>
+    MaxHeaderBytes:    <span class="num">1</span> &lt;&lt; <span class="num">20</span>,             <span class="cm">// 1 MB max header size</span>
+}
+
+<span class="cm">// ListenAndServe on a *http.Server: creates a TCP listener on server.Addr,</span>
+<span class="cm">// then calls server.Serve(listener). Blocks until error.</span>
+log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServe</span>())</code></pre>
+
+<h4>Method 4: server.ListenAndServeTLS — Production HTTPS</h4>
+<p>Same as above but with TLS. This is the most common production setup. HTTP/2 is automatically enabled over TLS connections.</p>
+<pre><code>server := &amp;<span class="ty">http.Server</span>{
+    Addr:         <span class="str">":443"</span>,
+    Handler:      mux,
+    ReadTimeout:  <span class="num">5</span> * time.Second,
+    WriteTimeout: <span class="num">10</span> * time.Second,
+    IdleTimeout:  <span class="num">120</span> * time.Second,
+    TLSConfig:    &amp;<span class="ty">tls.Config</span>{
+        MinVersion: tls.VersionTLS12,  <span class="cm">// Reject TLS 1.0 and 1.1 (insecure)</span>
+    },
+}
+
+<span class="cm">// Loads cert+key, wraps listener in TLS, enables HTTP/2 via ALPN</span>
+log.<span class="fn">Fatal</span>(server.<span class="fn">ListenAndServeTLS</span>(<span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>))
+
+<span class="cm">// If certs are already in TLSConfig.Certificates, pass empty strings:</span>
+<span class="cm">// log.Fatal(server.ListenAndServeTLS("", ""))</span></code></pre>
+
+<h4>Method 5: server.Serve(listener) — Maximum Control (HTTP)</h4>
+<p>You create the TCP listener yourself and pass it in. Use this for Unix sockets, dynamic port assignment, or custom connection handling.</p>
+<pre><code><span class="cm">// Create a TCP listener manually</span>
+ln, err := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":0"</span>)  <span class="cm">// :0 = OS picks a free port</span>
+<span class="kw">if</span> err != <span class="kw">nil</span> {
+    log.<span class="fn">Fatal</span>(err)
+}
+log.<span class="fn">Printf</span>(<span class="str">"Listening on %s"</span>, ln.<span class="fn">Addr</span>())  <span class="cm">// Print the actual assigned port</span>
+
+server := &amp;<span class="ty">http.Server</span>{Handler: mux}
+log.<span class="fn">Fatal</span>(server.<span class="fn">Serve</span>(ln))  <span class="cm">// Uses YOUR listener instead of creating one</span>
+
+<span class="cm">// Unix socket example — no TCP, communicates via filesystem:</span>
+<span class="cm">// ln, _ := net.Listen("unix", "/var/run/myapp.sock")</span>
+<span class="cm">// server.Serve(ln)</span></code></pre>
+
+<h4>Method 6: server.ServeTLS(listener, cert, key) — Maximum Control (HTTPS)</h4>
+<p>Same as <code>Serve</code> but wraps your listener in TLS. Used for custom TLS listeners, mTLS setups, or when you need to control the listener lifecycle.</p>
+<pre><code>ln, err := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":443"</span>)
+<span class="kw">if</span> err != <span class="kw">nil</span> {
+    log.<span class="fn">Fatal</span>(err)
+}
+
+server := &amp;<span class="ty">http.Server</span>{
+    Handler: mux,
+    TLSConfig: &amp;<span class="ty">tls.Config</span>{
+        MinVersion: tls.VersionTLS12,
+        ClientAuth: tls.RequireAndVerifyClientCert,  <span class="cm">// mTLS — require client cert</span>
+    },
+}
+
+<span class="cm">// ServeTLS wraps ln in a TLS listener, then calls server.Serve(tlsListener)</span>
+log.<span class="fn">Fatal</span>(server.<span class="fn">ServeTLS</span>(ln, <span class="str">"cert.pem"</span>, <span class="str">"key.pem"</span>))</code></pre>
+
+<div class="tip-box">
+  <div class="box-title">All 6 Methods — Quick Comparison</div>
+  <table>
+    <tr><th>Method</th><th>Creates listener?</th><th>TLS?</th><th>Timeouts?</th><th>Use case</th></tr>
+    <tr><td><code>http.ListenAndServe(addr, h)</code></td><td>Yes (internal)</td><td>No</td><td>No</td><td>Prototyping, scripts</td></tr>
+    <tr><td><code>http.ListenAndServeTLS(addr, cert, key, h)</code></td><td>Yes (internal)</td><td>Yes</td><td>No</td><td>Quick HTTPS prototype</td></tr>
+    <tr><td><code>server.ListenAndServe()</code></td><td>Yes (from Addr)</td><td>No</td><td>Yes</td><td>Production HTTP</td></tr>
+    <tr><td><code>server.ListenAndServeTLS(cert, key)</code></td><td>Yes (from Addr)</td><td>Yes</td><td>Yes</td><td>Production HTTPS</td></tr>
+    <tr><td><code>server.Serve(ln)</code></td><td>No (you provide)</td><td>No</td><td>Yes</td><td>Unix sockets, dynamic ports</td></tr>
+    <tr><td><code>server.ServeTLS(ln, cert, key)</code></td><td>No (you provide)</td><td>Yes</td><td>Yes</td><td>Custom TLS, mTLS</td></tr>
+  </table>
+</div>
+
+<div class="info-box">
+  <div class="box-title">What happens inside each method</div>
+  <pre><code>http.ListenAndServe(addr, handler)
+  └─ creates &amp;http.Server{Addr: addr, Handler: handler}
+     └─ server.ListenAndServe()
+        └─ net.Listen("tcp", server.Addr)   ← creates TCP listener
+           └─ server.Serve(listener)        ← accept loop (blocks forever)
+              └─ for each connection: go conn.serve()  ← goroutine per request
+
+http.ListenAndServeTLS(addr, cert, key, handler)
+  └─ creates &amp;http.Server{Addr: addr, Handler: handler}
+     └─ server.ListenAndServeTLS(cert, key)
+        └─ tls.LoadX509KeyPair(cert, key)   ← loads certificate + private key
+           └─ net.Listen("tcp", server.Addr)
+              └─ tls.NewListener(ln, config) ← wraps TCP in TLS
+                 └─ server.Serve(tlsListener) ← same accept loop, encrypted</code></pre>
+</div>
+
+<div class="warn-box">
+  <div class="box-title">Common mistake: using log.Fatal inside handlers</div>
+  <p><code>log.Fatal</code> calls <code>os.Exit(1)</code> which kills the entire process. Inside a handler, one bad request would crash the whole server. Use it only at startup. Inside handlers, return errors to the client:</p>
+  <pre><code><span class="cm">// ❌ WRONG — kills the entire server for one bad request</span>
+<span class="kw">func</span> <span class="fn">handler</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    data, err := db.<span class="fn">Query</span>(<span class="str">"SELECT ..."</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(err)  <span class="cm">// DON'T — this calls os.Exit(1)!</span>
+    }
+}
+
+<span class="cm">// ✅ CORRECT — returns error to client, server keeps running</span>
+<span class="kw">func</span> <span class="fn">handler</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    data, err := db.<span class="fn">Query</span>(<span class="str">"SELECT ..."</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        log.<span class="fn">Printf</span>(<span class="str">"DB error: %v"</span>, err)  <span class="cm">// Log it (non-fatal)</span>
+        http.<span class="fn">Error</span>(w, <span class="str">"Internal Server Error"</span>, http.StatusInternalServerError)
+        <span class="kw">return</span>
+    }
+}</code></pre>
+</div>
+
 <h3>Handler vs HandlerFunc</h3>
 <p>Go has two ways to define handlers. <code>http.HandlerFunc</code> is for quick inline functions. <code>http.Handler</code> is an interface that any struct can implement, giving you more structure for complex handlers.</p>
 
