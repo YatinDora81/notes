@@ -2401,6 +2401,83 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
   <p>Because each middleware wraps the previous one, the <strong>first middleware in the list</strong> is the outermost layer. It runs first on the request and last on the response. Think of it like an onion: <code>CORS -> ResponseTime -> JWT -> XSS -> Compression -> SecurityHeaders -> [handler] -> SecurityHeaders -> Compression -> XSS -> JWT -> ResponseTime -> CORS</code>.</p>
 </div>
 
+<h3>Express vs Go Middleware — Side by Side</h3>
+<p>If you're coming from Node/Express, Go middleware looks unfamiliar at first because it uses a <strong>wrapper pattern</strong> instead of a <strong>callback chain</strong>. Both accomplish the same goal — run code before/after handlers — but the mental model is different.</p>
+
+<h4>Express: Callback-style Chain</h4>
+<p>In Express, middleware is a function that receives <code>(req, res, next)</code>. You call <code>next()</code> to hand control to the next middleware. The framework keeps an internal array of middleware and calls them in registration order — <em>you never see the chain itself</em>.</p>
+
+<pre><code><span class="cm">// Express: middleware is a function you register</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  console.<span class="fn">log</span>(<span class="str">'before'</span>);
+  <span class="fn">next</span>();              <span class="cm">// hand off to the next middleware</span>
+  console.<span class="fn">log</span>(<span class="str">'after'</span>);
+});
+
+app.<span class="fn">get</span>(<span class="str">'/hello'</span>, (req, res) =&gt; res.<span class="fn">send</span>(<span class="str">'hi'</span>));</code></pre>
+
+<h4>Go: Wrapper-style (Decorator Pattern)</h4>
+<p>In Go, middleware is a function that <strong>takes a handler and returns a new handler</strong>. You build the chain <em>explicitly</em> by wrapping: <code>logger(auth(mux))</code>. There's no hidden array — the stack is literally the code you wrote.</p>
+
+<pre><code><span class="cm">// Go: middleware wraps a handler, returns a handler</span>
+<span class="kw">func</span> <span class="fn">logger</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+  <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    log.<span class="fn">Println</span>(<span class="str">"before"</span>)
+    next.<span class="fn">ServeHTTP</span>(w, r)   <span class="cm">// call the wrapped handler</span>
+    log.<span class="fn">Println</span>(<span class="str">"after"</span>)
+  })
+}
+
+mux := http.<span class="fn">NewServeMux</span>()
+mux.<span class="fn">HandleFunc</span>(<span class="str">"/hello"</span>, helloHandler)
+
+<span class="cm">// You explicitly build the stack by wrapping:</span>
+http.<span class="fn">ListenAndServe</span>(<span class="str">":8080"</span>, <span class="fn">logger</span>(<span class="fn">auth</span>(mux)))</code></pre>
+
+<h4>Concept-by-Concept Mapping</h4>
+<table>
+  <tr><th>Concept</th><th>Express</th><th>Go</th></tr>
+  <tr><td>Pass control forward</td><td><code>next()</code></td><td><code>next.ServeHTTP(w, r)</code></td></tr>
+  <tr><td>Register middleware</td><td><code>app.use(fn)</code></td><td><code>handler = mw(handler)</code></td></tr>
+  <tr><td>Chain order</td><td>Registration order via <code>app.use</code></td><td>Wrap order: <code>a(b(c(h)))</code> → <code>a</code> runs first</td></tr>
+  <tr><td>Short-circuit</td><td>Don't call <code>next()</code>, send response</td><td>Don't call <code>next.ServeHTTP</code>, write response</td></tr>
+  <tr><td>Who owns the chain</td><td>Framework (hidden array)</td><td>You (explicit wrapping)</td></tr>
+  <tr><td>Signature</td><td><code>(req, res, next) =&gt; ...</code></td><td><code>func(http.Handler) http.Handler</code></td></tr>
+  <tr><td>Attach request data</td><td>Mutate <code>req.user = ...</code></td><td><code>r.WithContext(ctx)</code> — immutable</td></tr>
+  <tr><td>Error handling</td><td><code>next(err)</code> → error middleware</td><td>Write error response directly; no special error chain</td></tr>
+</table>
+
+<div class="tip-box">
+  <div class="box-title">Mental Model</div>
+  <ul>
+    <li><strong>Express:</strong> "I'm a link in a chain. Someone calls me, I call <code>next</code>."</li>
+    <li><strong>Go:</strong> "I'm a box wrapped around another handler. I decide when (or if) to call what's inside me."</li>
+  </ul>
+  <p>That's why Go feels <strong>stack-based</strong>: <code>logger(auth(mux))</code> literally reads as a stack you built by hand. In Express the stack exists but the framework builds it for you from <code>app.use</code> calls.</p>
+</div>
+
+<h4>Short-circuiting: Auth Rejection Example</h4>
+<p>Both frameworks support early return — just skip calling the "next" step.</p>
+
+<pre><code><span class="cm">// Express: don't call next(), just respond</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">if</span> (!req.headers.authorization) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">send</span>(<span class="str">'unauthorized'</span>);
+  }
+  <span class="fn">next</span>();
+});</code></pre>
+
+<pre><code><span class="cm">// Go: don't call next.ServeHTTP, just write</span>
+<span class="kw">func</span> <span class="fn">auth</span>(next <span class="ty">http.Handler</span>) <span class="ty">http.Handler</span> {
+  <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w <span class="ty">http.ResponseWriter</span>, r *<span class="ty">http.Request</span>) {
+    <span class="kw">if</span> r.Header.<span class="fn">Get</span>(<span class="str">"Authorization"</span>) == <span class="str">""</span> {
+      http.<span class="fn">Error</span>(w, <span class="str">"unauthorized"</span>, http.StatusUnauthorized)
+      <span class="kw">return</span>
+    }
+    next.<span class="fn">ServeHTTP</span>(w, r)
+  })
+}</code></pre>
+
 
 <!-- ===================== SECTION 12: SECURITY HEADERS ===================== -->
 <h2 id="security-headers"><span class="section-num">12</span> Security Headers Middleware</h2>
