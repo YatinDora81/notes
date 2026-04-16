@@ -409,6 +409,50 @@
     margin: 8px 0;
     overflow-x: auto;
   }
+
+  /* ========== NODE.JS COMPARISON BOX ========== */
+  .node-box {
+    border-left: 3px solid #68a063;
+    background: rgba(104,160,99,0.04);
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin: 18px 0;
+    border: 1px solid rgba(104,160,99,0.2);
+  }
+  .node-box .box-title {
+    font-weight: 650;
+    margin-bottom: 6px;
+    color: #68a063;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .node-box .box-title::before {
+    content: 'JS';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    background: rgba(104,160,99,0.15);
+    color: #68a063;
+    font-size: 0.65rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .node-box p { color: var(--muted); margin: 6px 0; font-size: 0.88rem; }
+  .node-box pre {
+    background: rgba(104,160,99,0.06);
+    border: 1px solid rgba(104,160,99,0.12);
+  }
+  .node-box code { color: #68a063; background: rgba(104,160,99,0.1); }
+  .node-box pre code { color: var(--text); background: none; }
+  .node-box ul { margin: 8px 0 8px 20px; }
+  .node-box li { color: var(--muted); font-size: 0.88rem; margin: 4px 0; }
+  .node-box table { font-size: 0.84rem; margin: 10px 0; }
+  .node-box th { background: rgba(104,160,99,0.08); color: #68a063; }
 </style>
 </head>
 <body>
@@ -588,6 +632,38 @@ resp, err := client.<span class="fn">Do</span>(req)
 <div class="tip-box">
   <div class="box-title">Production Tip</div>
   <p>Always set a <code>Timeout</code> on your HTTP client. The default client has <strong>no timeout</strong>, meaning a slow server can hang your application forever. A 10-30 second timeout is a sensible default.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's <code>http.Client</code> maps directly to <code>fetch</code> (built-in) or <code>axios</code> (npm). Here's the same Star Wars API call in both:</p>
+<pre><code><span class="cm">// Node.js — using built-in fetch (Node 18+)</span>
+<span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://swapi.dev/api/people/1'</span>);
+<span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();  <span class="cm">// auto-parses JSON</span>
+console.<span class="fn">log</span>(data);
+
+<span class="cm">// Node.js — using axios</span>
+<span class="kw">const</span> { data } = <span class="kw">await</span> axios.<span class="fn">get</span>(<span class="str">'https://swapi.dev/api/people/1'</span>);
+console.<span class="fn">log</span>(data);  <span class="cm">// axios auto-parses JSON too</span>
+
+<span class="cm">// Custom headers equivalent:</span>
+<span class="kw">const</span> resp = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.example.com/data'</span>, {
+  headers: {
+    <span class="str">'Authorization'</span>: <span class="str">'Bearer my-token'</span>,
+    <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+  },
+  signal: AbortSignal.<span class="fn">timeout</span>(<span class="num">10000</span>),  <span class="cm">// 10s timeout (like Go's Timeout)</span>
+});</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th><th>Key Difference</th></tr>
+    <tr><td><code>client.Get(url)</code></td><td><code>fetch(url)</code> / <code>axios.get(url)</code></td><td>Go returns <code>(resp, err)</code>; Node returns a Promise</td></tr>
+    <tr><td><code>io.ReadAll(resp.Body)</code></td><td><code>resp.json()</code> / <code>resp.text()</code></td><td>Go gives raw bytes; Node auto-decodes</td></tr>
+    <tr><td><code>defer resp.Body.Close()</code></td><td>Nothing — GC handles it</td><td>Go MUST close body or leak sockets</td></tr>
+    <tr><td><code>http.NewRequest("GET", url, nil)</code></td><td><code>new Request(url, { method: 'GET' })</code></td><td>Almost identical pattern</td></tr>
+    <tr><td><code>client.Timeout = 10 * time.Second</code></td><td><code>AbortSignal.timeout(10000)</code></td><td>Go sets once on client; Node per-request</td></tr>
+    <tr><td><code>if err != nil { ... }</code></td><td><code>try/catch</code> or <code>.catch()</code></td><td>Go: explicit error value. Node: thrown exception</td></tr>
+  </table>
+  <p><strong>Critical difference:</strong> In Go, you <strong>must</strong> close <code>resp.Body</code> or you leak TCP connections. In Node, the garbage collector handles cleanup. Also, Go errors are <strong>values</strong> you check explicitly — a <code>500</code> response is NOT an error in Go (you check <code>resp.StatusCode</code>), while <code>axios</code> throws on non-2xx by default.</p>
 </div>
 
 
@@ -1118,6 +1194,48 @@ server.<span class="fn">ListenAndServe</span>()
 <span class="cm">// base context, and call Shutdown() for graceful termination.</span>
 <span class="cm">// http.ListenAndServe gives you NONE of that.</span></code></pre>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's HTTP server maps to Node's <code>http.createServer()</code> or Express's <code>app.listen()</code>. Here's how the concepts translate:</p>
+<pre><code><span class="cm">// --- BASIC SERVER (like Go's http.ListenAndServe) ---</span>
+<span class="kw">const</span> http = <span class="fn">require</span>(<span class="str">'http'</span>);
+<span class="kw">const</span> server = http.<span class="fn">createServer</span>((req, res) =&gt; {
+  res.<span class="fn">end</span>(<span class="str">'Hello Server!'</span>);
+});
+server.<span class="fn">listen</span>(<span class="num">8080</span>, () =&gt; console.<span class="fn">log</span>(<span class="str">'Server on :8080'</span>));
+
+<span class="cm">// --- PRODUCTION SERVER (like Go's custom *http.Server) ---</span>
+<span class="kw">const</span> server = http.<span class="fn">createServer</span>(app);
+server.timeout = <span class="num">10000</span>;         <span class="cm">// Like Go's WriteTimeout (10s)</span>
+server.headersTimeout = <span class="num">5000</span>;  <span class="cm">// Like Go's ReadHeaderTimeout (5s)</span>
+server.keepAliveTimeout = <span class="num">120000</span>; <span class="cm">// Like Go's IdleTimeout (120s)</span>
+server.maxHeadersCount = <span class="num">100</span>;   <span class="cm">// Limit header count</span>
+server.<span class="fn">listen</span>(<span class="num">8080</span>);
+
+<span class="cm">// --- GRACEFUL SHUTDOWN (like Go's server.Shutdown(ctx)) ---</span>
+process.<span class="fn">on</span>(<span class="str">'SIGINT'</span>, () =&gt; {
+  console.<span class="fn">log</span>(<span class="str">'Shutting down...'</span>);
+  server.<span class="fn">close</span>(() =&gt; {  <span class="cm">// Waits for in-flight requests</span>
+    console.<span class="fn">log</span>(<span class="str">'Server stopped gracefully'</span>);
+    process.<span class="fn">exit</span>(<span class="num">0</span>);
+  });
+  <span class="cm">// Force kill after 30s</span>
+  <span class="fn">setTimeout</span>(() =&gt; process.<span class="fn">exit</span>(<span class="num">1</span>), <span class="num">30000</span>);
+});</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th><th>Key Difference</th></tr>
+    <tr><td><code>http.HandleFunc("/", handler)</code></td><td><code>app.get("/", handler)</code></td><td>Go registers on a mux; Express uses chained methods</td></tr>
+    <tr><td><code>http.ListenAndServe(":8080", nil)</code></td><td><code>app.listen(8080)</code></td><td>Go blocks forever; Node is non-blocking (event loop)</td></tr>
+    <tr><td><code>log.Fatal(err)</code></td><td><code>server.on('error', cb)</code></td><td>Go exits on startup error; Node emits an error event</td></tr>
+    <tr><td><code>server.Shutdown(ctx)</code></td><td><code>server.close(callback)</code></td><td>Go uses context for timeout; Node uses callback</td></tr>
+    <tr><td>Goroutine per request (auto)</td><td>Single-threaded event loop</td><td><strong>Fundamental:</strong> Go handles CPU-heavy requests concurrently; Node blocks on them</td></tr>
+    <tr><td><code>http.NewServeMux()</code></td><td><code>express.Router()</code></td><td>Go's mux is a simple trie; Express router is middleware-based</td></tr>
+    <tr><td><code>w.Header().Set(...)</code></td><td><code>res.setHeader(...)</code></td><td>Same concept, different API</td></tr>
+    <tr><td><code>fmt.Fprintln(w, "text")</code></td><td><code>res.send("text")</code></td><td>Go writes to io.Writer; Express has convenience methods</td></tr>
+  </table>
+  <p><strong>The biggest difference:</strong> Go spawns a <strong>goroutine per request</strong> automatically — 10,000 concurrent connections = 10,000 goroutines (~20KB each). Node processes ALL requests on a <strong>single thread</strong>. One slow database query in Node.js doesn't block (it's async), but one CPU-heavy computation blocks everything. In Go, CPU-heavy work in one goroutine doesn't affect others.</p>
+</div>
+
 
 <!-- ===================== SECTION 03: MODERN ROUTING ===================== -->
 <h2 id="modern-routing"><span class="section-num">03</span> Modern Routing (Go 1.22+)</h2>
@@ -1209,6 +1327,48 @@ id := r.<span class="fn">PathValue</span>(<span class="str">"id"</span>)  <span 
 page := r.URL.Query().<span class="fn">Get</span>(<span class="str">"page"</span>)    <span class="cm">// "2"</span>
 limit := r.URL.Query().<span class="fn">Get</span>(<span class="str">"limit"</span>)  <span class="cm">// "10"</span></code></pre>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go 1.22's routing now matches what Express has offered since day one — method-based routing and path parameters. The syntax is different but the concepts map 1:1:</p>
+<pre><code><span class="cm">// Express.js — the same routing patterns</span>
+<span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+<span class="cm">// Method-based routing (same as Go's "POST /items/create")</span>
+app.<span class="fn">post</span>(<span class="str">'/items/create'</span>, createItem);
+app.<span class="fn">delete</span>(<span class="str">'/items/create'</span>, deleteItem);
+
+<span class="cm">// Path parameters (same as Go's /teachers/{id})</span>
+app.<span class="fn">get</span>(<span class="str">'/teachers/:id'</span>, (req, res) =&gt; {
+  res.<span class="fn">send</span>(<span class="str">`Teacher ID: ${req.params.id}`</span>);
+  <span class="cm">//                      ^^^^^^^^^^^^^^</span>
+  <span class="cm">// Express: req.params.id</span>
+  <span class="cm">// Go:      r.PathValue("id")</span>
+});
+
+<span class="cm">// Wildcard catch-all (same as Go's /files/{path...})</span>
+app.<span class="fn">get</span>(<span class="str">'/files/*'</span>, (req, res) =&gt; {
+  res.<span class="fn">send</span>(<span class="str">`Path: ${req.params[0]}`</span>);
+  <span class="cm">// Express uses * for catch-all; Go uses {name...}</span>
+});
+
+<span class="cm">// Query parameters — identical concept</span>
+app.<span class="fn">get</span>(<span class="str">'/users'</span>, (req, res) =&gt; {
+  <span class="kw">const</span> page = req.query.page;    <span class="cm">// Express: req.query.page</span>
+  <span class="kw">const</span> limit = req.query.limit;  <span class="cm">// Go: r.URL.Query().Get("limit")</span>
+});</code></pre>
+  <table>
+    <tr><th>Go (1.22+)</th><th>Express.js</th></tr>
+    <tr><td><code>mux.HandleFunc("GET /users/{id}", h)</code></td><td><code>app.get('/users/:id', h)</code></td></tr>
+    <tr><td><code>r.PathValue("id")</code></td><td><code>req.params.id</code></td></tr>
+    <tr><td><code>r.URL.Query().Get("page")</code></td><td><code>req.query.page</code></td></tr>
+    <tr><td><code>"/files/{path...}"</code></td><td><code>'/files/*'</code></td></tr>
+    <tr><td>Auto 405 Method Not Allowed</td><td>Need <code>app.all()</code> or custom handler</td></tr>
+    <tr><td>More-specific pattern wins automatically</td><td>First registered route wins (order matters!)</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Express matches routes in <strong>registration order</strong> (first match wins), so route order matters. Go 1.22 uses <strong>specificity</strong> (most-specific pattern wins), so <code>/users/new</code> always beats <code>/users/{id}</code> regardless of order.</p>
+</div>
+
 
 <!-- ===================== SECTION 04: SUB-ROUTING ===================== -->
 <h2 id="sub-routing"><span class="section-num">04</span> Sub-Routing &amp; Route Groups</h2>
@@ -1281,6 +1441,44 @@ v2.<span class="fn">HandleFunc</span>(<span class="str">"GET /users"</span>, get
 api := http.<span class="fn">NewServeMux</span>()
 api.<span class="fn">Handle</span>(<span class="str">"/api/v1/"</span>, http.<span class="fn">StripPrefix</span>(<span class="str">"/api/v1"</span>, v1))
 api.<span class="fn">Handle</span>(<span class="str">"/api/v2/"</span>, http.<span class="fn">StripPrefix</span>(<span class="str">"/api/v2"</span>, v2))</code></pre>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Express has first-class sub-routing with <code>express.Router()</code> and <code>app.use(prefix, router)</code> — no <code>StripPrefix</code> needed because Express handles prefix stripping automatically:</p>
+<pre><code><span class="cm">// Express.js — Sub-routing with express.Router()</span>
+<span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+<span class="cm">// Create sub-routers (like Go's http.NewServeMux())</span>
+<span class="kw">const</span> usersRouter = express.<span class="fn">Router</span>();
+usersRouter.<span class="fn">get</span>(<span class="str">'/'</span>, getUsers);        <span class="cm">// Handles /app/users</span>
+usersRouter.<span class="fn">get</span>(<span class="str">'/:id'</span>, getUser);      <span class="cm">// Handles /app/users/:id</span>
+
+<span class="kw">const</span> itemsRouter = express.<span class="fn">Router</span>();
+itemsRouter.<span class="fn">get</span>(<span class="str">'/'</span>, getItems);        <span class="cm">// Handles /app/items</span>
+
+<span class="cm">// Mount under /app prefix — Express strips the prefix automatically!</span>
+app.<span class="fn">use</span>(<span class="str">'/app/users'</span>, usersRouter);
+app.<span class="fn">use</span>(<span class="str">'/app/items'</span>, itemsRouter);
+
+<span class="cm">// --- API Versioning ---</span>
+<span class="kw">const</span> v1Router = express.<span class="fn">Router</span>();
+v1Router.<span class="fn">get</span>(<span class="str">'/users'</span>, getUsersV1);
+
+<span class="kw">const</span> v2Router = express.<span class="fn">Router</span>();
+v2Router.<span class="fn">get</span>(<span class="str">'/users'</span>, getUsersV2);
+
+app.<span class="fn">use</span>(<span class="str">'/api/v1'</span>, v1Router);  <span class="cm">// No StripPrefix needed!</span>
+app.<span class="fn">use</span>(<span class="str">'/api/v2'</span>, v2Router);  <span class="cm">// Express handles it automatically</span></code></pre>
+  <table>
+    <tr><th>Go</th><th>Express.js</th></tr>
+    <tr><td><code>mux := http.NewServeMux()</code></td><td><code>const router = express.Router()</code></td></tr>
+    <tr><td><code>app.Handle("/api/", http.StripPrefix("/api", mux))</code></td><td><code>app.use('/api', router)</code></td></tr>
+    <tr><td>Must use <code>http.StripPrefix</code> manually</td><td>Express strips prefix automatically</td></tr>
+    <tr><td>Trailing slash matters: <code>"/api/"</code> vs <code>"/api"</code></td><td>Express normalizes both</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Express's <code>app.use('/prefix', router)</code> is a one-liner. Go requires the <code>http.StripPrefix</code> wrapper because the sub-mux sees the full path otherwise. Express handles this automatically, which is more convenient but also more magical.</p>
+</div>
 
 
 <!-- ===================== SECTION 05: TLS HTTPS ===================== -->
@@ -1774,6 +1972,55 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
 }</code></pre>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Node.js has a separate <code>https</code> module for TLS. Unlike Go (where TLS + HTTP/2 is automatic), Node needs extra setup for HTTP/2:</p>
+<pre><code><span class="cm">// Node.js — HTTPS server (like Go's ListenAndServeTLS)</span>
+<span class="kw">const</span> https = <span class="fn">require</span>(<span class="str">'https'</span>);
+<span class="kw">const</span> fs = <span class="fn">require</span>(<span class="str">'fs'</span>);
+
+<span class="kw">const</span> options = {
+  key: fs.<span class="fn">readFileSync</span>(<span class="str">'key.pem'</span>),     <span class="cm">// Go: passed to ListenAndServeTLS</span>
+  cert: fs.<span class="fn">readFileSync</span>(<span class="str">'cert.pem'</span>),   <span class="cm">// Go: passed to ListenAndServeTLS</span>
+  minVersion: <span class="str">'TLSv1.2'</span>,              <span class="cm">// Go: tls.Config{MinVersion: tls.VersionTLS12}</span>
+};
+
+<span class="kw">const</span> server = https.<span class="fn">createServer</span>(options, app);
+server.<span class="fn">listen</span>(<span class="num">443</span>);
+
+<span class="cm">// HTTP → HTTPS redirect (same concept as Go)</span>
+<span class="kw">const</span> http = <span class="fn">require</span>(<span class="str">'http'</span>);
+http.<span class="fn">createServer</span>((req, res) =&gt; {
+  res.<span class="fn">writeHead</span>(<span class="num">301</span>, { Location: <span class="str">`https://${req.headers.host}${req.url}`</span> });
+  res.<span class="fn">end</span>();
+}).<span class="fn">listen</span>(<span class="num">80</span>);
+
+<span class="cm">// Node.js HTTP/2 — requires separate module (NOT automatic like Go!)</span>
+<span class="kw">const</span> http2 = <span class="fn">require</span>(<span class="str">'http2'</span>);
+<span class="kw">const</span> h2Server = http2.<span class="fn">createSecureServer</span>({
+  key: fs.<span class="fn">readFileSync</span>(<span class="str">'key.pem'</span>),
+  cert: fs.<span class="fn">readFileSync</span>(<span class="str">'cert.pem'</span>),
+  allowHTTP1: <span class="kw">true</span>,  <span class="cm">// Fallback to HTTP/1.1</span>
+});
+
+<span class="cm">// Let's Encrypt (like Go's autocert)</span>
+<span class="cm">// npm install greenlock-express</span>
+<span class="fn">require</span>(<span class="str">'greenlock-express'</span>).<span class="fn">init</span>({
+  packageRoot: __dirname,
+  maintainerEmail: <span class="str">'admin@example.com'</span>,
+  configDir: <span class="str">'./greenlock.d'</span>,
+  cluster: <span class="kw">false</span>,
+}).<span class="fn">serve</span>(app);</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th><th>Key Difference</th></tr>
+    <tr><td><code>server.ListenAndServeTLS("cert", "key")</code></td><td><code>https.createServer({key, cert}, app)</code></td><td>Go: one method. Node: separate module</td></tr>
+    <tr><td>HTTP/2 automatic with TLS</td><td>Requires <code>http2</code> module separately</td><td><strong>Go wins here</strong> — zero config for HTTP/2</td></tr>
+    <tr><td><code>autocert.Manager{}</code></td><td><code>greenlock-express</code> / <code>certbot</code></td><td>Go has stdlib-adjacent support; Node needs npm</td></tr>
+    <tr><td><code>tls.Config{ClientAuth: RequireAndVerifyClientCert}</code></td><td><code>{requestCert: true, rejectUnauthorized: true}</code></td><td>Same mTLS concept, different syntax</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go enables HTTP/2 <strong>automatically</strong> when you use TLS — zero configuration. Node requires importing the separate <code>http2</code> module and changing your server creation code. Also, Go's <code>crypto/tls</code> can generate certificates programmatically at runtime, which is very convenient for tests.</p>
+</div>
+
 
 <!-- ===================== SECTION 06: PROJECT STRUCTURE ===================== -->
 <h2 id="project-structure"><span class="section-num">06</span> REST API Project Structure</h2>
@@ -1843,6 +2090,34 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
     <li><strong>handlers/</strong> — HTTP handlers that parse requests and call business logic. Thin layer.</li>
     <li><strong>repository/</strong> — Database access layer. Isolates SQL queries from business logic.</li>
   </ul>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Node.js/Express projects have a similar layered structure but with different conventions. Here's how they map:</p>
+<pre><code><span class="cm"># Go Project Structure          →  Node.js/Express Equivalent</span>
+<span class="cm">───────────────────────────────────────────────────────────</span>
+rest_api_go/                       my-express-app/
+├── cmd/api/server.go              ├── src/index.js          <span class="cm"># entry point</span>
+├── internal/                      ├── src/                  <span class="cm"># no enforced privacy</span>
+│   ├── models/student.go          │   ├── models/Student.js <span class="cm"># Mongoose/Prisma schema</span>
+│   ├── api/handlers/              │   ├── controllers/      <span class="cm"># request handlers</span>
+│   ├── api/router/                │   ├── routes/           <span class="cm"># route definitions</span>
+│   ├── api/middlewares/           │   ├── middleware/        <span class="cm"># Express middleware</span>
+│   └── repository/sqlconnect/     │   ├── services/         <span class="cm"># business logic</span>
+├── pkg/utils/                     │   └── utils/            <span class="cm"># shared utilities</span>
+├── go.mod                         ├── package.json          <span class="cm"># like go.mod</span>
+├── go.sum                         ├── package-lock.json     <span class="cm"># like go.sum</span>
+└── Makefile                       └── node_modules/         <span class="cm"># 500MB+ of deps</span></code></pre>
+  <table>
+    <tr><th>Go Concept</th><th>Node.js Equivalent</th><th>Key Difference</th></tr>
+    <tr><td><code>internal/</code> — compiler-enforced privacy</td><td>No equivalent — Node has no import restrictions</td><td><strong>Go wins:</strong> <code>internal/</code> is a compile error if violated</td></tr>
+    <tr><td><code>cmd/</code> — multiple binaries</td><td>Multiple <code>scripts</code> in package.json</td><td>Go compiles each to a separate binary</td></tr>
+    <tr><td><code>go.mod</code> + <code>go.sum</code></td><td><code>package.json</code> + <code>package-lock.json</code></td><td>Same concept: deps + lockfile</td></tr>
+    <tr><td>Single binary deployment (~10MB)</td><td>Copy entire <code>node_modules/</code> + source</td><td>Go's deployment is dramatically simpler</td></tr>
+    <tr><td><code>handlers/</code></td><td><code>controllers/</code></td><td>Same layer, different name convention</td></tr>
+    <tr><td><code>repository/</code></td><td><code>services/</code> or <code>db/</code></td><td>Same purpose: isolate DB queries</td></tr>
+  </table>
 </div>
 
 
@@ -1926,6 +2201,54 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
 <div class="warn-box">
   <div class="box-title">JSON Gotcha with sql.NullString</div>
   <p><code>sql.NullString</code> serializes to JSON as <code>{"String": "...", "Valid": true}</code> — not what you want! You need a custom <code>MarshalJSON</code> method or use a library like <code>guregu/null</code> for clean JSON output.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go structs with tags map to Mongoose schemas, Prisma models, TypeScript interfaces, or Sequelize models:</p>
+<pre><code><span class="cm">// --- Mongoose Schema (like Go struct with tags) ---</span>
+<span class="kw">const</span> studentSchema = <span class="kw">new</span> mongoose.<span class="fn">Schema</span>({
+  firstName: { type: String, required: <span class="kw">true</span> },  <span class="cm">// Go: `json:"first_name" validate:"required"`</span>
+  lastName:  { type: String },
+  email:     { type: String, required: <span class="kw">true</span> },
+  class:     { type: String },
+}, {
+  toJSON: {                           <span class="cm">// Like Go's json:"..." tags</span>
+    transform: (doc, ret) =&gt; {
+      ret.id = ret._id;              <span class="cm">// Like Go's json:"id"</span>
+      <span class="kw">delete</span> ret._id;
+      <span class="kw">delete</span> ret.__v;
+    }
+  }
+});
+
+<span class="cm">// --- Prisma Model (schema-first, like Go structs) ---</span>
+<span class="cm">// In prisma/schema.prisma:</span>
+<span class="cm">// model Student {</span>
+<span class="cm">//   id        Int    @id @default(autoincrement())</span>
+<span class="cm">//   firstName String @map("first_name")   // Like Go's db:"first_name"</span>
+<span class="cm">//   lastName  String @map("last_name")</span>
+<span class="cm">//   email     String</span>
+<span class="cm">//   class     String?                     // ? = nullable (like sql.NullString)</span>
+<span class="cm">// }</span>
+
+<span class="cm">// --- TypeScript Interface (type-safe but no runtime) ---</span>
+<span class="kw">interface</span> <span class="ty">Student</span> {
+  id?: number;          <span class="cm">// ? = optional (like omitempty)</span>
+  first_name: string;
+  last_name?: string;
+  email: string;
+  class?: string;
+}</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js/TypeScript</th></tr>
+    <tr><td><code>`json:"first_name,omitempty"`</code></td><td><code>toJSON transform</code> or serialization library</td></tr>
+    <tr><td><code>`db:"first_name"`</code></td><td><code>@map("first_name")</code> (Prisma) / field name (Mongoose)</td></tr>
+    <tr><td><code>sql.NullString</code></td><td><code>String?</code> (Prisma) / <code>string | null</code> (TS)</td></tr>
+    <tr><td><code>omitempty</code> — skip zero values in JSON</td><td>No built-in equivalent; use <code>JSON.stringify</code> replacer</td></tr>
+    <tr><td>Struct tags read via <code>reflect</code></td><td>Decorators (<code>class-validator</code>) or schema objects</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go struct tags are a <strong>single source of truth</strong> — one struct controls JSON serialization, DB mapping, AND validation. In Node, you often have separate definitions: a Mongoose schema for DB, a TypeScript interface for types, and a Joi/Zod schema for validation. Prisma comes closest to Go's approach with its unified schema file.</p>
 </div>
 
 
@@ -2016,6 +2339,50 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
 <div class="warn-box">
   <div class="box-title">Security: Never Hardcode Credentials</div>
   <p>Always read database credentials from environment variables or a secrets manager. Hardcoded passwords in source code will end up in version control and eventually get leaked.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's <code>database/sql</code> maps to Node's <code>mysql2</code>, <code>pg</code>, or Prisma/Knex. The key difference: Go's pool is built into the stdlib; Node needs a library:</p>
+<pre><code><span class="cm">// --- mysql2 (closest to Go's database/sql) ---</span>
+<span class="kw">const</span> mysql = <span class="fn">require</span>(<span class="str">'mysql2/promise'</span>);
+
+<span class="cm">// Create a connection pool (like Go's sql.Open + SetMaxOpenConns)</span>
+<span class="kw">const</span> pool = mysql.<span class="fn">createPool</span>({
+  host: <span class="str">'localhost'</span>,
+  port: <span class="num">3306</span>,
+  user: process.env.DB_USER,         <span class="cm">// Like Go's os.Getenv("DB_USER")</span>
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  connectionLimit: <span class="num">25</span>,               <span class="cm">// Like Go's SetMaxOpenConns(25)</span>
+  idleTimeout: <span class="num">300000</span>,               <span class="cm">// Like Go's SetConnMaxIdleTime</span>
+  waitForConnections: <span class="kw">true</span>,
+});
+
+<span class="cm">// Test connection (like Go's db.Ping())</span>
+<span class="kw">await</span> pool.<span class="fn">query</span>(<span class="str">'SELECT 1'</span>);
+
+<span class="cm">// --- Prisma (ORM approach — no direct Go stdlib equivalent) ---</span>
+<span class="kw">const</span> { PrismaClient } = <span class="fn">require</span>(<span class="str">'@prisma/client'</span>);
+<span class="kw">const</span> prisma = <span class="kw">new</span> <span class="fn">PrismaClient</span>();  <span class="cm">// Pool managed internally</span>
+
+<span class="cm">// --- Knex.js (query builder, similar to sqlx) ---</span>
+<span class="kw">const</span> knex = <span class="fn">require</span>(<span class="str">'knex'</span>)({
+  client: <span class="str">'mysql2'</span>,
+  connection: { host: <span class="str">'localhost'</span>, user: <span class="str">'root'</span>, database: <span class="str">'mydb'</span> },
+  pool: { min: <span class="num">5</span>, max: <span class="num">25</span> },       <span class="cm">// Like Go's SetMaxIdleConns/SetMaxOpenConns</span>
+});</code></pre>
+  <table>
+    <tr><th>Go (<code>database/sql</code>)</th><th>Node.js</th></tr>
+    <tr><td><code>sql.Open("mysql", dsn)</code></td><td><code>mysql.createPool({...})</code></td></tr>
+    <tr><td><code>db.Ping()</code></td><td><code>pool.query('SELECT 1')</code></td></tr>
+    <tr><td><code>db.SetMaxOpenConns(25)</code></td><td><code>connectionLimit: 25</code></td></tr>
+    <tr><td><code>db.SetMaxIdleConns(5)</code></td><td><code>pool.min: 5</code> (Knex)</td></tr>
+    <tr><td><code>_ "github.com/go-sql-driver/mysql"</code></td><td><code>require('mysql2')</code></td></tr>
+    <tr><td>Driver registers via <code>init()</code></td><td>Driver is imported directly</td></tr>
+    <tr><td><code>db.Query()</code> is synchronous per goroutine</td><td><code>pool.query()</code> returns a Promise</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go's <code>sql.Open</code> doesn't actually connect — it just prepares the pool. The first real query triggers the connection. Node's <code>createPool</code> also doesn't connect eagerly, but Go's <strong>blank import pattern</strong> (<code>_ "github.com/go-sql-driver/mysql"</code>) is unique — the driver registers itself via an <code>init()</code> function, which feels magical if you're coming from Node.</p>
 </div>
 
 
@@ -2238,6 +2605,62 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
     w.<span class="fn">WriteHeader</span>(http.StatusNoContent)  <span class="cm">// 204 — deleted, no body</span>
 }</code></pre>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's explicit SQL + <code>json.NewDecoder</code> maps to Express's <code>req.body</code> + mysql2/Prisma/Knex queries. Here's the same CRUD in Express:</p>
+<pre><code><span class="cm">// --- GET with Pagination (Express + mysql2) ---</span>
+app.<span class="fn">get</span>(<span class="str">'/students'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">let</span> page = <span class="fn">parseInt</span>(req.query.page) || <span class="num">1</span>;    <span class="cm">// Go: strconv.Atoi(r.URL.Query().Get("page"))</span>
+  <span class="kw">let</span> limit = <span class="fn">parseInt</span>(req.query.limit) || <span class="num">10</span>;
+  <span class="kw">const</span> offset = (page - <span class="num">1</span>) * limit;
+
+  <span class="kw">const</span> [rows] = <span class="kw">await</span> pool.<span class="fn">query</span>(
+    <span class="str">'SELECT * FROM students LIMIT ? OFFSET ?'</span>,  <span class="cm">// Same SQL!</span>
+    [limit, offset]                               <span class="cm">// Same parameterized query</span>
+  );
+  res.<span class="fn">json</span>(rows);  <span class="cm">// Go: json.NewEncoder(w).Encode(students)</span>
+});
+
+<span class="cm">// --- POST (Express + mysql2) ---</span>
+app.<span class="fn">post</span>(<span class="str">'/students'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { first_name, email, last_name, class: cls } = req.body;
+  <span class="cm">// Go: json.NewDecoder(r.Body).Decode(&amp;s)</span>
+
+  <span class="kw">if</span> (!first_name || !email) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: <span class="str">'first_name and email required'</span> });
+  }
+
+  <span class="kw">const</span> [result] = <span class="kw">await</span> pool.<span class="fn">query</span>(
+    <span class="str">'INSERT INTO students (first_name, last_name, email, class) VALUES (?, ?, ?, ?)'</span>,
+    [first_name, last_name, email, cls]
+  );
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>({ id: result.insertId, first_name, email });
+  <span class="cm">// Go: w.WriteHeader(http.StatusCreated)</span>
+});
+
+<span class="cm">// --- DELETE with Transaction ---</span>
+app.<span class="fn">delete</span>(<span class="str">'/students/:id'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> conn = <span class="kw">await</span> pool.<span class="fn">getConnection</span>();
+  <span class="kw">try</span> {
+    <span class="kw">await</span> conn.<span class="fn">beginTransaction</span>();               <span class="cm">// Go: db.Begin()</span>
+    <span class="kw">await</span> conn.<span class="fn">query</span>(<span class="str">'DELETE FROM enrollments WHERE student_id = ?'</span>, [req.params.id]);
+    <span class="kw">const</span> [result] = <span class="kw">await</span> conn.<span class="fn">query</span>(<span class="str">'DELETE FROM students WHERE id = ?'</span>, [req.params.id]);
+    <span class="kw">if</span> (result.affectedRows === <span class="num">0</span>) {
+      <span class="kw">await</span> conn.<span class="fn">rollback</span>();                     <span class="cm">// Go: tx.Rollback()</span>
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">404</span>).<span class="fn">json</span>({ error: <span class="str">'Not found'</span> });
+    }
+    <span class="kw">await</span> conn.<span class="fn">commit</span>();                          <span class="cm">// Go: tx.Commit()</span>
+    res.<span class="fn">status</span>(<span class="num">204</span>).<span class="fn">end</span>();
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">await</span> conn.<span class="fn">rollback</span>();
+    res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: <span class="str">'Delete failed'</span> });
+  } <span class="kw">finally</span> {
+    conn.<span class="fn">release</span>();                              <span class="cm">// Go: automatic with pool</span>
+  }
+});</code></pre>
+  <p><strong>Key differences:</strong> (1) Express auto-parses JSON body with <code>express.json()</code> middleware — Go requires <code>json.NewDecoder</code>. (2) Node uses <code>try/catch</code> for errors — Go checks <code>err != nil</code> at every step. (3) Go's row scanning (<code>rows.Scan(&amp;s.ID, ...)</code>) is manual and explicit — Node's mysql2 returns plain JS objects automatically. (4) Go's <code>reflect</code>-based PATCH is way more verbose than Node's dynamic object merging.</p>
+</div>
+
 
 <!-- ===================== SECTION 10: ROUTER SETUP ===================== -->
 <h2 id="router-setup"><span class="section-num">10</span> Routing &amp; Router Setup</h2>
@@ -2318,6 +2741,33 @@ tlsConfig := &amp;<span class="ty">tls.Config</span>{
 <div class="info-box">
   <div class="box-title">How Router Composition Works</div>
   <p>When you call <code>tRouter.Handle("/", sRouter)</code>, any request that doesn't match a teachers route falls through to the students router. This creates a priority chain: teachers routes > students routes > execs routes. The <code>"/"</code> catch-all pattern acts as a fallback.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's router composition maps to Express's modular routing pattern where each domain has its own file:</p>
+<pre><code><span class="cm">// routes/students.js (like Go's studentsRouter function)</span>
+<span class="kw">const</span> router = <span class="fn">require</span>(<span class="str">'express'</span>).<span class="fn">Router</span>();
+router.<span class="fn">get</span>(<span class="str">'/'</span>, handlers.getStudents);
+router.<span class="fn">get</span>(<span class="str">'/:id'</span>, handlers.getStudent);
+router.<span class="fn">post</span>(<span class="str">'/'</span>, handlers.createStudent);
+router.<span class="fn">put</span>(<span class="str">'/:id'</span>, handlers.updateStudent);
+router.<span class="fn">patch</span>(<span class="str">'/:id'</span>, handlers.patchStudent);
+router.<span class="fn">delete</span>(<span class="str">'/:id'</span>, handlers.deleteStudent);
+module.exports = router;
+
+<span class="cm">// routes/teachers.js</span>
+<span class="kw">const</span> router = <span class="fn">require</span>(<span class="str">'express'</span>).<span class="fn">Router</span>();
+router.<span class="fn">get</span>(<span class="str">'/'</span>, handlers.getTeachers);
+router.<span class="fn">get</span>(<span class="str">'/:id'</span>, handlers.getTeacher);
+module.exports = router;
+
+<span class="cm">// app.js — main router composition (like Go's MainRouter)</span>
+<span class="kw">const</span> app = <span class="fn">require</span>(<span class="str">'express'</span>)();
+app.<span class="fn">use</span>(<span class="str">'/students'</span>, <span class="fn">require</span>(<span class="str">'./routes/students'</span>));
+app.<span class="fn">use</span>(<span class="str">'/teachers'</span>, <span class="fn">require</span>(<span class="str">'./routes/teachers'</span>));
+app.<span class="fn">use</span>(<span class="str">'/execs'</span>, <span class="fn">require</span>(<span class="str">'./routes/execs'</span>));</code></pre>
+  <p><strong>Key difference:</strong> Express's <code>app.use('/students', router)</code> is cleaner than Go's mux composition with <code>Handle("/")</code> fallthrough. In Go, you explicitly wire routers together; in Express, each <code>app.use()</code> call is independent. Go's approach is more verbose but makes the routing hierarchy completely transparent — no hidden behavior.</p>
 </div>
 
 
@@ -2555,6 +3005,41 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
 }</code></pre>
 
 <div class="accordion">
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's security headers middleware maps directly to <code>helmet</code> — the most popular Express security middleware (npm install helmet):</p>
+<pre><code><span class="cm">// Express + Helmet — same headers, one line</span>
+<span class="kw">const</span> helmet = <span class="fn">require</span>(<span class="str">'helmet'</span>);
+app.<span class="fn">use</span>(<span class="fn">helmet</span>());  <span class="cm">// Sets ALL the same headers Go sets manually!</span>
+
+<span class="cm">// What helmet() does internally (same as Go's SecurityHeaders):</span>
+app.<span class="fn">use</span>(<span class="fn">helmet</span>({
+  frameguard: { action: <span class="str">'sameorigin'</span> },          <span class="cm">// X-Frame-Options: SAMEORIGIN</span>
+  noSniff: <span class="kw">true</span>,                                 <span class="cm">// X-Content-Type-Options: nosniff</span>
+  xssFilter: <span class="kw">true</span>,                                <span class="cm">// X-XSS-Protection: 1; mode=block</span>
+  hsts: { maxAge: <span class="num">31536000</span>, includeSubDomains: <span class="kw">true</span> },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: [<span class="str">"'self'"</span>],
+      scriptSrc: [<span class="str">"'self'"</span>],
+      styleSrc: [<span class="str">"'self'"</span>],
+    }
+  },
+  referrerPolicy: { policy: <span class="str">'strict-origin-when-cross-origin'</span> },
+  permittedCrossDomainPolicies: <span class="kw">false</span>,
+}));
+
+<span class="cm">// Without helmet (manual, like Go's approach):</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  res.<span class="fn">setHeader</span>(<span class="str">'X-Frame-Options'</span>, <span class="str">'SAMEORIGIN'</span>);
+  res.<span class="fn">setHeader</span>(<span class="str">'X-Content-Type-Options'</span>, <span class="str">'nosniff'</span>);
+  res.<span class="fn">setHeader</span>(<span class="str">'X-XSS-Protection'</span>, <span class="str">'1; mode=block'</span>);
+  res.<span class="fn">removeHeader</span>(<span class="str">'X-Powered-By'</span>);  <span class="cm">// Like Go's w.Header().Del("Server")</span>
+  <span class="fn">next</span>();
+});</code></pre>
+  <p><strong>Key difference:</strong> In Node, <code>helmet</code> gives you all security headers with one <code>app.use(helmet())</code> call. In Go, you write the 20-line middleware yourself (or use <code>unrolled/secure</code>). Go's approach is more transparent — you see exactly what headers are set. Helmet is more convenient but hides the details.</p>
+</div>
+
   <div class="accordion-item">
     <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
       <span>What does each header do?</span>
@@ -2846,6 +3331,36 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
   <p>Using <code>*</code> as the allowed origin blocks cookies and credentials. If your API uses cookies for authentication (JWT in httpOnly cookie), you <strong>must</strong> echo the specific origin and set <code>Access-Control-Allow-Credentials: true</code>.</p>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's handwritten CORS middleware maps to the <code>cors</code> npm package — Express's standard CORS solution:</p>
+<pre><code><span class="cm">// Express + cors package (npm install cors)</span>
+<span class="kw">const</span> cors = <span class="fn">require</span>(<span class="str">'cors'</span>);
+
+app.<span class="fn">use</span>(<span class="fn">cors</span>({
+  origin: [<span class="str">'http://localhost:3000'</span>, <span class="str">'https://myapp.com'</span>],  <span class="cm">// Like Go's allowedOrigins map</span>
+  methods: [<span class="str">'GET'</span>, <span class="str">'POST'</span>, <span class="str">'PUT'</span>, <span class="str">'PATCH'</span>, <span class="str">'DELETE'</span>],
+  allowedHeaders: [<span class="str">'Content-Type'</span>, <span class="str">'Authorization'</span>],
+  credentials: <span class="kw">true</span>,                                       <span class="cm">// Allow-Credentials: true</span>
+  maxAge: <span class="num">86400</span>,                                             <span class="cm">// Cache preflight 24h</span>
+}));
+
+<span class="cm">// Without cors package (manual, like Go's approach):</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">const</span> origin = req.headers.origin;
+  <span class="kw">const</span> allowed = [<span class="str">'http://localhost:3000'</span>, <span class="str">'https://myapp.com'</span>];
+  <span class="kw">if</span> (allowed.<span class="fn">includes</span>(origin)) {
+    res.<span class="fn">setHeader</span>(<span class="str">'Access-Control-Allow-Origin'</span>, origin);
+    res.<span class="fn">setHeader</span>(<span class="str">'Access-Control-Allow-Methods'</span>, <span class="str">'GET,POST,PUT,DELETE'</span>);
+    res.<span class="fn">setHeader</span>(<span class="str">'Access-Control-Allow-Headers'</span>, <span class="str">'Content-Type,Authorization'</span>);
+    res.<span class="fn">setHeader</span>(<span class="str">'Access-Control-Allow-Credentials'</span>, <span class="str">'true'</span>);
+  }
+  <span class="kw">if</span> (req.method === <span class="str">'OPTIONS'</span>) <span class="kw">return</span> res.<span class="fn">sendStatus</span>(<span class="num">204</span>);
+  <span class="fn">next</span>();
+});</code></pre>
+  <p><strong>Key difference:</strong> Express's <code>cors()</code> package handles everything in one config object. Go's approach is manual but identical in logic. Both must handle preflight <code>OPTIONS</code> requests, both must echo the specific origin (not <code>*</code>) when using credentials.</p>
+</div>
+
 
 <!-- ===================== SECTION 14: JWT AUTH ===================== -->
 <h2 id="jwt-auth"><span class="section-num">14</span> JWT Authentication Middleware</h2>
@@ -2947,6 +3462,52 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
 <div class="info-box">
   <div class="box-title">Why httpOnly Cookie instead of localStorage?</div>
   <p>Storing JWT in localStorage is vulnerable to XSS attacks: any injected script can read <code>localStorage.getItem("token")</code>. An httpOnly cookie is <strong>invisible to JavaScript</strong>, so even if XSS occurs, the attacker cannot steal the token. The browser automatically sends the cookie with every request.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's <code>golang-jwt/jwt</code> maps to Node's <code>jsonwebtoken</code> package. The JWT logic is almost identical:</p>
+<pre><code><span class="cm">// Express JWT Middleware (npm install jsonwebtoken)</span>
+<span class="kw">const</span> jwt = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+
+<span class="kw">const</span> authMiddleware = (req, res, next) =&gt; {
+  <span class="cm">// Read from httpOnly cookie (like Go's r.Cookie("auth_token"))</span>
+  <span class="kw">const</span> token = req.cookies?.auth_token;
+  <span class="kw">if</span> (!token) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'No token'</span> });
+
+  <span class="kw">try</span> {
+    <span class="cm">// Verify signature + expiry (like Go's jwt.Parse with keyfunc)</span>
+    <span class="kw">const</span> claims = jwt.<span class="fn">verify</span>(token, process.env.JWT_SECRET, {
+      algorithms: [<span class="str">'HS256'</span>],  <span class="cm">// Pin algorithm (like Go's SigningMethodHMAC check)</span>
+    });
+    req.user = claims;    <span class="cm">// Go: context.WithValue(ctx, UserClaimsKey, claims)</span>
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> (err) {
+    res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid token'</span> });
+  }
+};
+
+<span class="cm">// Usage in handler:</span>
+app.<span class="fn">get</span>(<span class="str">'/profile'</span>, authMiddleware, (req, res) =&gt; {
+  <span class="kw">const</span> userId = req.user.user_id;  <span class="cm">// Go: r.Context().Value(UserClaimsKey)</span>
+  res.<span class="fn">json</span>({ userId });
+});
+
+<span class="cm">// Creating a JWT (sign):</span>
+<span class="kw">const</span> token = jwt.<span class="fn">sign</span>(
+  { user_id: <span class="num">42</span>, role: <span class="str">'admin'</span> },
+  process.env.JWT_SECRET,
+  { expiresIn: <span class="str">'24h'</span>, algorithm: <span class="str">'HS256'</span> }
+);</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th></tr>
+    <tr><td><code>jwt.Parse(tokenStr, keyFunc)</code></td><td><code>jwt.verify(token, secret, opts)</code></td></tr>
+    <tr><td><code>t.Method.(*jwt.SigningMethodHMAC)</code></td><td><code>algorithms: ['HS256']</code></td></tr>
+    <tr><td><code>context.WithValue(ctx, key, claims)</code></td><td><code>req.user = claims</code></td></tr>
+    <tr><td><code>r.Context().Value(key)</code></td><td><code>req.user</code></td></tr>
+    <tr><td><code>r.Cookie("auth_token")</code></td><td><code>req.cookies.auth_token</code> (needs <code>cookie-parser</code>)</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Node.js mutates <code>req.user</code> directly (mutable). Go uses <code>context.WithValue</code> which creates a new immutable context — safer for concurrent access. Also, Go forces you to use a typed context key (<code>type contextKey string</code>) to avoid collisions, while Node just adds a property to the request object.</p>
 </div>
 
 
@@ -3052,6 +3613,32 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
 <div class="warn-box">
   <div class="box-title">Why Constant-Time Comparison?</div>
   <p>Regular <code>==</code> comparison exits early on the first mismatched byte. An attacker can measure the time difference to determine how many bytes matched, gradually guessing the hash. <code>subtle.ConstantTimeCompare</code> always takes the same time regardless of input, eliminating this side-channel attack.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's Argon2 maps to Node's <code>argon2</code> or <code>bcrypt</code> npm packages:</p>
+<pre><code><span class="cm">// Node.js — argon2 (npm install argon2)</span>
+<span class="kw">const</span> argon2 = <span class="fn">require</span>(<span class="str">'argon2'</span>);
+
+<span class="cm">// Hash — argon2 handles salt generation internally</span>
+<span class="kw">const</span> hash = <span class="kw">await</span> argon2.<span class="fn">hash</span>(password, {
+  type: argon2.argon2id,   <span class="cm">// Like Go's argon2.IDKey (recommended variant)</span>
+  memoryCost: <span class="num">65536</span>,        <span class="cm">// 64 MB (like Go's argonMemory = 64 * 1024)</span>
+  timeCost: <span class="num">1</span>,              <span class="cm">// Like Go's argonTime = 1</span>
+  parallelism: <span class="num">4</span>,           <span class="cm">// Like Go's argonThreads = 4</span>
+});
+<span class="cm">// Returns: "$argon2id$v=19$m=65536,t=1,p=4$salt$hash"</span>
+
+<span class="cm">// Verify — constant-time comparison built in</span>
+<span class="kw">const</span> isValid = <span class="kw">await</span> argon2.<span class="fn">verify</span>(hash, password);
+<span class="cm">// Go: subtle.ConstantTimeCompare(expectedHash, computedHash) == 1</span>
+
+<span class="cm">// --- bcrypt alternative (simpler, older, still acceptable) ---</span>
+<span class="kw">const</span> bcrypt = <span class="fn">require</span>(<span class="str">'bcrypt'</span>);
+<span class="kw">const</span> bcryptHash = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="num">12</span>);  <span class="cm">// 12 rounds</span>
+<span class="kw">const</span> valid = <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(password, bcryptHash);</code></pre>
+  <p><strong>Key difference:</strong> Node's <code>argon2</code> package returns a <strong>self-describing string</strong> (<code>$argon2id$v=19$m=65536...</code>) that includes all parameters. Go's implementation here uses a custom <code>salt$hash</code> format. Node also handles salt generation and constant-time comparison internally — Go requires you to do both manually with <code>crypto/rand</code> and <code>subtle.ConstantTimeCompare</code>.</p>
 </div>
 
 
@@ -3171,6 +3758,28 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
   </ul>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's rate limiter maps to <code>express-rate-limit</code> — one of the most used Express middleware packages:</p>
+<pre><code><span class="cm">// Express + express-rate-limit (npm install express-rate-limit)</span>
+<span class="kw">const</span> rateLimit = <span class="fn">require</span>(<span class="str">'express-rate-limit'</span>);
+
+<span class="kw">const</span> limiter = <span class="fn">rateLimit</span>({
+  windowMs: <span class="num">60</span> * <span class="num">1000</span>,      <span class="cm">// 1 minute window (like Go's 1*time.Minute)</span>
+  max: <span class="num">100</span>,                  <span class="cm">// 100 requests per window (like Go's rateLimit = 100)</span>
+  message: <span class="str">'Rate limit exceeded'</span>,
+  standardHeaders: <span class="kw">true</span>,    <span class="cm">// Returns X-RateLimit-* headers</span>
+  legacyHeaders: <span class="kw">false</span>,
+  keyGenerator: (req) =&gt; req.ip,  <span class="cm">// Like Go's r.RemoteAddr</span>
+});
+app.<span class="fn">use</span>(limiter);
+
+<span class="cm">// Stricter limit for login (like Go's per-route limiting):</span>
+<span class="kw">const</span> loginLimiter = <span class="fn">rateLimit</span>({ windowMs: <span class="num">900000</span>, max: <span class="num">5</span> });
+app.<span class="fn">post</span>(<span class="str">'/login'</span>, loginLimiter, loginHandler);</code></pre>
+  <p><strong>Key difference:</strong> Express's <code>express-rate-limit</code> gives you per-route limiting, automatic headers, and Redis store support out of the box. Go's manual implementation requires you to build the visitor map, mutex locking, and cleanup goroutine yourself. Both are in-memory by default — for multiple server instances, both need Redis.</p>
+</div>
+
 
 <!-- ===================== SECTION 17: COMPRESSION ===================== -->
 <h2 id="compression"><span class="section-num">17</span> Compression Middleware</h2>
@@ -3252,6 +3861,24 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
         next.<span class="fn">ServeHTTP</span>(grw, r)  <span class="cm">// Downstream writes go through gzip</span>
     })
 }</code></pre>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's compression middleware maps to Express's <code>compression</code> package:</p>
+<pre><code><span class="cm">// Express + compression (npm install compression)</span>
+<span class="kw">const</span> compression = <span class="fn">require</span>(<span class="str">'compression'</span>);
+
+app.<span class="fn">use</span>(<span class="fn">compression</span>({
+  level: <span class="num">6</span>,                   <span class="cm">// Compression level (1=fast, 9=smallest)</span>
+  threshold: <span class="num">1024</span>,             <span class="cm">// Don't compress below 1KB</span>
+  filter: (req, res) =&gt; {    <span class="cm">// Skip already-compressed types</span>
+    <span class="kw">if</span> (req.headers[<span class="str">'x-no-compression'</span>]) <span class="kw">return</span> <span class="kw">false</span>;
+    <span class="kw">return</span> compression.<span class="fn">filter</span>(req, res);
+  },
+}));
+<span class="cm">// That's it! Handles Accept-Encoding, Vary header, Content-Encoding automatically</span></code></pre>
+  <p><strong>Key difference:</strong> Express's <code>compression()</code> handles everything — content-type filtering, minimum size threshold, Vary header — in one function call. Go requires you to build a custom <code>ResponseWriter</code> wrapper, manage the gzip writer lifecycle with <code>defer gz.Close()</code>, and set headers manually. Go gives you more control; Node gives you more convenience.</p>
+</div>
 
 
 <!-- ===================== SECTION 18: XSS ===================== -->
@@ -3350,6 +3977,40 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
     })
 }</code></pre>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's XSS middleware with <code>bluemonday</code> maps to Node's <code>xss</code>, <code>sanitize-html</code>, or <code>DOMPurify</code>:</p>
+<pre><code><span class="cm">// Express + xss-clean or sanitize-html</span>
+<span class="kw">const</span> sanitizeHtml = <span class="fn">require</span>(<span class="str">'sanitize-html'</span>);  <span class="cm">// Like Go's bluemonday</span>
+
+<span class="cm">// Middleware to sanitize all string fields in req.body</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">if</span> (req.body &amp;&amp; <span class="kw">typeof</span> req.body === <span class="str">'object'</span>) {
+    <span class="kw">const</span> sanitize = (obj) =&gt; {
+      <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">in</span> obj) {
+        <span class="kw">if</span> (<span class="kw">typeof</span> obj[key] === <span class="str">'string'</span>) {
+          obj[key] = <span class="fn">sanitizeHtml</span>(obj[key], {
+            allowedTags: [<span class="str">'b'</span>, <span class="str">'i'</span>, <span class="str">'em'</span>, <span class="str">'strong'</span>, <span class="str">'a'</span>],  <span class="cm">// Like bluemonday.UGCPolicy()</span>
+            allowedAttributes: { a: [<span class="str">'href'</span>] },
+          });
+        } <span class="kw">else</span> <span class="kw">if</span> (<span class="kw">typeof</span> obj[key] === <span class="str">'object'</span>) {
+          <span class="fn">sanitize</span>(obj[key]);  <span class="cm">// Recurse (like Go's sanitizeValue)</span>
+        }
+      }
+    };
+    <span class="fn">sanitize</span>(req.body);
+  }
+  <span class="fn">next</span>();
+});</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th></tr>
+    <tr><td><code>bluemonday.UGCPolicy()</code></td><td><code>sanitize-html</code> with UGC allow-list</td></tr>
+    <tr><td><code>html/template</code> (auto-escapes)</td><td>EJS/Pug don't auto-escape by default!</td></tr>
+    <tr><td>Server-side only</td><td><code>DOMPurify</code> can run client-side too</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go's <code>html/template</code> auto-escapes output by default (safe). Node's template engines (EJS, Handlebars) don't always auto-escape — you must use <code>&lt;%= %&gt;</code> (escaped) not <code>&lt;%- %&gt;</code> (unescaped). This is a common source of XSS in Node apps.</p>
+</div>
+
 
 <!-- ===================== SECTION 19: HPP ===================== -->
 <h2 id="hpp"><span class="section-num">19</span> HPP Protection</h2>
@@ -3427,6 +4088,24 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
   <p>Taking the last value is a common convention that matches PHP and Express.js behavior. Some frameworks take the first value. The important thing is to be <strong>consistent</strong> and prevent attackers from injecting unexpected values through duplicates.</p>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's HPP middleware maps directly to the <code>hpp</code> npm package:</p>
+<pre><code><span class="cm">// Express + hpp (npm install hpp)</span>
+<span class="kw">const</span> hpp = <span class="fn">require</span>(<span class="str">'hpp'</span>);
+
+app.<span class="fn">use</span>(<span class="fn">hpp</span>({
+  whitelist: [<span class="str">'tags'</span>, <span class="str">'ids'</span>],  <span class="cm">// Like Go's allowedDuplicates map</span>
+}));
+<span class="cm">// ?role=user&amp;role=admin → req.query.role = "admin" (last value)</span>
+<span class="cm">// ?tags=go&amp;tags=node   → req.query.tags = ["go", "node"] (whitelisted)</span>
+
+<span class="cm">// Without hpp — Express behavior by default:</span>
+<span class="cm">// ?role=user&amp;role=admin → req.query.role = ["user", "admin"] (array!)</span>
+<span class="cm">// This is DIFFERENT from Go, where Query().Get() returns the FIRST value</span></code></pre>
+  <p><strong>Key difference:</strong> Express turns duplicate params into <strong>arrays</strong> by default. Go's <code>r.URL.Query().Get()</code> returns the <strong>first</strong> value. Both behaviors can be exploited. The <code>hpp</code> package normalizes Express to use the last value, similar to Go's HPP middleware.</p>
+</div>
+
 
 <!-- ===================== SECTION 20: RESPONSE TIME ===================== -->
 <h2 id="response-time"><span class="section-num">20</span> Response Time Middleware</h2>
@@ -3502,6 +4181,32 @@ app.<span class="fn">use</span>((req, res, next) =&gt; {
   <p>Note that <code>w.Header().Set()</code> after <code>next.ServeHTTP(w, r)</code> only works if the handler hasn't already called <code>w.WriteHeader()</code> or <code>w.Write()</code>. Once headers are sent, they can't be modified. For guaranteed header delivery, use a custom ResponseWriter wrapper to capture the status code.</p>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's response time middleware maps to <code>response-time</code> and <code>morgan</code> npm packages:</p>
+<pre><code><span class="cm">// Express + response-time (npm install response-time)</span>
+<span class="kw">const</span> responseTime = <span class="fn">require</span>(<span class="str">'response-time'</span>);
+app.<span class="fn">use</span>(<span class="fn">responseTime</span>());
+<span class="cm">// Automatically sets X-Response-Time: 12.345ms header</span>
+
+<span class="cm">// Express + morgan for logging (npm install morgan)</span>
+<span class="kw">const</span> morgan = <span class="fn">require</span>(<span class="str">'morgan'</span>);
+app.<span class="fn">use</span>(<span class="fn">morgan</span>(<span class="str">'dev'</span>));  <span class="cm">// Logs: GET /api/users 200 12.345 ms</span>
+
+<span class="cm">// Manual version (same as Go's approach):</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">const</span> start = Date.<span class="fn">now</span>();        <span class="cm">// Go: time.Now()</span>
+  res.<span class="fn">on</span>(<span class="str">'finish'</span>, () =&gt; {          <span class="cm">// Go: code after next.ServeHTTP()</span>
+    <span class="kw">const</span> duration = Date.<span class="fn">now</span>() - start;
+    <span class="kw">if</span> (duration &gt; <span class="num">500</span>) {
+      console.<span class="fn">warn</span>(<span class="str">`SLOW: ${req.method} ${req.url} ${duration}ms`</span>);
+    }
+  });
+  <span class="fn">next</span>();
+});</code></pre>
+  <p><strong>Key difference:</strong> Node uses <code>res.on('finish', ...)</code> event to run code <strong>after</strong> the response is sent. Go runs code after <code>next.ServeHTTP(w, r)</code> returns. Both achieve the same result but Go's model is stack-based (code before/after the call), while Node uses events.</p>
+</div>
+
 
 <!-- ===================== SECTION 21: MW EXCLUSION ===================== -->
 <h2 id="mw-exclusion"><span class="section-num">21</span> Middleware Route Exclusion</h2>
@@ -3574,6 +4279,43 @@ jwtMiddleware := utils.<span class="fn">MiddlewaresExcludePaths</span>(
     <span class="str">"/auth/register"</span>,
     <span class="str">"/health"</span>,
 )</code></pre>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Express handles route exclusion more naturally through its route-group and per-route middleware model:</p>
+<pre><code><span class="cm">// Express — Method 1: express-unless (npm install express-unless)</span>
+<span class="kw">const</span> unless = <span class="fn">require</span>(<span class="str">'express-unless'</span>);
+
+<span class="kw">const</span> authMiddleware = (req, res, next) =&gt; { <span class="cm">/* JWT logic */</span> };
+authMiddleware.unless = unless;
+
+app.<span class="fn">use</span>(authMiddleware.<span class="fn">unless</span>({
+  path: [<span class="str">'/auth/login'</span>, <span class="str">'/auth/register'</span>, <span class="str">'/health'</span>],
+  <span class="cm">// Same paths Go's MiddlewaresExcludePaths skips!</span>
+}));
+
+<span class="cm">// Express — Method 2: Per-route middleware (cleaner, no package needed)</span>
+<span class="cm">// Public routes — no auth</span>
+app.<span class="fn">post</span>(<span class="str">'/auth/login'</span>, loginHandler);
+app.<span class="fn">post</span>(<span class="str">'/auth/register'</span>, registerHandler);
+app.<span class="fn">get</span>(<span class="str">'/health'</span>, healthHandler);
+
+<span class="cm">// Protected routes — auth middleware applied per-route</span>
+app.<span class="fn">get</span>(<span class="str">'/api/users'</span>, authMiddleware, usersHandler);
+app.<span class="fn">get</span>(<span class="str">'/api/profile'</span>, authMiddleware, profileHandler);
+
+<span class="cm">// Express — Method 3: Route groups (most common in Express)</span>
+<span class="kw">const</span> protectedRouter = express.<span class="fn">Router</span>();
+protectedRouter.<span class="fn">use</span>(authMiddleware);  <span class="cm">// Applied to all routes in this group</span>
+protectedRouter.<span class="fn">get</span>(<span class="str">'/profile'</span>, profileHandler);
+protectedRouter.<span class="fn">get</span>(<span class="str">'/settings'</span>, settingsHandler);
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, protectedRouter);
+
+<span class="kw">const</span> publicRouter = express.<span class="fn">Router</span>();  <span class="cm">// No auth middleware</span>
+publicRouter.<span class="fn">post</span>(<span class="str">'/login'</span>, loginHandler);
+app.<span class="fn">use</span>(<span class="str">'/auth'</span>, publicRouter);</code></pre>
+  <p><strong>Key difference:</strong> Express has <strong>per-route middleware</strong> built in — you can apply auth to individual routes without a helper function. Go's stdlib doesn't support per-route middleware natively, which is why the <code>MiddlewaresExcludePaths</code> helper exists. Express's router-group pattern (Method 3) is the cleanest approach and has no Go stdlib equivalent.</p>
+</div>
 
 
 <!-- ===================== SECTION 22: UTILS ===================== -->
@@ -3721,6 +4463,39 @@ jwtMiddleware := utils.<span class="fn">MiddlewaresExcludePaths</span>(
     <span class="kw">return</span> userID == resourceOwnerID
 }</code></pre>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's utility functions map to Express helper patterns. The biggest difference: Go needs reflection for dynamic queries, Node uses objects natively:</p>
+<pre><code><span class="cm">// --- JSON Response Helper (like Go's ErrorHandler) ---</span>
+<span class="cm">// In Express, res.json() and res.status() are built in!</span>
+<span class="kw">const</span> sendError = (res, status, message) =&gt; {
+  res.<span class="fn">status</span>(status).<span class="fn">json</span>({
+    error: http.STATUS_CODES[status],  <span class="cm">// Like Go's http.StatusText(status)</span>
+    message,
+  });
+};
+
+<span class="cm">// --- Dynamic INSERT (Go uses reflect; Node uses Object.keys!) ---</span>
+<span class="kw">const</span> generateInsert = (table, model) =&gt; {
+  <span class="kw">const</span> keys = Object.<span class="fn">keys</span>(model).<span class="fn">filter</span>(k =&gt; k !== <span class="str">'id'</span> &amp;&amp; model[k] != <span class="kw">null</span>);
+  <span class="kw">const</span> columns = keys.<span class="fn">join</span>(<span class="str">', '</span>);
+  <span class="kw">const</span> placeholders = keys.<span class="fn">map</span>(() =&gt; <span class="str">'?'</span>).<span class="fn">join</span>(<span class="str">', '</span>);
+  <span class="kw">const</span> values = keys.<span class="fn">map</span>(k =&gt; model[k]);
+  <span class="kw">return</span> { sql: <span class="str">`INSERT INTO ${table} (${columns}) VALUES (${placeholders})`</span>, values };
+  <span class="cm">// No reflect needed! JS objects are introspectable by default</span>
+};
+
+<span class="cm">// --- Sorting (like Go's AddSorting) ---</span>
+<span class="kw">const</span> addSorting = (query, reqQuery, allowedColumns) =&gt; {
+  <span class="kw">const</span> { sort, order = <span class="str">'asc'</span> } = reqQuery;
+  <span class="kw">if</span> (sort &amp;&amp; allowedColumns.<span class="fn">includes</span>(sort)) {
+    query += <span class="str">` ORDER BY ${sort} ${order === 'desc' ? 'desc' : 'asc'}`</span>;
+  }
+  <span class="kw">return</span> query;
+};</code></pre>
+  <p><strong>Key difference:</strong> Go needs the <code>reflect</code> package to introspect struct fields at runtime (verbose, slow). JavaScript objects are <strong>inherently dynamic</strong> — <code>Object.keys()</code>, bracket notation, and <code>for...in</code> make dynamic query building trivial. This is one area where Node's dynamic typing is a genuine advantage over Go's static types.</p>
+</div>
+
 
 <!-- ===================== SECTION 23: PROTOBUF ===================== -->
 <h2 id="protobuf"><span class="section-num">23</span> Protocol Buffers</h2>
@@ -3814,6 +4589,37 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
   <tr><td><code>repeated T</code></td><td><code>[]T</code></td><td>Lists/arrays</td></tr>
   <tr><td><code>map&lt;K,V&gt;</code></td><td><code>map[K]V</code></td><td>Key-value maps</td></tr>
 </table>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Protobuf works in Node too! The same <code>.proto</code> file generates JavaScript/TypeScript code. Here's how it compares:</p>
+<pre><code><span class="cm">// Node.js — protobuf with @grpc/proto-loader (dynamic loading)</span>
+<span class="kw">const</span> protoLoader = <span class="fn">require</span>(<span class="str">'@grpc/proto-loader'</span>);
+<span class="kw">const</span> grpc = <span class="fn">require</span>(<span class="str">'@grpc/grpc-js'</span>);
+
+<span class="kw">const</span> packageDef = protoLoader.<span class="fn">loadSync</span>(<span class="str">'calculator.proto'</span>);
+<span class="kw">const</span> proto = grpc.<span class="fn">loadPackageDefinition</span>(packageDef);
+<span class="cm">// proto.calculator.Calculate — service definition</span>
+
+<span class="cm">// Node.js — protobuf with protobufjs (static generation)</span>
+<span class="cm">// npx pbjs -t static-module -w commonjs -o proto.js calculator.proto</span>
+<span class="kw">const</span> { calculator } = <span class="fn">require</span>(<span class="str">'./proto.js'</span>);
+<span class="kw">const</span> msg = calculator.AddRequest.<span class="fn">create</span>({ a: <span class="num">10</span>, b: <span class="num">20</span> });
+<span class="kw">const</span> buffer = calculator.AddRequest.<span class="fn">encode</span>(msg).<span class="fn">finish</span>();
+<span class="cm">// buffer is the same binary wire format as Go's proto.Marshal()</span>
+
+<span class="cm">// JSON equivalent for comparison:</span>
+<span class="cm">// JSON: {"a": 10, "b": 20}              → ~18 bytes (text)</span>
+<span class="cm">// Protobuf: 0x08 0x0A 0x10 0x14         → 4 bytes (binary!)</span></code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th></tr>
+    <tr><td><code>protoc --go_out=.</code> (compile-time codegen)</td><td><code>@grpc/proto-loader</code> (runtime loading) or <code>pbjs</code> (codegen)</td></tr>
+    <tr><td>Generated Go structs (strongly typed)</td><td>Dynamic objects or generated TS interfaces</td></tr>
+    <tr><td><code>proto.Marshal(msg)</code></td><td><code>Type.encode(msg).finish()</code></td></tr>
+    <tr><td><code>proto.Unmarshal(data, msg)</code></td><td><code>Type.decode(buffer)</code></td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go always uses <strong>compile-time code generation</strong> — you run <code>protoc</code> and get typed structs. Node can either load <code>.proto</code> files at runtime (convenient but no type safety) or generate code with <code>pbjs</code>. Go's approach catches schema errors at compile time; Node's dynamic approach discovers them at runtime.</p>
+</div>
 
 
 <!-- ===================== SECTION 24: GRPC SERVER ===================== -->
@@ -3912,6 +4718,45 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
   <p>Embedding <code>UnimplementedCalculateServer</code> ensures forward compatibility. If you add new RPC methods to your <code>.proto</code> file but haven't implemented them yet, the server will return an "unimplemented" error instead of failing to compile. This lets you evolve your API incrementally.</p>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's gRPC server maps to Node's <code>@grpc/grpc-js</code> package. The same <code>.proto</code> file, different implementation:</p>
+<pre><code><span class="cm">// Node.js gRPC Server (@grpc/grpc-js + @grpc/proto-loader)</span>
+<span class="kw">const</span> grpc = <span class="fn">require</span>(<span class="str">'@grpc/grpc-js'</span>);
+<span class="kw">const</span> protoLoader = <span class="fn">require</span>(<span class="str">'@grpc/proto-loader'</span>);
+
+<span class="kw">const</span> packageDef = protoLoader.<span class="fn">loadSync</span>(<span class="str">'calculator.proto'</span>);
+<span class="kw">const</span> proto = grpc.<span class="fn">loadPackageDefinition</span>(packageDef);
+
+<span class="cm">// Implement the Add RPC (like Go's func (s *Server) Add(...))</span>
+<span class="kw">const</span> server = <span class="kw">new</span> grpc.<span class="fn">Server</span>();
+server.<span class="fn">addService</span>(proto.calculator.Calculate.service, {
+  Add: (call, callback) =&gt; {
+    <span class="kw">const</span> sum = call.request.a + call.request.b;
+    <span class="fn">callback</span>(<span class="kw">null</span>, { sum });
+    <span class="cm">// Go: return &amp;pb.AddResponse{Sum: sum}, nil</span>
+  },
+});
+
+<span class="cm">// Start server (like Go's grpcServer.Serve(lis))</span>
+server.<span class="fn">bindAsync</span>(
+  <span class="str">'0.0.0.0:50051'</span>,
+  grpc.ServerCredentials.<span class="fn">createInsecure</span>(),
+  (err, port) =&gt; {
+    console.<span class="fn">log</span>(<span class="str">`gRPC server on :${port}`</span>);
+  }
+);</code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th></tr>
+    <tr><td><code>pb.RegisterCalculateServer(srv, &amp;Server{})</code></td><td><code>server.addService(proto.service, impl)</code></td></tr>
+    <tr><td><code>return &amp;pb.AddResponse{Sum: sum}, nil</code></td><td><code>callback(null, { sum })</code></td></tr>
+    <tr><td><code>grpc.Creds(creds)</code></td><td><code>grpc.ServerCredentials.createSsl(...)</code></td></tr>
+    <tr><td>Goroutine per RPC (concurrent)</td><td>Single-threaded event loop</td></tr>
+    <tr><td><code>UnimplementedServer</code> embedding</td><td>No equivalent — just don't implement the method</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go's gRPC server handles concurrent RPCs via goroutines — each call runs on its own goroutine. Node's gRPC server runs on the <strong>single-threaded event loop</strong>, so CPU-heavy RPC handlers block all other calls. For I/O-heavy RPCs (database queries), Node is fine. For CPU-heavy work, Go is dramatically better.</p>
+</div>
+
 
 <!-- ===================== SECTION 25: GRPC CLIENT ===================== -->
 <h2 id="grpc-client"><span class="section-num">25</span> gRPC Client</h2>
@@ -4002,6 +4847,41 @@ protoc --go_out=. --go-grpc_out=. calculator.proto
 
     log.<span class="fn">Printf</span>(<span class="str">"10 + 20 = %d"</span>, resp.<span class="fn">GetSum</span>())  <span class="cm">// Output: 10 + 20 = 30</span>
 }</code></pre>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>Go's typed gRPC client maps to Node's dynamically loaded client stub:</p>
+<pre><code><span class="cm">// Node.js gRPC Client</span>
+<span class="kw">const</span> grpc = <span class="fn">require</span>(<span class="str">'@grpc/grpc-js'</span>);
+<span class="kw">const</span> protoLoader = <span class="fn">require</span>(<span class="str">'@grpc/proto-loader'</span>);
+
+<span class="kw">const</span> packageDef = protoLoader.<span class="fn">loadSync</span>(<span class="str">'calculator.proto'</span>);
+<span class="kw">const</span> proto = grpc.<span class="fn">loadPackageDefinition</span>(packageDef);
+
+<span class="cm">// Create client (like Go's grpc.Dial + pb.NewCalculateClient)</span>
+<span class="kw">const</span> client = <span class="kw">new</span> proto.calculator.<span class="fn">Calculate</span>(
+  <span class="str">'localhost:50051'</span>,
+  grpc.credentials.<span class="fn">createInsecure</span>()
+);
+
+<span class="cm">// Call the RPC — callback-style (traditional Node)</span>
+client.<span class="fn">Add</span>({ a: <span class="num">10</span>, b: <span class="num">20</span> }, (err, response) =&gt; {
+  <span class="kw">if</span> (err) <span class="kw">throw</span> err;
+  console.<span class="fn">log</span>(<span class="str">`10 + 20 = ${response.sum}`</span>);
+});
+
+<span class="cm">// With promisify (modern async/await style):</span>
+<span class="kw">const</span> { promisify } = <span class="fn">require</span>(<span class="str">'util'</span>);
+<span class="kw">const</span> addAsync = <span class="fn">promisify</span>(client.Add).<span class="fn">bind</span>(client);
+<span class="kw">const</span> resp = <span class="kw">await</span> <span class="fn">addAsync</span>({ a: <span class="num">10</span>, b: <span class="num">20</span> });
+<span class="cm">// Go: resp, err := client.Add(ctx, &amp;pb.AddRequest{A: 10, B: 20})</span>
+
+<span class="cm">// Metadata (like Go's gRPC metadata)</span>
+<span class="kw">const</span> metadata = <span class="kw">new</span> grpc.<span class="fn">Metadata</span>();
+metadata.<span class="fn">add</span>(<span class="str">'authorization'</span>, <span class="str">'Bearer my-token'</span>);
+client.<span class="fn">Add</span>({ a: <span class="num">10</span>, b: <span class="num">20</span> }, metadata, callback);</code></pre>
+  <p><strong>Key difference:</strong> Go's gRPC client returns <strong>typed structs</strong> generated from the proto — <code>resp.GetSum()</code> is compile-time checked. Node's client returns <strong>plain JS objects</strong> — <code>response.sum</code> has no type checking (unless using TypeScript with generated types). Also, Go uses <code>context.Context</code> for deadlines/cancellation; Node must manually set deadlines via metadata.</p>
+</div>
 
 
 <!-- ===================== SECTION 26: GRPC STREAMING ===================== -->
@@ -4172,6 +5052,45 @@ stream.<span class="fn">CloseSend</span>()</code></pre>
   </table>
 </div>
 
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>gRPC streaming in Node works similarly but uses Node.js event-style APIs instead of Go's loop-based approach:</p>
+<pre><code><span class="cm">// --- Node.js Server-Side Streaming ---</span>
+<span class="cm">// Server implementation:</span>
+Fibonacci: (call) =&gt; {
+  <span class="kw">let</span> a = <span class="num">0</span>, b = <span class="num">1</span>;
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; call.request.count; i++) {
+    call.<span class="fn">write</span>({ value: a });  <span class="cm">// Go: stream.Send(&amp;pb.FibResponse{...})</span>
+    [a, b] = [b, a + b];
+  }
+  call.<span class="fn">end</span>();                  <span class="cm">// Go: return nil (closes stream)</span>
+}
+
+<span class="cm">// Client reads stream:</span>
+<span class="kw">const</span> call = client.<span class="fn">Fibonacci</span>({ count: <span class="num">10</span> });
+call.<span class="fn">on</span>(<span class="str">'data'</span>, (resp) =&gt; console.<span class="fn">log</span>(resp.value));
+call.<span class="fn">on</span>(<span class="str">'end'</span>, () =&gt; console.<span class="fn">log</span>(<span class="str">'done'</span>));
+<span class="cm">// Go: for { resp, err := stream.Recv(); if err == io.EOF { break } }</span>
+
+<span class="cm">// --- Node.js Bidirectional Streaming (Chat) ---</span>
+<span class="kw">const</span> call = client.<span class="fn">Chat</span>();
+call.<span class="fn">on</span>(<span class="str">'data'</span>, (msg) =&gt; {
+  console.<span class="fn">log</span>(<span class="str">`[${msg.user}]: ${msg.text}`</span>);
+});
+call.<span class="fn">write</span>({ user: <span class="str">'client'</span>, text: <span class="str">'Hello'</span> });
+call.<span class="fn">write</span>({ user: <span class="str">'client'</span>, text: <span class="str">'Goodbye'</span> });
+call.<span class="fn">end</span>();  <span class="cm">// Go: stream.CloseSend()</span></code></pre>
+  <table>
+    <tr><th>Go</th><th>Node.js</th></tr>
+    <tr><td><code>stream.Send(&amp;msg)</code></td><td><code>call.write(msg)</code></td></tr>
+    <tr><td><code>stream.Recv()</code> in a loop</td><td><code>call.on('data', cb)</code> event</td></tr>
+    <tr><td><code>io.EOF</code> signals end</td><td><code>call.on('end', cb)</code></td></tr>
+    <tr><td><code>stream.CloseSend()</code></td><td><code>call.end()</code></td></tr>
+    <tr><td>Goroutines for concurrent send/recv</td><td>Events handle concurrency naturally</td></tr>
+  </table>
+  <p><strong>Key difference:</strong> Go uses <strong>loops with goroutines</strong> for streaming (imperative). Node uses <strong>event emitters</strong> (reactive). For bidirectional streaming, Go needs two goroutines (one for send, one for recv). Node handles both directions through events on a single thread — actually a case where the event loop model fits naturally.</p>
+</div>
+
 
 <!-- ===================== SECTION 27: GRPC GATEWAY ===================== -->
 <h2 id="grpc-gateway"><span class="section-num">27</span> gRPC Gateway</h2>
@@ -4274,6 +5193,41 @@ stream.<span class="fn">CloseSend</span>()</code></pre>
 <div class="info-box">
   <div class="box-title">Architecture Flow</div>
   <p>REST Client -> JSON/HTTP -> grpc-gateway (reverse proxy) -> Protobuf/HTTP2 -> gRPC Server. The gateway handles JSON <-> protobuf conversion automatically. Your gRPC server code stays the same.</p>
+</div>
+
+<div class="node-box">
+  <div class="box-title">In Node.js, this is equivalent to...</div>
+  <p>The concept of serving both gRPC and REST from one codebase exists in Node too, but with different tools:</p>
+<pre><code><span class="cm">// Node.js alternatives to grpc-gateway:</span>
+
+<span class="cm">// 1. grpc-web — browser-compatible gRPC (Envoy proxy translates)</span>
+<span class="cm">//    npm install @improbable-eng/grpc-web</span>
+<span class="cm">//    Browser → Envoy (HTTP/1.1→HTTP/2 proxy) → gRPC Server</span>
+
+<span class="cm">// 2. Connect-Web (connectrpc.com) — modern, browser-native gRPC</span>
+<span class="cm">//    Works directly from browser without Envoy proxy</span>
+<span class="cm">//    Server speaks gRPC + Connect + gRPC-Web all on one port</span>
+
+<span class="cm">// 3. Manual REST wrapper (most common in Node):</span>
+<span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+<span class="cm">// REST endpoint that calls the gRPC service internally</span>
+app.<span class="fn">post</span>(<span class="str">'/v1/add'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { a, b } = req.body;
+  <span class="cm">// Call gRPC service</span>
+  grpcClient.<span class="fn">Add</span>({ a, b }, (err, response) =&gt; {
+    <span class="kw">if</span> (err) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: err.message });
+    res.<span class="fn">json</span>(response);  <span class="cm">// {sum: 30}</span>
+  });
+});
+
+<span class="cm">// 4. NestJS with gRPC — framework that supports both natively:</span>
+<span class="cm">// @GrpcMethod('Calculate', 'Add')</span>
+<span class="cm">// add(data: AddRequest): AddResponse {</span>
+<span class="cm">//   return { sum: data.a + data.b };</span>
+<span class="cm">// }</span></code></pre>
+  <p><strong>Key difference:</strong> Go's <code>grpc-gateway</code> generates the REST proxy <strong>from the proto file</strong> — zero manual wiring. In Node, you typically write the REST wrapper manually or use a framework like NestJS that supports both. Go's approach guarantees REST and gRPC stay in sync; Node's manual approach can drift over time.</p>
 </div>
 
 
